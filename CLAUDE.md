@@ -62,6 +62,21 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Branch and Issue Discipline
+
+**Every feature gets its own branch and tracking issue.**
+
+Before starting any feature work:
+- Create a GitHub issue describing the feature/task.
+- Create a local branch from main with a descriptive name (e.g., `feature/domain-models`, `fix/verse-parsing`).
+- Reference the issue number in commits.
+
+Never work directly on main for features. This ensures:
+- Clean PR reviews with focused changes
+- Easy rollback if needed
+- Clear work-in-progress tracking
+- Atomic, reviewable units of work
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
