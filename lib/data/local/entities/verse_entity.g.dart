@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'verse.dart';
+part of 'verse_entity.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -9,49 +9,44 @@ part of 'verse.dart';
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetVerseCollection on Isar {
-  IsarCollection<Verse> get verses => this.collection();
+extension GetVerseEntityCollection on Isar {
+  IsarCollection<VerseEntity> get verseEntitys => this.collection();
 }
 
-const VerseSchema = CollectionSchema(
-  name: r'Verse',
-  id: 6982547837312371642,
+const VerseEntitySchema = CollectionSchema(
+  name: r'VerseEntity',
+  id: -5496938192407533235,
   properties: {
     r'arabicText': PropertySchema(
       id: 0,
       name: r'arabicText',
       type: IsarType.string,
     ),
-    r'hashCode': PropertySchema(
-      id: 1,
-      name: r'hashCode',
-      type: IsarType.long,
-    ),
     r'surahNumber': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'surahNumber',
       type: IsarType.long,
     ),
     r'translation': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'translation',
       type: IsarType.string,
     ),
     r'verseId': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'verseId',
       type: IsarType.string,
     ),
     r'verseNumber': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'verseNumber',
       type: IsarType.long,
     )
   },
-  estimateSize: _verseEstimateSize,
-  serialize: _verseSerialize,
-  deserialize: _verseDeserialize,
-  deserializeProp: _verseDeserializeProp,
+  estimateSize: _verseEntityEstimateSize,
+  serialize: _verseEntitySerialize,
+  deserialize: _verseEntityDeserialize,
+  deserializeProp: _verseEntityDeserializeProp,
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
@@ -83,14 +78,14 @@ const VerseSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-  getId: _verseGetId,
-  getLinks: _verseGetLinks,
-  attach: _verseAttach,
+  getId: _verseEntityGetId,
+  getLinks: _verseEntityGetLinks,
+  attach: _verseEntityAttach,
   version: '3.1.0+1',
 );
 
-int _verseEstimateSize(
-  Verse object,
+int _verseEntityEstimateSize(
+  VerseEntity object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
@@ -106,38 +101,36 @@ int _verseEstimateSize(
   return bytesCount;
 }
 
-void _verseSerialize(
-  Verse object,
+void _verseEntitySerialize(
+  VerseEntity object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.arabicText);
-  writer.writeLong(offsets[1], object.hashCode);
-  writer.writeLong(offsets[2], object.surahNumber);
-  writer.writeString(offsets[3], object.translation);
-  writer.writeString(offsets[4], object.verseId);
-  writer.writeLong(offsets[5], object.verseNumber);
+  writer.writeLong(offsets[1], object.surahNumber);
+  writer.writeString(offsets[2], object.translation);
+  writer.writeString(offsets[3], object.verseId);
+  writer.writeLong(offsets[4], object.verseNumber);
 }
 
-Verse _verseDeserialize(
+VerseEntity _verseEntityDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Verse(
-    arabicText: reader.readString(offsets[0]),
-    id: id,
-    surahNumber: reader.readLong(offsets[2]),
-    translation: reader.readStringOrNull(offsets[3]),
-    verseId: reader.readString(offsets[4]),
-    verseNumber: reader.readLong(offsets[5]),
-  );
+  final object = VerseEntity();
+  object.arabicText = reader.readString(offsets[0]);
+  object.id = id;
+  object.surahNumber = reader.readLong(offsets[1]);
+  object.translation = reader.readStringOrNull(offsets[2]);
+  object.verseId = reader.readString(offsets[3]);
+  object.verseNumber = reader.readLong(offsets[4]);
   return object;
 }
 
-P _verseDeserializeProp<P>(
+P _verseEntityDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -149,36 +142,35 @@ P _verseDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
-    case 3:
       return (reader.readStringOrNull(offset)) as P;
-    case 4:
+    case 3:
       return (reader.readString(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
-Id _verseGetId(Verse object) {
+Id _verseEntityGetId(VerseEntity object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _verseGetLinks(Verse object) {
+List<IsarLinkBase<dynamic>> _verseEntityGetLinks(VerseEntity object) {
   return [];
 }
 
-void _verseAttach(IsarCollection<dynamic> col, Id id, Verse object) {
+void _verseEntityAttach(
+    IsarCollection<dynamic> col, Id id, VerseEntity object) {
   object.id = id;
 }
 
-extension VerseByIndex on IsarCollection<Verse> {
-  Future<Verse?> getByVerseId(String verseId) {
+extension VerseEntityByIndex on IsarCollection<VerseEntity> {
+  Future<VerseEntity?> getByVerseId(String verseId) {
     return getByIndex(r'verseId', [verseId]);
   }
 
-  Verse? getByVerseIdSync(String verseId) {
+  VerseEntity? getByVerseIdSync(String verseId) {
     return getByIndexSync(r'verseId', [verseId]);
   }
 
@@ -190,12 +182,12 @@ extension VerseByIndex on IsarCollection<Verse> {
     return deleteByIndexSync(r'verseId', [verseId]);
   }
 
-  Future<List<Verse?>> getAllByVerseId(List<String> verseIdValues) {
+  Future<List<VerseEntity?>> getAllByVerseId(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
     return getAllByIndex(r'verseId', values);
   }
 
-  List<Verse?> getAllByVerseIdSync(List<String> verseIdValues) {
+  List<VerseEntity?> getAllByVerseIdSync(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
     return getAllByIndexSync(r'verseId', values);
   }
@@ -210,31 +202,33 @@ extension VerseByIndex on IsarCollection<Verse> {
     return deleteAllByIndexSync(r'verseId', values);
   }
 
-  Future<Id> putByVerseId(Verse object) {
+  Future<Id> putByVerseId(VerseEntity object) {
     return putByIndex(r'verseId', object);
   }
 
-  Id putByVerseIdSync(Verse object, {bool saveLinks = true}) {
+  Id putByVerseIdSync(VerseEntity object, {bool saveLinks = true}) {
     return putByIndexSync(r'verseId', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByVerseId(List<Verse> objects) {
+  Future<List<Id>> putAllByVerseId(List<VerseEntity> objects) {
     return putAllByIndex(r'verseId', objects);
   }
 
-  List<Id> putAllByVerseIdSync(List<Verse> objects, {bool saveLinks = true}) {
+  List<Id> putAllByVerseIdSync(List<VerseEntity> objects,
+      {bool saveLinks = true}) {
     return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
   }
 }
 
-extension VerseQueryWhereSort on QueryBuilder<Verse, Verse, QWhere> {
-  QueryBuilder<Verse, Verse, QAfterWhere> anyId() {
+extension VerseEntityQueryWhereSort
+    on QueryBuilder<VerseEntity, VerseEntity, QWhere> {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhere> anySurahNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhere> anySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'surahNumber'),
@@ -243,8 +237,9 @@ extension VerseQueryWhereSort on QueryBuilder<Verse, Verse, QWhere> {
   }
 }
 
-extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
-  QueryBuilder<Verse, Verse, QAfterWhereClause> idEqualTo(Id id) {
+extension VerseEntityQueryWhere
+    on QueryBuilder<VerseEntity, VerseEntity, QWhereClause> {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -253,7 +248,8 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> idNotEqualTo(
+      Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -275,7 +271,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> idGreaterThan(Id id,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -284,7 +280,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> idLessThan(Id id,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -293,7 +289,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> idBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -309,7 +305,8 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> verseIdEqualTo(String verseId) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> verseIdEqualTo(
+      String verseId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r'verseId',
@@ -318,7 +315,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> verseIdNotEqualTo(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> verseIdNotEqualTo(
       String verseId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
@@ -353,7 +350,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> surahNumberEqualTo(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> surahNumberEqualTo(
       int surahNumber) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
@@ -363,8 +360,8 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> surahNumberNotEqualTo(
-      int surahNumber) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause>
+      surahNumberNotEqualTo(int surahNumber) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -398,7 +395,8 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> surahNumberGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause>
+      surahNumberGreaterThan(
     int surahNumber, {
     bool include = false,
   }) {
@@ -412,7 +410,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> surahNumberLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> surahNumberLessThan(
     int surahNumber, {
     bool include = false,
   }) {
@@ -426,7 +424,7 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterWhereClause> surahNumberBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> surahNumberBetween(
     int lowerSurahNumber,
     int upperSurahNumber, {
     bool includeLower = true,
@@ -444,8 +442,10 @@ extension VerseQueryWhere on QueryBuilder<Verse, Verse, QWhereClause> {
   }
 }
 
-extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextEqualTo(
+extension VerseEntityQueryFilter
+    on QueryBuilder<VerseEntity, VerseEntity, QFilterCondition> {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -458,7 +458,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -473,7 +474,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -488,7 +490,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -507,7 +510,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextStartsWith(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -520,7 +524,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextEndsWith(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -533,9 +538,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'arabicText',
@@ -545,9 +549,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'arabicText',
@@ -557,7 +560,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextIsEmpty() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'arabicText',
@@ -566,7 +570,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> arabicTextIsNotEmpty() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      arabicTextIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'arabicText',
@@ -575,59 +580,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> hashCodeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> hashCodeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> hashCodeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> hashCodeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hashCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> idEqualTo(
+      Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -636,7 +590,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> idGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -649,7 +603,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> idLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -662,7 +616,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> idBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -679,8 +633,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> surahNumberEqualTo(
-      int value) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      surahNumberEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'surahNumber',
@@ -689,7 +643,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> surahNumberGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      surahNumberGreaterThan(
     int value, {
     bool include = false,
   }) {
@@ -702,7 +657,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> surahNumberLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      surahNumberLessThan(
     int value, {
     bool include = false,
   }) {
@@ -715,7 +671,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> surahNumberBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      surahNumberBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -732,7 +689,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationIsNull() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
         property: r'translation',
@@ -740,7 +698,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationIsNotNull() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
         property: r'translation',
@@ -748,7 +707,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationEqualTo(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
@@ -761,7 +721,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -776,7 +737,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -791,7 +753,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -810,7 +773,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationStartsWith(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -823,7 +787,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationEndsWith(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -836,9 +801,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'translation',
@@ -848,9 +812,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'translation',
@@ -860,7 +823,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationIsEmpty() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'translation',
@@ -869,7 +833,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> translationIsNotEmpty() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      translationIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'translation',
@@ -878,7 +843,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdEqualTo(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> verseIdEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -891,7 +856,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseIdGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -906,7 +872,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> verseIdLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -921,7 +887,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> verseIdBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -940,7 +906,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdStartsWith(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseIdStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -953,7 +920,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdEndsWith(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> verseIdEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -966,7 +933,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdContains(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> verseIdContains(
       String value,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -978,7 +945,7 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdMatches(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> verseIdMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -990,7 +957,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdIsEmpty() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'verseId',
@@ -999,7 +967,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseIdIsNotEmpty() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'verseId',
@@ -1008,8 +977,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseNumberEqualTo(
-      int value) {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseNumberEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'verseNumber',
@@ -1018,7 +987,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseNumberGreaterThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseNumberGreaterThan(
     int value, {
     bool include = false,
   }) {
@@ -1031,7 +1001,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseNumberLessThan(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseNumberLessThan(
     int value, {
     bool include = false,
   }) {
@@ -1044,7 +1015,8 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterFilterCondition> verseNumberBetween(
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition>
+      verseNumberBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -1062,249 +1034,219 @@ extension VerseQueryFilter on QueryBuilder<Verse, Verse, QFilterCondition> {
   }
 }
 
-extension VerseQueryObject on QueryBuilder<Verse, Verse, QFilterCondition> {}
+extension VerseEntityQueryObject
+    on QueryBuilder<VerseEntity, VerseEntity, QFilterCondition> {}
 
-extension VerseQueryLinks on QueryBuilder<Verse, Verse, QFilterCondition> {}
+extension VerseEntityQueryLinks
+    on QueryBuilder<VerseEntity, VerseEntity, QFilterCondition> {}
 
-extension VerseQuerySortBy on QueryBuilder<Verse, Verse, QSortBy> {
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByArabicText() {
+extension VerseEntityQuerySortBy
+    on QueryBuilder<VerseEntity, VerseEntity, QSortBy> {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByArabicText() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'arabicText', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByArabicTextDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByArabicTextDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'arabicText', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortBySurahNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortBySurahNumberDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortBySurahNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByTranslation() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByTranslation() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'translation', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByTranslationDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByTranslationDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'translation', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByVerseId() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByVerseIdDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByVerseNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByVerseNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseNumber', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> sortByVerseNumberDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByVerseNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseNumber', Sort.desc);
     });
   }
 }
 
-extension VerseQuerySortThenBy on QueryBuilder<Verse, Verse, QSortThenBy> {
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByArabicText() {
+extension VerseEntityQuerySortThenBy
+    on QueryBuilder<VerseEntity, VerseEntity, QSortThenBy> {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByArabicText() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'arabicText', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByArabicTextDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByArabicTextDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'arabicText', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenById() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenBySurahNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenBySurahNumberDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenBySurahNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByTranslation() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByTranslation() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'translation', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByTranslationDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByTranslationDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'translation', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByVerseId() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByVerseIdDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByVerseNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByVerseNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseNumber', Sort.asc);
     });
   }
 
-  QueryBuilder<Verse, Verse, QAfterSortBy> thenByVerseNumberDesc() {
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByVerseNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseNumber', Sort.desc);
     });
   }
 }
 
-extension VerseQueryWhereDistinct on QueryBuilder<Verse, Verse, QDistinct> {
-  QueryBuilder<Verse, Verse, QDistinct> distinctByArabicText(
+extension VerseEntityQueryWhereDistinct
+    on QueryBuilder<VerseEntity, VerseEntity, QDistinct> {
+  QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctByArabicText(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'arabicText', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Verse, Verse, QDistinct> distinctByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Verse, Verse, QDistinct> distinctBySurahNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'surahNumber');
     });
   }
 
-  QueryBuilder<Verse, Verse, QDistinct> distinctByTranslation(
+  QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctByTranslation(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'translation', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Verse, Verse, QDistinct> distinctByVerseId(
+  QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctByVerseId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseId', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Verse, Verse, QDistinct> distinctByVerseNumber() {
+  QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctByVerseNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseNumber');
     });
   }
 }
 
-extension VerseQueryProperty on QueryBuilder<Verse, Verse, QQueryProperty> {
-  QueryBuilder<Verse, int, QQueryOperations> idProperty() {
+extension VerseEntityQueryProperty
+    on QueryBuilder<VerseEntity, VerseEntity, QQueryProperty> {
+  QueryBuilder<VerseEntity, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
     });
   }
 
-  QueryBuilder<Verse, String, QQueryOperations> arabicTextProperty() {
+  QueryBuilder<VerseEntity, String, QQueryOperations> arabicTextProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'arabicText');
     });
   }
 
-  QueryBuilder<Verse, int, QQueryOperations> hashCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Verse, int, QQueryOperations> surahNumberProperty() {
+  QueryBuilder<VerseEntity, int, QQueryOperations> surahNumberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'surahNumber');
     });
   }
 
-  QueryBuilder<Verse, String?, QQueryOperations> translationProperty() {
+  QueryBuilder<VerseEntity, String?, QQueryOperations> translationProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'translation');
     });
   }
 
-  QueryBuilder<Verse, String, QQueryOperations> verseIdProperty() {
+  QueryBuilder<VerseEntity, String, QQueryOperations> verseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'verseId');
     });
   }
 
-  QueryBuilder<Verse, int, QQueryOperations> verseNumberProperty() {
+  QueryBuilder<VerseEntity, int, QQueryOperations> verseNumberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'verseNumber');
     });

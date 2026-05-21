@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'surah.dart';
+part of 'surah_entity.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -9,56 +9,51 @@ part of 'surah.dart';
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetSurahCollection on Isar {
-  IsarCollection<Surah> get surahs => this.collection();
+extension GetSurahEntityCollection on Isar {
+  IsarCollection<SurahEntity> get surahEntitys => this.collection();
 }
 
-const SurahSchema = CollectionSchema(
-  name: r'Surah',
-  id: -5819800798527960797,
+const SurahEntitySchema = CollectionSchema(
+  name: r'SurahEntity',
+  id: 1957003966686490940,
   properties: {
-    r'hashCode': PropertySchema(
-      id: 0,
-      name: r'hashCode',
-      type: IsarType.long,
-    ),
     r'nameArabic': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'nameArabic',
       type: IsarType.string,
     ),
     r'nameEnglish': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'nameEnglish',
       type: IsarType.string,
     ),
     r'numberOfVerses': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'numberOfVerses',
       type: IsarType.long,
     ),
     r'surahNumber': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'surahNumber',
       type: IsarType.long,
     )
   },
-  estimateSize: _surahEstimateSize,
-  serialize: _surahSerialize,
-  deserialize: _surahDeserialize,
-  deserializeProp: _surahDeserializeProp,
+  estimateSize: _surahEntityEstimateSize,
+  serialize: _surahEntitySerialize,
+  deserialize: _surahEntityDeserialize,
+  deserializeProp: _surahEntityDeserializeProp,
   idName: r'id',
   indexes: {},
   links: {},
   embeddedSchemas: {},
-  getId: _surahGetId,
-  getLinks: _surahGetLinks,
-  attach: _surahAttach,
+  getId: _surahEntityGetId,
+  getLinks: _surahEntityGetLinks,
+  attach: _surahEntityAttach,
   version: '3.1.0+1',
 );
 
-int _surahEstimateSize(
-  Surah object,
+int _surahEntityEstimateSize(
+  SurahEntity object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
@@ -68,35 +63,33 @@ int _surahEstimateSize(
   return bytesCount;
 }
 
-void _surahSerialize(
-  Surah object,
+void _surahEntitySerialize(
+  SurahEntity object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.hashCode);
-  writer.writeString(offsets[1], object.nameArabic);
-  writer.writeString(offsets[2], object.nameEnglish);
-  writer.writeLong(offsets[3], object.numberOfVerses);
-  writer.writeLong(offsets[4], object.surahNumber);
+  writer.writeString(offsets[0], object.nameArabic);
+  writer.writeString(offsets[1], object.nameEnglish);
+  writer.writeLong(offsets[2], object.numberOfVerses);
+  writer.writeLong(offsets[3], object.surahNumber);
 }
 
-Surah _surahDeserialize(
+SurahEntity _surahEntityDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Surah(
-    nameArabic: reader.readString(offsets[1]),
-    nameEnglish: reader.readString(offsets[2]),
-    numberOfVerses: reader.readLong(offsets[3]),
-    surahNumber: reader.readLong(offsets[4]),
-  );
+  final object = SurahEntity();
+  object.nameArabic = reader.readString(offsets[0]);
+  object.nameEnglish = reader.readString(offsets[1]);
+  object.numberOfVerses = reader.readLong(offsets[2]);
+  object.surahNumber = reader.readLong(offsets[3]);
   return object;
 }
 
-P _surahDeserializeProp<P>(
+P _surahEntityDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -104,40 +97,41 @@ P _surahDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
-    case 3:
       return (reader.readLong(offset)) as P;
-    case 4:
+    case 3:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
-Id _surahGetId(Surah object) {
+Id _surahEntityGetId(SurahEntity object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _surahGetLinks(Surah object) {
+List<IsarLinkBase<dynamic>> _surahEntityGetLinks(SurahEntity object) {
   return [];
 }
 
-void _surahAttach(IsarCollection<dynamic> col, Id id, Surah object) {}
+void _surahEntityAttach(
+    IsarCollection<dynamic> col, Id id, SurahEntity object) {}
 
-extension SurahQueryWhereSort on QueryBuilder<Surah, Surah, QWhere> {
-  QueryBuilder<Surah, Surah, QAfterWhere> anyId() {
+extension SurahEntityQueryWhereSort
+    on QueryBuilder<SurahEntity, SurahEntity, QWhere> {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
-  QueryBuilder<Surah, Surah, QAfterWhereClause> idEqualTo(Id id) {
+extension SurahEntityQueryWhere
+    on QueryBuilder<SurahEntity, SurahEntity, QWhereClause> {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -146,7 +140,8 @@ extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idNotEqualTo(
+      Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -168,7 +163,7 @@ extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idGreaterThan(Id id,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -177,7 +172,7 @@ extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idLessThan(Id id,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -186,7 +181,7 @@ extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterWhereClause> idBetween(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -203,60 +198,10 @@ extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
   }
 }
 
-extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> hashCodeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> hashCodeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> hashCodeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> hashCodeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hashCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> idEqualTo(Id value) {
+extension SurahEntityQueryFilter
+    on QueryBuilder<SurahEntity, SurahEntity, QFilterCondition> {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition> idEqualTo(
+      Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -265,7 +210,7 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition> idGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -278,7 +223,7 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> idLessThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition> idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -291,7 +236,7 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> idBetween(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -308,7 +253,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicEqualTo(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -321,7 +267,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicGreaterThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -336,7 +283,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicLessThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -351,7 +299,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicBetween(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -370,7 +319,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicStartsWith(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -383,7 +333,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicEndsWith(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -396,9 +347,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'nameArabic',
@@ -408,9 +358,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'nameArabic',
@@ -420,7 +369,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicIsEmpty() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'nameArabic',
@@ -429,7 +379,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameArabicIsNotEmpty() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameArabicIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'nameArabic',
@@ -438,7 +389,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishEqualTo(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -451,7 +403,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishGreaterThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -466,7 +419,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishLessThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -481,7 +435,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishBetween(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -500,7 +455,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishStartsWith(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -513,7 +469,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishEndsWith(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -526,9 +483,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'nameEnglish',
@@ -538,9 +494,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'nameEnglish',
@@ -550,7 +505,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishIsEmpty() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'nameEnglish',
@@ -559,7 +515,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> nameEnglishIsNotEmpty() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      nameEnglishIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'nameEnglish',
@@ -568,8 +525,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> numberOfVersesEqualTo(
-      int value) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      numberOfVersesEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'numberOfVerses',
@@ -578,7 +535,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> numberOfVersesGreaterThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      numberOfVersesGreaterThan(
     int value, {
     bool include = false,
   }) {
@@ -591,7 +549,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> numberOfVersesLessThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      numberOfVersesLessThan(
     int value, {
     bool include = false,
   }) {
@@ -604,7 +563,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> numberOfVersesBetween(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      numberOfVersesBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -621,8 +581,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> surahNumberEqualTo(
-      int value) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      surahNumberEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'surahNumber',
@@ -631,7 +591,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> surahNumberGreaterThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      surahNumberGreaterThan(
     int value, {
     bool include = false,
   }) {
@@ -644,7 +605,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> surahNumberLessThan(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      surahNumberLessThan(
     int value, {
     bool include = false,
   }) {
@@ -657,7 +619,8 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterFilterCondition> surahNumberBetween(
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+      surahNumberBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -675,212 +638,184 @@ extension SurahQueryFilter on QueryBuilder<Surah, Surah, QFilterCondition> {
   }
 }
 
-extension SurahQueryObject on QueryBuilder<Surah, Surah, QFilterCondition> {}
+extension SurahEntityQueryObject
+    on QueryBuilder<SurahEntity, SurahEntity, QFilterCondition> {}
 
-extension SurahQueryLinks on QueryBuilder<Surah, Surah, QFilterCondition> {}
+extension SurahEntityQueryLinks
+    on QueryBuilder<SurahEntity, SurahEntity, QFilterCondition> {}
 
-extension SurahQuerySortBy on QueryBuilder<Surah, Surah, QSortBy> {
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByNameArabic() {
+extension SurahEntityQuerySortBy
+    on QueryBuilder<SurahEntity, SurahEntity, QSortBy> {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortByNameArabic() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameArabic', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByNameArabicDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortByNameArabicDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameArabic', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByNameEnglish() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortByNameEnglish() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameEnglish', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByNameEnglishDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortByNameEnglishDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameEnglish', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByNumberOfVerses() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortByNumberOfVerses() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfVerses', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortByNumberOfVersesDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy>
+      sortByNumberOfVersesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfVerses', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortBySurahNumber() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> sortBySurahNumberDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> sortBySurahNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.desc);
     });
   }
 }
 
-extension SurahQuerySortThenBy on QueryBuilder<Surah, Surah, QSortThenBy> {
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenById() {
+extension SurahEntityQuerySortThenBy
+    on QueryBuilder<SurahEntity, SurahEntity, QSortThenBy> {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByNameArabic() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenByNameArabic() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameArabic', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByNameArabicDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenByNameArabicDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameArabic', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByNameEnglish() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenByNameEnglish() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameEnglish', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByNameEnglishDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenByNameEnglishDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nameEnglish', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByNumberOfVerses() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenByNumberOfVerses() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfVerses', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenByNumberOfVersesDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy>
+      thenByNumberOfVersesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfVerses', Sort.desc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenBySurahNumber() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
     });
   }
 
-  QueryBuilder<Surah, Surah, QAfterSortBy> thenBySurahNumberDesc() {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy> thenBySurahNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.desc);
     });
   }
 }
 
-extension SurahQueryWhereDistinct on QueryBuilder<Surah, Surah, QDistinct> {
-  QueryBuilder<Surah, Surah, QDistinct> distinctByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QDistinct> distinctByNameArabic(
+extension SurahEntityQueryWhereDistinct
+    on QueryBuilder<SurahEntity, SurahEntity, QDistinct> {
+  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNameArabic(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nameArabic', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Surah, Surah, QDistinct> distinctByNameEnglish(
+  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNameEnglish(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nameEnglish', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Surah, Surah, QDistinct> distinctByNumberOfVerses() {
+  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNumberOfVerses() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'numberOfVerses');
     });
   }
 
-  QueryBuilder<Surah, Surah, QDistinct> distinctBySurahNumber() {
+  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'surahNumber');
     });
   }
 }
 
-extension SurahQueryProperty on QueryBuilder<Surah, Surah, QQueryProperty> {
-  QueryBuilder<Surah, int, QQueryOperations> idProperty() {
+extension SurahEntityQueryProperty
+    on QueryBuilder<SurahEntity, SurahEntity, QQueryProperty> {
+  QueryBuilder<SurahEntity, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
     });
   }
 
-  QueryBuilder<Surah, int, QQueryOperations> hashCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Surah, String, QQueryOperations> nameArabicProperty() {
+  QueryBuilder<SurahEntity, String, QQueryOperations> nameArabicProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nameArabic');
     });
   }
 
-  QueryBuilder<Surah, String, QQueryOperations> nameEnglishProperty() {
+  QueryBuilder<SurahEntity, String, QQueryOperations> nameEnglishProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nameEnglish');
     });
   }
 
-  QueryBuilder<Surah, int, QQueryOperations> numberOfVersesProperty() {
+  QueryBuilder<SurahEntity, int, QQueryOperations> numberOfVersesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'numberOfVerses');
     });
   }
 
-  QueryBuilder<Surah, int, QQueryOperations> surahNumberProperty() {
+  QueryBuilder<SurahEntity, int, QQueryOperations> surahNumberProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'surahNumber');
     });

@@ -1,19 +1,10 @@
-import 'package:isar/isar.dart';
-
-part 'surah.g.dart';
-
-@collection
 class Surah {
-  Id get id => surahNumber;
-
-  // Note: surahNumber is already the primary key (Id), no need for additional index
   final int surahNumber;
-
   final String nameArabic;
   final String nameEnglish;
   final int numberOfVerses;
 
-  Surah({
+  const Surah({
     required this.surahNumber,
     required this.nameArabic,
     required this.nameEnglish,

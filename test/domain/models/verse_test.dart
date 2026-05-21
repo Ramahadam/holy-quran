@@ -4,7 +4,7 @@ import 'package:holy_quran_app/domain/models/verse.dart';
 void main() {
   group('Verse', () {
     test('creates instance with required fields', () {
-      final verse = Verse(
+      const verse = Verse(
         verseId: '1:1',
         surahNumber: 1,
         verseNumber: 1,
@@ -19,7 +19,7 @@ void main() {
     });
 
     test('creates instance with translation', () {
-      final verse = Verse(
+      const verse = Verse(
         verseId: '1:1',
         surahNumber: 1,
         verseNumber: 1,
@@ -31,19 +31,19 @@ void main() {
     });
 
     test('equality based on verseId', () {
-      final verse1 = Verse(
+      const verse1 = Verse(
         verseId: '1:1',
         surahNumber: 1,
         verseNumber: 1,
         arabicText: 'Text 1',
       );
-      final verse2 = Verse(
+      const verse2 = Verse(
         verseId: '1:1',
         surahNumber: 1,
         verseNumber: 1,
         arabicText: 'Text 2',
       );
-      final verse3 = Verse(
+      const verse3 = Verse(
         verseId: '1:2',
         surahNumber: 1,
         verseNumber: 2,
@@ -55,13 +55,13 @@ void main() {
     });
 
     test('hashCode based on verseId', () {
-      final verse1 = Verse(
+      const verse1 = Verse(
         verseId: '1:1',
         surahNumber: 1,
         verseNumber: 1,
         arabicText: 'Text',
       );
-      final verse2 = Verse(
+      const verse2 = Verse(
         verseId: '1:1',
         surahNumber: 1,
         verseNumber: 1,

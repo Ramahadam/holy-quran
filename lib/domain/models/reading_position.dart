@@ -1,18 +1,8 @@
-import 'package:isar/isar.dart';
-
-part 'reading_position.g.dart';
-
-@collection
 class ReadingPosition {
-  Id id = Isar.autoIncrement;
-
-  @Index(unique: true)
   final String verseId;
-
   final DateTime lastReadAt;
 
-  ReadingPosition({
-    this.id = Isar.autoIncrement,
+  const ReadingPosition({
     required this.verseId,
     required this.lastReadAt,
   });

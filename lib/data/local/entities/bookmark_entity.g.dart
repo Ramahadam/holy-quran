@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'bookmark.dart';
+part of 'bookmark_entity.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -9,39 +9,34 @@ part of 'bookmark.dart';
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetBookmarkCollection on Isar {
-  IsarCollection<Bookmark> get bookmarks => this.collection();
+extension GetBookmarkEntityCollection on Isar {
+  IsarCollection<BookmarkEntity> get bookmarkEntitys => this.collection();
 }
 
-const BookmarkSchema = CollectionSchema(
-  name: r'Bookmark',
-  id: 6727227738202460809,
+const BookmarkEntitySchema = CollectionSchema(
+  name: r'BookmarkEntity',
+  id: -7369956597930324689,
   properties: {
-    r'hashCode': PropertySchema(
-      id: 0,
-      name: r'hashCode',
-      type: IsarType.long,
-    ),
     r'note': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'note',
       type: IsarType.string,
     ),
     r'timestamp': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'verseId': PropertySchema(
-      id: 3,
+      id: 2,
       name: r'verseId',
       type: IsarType.string,
     )
   },
-  estimateSize: _bookmarkEstimateSize,
-  serialize: _bookmarkSerialize,
-  deserialize: _bookmarkDeserialize,
-  deserializeProp: _bookmarkDeserializeProp,
+  estimateSize: _bookmarkEntityEstimateSize,
+  serialize: _bookmarkEntitySerialize,
+  deserialize: _bookmarkEntityDeserialize,
+  deserializeProp: _bookmarkEntityDeserializeProp,
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
@@ -60,14 +55,14 @@ const BookmarkSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-  getId: _bookmarkGetId,
-  getLinks: _bookmarkGetLinks,
-  attach: _bookmarkAttach,
+  getId: _bookmarkEntityGetId,
+  getLinks: _bookmarkEntityGetLinks,
+  attach: _bookmarkEntityAttach,
   version: '3.1.0+1',
 );
 
-int _bookmarkEstimateSize(
-  Bookmark object,
+int _bookmarkEntityEstimateSize(
+  BookmarkEntity object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
@@ -82,34 +77,32 @@ int _bookmarkEstimateSize(
   return bytesCount;
 }
 
-void _bookmarkSerialize(
-  Bookmark object,
+void _bookmarkEntitySerialize(
+  BookmarkEntity object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.hashCode);
-  writer.writeString(offsets[1], object.note);
-  writer.writeDateTime(offsets[2], object.timestamp);
-  writer.writeString(offsets[3], object.verseId);
+  writer.writeString(offsets[0], object.note);
+  writer.writeDateTime(offsets[1], object.timestamp);
+  writer.writeString(offsets[2], object.verseId);
 }
 
-Bookmark _bookmarkDeserialize(
+BookmarkEntity _bookmarkEntityDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = Bookmark(
-    id: id,
-    note: reader.readStringOrNull(offsets[1]),
-    timestamp: reader.readDateTime(offsets[2]),
-    verseId: reader.readString(offsets[3]),
-  );
+  final object = BookmarkEntity();
+  object.id = id;
+  object.note = reader.readStringOrNull(offsets[0]);
+  object.timestamp = reader.readDateTime(offsets[1]);
+  object.verseId = reader.readString(offsets[2]);
   return object;
 }
 
-P _bookmarkDeserializeProp<P>(
+P _bookmarkEntityDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -117,40 +110,42 @@ P _bookmarkDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
-    case 1:
       return (reader.readStringOrNull(offset)) as P;
-    case 2:
+    case 1:
       return (reader.readDateTime(offset)) as P;
-    case 3:
+    case 2:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
-Id _bookmarkGetId(Bookmark object) {
+Id _bookmarkEntityGetId(BookmarkEntity object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _bookmarkGetLinks(Bookmark object) {
+List<IsarLinkBase<dynamic>> _bookmarkEntityGetLinks(BookmarkEntity object) {
   return [];
 }
 
-void _bookmarkAttach(IsarCollection<dynamic> col, Id id, Bookmark object) {
+void _bookmarkEntityAttach(
+    IsarCollection<dynamic> col, Id id, BookmarkEntity object) {
   object.id = id;
 }
 
-extension BookmarkQueryWhereSort on QueryBuilder<Bookmark, Bookmark, QWhere> {
-  QueryBuilder<Bookmark, Bookmark, QAfterWhere> anyId() {
+extension BookmarkEntityQueryWhereSort
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QWhere> {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> idEqualTo(Id id) {
+extension BookmarkEntityQueryWhere
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QWhereClause> {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idEqualTo(
+      Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -159,7 +154,8 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idNotEqualTo(
+      Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -181,7 +177,8 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> idGreaterThan(Id id,
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idGreaterThan(
+      Id id,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -190,7 +187,8 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> idLessThan(Id id,
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idLessThan(
+      Id id,
       {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -199,7 +197,7 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> idBetween(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -215,8 +213,8 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> verseIdEqualTo(
-      String verseId) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      verseIdEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r'verseId',
@@ -225,8 +223,8 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> verseIdNotEqualTo(
-      String verseId) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      verseIdNotEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -261,62 +259,10 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
   }
 }
 
-extension BookmarkQueryFilter
-    on QueryBuilder<Bookmark, Bookmark, QFilterCondition> {
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> hashCodeEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> hashCodeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> hashCodeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> hashCodeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hashCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> idEqualTo(Id value) {
+extension BookmarkEntityQueryFilter
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QFilterCondition> {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition> idEqualTo(
+      Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -325,7 +271,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      idGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -338,7 +285,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> idLessThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -351,7 +299,7 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> idBetween(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -368,7 +316,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteIsNull() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
         property: r'note',
@@ -376,7 +325,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteIsNotNull() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
         property: r'note',
@@ -384,7 +334,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteEqualTo(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteEqualTo(
     String? value, {
     bool caseSensitive = true,
   }) {
@@ -397,7 +348,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteGreaterThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -412,7 +364,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteLessThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteLessThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
@@ -427,7 +380,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteBetween(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -446,7 +400,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteStartsWith(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -459,7 +414,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteEndsWith(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -472,9 +428,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'note',
@@ -484,9 +439,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'note',
@@ -496,7 +450,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteIsEmpty() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'note',
@@ -505,7 +460,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> noteIsNotEmpty() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      noteIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'note',
@@ -514,8 +470,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> timestampEqualTo(
-      DateTime value) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      timestampEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'timestamp',
@@ -524,7 +480,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> timestampGreaterThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      timestampGreaterThan(
     DateTime value, {
     bool include = false,
   }) {
@@ -537,7 +494,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> timestampLessThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      timestampLessThan(
     DateTime value, {
     bool include = false,
   }) {
@@ -550,7 +508,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> timestampBetween(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      timestampBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
@@ -567,7 +526,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdEqualTo(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -580,7 +540,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdGreaterThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -595,7 +556,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdLessThan(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -610,7 +572,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdBetween(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -629,7 +592,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdStartsWith(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -642,7 +606,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdEndsWith(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -655,9 +620,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdContains(
-      String value,
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
         property: r'verseId',
@@ -667,9 +631,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
         property: r'verseId',
@@ -679,7 +642,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdIsEmpty() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'verseId',
@@ -688,7 +652,8 @@ extension BookmarkQueryFilter
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> verseIdIsNotEmpty() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      verseIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'verseId',
@@ -698,147 +663,123 @@ extension BookmarkQueryFilter
   }
 }
 
-extension BookmarkQueryObject
-    on QueryBuilder<Bookmark, Bookmark, QFilterCondition> {}
+extension BookmarkEntityQueryObject
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QFilterCondition> {}
 
-extension BookmarkQueryLinks
-    on QueryBuilder<Bookmark, Bookmark, QFilterCondition> {}
+extension BookmarkEntityQueryLinks
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QFilterCondition> {}
 
-extension BookmarkQuerySortBy on QueryBuilder<Bookmark, Bookmark, QSortBy> {
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByNote() {
+extension BookmarkEntityQuerySortBy
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QSortBy> {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> sortByNote() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByNoteDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> sortByNoteDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.desc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByTimestamp() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> sortByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByTimestampDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      sortByTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.desc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByVerseId() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> sortByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByVerseIdDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      sortByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
   }
 }
 
-extension BookmarkQuerySortThenBy
-    on QueryBuilder<Bookmark, Bookmark, QSortThenBy> {
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenById() {
+extension BookmarkEntityQuerySortThenBy
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QSortThenBy> {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByNote() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenByNote() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByNoteDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenByNoteDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'note', Sort.desc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByTimestamp() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByTimestampDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      thenByTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.desc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByVerseId() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByVerseIdDesc() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      thenByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
   }
 }
 
-extension BookmarkQueryWhereDistinct
-    on QueryBuilder<Bookmark, Bookmark, QDistinct> {
-  QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByNote(
+extension BookmarkEntityQueryWhereDistinct
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> distinctByNote(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'note', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByTimestamp() {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct>
+      distinctByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timestamp');
     });
   }
 
-  QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByVerseId(
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> distinctByVerseId(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseId', caseSensitive: caseSensitive);
@@ -846,33 +787,27 @@ extension BookmarkQueryWhereDistinct
   }
 }
 
-extension BookmarkQueryProperty
-    on QueryBuilder<Bookmark, Bookmark, QQueryProperty> {
-  QueryBuilder<Bookmark, int, QQueryOperations> idProperty() {
+extension BookmarkEntityQueryProperty
+    on QueryBuilder<BookmarkEntity, BookmarkEntity, QQueryProperty> {
+  QueryBuilder<BookmarkEntity, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
     });
   }
 
-  QueryBuilder<Bookmark, int, QQueryOperations> hashCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Bookmark, String?, QQueryOperations> noteProperty() {
+  QueryBuilder<BookmarkEntity, String?, QQueryOperations> noteProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'note');
     });
   }
 
-  QueryBuilder<Bookmark, DateTime, QQueryOperations> timestampProperty() {
+  QueryBuilder<BookmarkEntity, DateTime, QQueryOperations> timestampProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'timestamp');
     });
   }
 
-  QueryBuilder<Bookmark, String, QQueryOperations> verseIdProperty() {
+  QueryBuilder<BookmarkEntity, String, QQueryOperations> verseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'verseId');
     });

@@ -4,7 +4,7 @@ import 'package:holy_quran_app/domain/models/surah.dart';
 void main() {
   group('Surah', () {
     test('creates instance with required fields', () {
-      final surah = Surah(
+      const surah = Surah(
         surahNumber: 1,
         nameArabic: 'الفاتحة',
         nameEnglish: 'Al-Fatihah',
@@ -18,19 +18,19 @@ void main() {
     });
 
     test('equality based on surahNumber', () {
-      final surah1 = Surah(
+      const surah1 = Surah(
         surahNumber: 1,
         nameArabic: 'الفاتحة',
         nameEnglish: 'Al-Fatihah',
         numberOfVerses: 7,
       );
-      final surah2 = Surah(
+      const surah2 = Surah(
         surahNumber: 1,
         nameArabic: 'Different Name',
         nameEnglish: 'Different Name',
         numberOfVerses: 10,
       );
-      final surah3 = Surah(
+      const surah3 = Surah(
         surahNumber: 2,
         nameArabic: 'البقرة',
         nameEnglish: 'Al-Baqarah',
@@ -42,13 +42,13 @@ void main() {
     });
 
     test('hashCode based on surahNumber', () {
-      final surah1 = Surah(
+      const surah1 = Surah(
         surahNumber: 1,
         nameArabic: 'الفاتحة',
         nameEnglish: 'Al-Fatihah',
         numberOfVerses: 7,
       );
-      final surah2 = Surah(
+      const surah2 = Surah(
         surahNumber: 1,
         nameArabic: 'Different Name',
         nameEnglish: 'Different Name',
@@ -60,7 +60,7 @@ void main() {
 
     test('handles edge cases', () {
       // Test with minimum valid surah number
-      final surah1 = Surah(
+      const surah1 = Surah(
         surahNumber: 1,
         nameArabic: 'الفاتحة',
         nameEnglish: 'Al-Fatihah',
@@ -69,7 +69,7 @@ void main() {
       expect(surah1.surahNumber, 1);
 
       // Test with maximum valid surah number
-      final surah114 = Surah(
+      const surah114 = Surah(
         surahNumber: 114,
         nameArabic: 'الناس',
         nameEnglish: 'An-Nas',
@@ -78,7 +78,7 @@ void main() {
       expect(surah114.surahNumber, 114);
 
       // Test with empty strings (should be allowed, validation can be added later)
-      final surahEmptyNames = Surah(
+      const surahEmptyNames = Surah(
         surahNumber: 1,
         nameArabic: '',
         nameEnglish: '',

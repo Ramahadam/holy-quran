@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'reading_position.dart';
+part of 'reading_position_entity.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -9,34 +9,30 @@ part of 'reading_position.dart';
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
-extension GetReadingPositionCollection on Isar {
-  IsarCollection<ReadingPosition> get readingPositions => this.collection();
+extension GetReadingPositionEntityCollection on Isar {
+  IsarCollection<ReadingPositionEntity> get readingPositionEntitys =>
+      this.collection();
 }
 
-const ReadingPositionSchema = CollectionSchema(
-  name: r'ReadingPosition',
-  id: -5555304648089438970,
+const ReadingPositionEntitySchema = CollectionSchema(
+  name: r'ReadingPositionEntity',
+  id: 8410079443906433630,
   properties: {
-    r'hashCode': PropertySchema(
-      id: 0,
-      name: r'hashCode',
-      type: IsarType.long,
-    ),
     r'lastReadAt': PropertySchema(
-      id: 1,
+      id: 0,
       name: r'lastReadAt',
       type: IsarType.dateTime,
     ),
     r'verseId': PropertySchema(
-      id: 2,
+      id: 1,
       name: r'verseId',
       type: IsarType.string,
     )
   },
-  estimateSize: _readingPositionEstimateSize,
-  serialize: _readingPositionSerialize,
-  deserialize: _readingPositionDeserialize,
-  deserializeProp: _readingPositionDeserializeProp,
+  estimateSize: _readingPositionEntityEstimateSize,
+  serialize: _readingPositionEntitySerialize,
+  deserialize: _readingPositionEntityDeserialize,
+  deserializeProp: _readingPositionEntityDeserializeProp,
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
@@ -55,14 +51,14 @@ const ReadingPositionSchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
-  getId: _readingPositionGetId,
-  getLinks: _readingPositionGetLinks,
-  attach: _readingPositionAttach,
+  getId: _readingPositionEntityGetId,
+  getLinks: _readingPositionEntityGetLinks,
+  attach: _readingPositionEntityAttach,
   version: '3.1.0+1',
 );
 
-int _readingPositionEstimateSize(
-  ReadingPosition object,
+int _readingPositionEntityEstimateSize(
+  ReadingPositionEntity object,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
@@ -71,32 +67,30 @@ int _readingPositionEstimateSize(
   return bytesCount;
 }
 
-void _readingPositionSerialize(
-  ReadingPosition object,
+void _readingPositionEntitySerialize(
+  ReadingPositionEntity object,
   IsarWriter writer,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.hashCode);
-  writer.writeDateTime(offsets[1], object.lastReadAt);
-  writer.writeString(offsets[2], object.verseId);
+  writer.writeDateTime(offsets[0], object.lastReadAt);
+  writer.writeString(offsets[1], object.verseId);
 }
 
-ReadingPosition _readingPositionDeserialize(
+ReadingPositionEntity _readingPositionEntityDeserialize(
   Id id,
   IsarReader reader,
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = ReadingPosition(
-    id: id,
-    lastReadAt: reader.readDateTime(offsets[1]),
-    verseId: reader.readString(offsets[2]),
-  );
+  final object = ReadingPositionEntity();
+  object.id = id;
+  object.lastReadAt = reader.readDateTime(offsets[0]);
+  object.verseId = reader.readString(offsets[1]);
   return object;
 }
 
-P _readingPositionDeserializeProp<P>(
+P _readingPositionEntityDeserializeProp<P>(
   IsarReader reader,
   int propertyId,
   int offset,
@@ -104,35 +98,35 @@ P _readingPositionDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
-    case 1:
       return (reader.readDateTime(offset)) as P;
-    case 2:
+    case 1:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
-Id _readingPositionGetId(ReadingPosition object) {
+Id _readingPositionEntityGetId(ReadingPositionEntity object) {
   return object.id;
 }
 
-List<IsarLinkBase<dynamic>> _readingPositionGetLinks(ReadingPosition object) {
+List<IsarLinkBase<dynamic>> _readingPositionEntityGetLinks(
+    ReadingPositionEntity object) {
   return [];
 }
 
-void _readingPositionAttach(
-    IsarCollection<dynamic> col, Id id, ReadingPosition object) {
+void _readingPositionEntityAttach(
+    IsarCollection<dynamic> col, Id id, ReadingPositionEntity object) {
   object.id = id;
 }
 
-extension ReadingPositionByIndex on IsarCollection<ReadingPosition> {
-  Future<ReadingPosition?> getByVerseId(String verseId) {
+extension ReadingPositionEntityByIndex
+    on IsarCollection<ReadingPositionEntity> {
+  Future<ReadingPositionEntity?> getByVerseId(String verseId) {
     return getByIndex(r'verseId', [verseId]);
   }
 
-  ReadingPosition? getByVerseIdSync(String verseId) {
+  ReadingPositionEntity? getByVerseIdSync(String verseId) {
     return getByIndexSync(r'verseId', [verseId]);
   }
 
@@ -144,12 +138,13 @@ extension ReadingPositionByIndex on IsarCollection<ReadingPosition> {
     return deleteByIndexSync(r'verseId', [verseId]);
   }
 
-  Future<List<ReadingPosition?>> getAllByVerseId(List<String> verseIdValues) {
+  Future<List<ReadingPositionEntity?>> getAllByVerseId(
+      List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
     return getAllByIndex(r'verseId', values);
   }
 
-  List<ReadingPosition?> getAllByVerseIdSync(List<String> verseIdValues) {
+  List<ReadingPositionEntity?> getAllByVerseIdSync(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
     return getAllByIndexSync(r'verseId', values);
   }
@@ -164,37 +159,38 @@ extension ReadingPositionByIndex on IsarCollection<ReadingPosition> {
     return deleteAllByIndexSync(r'verseId', values);
   }
 
-  Future<Id> putByVerseId(ReadingPosition object) {
+  Future<Id> putByVerseId(ReadingPositionEntity object) {
     return putByIndex(r'verseId', object);
   }
 
-  Id putByVerseIdSync(ReadingPosition object, {bool saveLinks = true}) {
+  Id putByVerseIdSync(ReadingPositionEntity object, {bool saveLinks = true}) {
     return putByIndexSync(r'verseId', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByVerseId(List<ReadingPosition> objects) {
+  Future<List<Id>> putAllByVerseId(List<ReadingPositionEntity> objects) {
     return putAllByIndex(r'verseId', objects);
   }
 
-  List<Id> putAllByVerseIdSync(List<ReadingPosition> objects,
+  List<Id> putAllByVerseIdSync(List<ReadingPositionEntity> objects,
       {bool saveLinks = true}) {
     return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
   }
 }
 
-extension ReadingPositionQueryWhereSort
-    on QueryBuilder<ReadingPosition, ReadingPosition, QWhere> {
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhere> anyId() {
+extension ReadingPositionEntityQueryWhereSort
+    on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QWhere> {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhere>
+      anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension ReadingPositionQueryWhere
-    on QueryBuilder<ReadingPosition, ReadingPosition, QWhereClause> {
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause> idEqualTo(
-      Id id) {
+extension ReadingPositionEntityQueryWhere on QueryBuilder<ReadingPositionEntity,
+    ReadingPositionEntity, QWhereClause> {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
+      idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IdWhereClause.between(
         lower: id,
@@ -203,7 +199,7 @@ extension ReadingPositionQueryWhere
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
       idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
@@ -226,7 +222,7 @@ extension ReadingPositionQueryWhere
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
       idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
@@ -235,9 +231,8 @@ extension ReadingPositionQueryWhere
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
+      idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -245,7 +240,8 @@ extension ReadingPositionQueryWhere
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause> idBetween(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
+      idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
@@ -261,7 +257,7 @@ extension ReadingPositionQueryWhere
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
       verseIdEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
@@ -271,7 +267,7 @@ extension ReadingPositionQueryWhere
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterWhereClause>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
       verseIdNotEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
@@ -307,66 +303,10 @@ extension ReadingPositionQueryWhere
   }
 }
 
-extension ReadingPositionQueryFilter
-    on QueryBuilder<ReadingPosition, ReadingPosition, QFilterCondition> {
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      hashCodeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      hashCodeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      hashCodeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'hashCode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      hashCodeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'hashCode',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      idEqualTo(Id value) {
+extension ReadingPositionEntityQueryFilter on QueryBuilder<
+    ReadingPositionEntity, ReadingPositionEntity, QFilterCondition> {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'id',
@@ -375,8 +315,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      idGreaterThan(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> idGreaterThan(
     Id value, {
     bool include = false,
   }) {
@@ -389,8 +329,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      idLessThan(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> idLessThan(
     Id value, {
     bool include = false,
   }) {
@@ -403,8 +343,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      idBetween(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
@@ -421,8 +361,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      lastReadAtEqualTo(DateTime value) {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> lastReadAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'lastReadAt',
@@ -431,8 +371,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      lastReadAtGreaterThan(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> lastReadAtGreaterThan(
     DateTime value, {
     bool include = false,
   }) {
@@ -445,8 +385,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      lastReadAtLessThan(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> lastReadAtLessThan(
     DateTime value, {
     bool include = false,
   }) {
@@ -459,8 +399,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      lastReadAtBetween(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> lastReadAtBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
@@ -477,8 +417,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdEqualTo(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -491,8 +431,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdGreaterThan(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -507,8 +447,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdLessThan(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdLessThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
@@ -523,8 +463,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdBetween(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -543,8 +483,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdStartsWith(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -557,8 +497,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdEndsWith(
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -571,7 +511,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+          QAfterFilterCondition>
       verseIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.contains(
@@ -582,7 +523,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+          QAfterFilterCondition>
       verseIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.matches(
@@ -593,8 +535,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdIsEmpty() {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'verseId',
@@ -603,8 +545,8 @@ extension ReadingPositionQueryFilter
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterFilterCondition>
-      verseIdIsNotEmpty() {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
+      QAfterFilterCondition> verseIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'verseId',
@@ -614,49 +556,36 @@ extension ReadingPositionQueryFilter
   }
 }
 
-extension ReadingPositionQueryObject
-    on QueryBuilder<ReadingPosition, ReadingPosition, QFilterCondition> {}
+extension ReadingPositionEntityQueryObject on QueryBuilder<
+    ReadingPositionEntity, ReadingPositionEntity, QFilterCondition> {}
 
-extension ReadingPositionQueryLinks
-    on QueryBuilder<ReadingPosition, ReadingPosition, QFilterCondition> {}
+extension ReadingPositionEntityQueryLinks on QueryBuilder<ReadingPositionEntity,
+    ReadingPositionEntity, QFilterCondition> {}
 
-extension ReadingPositionQuerySortBy
-    on QueryBuilder<ReadingPosition, ReadingPosition, QSortBy> {
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
-      sortByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
-      sortByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
+extension ReadingPositionEntityQuerySortBy
+    on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QSortBy> {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
       sortByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.asc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
       sortByLastReadAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.desc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy> sortByVerseId() {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
+      sortByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
       sortByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
@@ -664,55 +593,44 @@ extension ReadingPositionQuerySortBy
   }
 }
 
-extension ReadingPositionQuerySortThenBy
-    on QueryBuilder<ReadingPosition, ReadingPosition, QSortThenBy> {
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
-      thenByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
-      thenByHashCodeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'hashCode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy> thenById() {
+extension ReadingPositionEntityQuerySortThenBy
+    on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QSortThenBy> {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
+      thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
+      thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
       thenByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.asc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
       thenByLastReadAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.desc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy> thenByVerseId() {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
+      thenByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QAfterSortBy>
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
       thenByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
@@ -720,52 +638,40 @@ extension ReadingPositionQuerySortThenBy
   }
 }
 
-extension ReadingPositionQueryWhereDistinct
-    on QueryBuilder<ReadingPosition, ReadingPosition, QDistinct> {
-  QueryBuilder<ReadingPosition, ReadingPosition, QDistinct>
-      distinctByHashCode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'hashCode');
-    });
-  }
-
-  QueryBuilder<ReadingPosition, ReadingPosition, QDistinct>
+extension ReadingPositionEntityQueryWhereDistinct
+    on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QDistinct> {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QDistinct>
       distinctByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastReadAt');
     });
   }
 
-  QueryBuilder<ReadingPosition, ReadingPosition, QDistinct> distinctByVerseId(
-      {bool caseSensitive = true}) {
+  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QDistinct>
+      distinctByVerseId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseId', caseSensitive: caseSensitive);
     });
   }
 }
 
-extension ReadingPositionQueryProperty
-    on QueryBuilder<ReadingPosition, ReadingPosition, QQueryProperty> {
-  QueryBuilder<ReadingPosition, int, QQueryOperations> idProperty() {
+extension ReadingPositionEntityQueryProperty on QueryBuilder<
+    ReadingPositionEntity, ReadingPositionEntity, QQueryProperty> {
+  QueryBuilder<ReadingPositionEntity, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
     });
   }
 
-  QueryBuilder<ReadingPosition, int, QQueryOperations> hashCodeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'hashCode');
-    });
-  }
-
-  QueryBuilder<ReadingPosition, DateTime, QQueryOperations>
+  QueryBuilder<ReadingPositionEntity, DateTime, QQueryOperations>
       lastReadAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastReadAt');
     });
   }
 
-  QueryBuilder<ReadingPosition, String, QQueryOperations> verseIdProperty() {
+  QueryBuilder<ReadingPositionEntity, String, QQueryOperations>
+      verseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'verseId');
     });
