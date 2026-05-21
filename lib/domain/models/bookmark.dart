@@ -1,11 +1,19 @@
+import 'package:isar/isar.dart';
+
+part 'bookmark.g.dart';
+
+@collection
 class Bookmark {
-  final int id;
+  Id id = Isar.autoIncrement;
+
+  @Index()
   final String verseId;
+
   final DateTime timestamp;
   final String? note;
 
-  const Bookmark({
-    required this.id,
+  Bookmark({
+    this.id = Isar.autoIncrement,
     required this.verseId,
     required this.timestamp,
     this.note,

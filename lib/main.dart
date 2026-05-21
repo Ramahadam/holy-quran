@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:holy_quran_app/data/local/isar_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Isar database
+  await IsarService.getInstance();
+
   runApp(
     const ProviderScope(
       child: HolyQuranApp(),
