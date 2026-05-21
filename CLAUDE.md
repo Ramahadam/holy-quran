@@ -64,17 +64,53 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## 5. Branch and Issue Discipline
 
-**Every feature gets its own branch and tracking issue.**
+**Every feature gets its own branch and tracking issue. Clean up after merge.**
 
-Before starting any feature work:
-- Create a GitHub issue describing the feature/task.
-- Create a local branch from main with a descriptive name (e.g., `feature/domain-models`, `fix/verse-parsing`).
-- Reference the issue number in commits.
+### Before Starting Feature Work
+1. **Create GitHub issue** describing the feature/task with:
+   - Clear overview and context
+   - Detailed requirements or acceptance criteria
+   - Technical notes and considerations
+   - Related issues and dependencies
+2. **Create local branch** from main:
+   ```bash
+   git checkout main
+   git pull
+   git checkout -b feature/descriptive-name
+   ```
+   Use naming conventions:
+   - `feature/` for new features
+   - `fix/` for bug fixes
+   - `refactor/` for refactoring work
+3. **Reference issue number** in all commits (e.g., "feat: Add models (#3)")
 
-Never work directly on main for features. This ensures:
+### During Development
+- Work only on your feature branch
+- Never commit directly to main
+- Keep commits atomic and focused
+- Write clear commit messages
+
+### After PR Merge
+**Always clean up branches after merge:**
+```bash
+# Switch back to main
+git checkout main
+
+# Pull the merged changes
+git pull
+
+# Delete local feature branch
+git branch -d feature/branch-name
+
+# Delete remote branch (if not auto-deleted)
+git push origin --delete feature/branch-name
+```
+
+This workflow ensures:
 - Clean PR reviews with focused changes
 - Easy rollback if needed
 - Clear work-in-progress tracking
+- No stale branches cluttering the repository
 - Atomic, reviewable units of work
 
 ---
