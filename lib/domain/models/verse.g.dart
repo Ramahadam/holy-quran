@@ -128,12 +128,12 @@ Verse _verseDeserialize(
 ) {
   final object = Verse(
     arabicText: reader.readString(offsets[0]),
+    id: id,
     surahNumber: reader.readLong(offsets[2]),
     translation: reader.readStringOrNull(offsets[3]),
     verseId: reader.readString(offsets[4]),
     verseNumber: reader.readLong(offsets[5]),
   );
-  object.id = id;
   return object;
 }
 

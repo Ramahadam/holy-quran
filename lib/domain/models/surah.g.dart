@@ -48,21 +48,7 @@ const SurahSchema = CollectionSchema(
   deserialize: _surahDeserialize,
   deserializeProp: _surahDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'surahNumber': IndexSchema(
-      id: 9024003441292455669,
-      name: r'surahNumber',
-      unique: true,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'surahNumber',
-          type: IndexType.value,
-          caseSensitive: false,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _surahGetId,
@@ -142,73 +128,10 @@ List<IsarLinkBase<dynamic>> _surahGetLinks(Surah object) {
 
 void _surahAttach(IsarCollection<dynamic> col, Id id, Surah object) {}
 
-extension SurahByIndex on IsarCollection<Surah> {
-  Future<Surah?> getBySurahNumber(int surahNumber) {
-    return getByIndex(r'surahNumber', [surahNumber]);
-  }
-
-  Surah? getBySurahNumberSync(int surahNumber) {
-    return getByIndexSync(r'surahNumber', [surahNumber]);
-  }
-
-  Future<bool> deleteBySurahNumber(int surahNumber) {
-    return deleteByIndex(r'surahNumber', [surahNumber]);
-  }
-
-  bool deleteBySurahNumberSync(int surahNumber) {
-    return deleteByIndexSync(r'surahNumber', [surahNumber]);
-  }
-
-  Future<List<Surah?>> getAllBySurahNumber(List<int> surahNumberValues) {
-    final values = surahNumberValues.map((e) => [e]).toList();
-    return getAllByIndex(r'surahNumber', values);
-  }
-
-  List<Surah?> getAllBySurahNumberSync(List<int> surahNumberValues) {
-    final values = surahNumberValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'surahNumber', values);
-  }
-
-  Future<int> deleteAllBySurahNumber(List<int> surahNumberValues) {
-    final values = surahNumberValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'surahNumber', values);
-  }
-
-  int deleteAllBySurahNumberSync(List<int> surahNumberValues) {
-    final values = surahNumberValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'surahNumber', values);
-  }
-
-  Future<Id> putBySurahNumber(Surah object) {
-    return putByIndex(r'surahNumber', object);
-  }
-
-  Id putBySurahNumberSync(Surah object, {bool saveLinks = true}) {
-    return putByIndexSync(r'surahNumber', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllBySurahNumber(List<Surah> objects) {
-    return putAllByIndex(r'surahNumber', objects);
-  }
-
-  List<Id> putAllBySurahNumberSync(List<Surah> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'surahNumber', objects, saveLinks: saveLinks);
-  }
-}
-
 extension SurahQueryWhereSort on QueryBuilder<Surah, Surah, QWhere> {
   QueryBuilder<Surah, Surah, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterWhere> anySurahNumber() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'surahNumber'),
-      );
     });
   }
 }
@@ -274,96 +197,6 @@ extension SurahQueryWhere on QueryBuilder<Surah, Surah, QWhereClause> {
         lower: lowerId,
         includeLower: includeLower,
         upper: upperId,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterWhereClause> surahNumberEqualTo(
-      int surahNumber) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'surahNumber',
-        value: [surahNumber],
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterWhereClause> surahNumberNotEqualTo(
-      int surahNumber) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [],
-              upper: [surahNumber],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [surahNumber],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [surahNumber],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [],
-              upper: [surahNumber],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterWhereClause> surahNumberGreaterThan(
-    int surahNumber, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber',
-        lower: [surahNumber],
-        includeLower: include,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterWhereClause> surahNumberLessThan(
-    int surahNumber, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber',
-        lower: [],
-        upper: [surahNumber],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<Surah, Surah, QAfterWhereClause> surahNumberBetween(
-    int lowerSurahNumber,
-    int upperSurahNumber, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber',
-        lower: [lowerSurahNumber],
-        includeLower: includeLower,
-        upper: [upperSurahNumber],
         includeUpper: includeUpper,
       ));
     });

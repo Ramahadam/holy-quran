@@ -6,7 +6,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Isar database
-  await IsarService.getInstance();
+  try {
+    await IsarService.getInstance();
+  } catch (e, stackTrace) {
+    debugPrint('Database initialization failed: $e');
+    debugPrint('Stack trace: $stackTrace');
+    // App will still launch but database operations will fail gracefully
+    // TODO: Implement error screen or retry mechanism in future iterations
+  }
 
   runApp(
     const ProviderScope(

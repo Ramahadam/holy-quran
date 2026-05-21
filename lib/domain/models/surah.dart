@@ -6,7 +6,7 @@ part 'surah.g.dart';
 class Surah {
   Id get id => surahNumber;
 
-  @Index(unique: true)
+  // Note: surahNumber is already the primary key (Id), no need for additional index
   final int surahNumber;
 
   final String nameArabic;
