@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:holy_quran_app/data/local/isar_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Isar database
+  try {
+    await IsarService.getInstance();
+  } catch (e, stackTrace) {
+    debugPrint('Database initialization failed: $e');
+    debugPrint('Stack trace: $stackTrace');
+    // App will still launch but database operations will fail gracefully
+    // TODO: Implement error screen or retry mechanism in future iterations
+  }
+
   runApp(
     const ProviderScope(
       child: HolyQuranApp(),

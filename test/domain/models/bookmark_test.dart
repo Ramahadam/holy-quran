@@ -7,12 +7,10 @@ void main() {
 
     test('creates instance with required fields', () {
       final bookmark = Bookmark(
-        id: 1,
         verseId: '1:1',
         timestamp: testDate,
       );
 
-      expect(bookmark.id, 1);
       expect(bookmark.verseId, '1:1');
       expect(bookmark.timestamp, testDate);
       expect(bookmark.note, isNull);
@@ -20,7 +18,6 @@ void main() {
 
     test('creates instance with note', () {
       final bookmark = Bookmark(
-        id: 1,
         verseId: '1:1',
         timestamp: testDate,
         note: 'Important verse',
@@ -29,25 +26,48 @@ void main() {
       expect(bookmark.note, 'Important verse');
     });
 
-    test('equality based on id', () {
+    test('equality based on verseId and timestamp', () {
       final bookmark1 = Bookmark(
-        id: 1,
         verseId: '1:1',
         timestamp: testDate,
       );
       final bookmark2 = Bookmark(
-        id: 1,
+        verseId: '1:1',
+        timestamp: testDate,
+        note: 'Different note',
+      );
+      final bookmark3 = Bookmark(
         verseId: '2:1',
         timestamp: testDate,
       );
-      final bookmark3 = Bookmark(
-        id: 2,
+      final bookmark4 = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime(2024, 2, 1),
+      );
+
+      // Same verseId and timestamp - equal
+      expect(bookmark1, equals(bookmark2));
+
+      // Different verseId - not equal
+      expect(bookmark1, isNot(equals(bookmark3)));
+
+      // Different timestamp - not equal
+      expect(bookmark1, isNot(equals(bookmark4)));
+    });
+
+    test('hashCode based on verseId and timestamp', () {
+      final bookmark1 = Bookmark(
         verseId: '1:1',
         timestamp: testDate,
       );
+      final bookmark2 = Bookmark(
+        verseId: '1:1',
+        timestamp: testDate,
+        note: 'Some note',
+      );
 
-      expect(bookmark1, equals(bookmark2));
-      expect(bookmark1, isNot(equals(bookmark3)));
+      expect(bookmark1.hashCode, equals(bookmark2.hashCode));
     });
   });
 }
+
