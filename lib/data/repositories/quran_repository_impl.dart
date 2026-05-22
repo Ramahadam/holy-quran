@@ -1,0 +1,158 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:isar/isar.dart';
+
+import '../../core/utils/checksum_validator.dart';
+import '../../domain/models/surah.dart';
+import '../../domain/models/verse.dart';
+import '../local/entities/surah_entity.dart';
+import '../local/entities/verse_entity.dart';
+import '../local/isar_service.dart';
+import 'quran_repository.dart';
+
+class QuranRepositoryImpl implements QuranRepository {
+  QuranRepositoryImpl();
+
+  @override
+  Future<void> loadQuranData() async {
+    if (await isDataLoaded()) {
+      return;
+    }
+
+    final isar = await IsarService.getInstance();
+
+    await isar.writeTxn(() async {
+      await isar.verseEntitys.clear();
+      await isar.surahEntitys.clear();
+    });
+
+    await _loadSurahs();
+    await _loadVerses();
+  }
+
+  Future<void> _loadSurahs() async {
+    final surahsJson = await rootBundle.loadString('assets/quran/surahs.json');
+    final surahsChecksum = await rootBundle.loadString('assets/quran/checksums.txt');
+    final lines = surahsChecksum.split('\n');
+    final expectedChecksum = lines.firstWhere(
+      (line) => line.contains('surahs.json'),
+      orElse: () => '',
+    ).split(' ').first;
+
+    if (expectedChecksum.isNotEmpty &&
+        !ChecksumValidator.verify(surahsJson, expectedChecksum)) {
+      throw Exception('Surahs data checksum verification failed');
+    }
+
+    final List<dynamic> surahsData = json.decode(surahsJson);
+    final surahEntities = surahsData.map((data) {
+      final surah = Surah(
+        surahNumber: data['number'] as int,
+        nameArabic: data['name'] as String,
+        nameEnglish: data['translation'] as String,
+        numberOfVerses: data['totalVerses'] as int,
+      );
+      return SurahEntity.fromDomain(surah);
+    }).toList();
+
+    final isar = await IsarService.getInstance();
+    await isar.writeTxn(() async {
+      await isar.surahEntitys.putAll(surahEntities);
+    });
+  }
+
+  Future<void> _loadVerses() async {
+    final versesJson = await rootBundle.loadString('assets/quran/verses.json');
+    final versesChecksum = await rootBundle.loadString('assets/quran/checksums.txt');
+    final lines = versesChecksum.split('\n');
+    final expectedChecksum = lines.firstWhere(
+      (line) => line.contains('verses.json'),
+      orElse: () => '',
+    ).split(' ').first;
+
+    if (expectedChecksum.isNotEmpty &&
+        !ChecksumValidator.verify(versesJson, expectedChecksum)) {
+      throw Exception('Verses data checksum verification failed');
+    }
+
+    final List<dynamic> versesData = json.decode(versesJson);
+    final verseEntities = versesData.map((data) {
+      final verse = Verse(
+        verseId: data['verseId'] as String,
+        surahNumber: data['surahNumber'] as int,
+        verseNumber: data['verseNumber'] as int,
+        arabicText: data['arabicText'] as String,
+        translation: data['translation'] as String?,
+      );
+      return VerseEntity.fromDomain(verse);
+    }).toList();
+
+    final isar = await IsarService.getInstance();
+
+    const batchSize = 500;
+    for (var i = 0; i < verseEntities.length; i += batchSize) {
+      final end = (i + batchSize < verseEntities.length)
+          ? i + batchSize
+          : verseEntities.length;
+      final batch = verseEntities.sublist(i, end);
+
+      await isar.writeTxn(() async {
+        await isar.verseEntitys.putAll(batch);
+      });
+    }
+  }
+
+  @override
+  Future<List<Verse>> getVersesBySurah(int surahNumber) async {
+    final isar = await IsarService.getInstance();
+
+    final entities = await isar.verseEntitys
+        .filter()
+        .surahNumberEqualTo(surahNumber)
+        .sortByVerseNumber()
+        .findAll();
+
+    return entities.map((e) => e.toDomain()).toList();
+  }
+
+  @override
+  Future<Verse?> getVerseById(String verseId) async {
+    final isar = await IsarService.getInstance();
+
+    final entity = await isar.verseEntitys
+        .filter()
+        .verseIdEqualTo(verseId)
+        .findFirst();
+
+    return entity?.toDomain();
+  }
+
+  @override
+  Future<List<Surah>> getAllSurahs() async {
+    final isar = await IsarService.getInstance();
+
+    final entities = await isar.surahEntitys.where().findAll();
+
+    entities.sort((a, b) => a.surahNumber.compareTo(b.surahNumber));
+    return entities.map((e) => e.toDomain()).toList();
+  }
+
+  @override
+  Future<Surah?> getSurahByNumber(int surahNumber) async {
+    final isar = await IsarService.getInstance();
+
+    final entity = await isar.surahEntitys.get(surahNumber);
+
+    return entity?.toDomain();
+  }
+
+  @override
+  Future<bool> isDataLoaded() async {
+    final isar = await IsarService.getInstance();
+
+    final verseCount = await isar.verseEntitys.count();
+    final surahCount = await isar.surahEntitys.count();
+
+    return verseCount > 0 && surahCount == 114;
+  }
+}
