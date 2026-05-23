@@ -16,13 +16,19 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
   void initState() {
     super.initState();
     // Listen once — navigate when data load completes, regardless of rebuilds.
-    ref.listenManual<AsyncValue<void>>(initializeDataProvider, (_, next) {
-      if (next is AsyncData && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      }
-    });
+    // fireImmediately: true ensures navigation fires even when the provider
+    // is already settled before this widget mounts (e.g. hot-restart).
+    ref.listenManual<AsyncValue<void>>(
+      initializeDataProvider,
+      (_, next) {
+        if (next is AsyncData && mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        }
+      },
+      fireImmediately: true,
+    );
   }
 
   @override

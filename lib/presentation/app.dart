@@ -22,6 +22,7 @@ class DatabaseErrorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Holy Quran',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       home: Scaffold(
@@ -37,7 +38,7 @@ class DatabaseErrorApp extends StatelessWidget {
                 Text(
                   'Could not open the database.\nPlease restart the app.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Color(0xFF555555)),
+                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                 ),
               ],
             ),
