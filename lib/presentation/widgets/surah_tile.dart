@@ -66,11 +66,10 @@ class _SurahNumber extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '$number',
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: AppTheme.islamicGreen,
-        ),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: AppTheme.islamicGreen,
+            ),
       ),
     );
   }

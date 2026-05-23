@@ -7,6 +7,9 @@ class AppTheme {
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF555555);
   static const Color divider = Color(0xFFE8DCC8);
+  // Tinted badge backgrounds: islamicGreen at ~8% opacity (fill) and ~24% (border).
+  static const Color islamicGreenSubtle = Color(0x142E7D32);
+  static const Color islamicGreenBorder = Color(0x3C2E7D32);
 
   static ThemeData get light => ThemeData(
         useMaterial3: true,

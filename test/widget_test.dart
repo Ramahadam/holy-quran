@@ -6,11 +6,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:holy_quran_app/presentation/app.dart';
 import 'package:holy_quran_app/presentation/screens/loading_screen.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
+import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
 import 'package:holy_quran_app/presentation/widgets/verse_card.dart';
+
+const _surah1 = Surah(
+  surahNumber: 1,
+  nameArabic: 'الفاتحة',
+  nameEnglish: 'The Opening',
+  numberOfVerses: 7,
+);
+
+const _verse1 = Verse(
+  verseId: '1:1',
+  surahNumber: 1,
+  verseNumber: 1,
+  arabicText: 'بِسْمِ اللَّهِ',
+  translation: 'In the name of Allah',
+);
 
 void main() {
   group('HolyQuranApp', () {
@@ -32,7 +48,6 @@ void main() {
 
   group('LoadingScreen', () {
     testWidgets('shows loading indicator while data is loading', (tester) async {
-      // Use a Completer that never resolves to avoid pending-timer assertions.
       final completer = Completer<void>();
       await tester.pumpWidget(
         ProviderScope(
@@ -45,7 +60,8 @@ void main() {
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.textContaining('Preparing your Digital Sanctuary'), findsOneWidget);
-      completer.complete(); // clean up
+      // Resolve to avoid pending-microtask assertion on teardown.
+      completer.complete();
     });
 
     testWidgets('shows error UI when initialization fails', (tester) async {
@@ -75,25 +91,95 @@ void main() {
           child: const MaterialApp(home: LoadingScreen()),
         ),
       );
-      // Settle all async work + navigation
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
     });
   });
 
-  group('SurahTile', () {
-    testWidgets('renders Arabic name, English name and verse count', (tester) async {
-      const surah = Surah(
-        surahNumber: 1,
-        nameArabic: 'الفاتحة',
-        nameEnglish: 'The Opening',
-        numberOfVerses: 7,
+  group('HomeScreen', () {
+    testWidgets('shows surah list when data is available', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
       );
+      await tester.pumpAndSettle();
+      expect(find.byType(SurahTile), findsOneWidget);
+      expect(find.text('The Opening'), findsOneWidget);
+    });
+
+    testWidgets('shows empty state when surah list is empty', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => []),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('No surahs found.'), findsOneWidget);
+    });
+
+    testWidgets('shows error state when load fails', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) => Future.error('db error')),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Failed to load surahs'), findsOneWidget);
+    });
+  });
+
+  group('ReadingScreen', () {
+    testWidgets('shows verse list when data is available', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+          ],
+          child: const MaterialApp(
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(VerseCard), findsOneWidget);
+      expect(find.text('بِسْمِ اللَّهِ'), findsOneWidget);
+    });
+
+    testWidgets('shows error state when verse load fails', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            versesBySurahProvider(1)
+                .overrideWith((ref) => Future.error('db error')),
+          ],
+          child: const MaterialApp(
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Failed to load verses'), findsOneWidget);
+    });
+  });
+
+  group('SurahTile', () {
+    testWidgets('renders Arabic name, English name and verse count',
+        (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SurahTile(surah: surah, onTap: () => tapped = true),
+            body: SurahTile(surah: _surah1, onTap: () => tapped = true),
           ),
         ),
       );
@@ -108,16 +194,9 @@ void main() {
 
   group('VerseCard', () {
     testWidgets('renders Arabic text and translation', (tester) async {
-      const verse = Verse(
-        verseId: '1:1',
-        surahNumber: 1,
-        verseNumber: 1,
-        arabicText: 'بِسْمِ اللَّهِ',
-        translation: 'In the name of Allah',
-      );
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(body: VerseCard(verse: verse)),
+          home: Scaffold(body: VerseCard(verse: _verse1)),
         ),
       );
       expect(find.text('بِسْمِ اللَّهِ'), findsOneWidget);

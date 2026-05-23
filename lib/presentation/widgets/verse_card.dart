@@ -58,19 +58,16 @@ class _VerseNumber extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
-          color: AppTheme.islamicGreen.withAlpha(20),
+          color: AppTheme.islamicGreenSubtle,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppTheme.islamicGreen.withAlpha(60),
-          ),
+          border: Border.all(color: AppTheme.islamicGreenBorder),
         ),
         child: Text(
           '$number',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.islamicGreen,
-          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppTheme.islamicGreen,
+              ),
         ),
       ),
     );

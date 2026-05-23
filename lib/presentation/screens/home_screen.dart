@@ -31,7 +31,9 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
       body: surahsAsync.when(
-        data: (surahs) => ListView.separated(
+        data: (surahs) => surahs.isEmpty
+            ? const Center(child: Text('No surahs found.'))
+            : ListView.separated(
           itemCount: surahs.length,
           separatorBuilder: (context, index) =>
               const Divider(height: 1, color: AppTheme.divider),
