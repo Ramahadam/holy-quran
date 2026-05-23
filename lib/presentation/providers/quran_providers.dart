@@ -8,11 +8,6 @@ final quranRepositoryProvider = Provider<QuranRepository>((ref) {
   return QuranRepositoryImpl();
 });
 
-final dataLoadedProvider = FutureProvider<bool>((ref) async {
-  final repo = ref.watch(quranRepositoryProvider);
-  return repo.isDataLoaded();
-});
-
 final initializeDataProvider = FutureProvider<void>((ref) async {
   final repo = ref.watch(quranRepositoryProvider);
   await repo.loadQuranData();
@@ -26,6 +21,7 @@ final surahListProvider = FutureProvider<List<Surah>>((ref) async {
 
 final versesBySurahProvider =
     FutureProvider.family<List<Verse>, int>((ref, surahNumber) async {
+  await ref.watch(initializeDataProvider.future);
   final repo = ref.watch(quranRepositoryProvider);
   return repo.getVersesBySurah(surahNumber);
 });

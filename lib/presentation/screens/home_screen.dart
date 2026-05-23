@@ -34,7 +34,7 @@ class HomeScreen extends ConsumerWidget {
         data: (surahs) => ListView.separated(
           itemCount: surahs.length,
           separatorBuilder: (context, index) =>
-              const Divider(height: 1, color: Color(0xFFE8DCC8)),
+              const Divider(height: 1, color: AppTheme.divider),
           itemBuilder: (context, index) {
             final surah = surahs[index];
             return SurahTile(
@@ -54,7 +54,7 @@ class HomeScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Failed to load surahs.\n$e',
+              'Failed to load surahs.\nPlease restart the app.',
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

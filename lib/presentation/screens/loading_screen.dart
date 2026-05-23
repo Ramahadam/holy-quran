@@ -4,20 +4,30 @@ import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
 
-class LoadingScreen extends ConsumerWidget {
+class LoadingScreen extends ConsumerStatefulWidget {
   const LoadingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final initState = ref.watch(initializeDataProvider);
+  ConsumerState<LoadingScreen> createState() => _LoadingScreenState();
+}
 
-    initState.whenData((_) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+class _LoadingScreenState extends ConsumerState<LoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Listen once — navigate when data load completes, regardless of rebuilds.
+    ref.listenManual<AsyncValue<void>>(initializeDataProvider, (_, next) {
+      if (next is AsyncData && mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
-      });
+      }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final initState = ref.watch(initializeDataProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -60,14 +70,13 @@ class LoadingScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 24),
-            if (initState.isLoading)
-              Text(
-                'Preparing your Digital Sanctuary...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                      fontStyle: FontStyle.italic,
-                    ),
-              ),
+            Text(
+              'Preparing your Digital Sanctuary...',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
           ],
         ),
       ),

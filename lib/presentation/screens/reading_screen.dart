@@ -44,7 +44,7 @@ class ReadingScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Failed to load verses.\n$e',
+              'Failed to load verses.\nPlease restart the app.',
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

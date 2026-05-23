@@ -6,12 +6,14 @@ import 'presentation/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  bool dbFailed = false;
   try {
     await IsarService.getInstance();
   } catch (e, stackTrace) {
     debugPrint('Database initialization failed: $e');
     debugPrint('Stack trace: $stackTrace');
+    dbFailed = true;
   }
 
-  runApp(const ProviderScope(child: HolyQuranApp()));
+  runApp(ProviderScope(child: dbFailed ? const DatabaseErrorApp() : const HolyQuranApp()));
 }

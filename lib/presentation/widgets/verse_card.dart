@@ -39,7 +39,7 @@ class VerseCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 8),
-          const Divider(color: Color(0xFFE8DCC8), thickness: 1),
+          const Divider(color: AppTheme.divider, thickness: 1),
         ],
       ),
     );

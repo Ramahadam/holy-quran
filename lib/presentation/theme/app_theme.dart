@@ -6,6 +6,7 @@ class AppTheme {
   static const Color goldAccent = Color(0xFFB8860B);
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF555555);
+  static const Color divider = Color(0xFFE8DCC8);
 
   static ThemeData get light => ThemeData(
         useMaterial3: true,
