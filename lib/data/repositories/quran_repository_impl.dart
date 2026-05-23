@@ -26,18 +26,19 @@ class QuranRepositoryImpl implements QuranRepository {
       await isar.surahEntitys.clear();
     });
 
-    await _loadSurahs();
-    await _loadVerses();
+    final checksumLines =
+        (await rootBundle.loadString('assets/quran/checksums.txt')).split('\n');
+
+    await _loadSurahs(checksumLines);
+    await _loadVerses(checksumLines);
   }
 
-  Future<void> _loadSurahs() async {
+  Future<void> _loadSurahs(List<String> checksumLines) async {
     final surahsJson = await rootBundle.loadString('assets/quran/surahs.json');
-    final surahsChecksum = await rootBundle.loadString('assets/quran/checksums.txt');
-    final lines = surahsChecksum.split('\n');
-    final expectedChecksum = lines.firstWhere(
-      (line) => line.contains('surahs.json'),
-      orElse: () => '',
-    ).split(' ').first;
+    final expectedChecksum = checksumLines
+        .firstWhere((line) => line.contains('surahs.json'), orElse: () => '')
+        .split(' ')
+        .first;
 
     if (expectedChecksum.isNotEmpty &&
         !ChecksumValidator.verify(surahsJson, expectedChecksum)) {
@@ -61,14 +62,12 @@ class QuranRepositoryImpl implements QuranRepository {
     });
   }
 
-  Future<void> _loadVerses() async {
+  Future<void> _loadVerses(List<String> checksumLines) async {
     final versesJson = await rootBundle.loadString('assets/quran/verses.json');
-    final versesChecksum = await rootBundle.loadString('assets/quran/checksums.txt');
-    final lines = versesChecksum.split('\n');
-    final expectedChecksum = lines.firstWhere(
-      (line) => line.contains('verses.json'),
-      orElse: () => '',
-    ).split(' ').first;
+    final expectedChecksum = checksumLines
+        .firstWhere((line) => line.contains('verses.json'), orElse: () => '')
+        .split(' ')
+        .first;
 
     if (expectedChecksum.isNotEmpty &&
         !ChecksumValidator.verify(versesJson, expectedChecksum)) {
