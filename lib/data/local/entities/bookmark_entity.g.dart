@@ -22,13 +22,18 @@ const BookmarkEntitySchema = CollectionSchema(
       name: r'note',
       type: IsarType.string,
     ),
-    r'timestamp': PropertySchema(
+    r'surahNumber': PropertySchema(
       id: 1,
+      name: r'surahNumber',
+      type: IsarType.long,
+    ),
+    r'timestamp': PropertySchema(
+      id: 2,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'verseId': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'verseId',
       type: IsarType.string,
     )
@@ -42,13 +47,26 @@ const BookmarkEntitySchema = CollectionSchema(
     r'verseId': IndexSchema(
       id: 1744958713610519296,
       name: r'verseId',
-      unique: false,
-      replace: false,
+      unique: true,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'verseId',
           type: IndexType.hash,
           caseSensitive: true,
+        )
+      ],
+    ),
+    r'surahNumber': IndexSchema(
+      id: 9024003441292455669,
+      name: r'surahNumber',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'surahNumber',
+          type: IndexType.value,
+          caseSensitive: false,
         )
       ],
     )
@@ -84,8 +102,9 @@ void _bookmarkEntitySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.note);
-  writer.writeDateTime(offsets[1], object.timestamp);
-  writer.writeString(offsets[2], object.verseId);
+  writer.writeLong(offsets[1], object.surahNumber);
+  writer.writeDateTime(offsets[2], object.timestamp);
+  writer.writeString(offsets[3], object.verseId);
 }
 
 BookmarkEntity _bookmarkEntityDeserialize(
@@ -97,8 +116,9 @@ BookmarkEntity _bookmarkEntityDeserialize(
   final object = BookmarkEntity();
   object.id = id;
   object.note = reader.readStringOrNull(offsets[0]);
-  object.timestamp = reader.readDateTime(offsets[1]);
-  object.verseId = reader.readString(offsets[2]);
+  object.surahNumber = reader.readLong(offsets[1]);
+  object.timestamp = reader.readDateTime(offsets[2]);
+  object.verseId = reader.readString(offsets[3]);
   return object;
 }
 
@@ -112,8 +132,10 @@ P _bookmarkEntityDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
+      return (reader.readDateTime(offset)) as P;
+    case 3:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -133,11 +155,74 @@ void _bookmarkEntityAttach(
   object.id = id;
 }
 
+extension BookmarkEntityByIndex on IsarCollection<BookmarkEntity> {
+  Future<BookmarkEntity?> getByVerseId(String verseId) {
+    return getByIndex(r'verseId', [verseId]);
+  }
+
+  BookmarkEntity? getByVerseIdSync(String verseId) {
+    return getByIndexSync(r'verseId', [verseId]);
+  }
+
+  Future<bool> deleteByVerseId(String verseId) {
+    return deleteByIndex(r'verseId', [verseId]);
+  }
+
+  bool deleteByVerseIdSync(String verseId) {
+    return deleteByIndexSync(r'verseId', [verseId]);
+  }
+
+  Future<List<BookmarkEntity?>> getAllByVerseId(List<String> verseIdValues) {
+    final values = verseIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'verseId', values);
+  }
+
+  List<BookmarkEntity?> getAllByVerseIdSync(List<String> verseIdValues) {
+    final values = verseIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'verseId', values);
+  }
+
+  Future<int> deleteAllByVerseId(List<String> verseIdValues) {
+    final values = verseIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'verseId', values);
+  }
+
+  int deleteAllByVerseIdSync(List<String> verseIdValues) {
+    final values = verseIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'verseId', values);
+  }
+
+  Future<Id> putByVerseId(BookmarkEntity object) {
+    return putByIndex(r'verseId', object);
+  }
+
+  Id putByVerseIdSync(BookmarkEntity object, {bool saveLinks = true}) {
+    return putByIndexSync(r'verseId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByVerseId(List<BookmarkEntity> objects) {
+    return putAllByIndex(r'verseId', objects);
+  }
+
+  List<Id> putAllByVerseIdSync(List<BookmarkEntity> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
+  }
+}
+
 extension BookmarkEntityQueryWhereSort
     on QueryBuilder<BookmarkEntity, BookmarkEntity, QWhere> {
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhere> anySurahNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'surahNumber'),
+      );
     });
   }
 }
@@ -255,6 +340,99 @@ extension BookmarkEntityQueryWhere
               includeUpper: false,
             ));
       }
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      surahNumberEqualTo(int surahNumber) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'surahNumber',
+        value: [surahNumber],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      surahNumberNotEqualTo(int surahNumber) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'surahNumber',
+              lower: [],
+              upper: [surahNumber],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'surahNumber',
+              lower: [surahNumber],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'surahNumber',
+              lower: [surahNumber],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'surahNumber',
+              lower: [],
+              upper: [surahNumber],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      surahNumberGreaterThan(
+    int surahNumber, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'surahNumber',
+        lower: [surahNumber],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      surahNumberLessThan(
+    int surahNumber, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'surahNumber',
+        lower: [],
+        upper: [surahNumber],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
+      surahNumberBetween(
+    int lowerSurahNumber,
+    int upperSurahNumber, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'surahNumber',
+        lower: [lowerSurahNumber],
+        includeLower: includeLower,
+        upper: [upperSurahNumber],
+        includeUpper: includeUpper,
+      ));
     });
   }
 }
@@ -466,6 +644,62 @@ extension BookmarkEntityQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'note',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      surahNumberEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'surahNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      surahNumberGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'surahNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      surahNumberLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'surahNumber',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+      surahNumberBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'surahNumber',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -683,6 +917,20 @@ extension BookmarkEntityQuerySortBy
     });
   }
 
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      sortBySurahNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'surahNumber', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      sortBySurahNumberDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'surahNumber', Sort.desc);
+    });
+  }
+
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> sortByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -736,6 +984,20 @@ extension BookmarkEntityQuerySortThenBy
     });
   }
 
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      thenBySurahNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'surahNumber', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
+      thenBySurahNumberDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'surahNumber', Sort.desc);
+    });
+  }
+
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy> thenByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -773,6 +1035,13 @@ extension BookmarkEntityQueryWhereDistinct
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct>
+      distinctBySurahNumber() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'surahNumber');
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct>
       distinctByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timestamp');
@@ -798,6 +1067,12 @@ extension BookmarkEntityQueryProperty
   QueryBuilder<BookmarkEntity, String?, QQueryOperations> noteProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'note');
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, int, QQueryOperations> surahNumberProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'surahNumber');
     });
   }
 

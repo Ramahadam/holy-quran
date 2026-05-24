@@ -4,17 +4,36 @@ import '../theme/app_theme.dart';
 
 class VerseCard extends StatelessWidget {
   final Verse verse;
+  final bool isBookmarked;
+  final VoidCallback? onBookmarkToggle;
 
-  const VerseCard({super.key, required this.verse});
+  const VerseCard({
+    super.key,
+    required this.verse,
+    this.isBookmarked = false,
+    this.onBookmarkToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: onBookmarkToggle,
+      child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _VerseNumber(number: verse.verseNumber),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (isBookmarked)
+                const Icon(Icons.bookmark, color: AppTheme.islamicGreen, size: 18)
+              else
+                const SizedBox(width: 18),
+              _VerseNumber(number: verse.verseNumber),
+            ],
+          ),
           const SizedBox(height: 12),
           Text(
             verse.arabicText,
@@ -41,6 +60,7 @@ class VerseCard extends StatelessWidget {
           const SizedBox(height: 8),
           const Divider(color: AppTheme.divider, thickness: 1),
         ],
+      ),
       ),
     );
   }

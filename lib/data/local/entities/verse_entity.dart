@@ -19,6 +19,9 @@ class VerseEntity {
   late String arabicText;
   String? translation;
 
+  @Index()
+  late int page;
+
   VerseEntity();
 
   /// Create entity from domain model
@@ -28,6 +31,7 @@ class VerseEntity {
     verseNumber = verse.verseNumber;
     arabicText = verse.arabicText;
     translation = verse.translation;
+    page = verse.page;
   }
 
   /// Convert entity to domain model
@@ -38,6 +42,7 @@ class VerseEntity {
       verseNumber: verseNumber,
       arabicText: arabicText,
       translation: translation,
+      page: page,
     );
   }
 }

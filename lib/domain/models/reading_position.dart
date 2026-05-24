@@ -12,8 +12,9 @@ class ReadingPosition {
       identical(this, other) ||
       other is ReadingPosition &&
           runtimeType == other.runtimeType &&
-          verseId == other.verseId;
+          verseId == other.verseId &&
+          lastReadAt == other.lastReadAt;
 
   @override
-  int get hashCode => verseId.hashCode;
+  int get hashCode => Object.hash(verseId, lastReadAt);
 }

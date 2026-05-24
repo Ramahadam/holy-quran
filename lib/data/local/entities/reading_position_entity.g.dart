@@ -34,21 +34,7 @@ const ReadingPositionEntitySchema = CollectionSchema(
   deserialize: _readingPositionEntityDeserialize,
   deserializeProp: _readingPositionEntityDeserializeProp,
   idName: r'id',
-  indexes: {
-    r'verseId': IndexSchema(
-      id: 1744958713610519296,
-      name: r'verseId',
-      unique: true,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'verseId',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    )
-  },
+  indexes: {},
   links: {},
   embeddedSchemas: {},
   getId: _readingPositionEntityGetId,
@@ -118,63 +104,6 @@ List<IsarLinkBase<dynamic>> _readingPositionEntityGetLinks(
 void _readingPositionEntityAttach(
     IsarCollection<dynamic> col, Id id, ReadingPositionEntity object) {
   object.id = id;
-}
-
-extension ReadingPositionEntityByIndex
-    on IsarCollection<ReadingPositionEntity> {
-  Future<ReadingPositionEntity?> getByVerseId(String verseId) {
-    return getByIndex(r'verseId', [verseId]);
-  }
-
-  ReadingPositionEntity? getByVerseIdSync(String verseId) {
-    return getByIndexSync(r'verseId', [verseId]);
-  }
-
-  Future<bool> deleteByVerseId(String verseId) {
-    return deleteByIndex(r'verseId', [verseId]);
-  }
-
-  bool deleteByVerseIdSync(String verseId) {
-    return deleteByIndexSync(r'verseId', [verseId]);
-  }
-
-  Future<List<ReadingPositionEntity?>> getAllByVerseId(
-      List<String> verseIdValues) {
-    final values = verseIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'verseId', values);
-  }
-
-  List<ReadingPositionEntity?> getAllByVerseIdSync(List<String> verseIdValues) {
-    final values = verseIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'verseId', values);
-  }
-
-  Future<int> deleteAllByVerseId(List<String> verseIdValues) {
-    final values = verseIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'verseId', values);
-  }
-
-  int deleteAllByVerseIdSync(List<String> verseIdValues) {
-    final values = verseIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'verseId', values);
-  }
-
-  Future<Id> putByVerseId(ReadingPositionEntity object) {
-    return putByIndex(r'verseId', object);
-  }
-
-  Id putByVerseIdSync(ReadingPositionEntity object, {bool saveLinks = true}) {
-    return putByIndexSync(r'verseId', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByVerseId(List<ReadingPositionEntity> objects) {
-    return putAllByIndex(r'verseId', objects);
-  }
-
-  List<Id> putAllByVerseIdSync(List<ReadingPositionEntity> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
-  }
 }
 
 extension ReadingPositionEntityQueryWhereSort
@@ -254,51 +183,6 @@ extension ReadingPositionEntityQueryWhere on QueryBuilder<ReadingPositionEntity,
         upper: upperId,
         includeUpper: includeUpper,
       ));
-    });
-  }
-
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      verseIdEqualTo(String verseId) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'verseId',
-        value: [verseId],
-      ));
-    });
-  }
-
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      verseIdNotEqualTo(String verseId) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [],
-              upper: [verseId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [verseId],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [verseId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [],
-              upper: [verseId],
-              includeUpper: false,
-            ));
-      }
     });
   }
 }
