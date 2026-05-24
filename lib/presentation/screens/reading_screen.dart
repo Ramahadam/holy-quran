@@ -31,9 +31,12 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   }
 
   @override
-  void dispose() {
+  void deactivate() {
+    // deactivate() fires before the widget leaves the tree, so ref is still
+    // live here — this is the correct place to invalidate providers on pop.
     _saveReadingPosition();
-    super.dispose();
+    ref.invalidate(lastReadPositionProvider);
+    super.deactivate();
   }
 
   void _saveReadingPosition() {
@@ -55,7 +58,6 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       await repo.addBookmark(verse.verseId, DateTime.now());
     }
     ref.invalidate(bookmarksBySurahProvider(widget.surah.surahNumber));
-    ref.invalidate(lastReadPositionProvider);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -39,7 +39,7 @@ const ReadingPositionEntitySchema = CollectionSchema(
       id: 1744958713610519296,
       name: r'verseId',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'verseId',

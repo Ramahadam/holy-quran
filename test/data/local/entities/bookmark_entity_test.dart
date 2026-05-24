@@ -16,6 +16,7 @@ void main() {
       final entity = BookmarkEntity.fromDomain(bookmark);
 
       expect(entity.verseId, '1:1');
+      expect(entity.surahNumber, 1);
       expect(entity.timestamp, testDate);
       expect(entity.note, 'Important verse');
     });
@@ -108,6 +109,12 @@ void main() {
       final bookmark = Bookmark(verseId: '36:83', timestamp: testDate);
       final entity = BookmarkEntity.fromDomain(bookmark);
       expect(entity.surahNumber, 36);
+    });
+
+    test('fromDomain falls back to surahNumber 0 for malformed verseId', () {
+      final bookmark = Bookmark(verseId: 'invalid', timestamp: testDate);
+      final entity = BookmarkEntity.fromDomain(bookmark);
+      expect(entity.surahNumber, 0);
     });
 
     test('handles multi-line notes', () {

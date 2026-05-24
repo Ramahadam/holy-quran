@@ -20,7 +20,7 @@ class BookmarkEntity {
 
   BookmarkEntity.fromDomain(Bookmark bookmark) {
     verseId = bookmark.verseId;
-    surahNumber = int.parse(bookmark.verseId.split(':').first);
+    surahNumber = int.tryParse(bookmark.verseId.split(':').first) ?? 0;
     timestamp = bookmark.timestamp;
     note = bookmark.note;
   }
