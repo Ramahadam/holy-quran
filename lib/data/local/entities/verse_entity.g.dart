@@ -22,23 +22,28 @@ const VerseEntitySchema = CollectionSchema(
       name: r'arabicText',
       type: IsarType.string,
     ),
-    r'surahNumber': PropertySchema(
+    r'page': PropertySchema(
       id: 1,
+      name: r'page',
+      type: IsarType.long,
+    ),
+    r'surahNumber': PropertySchema(
+      id: 2,
       name: r'surahNumber',
       type: IsarType.long,
     ),
     r'translation': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'translation',
       type: IsarType.string,
     ),
     r'verseId': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'verseId',
       type: IsarType.string,
     ),
     r'verseNumber': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'verseNumber',
       type: IsarType.long,
     )
@@ -70,6 +75,19 @@ const VerseEntitySchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r'surahNumber',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'page': IndexSchema(
+      id: -1004952015509011454,
+      name: r'page',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'page',
           type: IndexType.value,
           caseSensitive: false,
         )
@@ -108,10 +126,11 @@ void _verseEntitySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.arabicText);
-  writer.writeLong(offsets[1], object.surahNumber);
-  writer.writeString(offsets[2], object.translation);
-  writer.writeString(offsets[3], object.verseId);
-  writer.writeLong(offsets[4], object.verseNumber);
+  writer.writeLong(offsets[1], object.page);
+  writer.writeLong(offsets[2], object.surahNumber);
+  writer.writeString(offsets[3], object.translation);
+  writer.writeString(offsets[4], object.verseId);
+  writer.writeLong(offsets[5], object.verseNumber);
 }
 
 VerseEntity _verseEntityDeserialize(
@@ -123,10 +142,11 @@ VerseEntity _verseEntityDeserialize(
   final object = VerseEntity();
   object.arabicText = reader.readString(offsets[0]);
   object.id = id;
-  object.surahNumber = reader.readLong(offsets[1]);
-  object.translation = reader.readStringOrNull(offsets[2]);
-  object.verseId = reader.readString(offsets[3]);
-  object.verseNumber = reader.readLong(offsets[4]);
+  object.page = reader.readLong(offsets[1]);
+  object.surahNumber = reader.readLong(offsets[2]);
+  object.translation = reader.readStringOrNull(offsets[3]);
+  object.verseId = reader.readString(offsets[4]);
+  object.verseNumber = reader.readLong(offsets[5]);
   return object;
 }
 
@@ -142,10 +162,12 @@ P _verseEntityDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -232,6 +254,14 @@ extension VerseEntityQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'surahNumber'),
+      );
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhere> anyPage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'page'),
       );
     });
   }
@@ -440,6 +470,96 @@ extension VerseEntityQueryWhere
       ));
     });
   }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> pageEqualTo(
+      int page) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'page',
+        value: [page],
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> pageNotEqualTo(
+      int page) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'page',
+              lower: [],
+              upper: [page],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'page',
+              lower: [page],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'page',
+              lower: [page],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'page',
+              lower: [],
+              upper: [page],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> pageGreaterThan(
+    int page, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'page',
+        lower: [page],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> pageLessThan(
+    int page, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'page',
+        lower: [],
+        upper: [page],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterWhereClause> pageBetween(
+    int lowerPage,
+    int upperPage, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'page',
+        lower: [lowerPage],
+        includeLower: includeLower,
+        upper: [upperPage],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension VerseEntityQueryFilter
@@ -625,6 +745,59 @@ extension VerseEntityQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'id',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> pageEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'page',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> pageGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'page',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> pageLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'page',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterFilterCondition> pageBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'page',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1054,6 +1227,18 @@ extension VerseEntityQuerySortBy
     });
   }
 
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByPage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'page', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortByPageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'page', Sort.desc);
+    });
+  }
+
   QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> sortBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
@@ -1129,6 +1314,18 @@ extension VerseEntityQuerySortThenBy
     });
   }
 
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByPage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'page', Sort.asc);
+    });
+  }
+
+  QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenByPageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'page', Sort.desc);
+    });
+  }
+
   QueryBuilder<VerseEntity, VerseEntity, QAfterSortBy> thenBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
@@ -1187,6 +1384,12 @@ extension VerseEntityQueryWhereDistinct
     });
   }
 
+  QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctByPage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'page');
+    });
+  }
+
   QueryBuilder<VerseEntity, VerseEntity, QDistinct> distinctBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'surahNumber');
@@ -1225,6 +1428,12 @@ extension VerseEntityQueryProperty
   QueryBuilder<VerseEntity, String, QQueryOperations> arabicTextProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'arabicText');
+    });
+  }
+
+  QueryBuilder<VerseEntity, int, QQueryOperations> pageProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'page');
     });
   }
 

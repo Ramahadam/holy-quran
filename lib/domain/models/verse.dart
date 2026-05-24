@@ -4,6 +4,7 @@ class Verse {
   final int verseNumber;
   final String arabicText;
   final String? translation;
+  final int page;
 
   const Verse({
     required this.verseId,
@@ -11,6 +12,7 @@ class Verse {
     required this.verseNumber,
     required this.arabicText,
     this.translation,
+    this.page = 0,
   });
 
   @override

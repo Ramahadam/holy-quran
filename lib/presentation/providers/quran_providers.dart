@@ -40,6 +40,27 @@ final versesBySurahProvider =
   return repo.getVersesBySurah(surahNumber);
 });
 
+final versesByPageProvider =
+    FutureProvider.family<List<Verse>, int>((ref, page) async {
+  await ref.watch(initializeDataProvider.future);
+  final repo = ref.watch(quranRepositoryProvider);
+  return repo.getVersesByPage(page);
+});
+
+final startPageForSurahProvider =
+    FutureProvider.family<int, int>((ref, surahNumber) async {
+  await ref.watch(initializeDataProvider.future);
+  final repo = ref.watch(quranRepositoryProvider);
+  return repo.getStartPageForSurah(surahNumber);
+});
+
+final pageForVerseProvider =
+    FutureProvider.family<int, String>((ref, verseId) async {
+  await ref.watch(initializeDataProvider.future);
+  final repo = ref.watch(quranRepositoryProvider);
+  return repo.getPageForVerse(verseId);
+});
+
 final lastReadPositionProvider = FutureProvider<ReadingPosition?>((ref) async {
   return ref.watch(readingPositionRepositoryProvider).getLastPosition();
 });

@@ -43,7 +43,8 @@ void main() {
         ..surahNumber = 2
         ..verseNumber = 255
         ..arabicText = 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ'
-        ..translation = 'Allah - there is no deity except Him';
+        ..translation = 'Allah - there is no deity except Him'
+        ..page = 42;
 
       final verse = entity.toDomain();
 
@@ -52,6 +53,7 @@ void main() {
       expect(verse.verseNumber, 255);
       expect(verse.arabicText, 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ');
       expect(verse.translation, 'Allah - there is no deity except Him');
+      expect(verse.page, 42);
     });
 
     test('roundtrip conversion preserves all data', () {
