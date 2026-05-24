@@ -4,12 +4,12 @@ import 'package:holy_quran_app/domain/models/reading_position.dart';
 part 'reading_position_entity.g.dart';
 
 /// Isar database entity for ReadingPosition model.
-/// Singleton: exactly one row ever exists, always written at id=1.
+/// Singleton: exactly one row ever exists, always written at id=1 by the
+/// repository. No secondary index needed — all access is by fixed primary key.
 @collection
 class ReadingPositionEntity {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true, replace: true)
   late String verseId;
 
   late DateTime lastReadAt;

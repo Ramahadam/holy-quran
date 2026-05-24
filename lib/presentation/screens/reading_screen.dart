@@ -35,7 +35,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     // deactivate() fires before the widget leaves the tree, so ref is still
     // live here — this is the correct place to invalidate providers on pop.
     _saveReadingPosition();
-    ref.invalidate(lastReadPositionProvider);
+    if (mounted) ref.invalidate(lastReadPositionProvider);
     super.deactivate();
   }
 
@@ -101,7 +101,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           _lastVisibleVerseId ??= verses.isNotEmpty ? verses.first.verseId : null;
 
           final bookmarked = bookmarksAsync.valueOrNull ?? {};
-          return NotificationListener<ScrollUpdateNotification>(
+          return NotificationListener<ScrollEndNotification>(
             onNotification: (notification) {
               if (verses.isNotEmpty) {
                 // NOTE: pixel-fraction estimation assumes uniform row heights.

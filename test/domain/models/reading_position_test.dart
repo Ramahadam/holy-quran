@@ -15,35 +15,39 @@ void main() {
       expect(position.lastReadAt, testDate);
     });
 
-    test('equality based on verseId', () {
+    test('equality requires both verseId and lastReadAt to match', () {
       final position1 = ReadingPosition(
         verseId: '1:1',
         lastReadAt: testDate,
       );
-      final position2 = ReadingPosition(
+      final positionSameVerseDifferentTime = ReadingPosition(
         verseId: '1:1',
         lastReadAt: DateTime(2024, 2, 1),
       );
-      final position3 = ReadingPosition(
+      final positionSameTimeDifferentVerse = ReadingPosition(
         verseId: '2:1',
         lastReadAt: testDate,
       );
-
-      expect(position1, equals(position2));
-      expect(position1, isNot(equals(position3)));
-    });
-
-    test('hashCode based on verseId', () {
-      final position1 = ReadingPosition(
+      final positionIdentical = ReadingPosition(
         verseId: '1:1',
         lastReadAt: testDate,
       );
-      final position2 = ReadingPosition(
+
+      expect(position1, equals(positionIdentical));
+      expect(position1, isNot(equals(positionSameVerseDifferentTime)));
+      expect(position1, isNot(equals(positionSameTimeDifferentVerse)));
+    });
+
+    test('hashCode includes both verseId and lastReadAt', () {
+      final position1 = ReadingPosition(verseId: '1:1', lastReadAt: testDate);
+      final positionIdentical = ReadingPosition(verseId: '1:1', lastReadAt: testDate);
+      final positionDifferentTime = ReadingPosition(
         verseId: '1:1',
         lastReadAt: DateTime(2024, 2, 1),
       );
 
-      expect(position1.hashCode, equals(position2.hashCode));
+      expect(position1.hashCode, equals(positionIdentical.hashCode));
+      expect(position1.hashCode, isNot(equals(positionDifferentTime.hashCode)));
     });
 
     test('handles different verseId formats', () {

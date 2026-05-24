@@ -3,9 +3,5 @@ abstract class BookmarkRepository {
 
   Future<void> removeBookmark(String verseId);
 
-  Future<bool> isBookmarked(String verseId);
-
   Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber);
-
-  Future<int> getBookmarkCount();
 }

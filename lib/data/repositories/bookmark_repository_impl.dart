@@ -26,13 +26,6 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
   }
 
   @override
-  Future<bool> isBookmarked(String verseId) async {
-    final isar = await IsarService.getInstance();
-    final entity = await isar.bookmarkEntitys.getByVerseId(verseId);
-    return entity != null;
-  }
-
-  @override
   Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber) async {
     final isar = await IsarService.getInstance();
     final entities = await isar.bookmarkEntitys
@@ -40,11 +33,5 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
         .surahNumberEqualTo(surahNumber)
         .findAll();
     return entities.map((e) => e.verseId).toSet();
-  }
-
-  @override
-  Future<int> getBookmarkCount() async {
-    final isar = await IsarService.getInstance();
-    return isar.bookmarkEntitys.count();
   }
 }
