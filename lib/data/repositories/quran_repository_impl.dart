@@ -82,6 +82,7 @@ class QuranRepositoryImpl implements QuranRepository {
         verseNumber: data['verseNumber'] as int,
         arabicText: data['arabicText'] as String,
         translation: data['translation'] as String?,
+        page: (data['page'] as int?) ?? 0,
       );
       return VerseEntity.fromDomain(verse);
     }).toList();
@@ -115,6 +116,24 @@ class QuranRepositoryImpl implements QuranRepository {
   }
 
   @override
+  Future<List<Verse>> getVersesByPage(int page) async {
+    final isar = await IsarService.getInstance();
+
+    final entities = await isar.verseEntitys
+        .where()
+        .pageEqualTo(page)
+        .findAll();
+
+    // Sort by surah then verse for pages that span surahs.
+    entities.sort((a, b) {
+      final cmp = a.surahNumber.compareTo(b.surahNumber);
+      return cmp != 0 ? cmp : a.verseNumber.compareTo(b.verseNumber);
+    });
+
+    return entities.map((e) => e.toDomain()).toList();
+  }
+
+  @override
   Future<Verse?> getVerseById(String verseId) async {
     final isar = await IsarService.getInstance();
 
@@ -124,6 +143,27 @@ class QuranRepositoryImpl implements QuranRepository {
         .findFirst();
 
     return entity?.toDomain();
+  }
+
+  @override
+  Future<int> getPageForVerse(String verseId) async {
+    final isar = await IsarService.getInstance();
+    final entity = await isar.verseEntitys
+        .filter()
+        .verseIdEqualTo(verseId)
+        .findFirst();
+    return entity?.page ?? 1;
+  }
+
+  @override
+  Future<int> getStartPageForSurah(int surahNumber) async {
+    final isar = await IsarService.getInstance();
+    final entity = await isar.verseEntitys
+        .filter()
+        .surahNumberEqualTo(surahNumber)
+        .sortByPage()
+        .findFirst();
+    return entity?.page ?? 1;
   }
 
   @override
@@ -152,6 +192,19 @@ class QuranRepositoryImpl implements QuranRepository {
     final verseCount = await isar.verseEntitys.count();
     final surahCount = await isar.surahEntitys.count();
 
-    return verseCount > 0 && surahCount == 114;
+    if (verseCount == 0 || surahCount != 114) return false;
+
+    // Check if page data is present (migration from pre-page schema).
+    final sample = await isar.verseEntitys.where().findFirst();
+    if (sample != null && sample.page == 0) return false;
+
+    // Verify that page queries actually work (spot check page 1).
+    final page1Verses = await isar.verseEntitys
+        .where()
+        .pageEqualTo(1)
+        .findAll();
+    if (page1Verses.isEmpty) return false;
+
+    return true;
   }
 }

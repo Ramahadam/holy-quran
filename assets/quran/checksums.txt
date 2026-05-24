@@ -1,2 +1,2 @@
 d3836d8513df67b6a9de30d01dc96e87f62f6c560ea5710997165adc699909b5  assets/quran/surahs.json
-66eaefb37e90d026d8814f44c5947415d0d4b3d2341cdc18fcc277c390919680  assets/quran/verses.json
+033297ce03d1e8fd7bf38f258f2f51d205704d8c86b58d4664ffa4fe6f4f4a5e  assets/quran/verses.json
