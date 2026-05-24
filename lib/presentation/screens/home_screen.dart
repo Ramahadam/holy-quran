@@ -105,7 +105,10 @@ class _LastReadBanner extends ConsumerWidget {
     final verseNum = verseId.split(':').elementAtOrNull(1) ?? '';
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => ReadingScreen(surah: surah)),
+        MaterialPageRoute(
+          builder: (_) =>
+              ReadingScreen(surah: surah, initialVerseId: verseId),
+        ),
       ),
       child: Container(
         width: double.infinity,

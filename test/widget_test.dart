@@ -203,6 +203,22 @@ void main() {
   });
 
   group('ReadingScreen', () {
+    testWidgets('renders with initialVerseId without crashing', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(
+            home: ReadingScreen(surah: _surah1, initialVerseId: '1:1'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(VerseCard), findsOneWidget);
+    });
+
     testWidgets('shows verse list when data is available', (tester) async {
       await tester.pumpWidget(
         ProviderScope(

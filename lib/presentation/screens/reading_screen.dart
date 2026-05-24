@@ -11,7 +11,11 @@ import '../widgets/verse_card.dart';
 class ReadingScreen extends ConsumerStatefulWidget {
   final Surah surah;
 
-  const ReadingScreen({super.key, required this.surah});
+  /// When set, the list jumps to this verse on first load.
+  /// Used by the "Continue Reading" banner to resume at the saved position.
+  final String? initialVerseId;
+
+  const ReadingScreen({super.key, required this.surah, this.initialVerseId});
 
   @override
   ConsumerState<ReadingScreen> createState() => _ReadingScreenState();
@@ -19,14 +23,18 @@ class ReadingScreen extends ConsumerStatefulWidget {
 
 class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   String? _lastVisibleVerseId;
+  bool _didScrollToInitial = false;
 
-  // Repository is stateless — captured once to allow calling it safely in dispose,
-  // where ref is no longer accessible.
+  late final ScrollController _scrollController;
+
+  // Repository is stateless — captured once to allow calling it safely in
+  // deactivate(), before ref becomes unavailable.
   late final ReadingPositionRepository _positionRepo;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     _positionRepo = ref.read(readingPositionRepositoryProvider);
   }
 
@@ -39,6 +47,12 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     super.deactivate();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _saveReadingPosition() {
     final verseId = _lastVisibleVerseId;
     if (verseId == null) return;
@@ -46,6 +60,25 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         .savePosition(ReadingPosition(verseId: verseId, lastReadAt: DateTime.now()))
         .catchError((Object e) {
       debugPrint('Failed to save reading position: $e');
+    });
+  }
+
+  void _scrollToInitialVerse(List<Verse> verses) {
+    if (_didScrollToInitial) return;
+    final target = widget.initialVerseId;
+    if (target == null) return;
+
+    final index = verses.indexWhere((v) => v.verseId == target);
+    if (index <= 0) return; // already at top
+
+    _didScrollToInitial = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      final maxExtent = _scrollController.position.maxScrollExtent;
+      if (maxExtent <= 0) return;
+      // Use the same fractional mapping as _estimateVisibleIndex (inverse).
+      final fraction = index / (verses.length - 1);
+      _scrollController.jumpTo(fraction * maxExtent);
     });
   }
 
@@ -100,6 +133,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           // navigating away without scrolling still records a valid position.
           _lastVisibleVerseId ??= verses.isNotEmpty ? verses.first.verseId : null;
 
+          _scrollToInitialVerse(verses);
+
           final bookmarked = bookmarksAsync.valueOrNull ?? {};
           return NotificationListener<ScrollEndNotification>(
             onNotification: (notification) {
@@ -113,6 +148,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               return false;
             },
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: verses.length,
               itemBuilder: (context, index) {
                 final verse = verses[index];
