@@ -128,7 +128,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       title: Column(
         children: [
           Text(
-            widget.surah.nameArabic,
+            'القرآن الكريم',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppTheme.islamicGreen,
                 ),

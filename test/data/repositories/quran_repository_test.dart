@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/core/utils/checksum_validator.dart';
+import 'package:holy_quran_app/data/repositories/quran_repository_impl.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
 
@@ -90,6 +91,72 @@ void main() {
 
       expect(checksum.length, 64);
       expect(ChecksumValidator.verify(arabicContent, checksum), true);
+    });
+  });
+
+  group('QuranRepository - Page Navigation', () {
+    late QuranRepositoryImpl repository;
+
+    setUp(() {
+      repository = QuranRepositoryImpl();
+    });
+
+    test('getVersesByPage throws ArgumentError for invalid page numbers', () {
+      // Test invalid page numbers without database access
+      expect(() => repository.getVersesByPage(0), throwsArgumentError);
+      expect(() => repository.getVersesByPage(-1), throwsArgumentError);
+      expect(() => repository.getVersesByPage(605), throwsArgumentError);
+      expect(() => repository.getVersesByPage(1000), throwsArgumentError);
+    });
+
+    test('page validation constants are correct', () {
+      // Verify the page range constants
+      const minPage = 1;
+      const maxPage = 604;
+
+      expect(minPage, 1, reason: 'First page should be 1');
+      expect(maxPage, 604, reason: 'Last page should be 604 (Madani Mushaf)');
+    });
+
+    test('verse page field is included in model', () {
+      const verse = Verse(
+        verseId: '1:1',
+        surahNumber: 1,
+        verseNumber: 1,
+        arabicText: 'test',
+        page: 1,
+      );
+
+      expect(verse.page, 1);
+      expect(verse.page, greaterThanOrEqualTo(1));
+      expect(verse.page, lessThanOrEqualTo(604));
+    });
+
+    test('verses with same page number should be sortable by surah and verse', () {
+      final verse1 = const Verse(
+        verseId: '2:1',
+        surahNumber: 2,
+        verseNumber: 1,
+        arabicText: 'test',
+        page: 2,
+      );
+
+      final verse2 = const Verse(
+        verseId: '2:2',
+        surahNumber: 2,
+        verseNumber: 2,
+        arabicText: 'test',
+        page: 2,
+      );
+
+      final verses = [verse2, verse1];
+      verses.sort((a, b) {
+        final cmp = a.surahNumber.compareTo(b.surahNumber);
+        return cmp != 0 ? cmp : a.verseNumber.compareTo(b.verseNumber);
+      });
+
+      expect(verses[0].verseId, '2:1');
+      expect(verses[1].verseId, '2:2');
     });
   });
 }

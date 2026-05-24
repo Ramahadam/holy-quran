@@ -82,7 +82,7 @@ class QuranRepositoryImpl implements QuranRepository {
         verseNumber: data['verseNumber'] as int,
         arabicText: data['arabicText'] as String,
         translation: data['translation'] as String?,
-        page: (data['page'] as int?) ?? 0,
+        page: data['page'] as int,
       );
       return VerseEntity.fromDomain(verse);
     }).toList();
@@ -117,6 +117,10 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<List<Verse>> getVersesByPage(int page) async {
+    if (page < 1 || page > 604) {
+      throw ArgumentError('Page must be between 1 and 604, got $page');
+    }
+
     final isar = await IsarService.getInstance();
 
     final entities = await isar.verseEntitys
@@ -152,7 +156,10 @@ class QuranRepositoryImpl implements QuranRepository {
         .filter()
         .verseIdEqualTo(verseId)
         .findFirst();
-    return entity?.page ?? 1;
+    if (entity == null) {
+      throw StateError('Verse not found: $verseId');
+    }
+    return entity.page;
   }
 
   @override
@@ -163,7 +170,10 @@ class QuranRepositoryImpl implements QuranRepository {
         .surahNumberEqualTo(surahNumber)
         .sortByPage()
         .findFirst();
-    return entity?.page ?? 1;
+    if (entity == null) {
+      throw StateError('Surah not found: $surahNumber');
+    }
+    return entity.page;
   }
 
   @override
@@ -198,12 +208,18 @@ class QuranRepositoryImpl implements QuranRepository {
     final sample = await isar.verseEntitys.where().findFirst();
     if (sample != null && sample.page == 0) return false;
 
-    // Verify that page queries actually work (spot check page 1).
+    // Verify that page queries work across the full range (check first and last page).
     final page1Verses = await isar.verseEntitys
         .where()
         .pageEqualTo(1)
         .findAll();
     if (page1Verses.isEmpty) return false;
+
+    final page604Verses = await isar.verseEntitys
+        .where()
+        .pageEqualTo(604)
+        .findAll();
+    if (page604Verses.isEmpty) return false;
 
     return true;
   }

@@ -11,6 +11,7 @@ void main() {
         verseNumber: 1,
         arabicText: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
         translation: 'In the name of Allah, the Most Gracious, the Most Merciful',
+        page: 1,
       );
 
       final entity = VerseEntity.fromDomain(verse);
@@ -22,6 +23,7 @@ void main() {
       expect(
           entity.translation,
           'In the name of Allah, the Most Gracious, the Most Merciful');
+      expect(entity.page, 1);
     });
 
     test('fromDomain handles null translation', () {
@@ -63,6 +65,7 @@ void main() {
         verseNumber: 6,
         arabicText: 'مِنَ الْجِنَّةِ وَالنَّاسِ',
         translation: 'From among the jinn and mankind',
+        page: 604,
       );
 
       final entity = VerseEntity.fromDomain(original);
@@ -74,6 +77,7 @@ void main() {
       expect(result.verseNumber, original.verseNumber);
       expect(result.arabicText, original.arabicText);
       expect(result.translation, original.translation);
+      expect(result.page, original.page);
     });
 
     test('roundtrip conversion preserves null translation', () {
