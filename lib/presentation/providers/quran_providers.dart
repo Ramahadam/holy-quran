@@ -41,13 +41,12 @@ final versesBySurahProvider =
 });
 
 final lastReadPositionProvider = FutureProvider<ReadingPosition?>((ref) async {
-  return ref.read(readingPositionRepositoryProvider).getLastPosition();
+  return ref.watch(readingPositionRepositoryProvider).getLastPosition();
 });
 
 final bookmarksBySurahProvider =
     FutureProvider.family<Set<String>, int>((ref, surahNumber) async {
-  final bookmarks = await ref
-      .read(bookmarkRepositoryProvider)
-      .getBookmarksBySurah(surahNumber);
-  return bookmarks.map((b) => b.verseId).toSet();
+  return ref
+      .watch(bookmarkRepositoryProvider)
+      .getBookmarkedVerseIdsBySurah(surahNumber);
 });

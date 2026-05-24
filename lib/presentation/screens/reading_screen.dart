@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/reading_position_repository.dart';
-import '../../domain/models/bookmark.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
@@ -20,6 +19,9 @@ class ReadingScreen extends ConsumerStatefulWidget {
 
 class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   String? _lastVisibleVerseId;
+
+  // Repository is stateless — captured once to allow calling it safely in dispose,
+  // where ref is no longer accessible.
   late final ReadingPositionRepository _positionRepo;
 
   @override
@@ -37,21 +39,33 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   void _saveReadingPosition() {
     final verseId = _lastVisibleVerseId;
     if (verseId == null) return;
-    _positionRepo.savePosition(
-      ReadingPosition(verseId: verseId, lastReadAt: DateTime.now()),
-    );
+    _positionRepo
+        .savePosition(ReadingPosition(verseId: verseId, lastReadAt: DateTime.now()))
+        .catchError((Object e) {
+      debugPrint('Failed to save reading position: $e');
+    });
   }
 
   Future<void> _toggleBookmark(Verse verse, Set<String> bookmarked) async {
     final repo = ref.read(bookmarkRepositoryProvider);
-    if (bookmarked.contains(verse.verseId)) {
+    final wasBookmarked = bookmarked.contains(verse.verseId);
+    if (wasBookmarked) {
       await repo.removeBookmark(verse.verseId);
     } else {
-      await repo.addBookmark(
-        Bookmark(verseId: verse.verseId, timestamp: DateTime.now()),
-      );
+      await repo.addBookmark(verse.verseId, DateTime.now());
     }
     ref.invalidate(bookmarksBySurahProvider(widget.surah.surahNumber));
+    ref.invalidate(lastReadPositionProvider);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(wasBookmarked ? 'Bookmark removed' : 'Bookmarked'),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -80,16 +94,19 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       ),
       body: versesAsync.when(
         data: (verses) {
+          // Seed the position with the first verse when data arrives so that
+          // navigating away without scrolling still records a valid position.
+          _lastVisibleVerseId ??= verses.isNotEmpty ? verses.first.verseId : null;
+
           final bookmarked = bookmarksAsync.valueOrNull ?? {};
           return NotificationListener<ScrollUpdateNotification>(
             onNotification: (notification) {
-              final ctx = notification.context;
-              if (ctx != null && verses.isNotEmpty) {
+              if (verses.isNotEmpty) {
+                // NOTE: pixel-fraction estimation assumes uniform row heights.
+                // Actual verse heights vary; this is intentionally approximate.
                 final index = _estimateVisibleIndex(
                     notification.metrics, verses.length);
-                if (index >= 0 && index < verses.length) {
-                  _lastVisibleVerseId = verses[index].verseId;
-                }
+                _lastVisibleVerseId = verses[index].verseId;
               }
               return false;
             },
@@ -97,9 +114,6 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               itemCount: verses.length,
               itemBuilder: (context, index) {
                 final verse = verses[index];
-                if (_lastVisibleVerseId == null && index == 0) {
-                  _lastVisibleVerseId = verse.verseId;
-                }
                 return VerseCard(
                   verse: verse,
                   isBookmarked: bookmarked.contains(verse.verseId),

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/surah.dart';
@@ -40,12 +41,8 @@ class HomeScreen extends ConsumerWidget {
             final surahNum =
                 int.tryParse(lastPosition.verseId.split(':').first);
             if (surahNum != null) {
-              try {
-                lastSurah =
-                    surahs.firstWhere((s) => s.surahNumber == surahNum);
-              } catch (_) {
-                lastSurah = null;
-              }
+              lastSurah =
+                  surahs.firstWhereOrNull((s) => s.surahNumber == surahNum);
             }
           }
 

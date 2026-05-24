@@ -90,9 +90,9 @@ void main() {
       expect(result.timestamp.microsecond, 999);
     });
 
-    test('handles empty strings correctly', () {
+    test('handles empty note string correctly', () {
       final bookmark = Bookmark(
-        verseId: '',
+        verseId: '1:1',
         timestamp: testDate,
         note: '',
       );
@@ -100,8 +100,14 @@ void main() {
       final entity = BookmarkEntity.fromDomain(bookmark);
       final result = entity.toDomain();
 
-      expect(result.verseId, '');
+      expect(result.verseId, '1:1');
       expect(result.note, '');
+    });
+
+    test('fromDomain sets surahNumber from verseId', () {
+      final bookmark = Bookmark(verseId: '36:83', timestamp: testDate);
+      final entity = BookmarkEntity.fromDomain(bookmark);
+      expect(entity.surahNumber, 36);
     });
 
     test('handles multi-line notes', () {

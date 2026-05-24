@@ -7,10 +7,13 @@ import 'bookmark_repository.dart';
 
 class BookmarkRepositoryImpl implements BookmarkRepository {
   @override
-  Future<void> addBookmark(Bookmark bookmark) async {
+  Future<void> addBookmark(String verseId, DateTime timestamp) async {
     final isar = await IsarService.getInstance();
+    final entity = BookmarkEntity.fromDomain(
+      Bookmark(verseId: verseId, timestamp: timestamp),
+    );
     await isar.writeTxn(() async {
-      await isar.bookmarkEntitys.put(BookmarkEntity.fromDomain(bookmark));
+      await isar.bookmarkEntitys.putByVerseId(entity);
     });
   }
 
@@ -18,33 +21,30 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
   Future<void> removeBookmark(String verseId) async {
     final isar = await IsarService.getInstance();
     await isar.writeTxn(() async {
-      await isar.bookmarkEntitys.filter().verseIdEqualTo(verseId).deleteAll();
+      await isar.bookmarkEntitys.deleteByVerseId(verseId);
     });
   }
 
   @override
   Future<bool> isBookmarked(String verseId) async {
     final isar = await IsarService.getInstance();
-    final count =
-        await isar.bookmarkEntitys.filter().verseIdEqualTo(verseId).count();
-    return count > 0;
+    final entity = await isar.bookmarkEntitys.getByVerseId(verseId);
+    return entity != null;
   }
 
   @override
-  Future<List<Bookmark>> getBookmarksBySurah(int surahNumber) async {
+  Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber) async {
     final isar = await IsarService.getInstance();
-    final prefix = '$surahNumber:';
     final entities = await isar.bookmarkEntitys
         .filter()
-        .verseIdStartsWith(prefix)
+        .surahNumberEqualTo(surahNumber)
         .findAll();
-    return entities.map((e) => e.toDomain()).toList();
+    return entities.map((e) => e.verseId).toSet();
   }
 
   @override
-  Future<List<Bookmark>> getAllBookmarks() async {
+  Future<int> getBookmarkCount() async {
     final isar = await IsarService.getInstance();
-    final entities = await isar.bookmarkEntitys.where().findAll();
-    return entities.map((e) => e.toDomain()).toList();
+    return isar.bookmarkEntitys.count();
   }
 }

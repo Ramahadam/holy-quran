@@ -88,6 +88,7 @@ void main() {
           overrides: [
             initializeDataProvider.overrideWith((ref) async {}),
             surahListProvider.overrideWith((ref) async => []),
+            lastReadPositionProvider.overrideWith((ref) async => null),
           ],
           child: const MaterialApp(home: LoadingScreen()),
         ),
@@ -175,6 +176,29 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Continue Reading'), findsNothing);
+    });
+
+    testWidgets('tapping Last Read banner navigates to ReadingScreen',
+        (tester) async {
+      final position = ReadingPosition(
+        verseId: '1:1',
+        lastReadAt: DateTime(2026, 5, 24),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => position),
+            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue Reading'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReadingScreen), findsOneWidget);
     });
   });
 

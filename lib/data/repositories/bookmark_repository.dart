@@ -1,13 +1,11 @@
-import '../../domain/models/bookmark.dart';
-
 abstract class BookmarkRepository {
-  Future<void> addBookmark(Bookmark bookmark);
+  Future<void> addBookmark(String verseId, DateTime timestamp);
 
   Future<void> removeBookmark(String verseId);
 
   Future<bool> isBookmarked(String verseId);
 
-  Future<List<Bookmark>> getBookmarksBySurah(int surahNumber);
+  Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber);
 
-  Future<List<Bookmark>> getAllBookmarks();
+  Future<int> getBookmarkCount();
 }

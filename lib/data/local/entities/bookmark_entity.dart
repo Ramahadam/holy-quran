@@ -3,23 +3,24 @@ import 'package:holy_quran_app/domain/models/bookmark.dart';
 
 part 'bookmark_entity.g.dart';
 
-/// Isar database entity for Bookmark model.
-/// Auto-increment ID for database management.
 @collection
 class BookmarkEntity {
   Id id = Isar.autoIncrement;
 
-  @Index()
+  @Index(unique: true, replace: true)
   late String verseId;
+
+  @Index()
+  late int surahNumber;
 
   late DateTime timestamp;
   String? note;
 
   BookmarkEntity();
 
-  /// Create entity from domain model
   BookmarkEntity.fromDomain(Bookmark bookmark) {
     verseId = bookmark.verseId;
+    surahNumber = int.parse(bookmark.verseId.split(':').first);
     timestamp = bookmark.timestamp;
     note = bookmark.note;
   }
