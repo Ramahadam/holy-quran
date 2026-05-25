@@ -53,8 +53,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     _positionRepo
         .savePosition(ReadingPosition(verseId: id, lastReadAt: DateTime.now()))
         .catchError((Object e) {
-      debugPrint('Failed to save reading position: $e');
-    });
+          debugPrint('Failed to save reading position: $e');
+        });
   }
 
   String? _currentPageFirstVerseId;
@@ -71,24 +71,27 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     // Resolve the starting page.
     if (!_resolved) {
       if (widget.initialVerseId != null) {
-        final pageAsync = ref.watch(pageForVerseProvider(widget.initialVerseId!));
+        final pageAsync = ref.watch(
+          pageForVerseProvider(widget.initialVerseId!),
+        );
         return pageAsync.when(
           data: (page) {
             _initPageController(page);
             return _buildPageView();
           },
           loading: () => _buildLoading(),
-          error: (_, __) {
+          error: (_, _) {
             // Fallback: start at surah's first page.
-            final startAsync =
-                ref.watch(startPageForSurahProvider(widget.surah.surahNumber));
+            final startAsync = ref.watch(
+              startPageForSurahProvider(widget.surah.surahNumber),
+            );
             return startAsync.when(
               data: (page) {
                 _initPageController(page);
                 return _buildPageView();
               },
               loading: () => _buildLoading(),
-              error: (_, __) {
+              error: (_, _) {
                 _initPageController(1);
                 return _buildPageView();
               },
@@ -96,15 +99,16 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           },
         );
       } else {
-        final startAsync =
-            ref.watch(startPageForSurahProvider(widget.surah.surahNumber));
+        final startAsync = ref.watch(
+          startPageForSurahProvider(widget.surah.surahNumber),
+        );
         return startAsync.when(
           data: (page) {
             _initPageController(page);
             return _buildPageView();
           },
           loading: () => _buildLoading(),
-          error: (_, __) {
+          error: (_, _) {
             _initPageController(1);
             return _buildPageView();
           },
@@ -129,9 +133,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         children: [
           Text(
             'القرآن الكريم',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppTheme.islamicGreen,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: AppTheme.islamicGreen),
             textDirection: TextDirection.rtl,
           ),
           Text(
@@ -218,10 +222,9 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
           child: Text(
             'Failed to load verses.\nPlease restart the app.',
             textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: Colors.red),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
           ),
         ),
       ),
@@ -266,9 +269,9 @@ class _QuranPageContent extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               '$page',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
               textAlign: TextAlign.center,
             ),
           ),
@@ -278,7 +281,10 @@ class _QuranPageContent extends ConsumerWidget {
   }
 
   List<Widget> _buildVerseWidgets(
-      BuildContext context, WidgetRef ref, Set<String> bookmarks) {
+    BuildContext context,
+    WidgetRef ref,
+    Set<String> bookmarks,
+  ) {
     final widgets = <Widget>[];
     int? lastSurah;
 
@@ -297,10 +303,7 @@ class _QuranPageContent extends ConsumerWidget {
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onLongPress: () => _toggleBookmark(context, ref, verse, bookmarks),
-          child: _ArabicVerse(
-            verse: verse,
-            isBookmarked: isBookmarked,
-          ),
+          child: _ArabicVerse(verse: verse, isBookmarked: isBookmarked),
         ),
       );
     }
@@ -308,8 +311,12 @@ class _QuranPageContent extends ConsumerWidget {
     return widgets;
   }
 
-  Future<void> _toggleBookmark(BuildContext context, WidgetRef ref, Verse verse,
-      Set<String> bookmarks) async {
+  Future<void> _toggleBookmark(
+    BuildContext context,
+    WidgetRef ref,
+    Verse verse,
+    Set<String> bookmarks,
+  ) async {
     final repo = ref.read(bookmarkRepositoryProvider);
     final wasBookmarked = bookmarks.contains(verse.verseId);
     if (wasBookmarked) {
@@ -317,6 +324,7 @@ class _QuranPageContent extends ConsumerWidget {
     } else {
       await repo.addBookmark(verse.verseId, DateTime.now());
     }
+    ref.invalidate(recentBookmarksProvider);
     ref.invalidate(bookmarksBySurahProvider(verse.surahNumber));
 
     if (context.mounted) {
@@ -340,8 +348,10 @@ class _SurahHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final surahAsync = ref.watch(surahListProvider);
     final surahName = surahAsync.whenOrNull(
-      data: (surahs) =>
-          surahs.where((s) => s.surahNumber == surahNumber).firstOrNull?.nameArabic,
+      data: (surahs) => surahs
+          .where((s) => s.surahNumber == surahNumber)
+          .firstOrNull
+          ?.nameArabic,
     );
 
     return Container(
@@ -356,9 +366,9 @@ class _SurahHeader extends ConsumerWidget {
         child: Text(
           surahName ?? 'سورة $surahNumber',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppTheme.islamicGreen,
-                fontWeight: FontWeight.w600,
-              ),
+            color: AppTheme.islamicGreen,
+            fontWeight: FontWeight.w600,
+          ),
           textDirection: TextDirection.rtl,
         ),
       ),
@@ -381,19 +391,16 @@ class _ArabicVerse extends StatelessWidget {
         textAlign: TextAlign.center,
         text: TextSpan(
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                fontSize: 24,
-                fontWeight: FontWeight.w400,
-                height: 2.2,
-                color: isBookmarked ? AppTheme.islamicGreen : AppTheme.textPrimary,
-              ),
+            fontSize: 24,
+            fontWeight: FontWeight.w400,
+            height: 2.2,
+            color: isBookmarked ? AppTheme.islamicGreen : AppTheme.textPrimary,
+          ),
           children: [
             TextSpan(text: verse.arabicText),
             TextSpan(
               text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
-              style: TextStyle(
-                color: AppTheme.goldAccent,
-                fontSize: 20,
-              ),
+              style: TextStyle(color: AppTheme.goldAccent, fontSize: 20),
             ),
           ],
         ),
@@ -403,6 +410,10 @@ class _ArabicVerse extends StatelessWidget {
 
   String _toArabicNumeral(int number) {
     const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number.toString().split('').map((d) => arabicDigits[int.parse(d)]).join();
+    return number
+        .toString()
+        .split('')
+        .map((d) => arabicDigits[int.parse(d)])
+        .join();
   }
 }

@@ -26,6 +26,17 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
   }
 
   @override
+  Future<List<Bookmark>> getRecentBookmarks({int limit = 3}) async {
+    final isar = await IsarService.getInstance();
+    final entities = await isar.bookmarkEntitys
+        .where()
+        .sortByTimestampDesc()
+        .limit(limit)
+        .findAll();
+    return entities.map((e) => e.toDomain()).toList();
+  }
+
+  @override
   Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber) async {
     final isar = await IsarService.getInstance();
     final entities = await isar.bookmarkEntitys
