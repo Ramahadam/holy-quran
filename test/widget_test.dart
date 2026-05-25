@@ -8,9 +8,12 @@ import 'package:holy_quran_app/presentation/screens/loading_screen.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
+import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
+import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
+import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
 import 'package:holy_quran_app/presentation/widgets/verse_card.dart';
 
@@ -29,6 +32,24 @@ const _verse1 = Verse(
   translation: 'In the name of Allah',
 );
 
+class _FakeBookmarkRepository implements BookmarkRepository {
+  final removedVerseIds = <String>[];
+
+  @override
+  Future<void> addBookmark(String verseId, DateTime timestamp) async {}
+
+  @override
+  Future<void> removeBookmark(String verseId) async {
+    removedVerseIds.add(verseId);
+  }
+
+  @override
+  Future<List<Bookmark>> getRecentBookmarks({int limit = 3}) async => const [];
+
+  @override
+  Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber) async => {};
+}
+
 void main() {
   group('HolyQuranApp', () {
     testWidgets('renders MaterialApp', (tester) async {
@@ -42,13 +63,18 @@ void main() {
     testWidgets('shows database error message', (tester) async {
       await tester.pumpWidget(const ProviderScope(child: DatabaseErrorApp()));
       await tester.pump();
-      expect(find.textContaining('Could not open the database'), findsOneWidget);
+      expect(
+        find.textContaining('Could not open the database'),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
   });
 
   group('LoadingScreen', () {
-    testWidgets('shows loading indicator while data is loading', (tester) async {
+    testWidgets('shows loading indicator while data is loading', (
+      tester,
+    ) async {
       final completer = Completer<void>();
       await tester.pumpWidget(
         ProviderScope(
@@ -60,7 +86,10 @@ void main() {
       );
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.textContaining('Preparing your Digital Sanctuary'), findsOneWidget);
+      expect(
+        find.textContaining('Preparing your Digital Sanctuary'),
+        findsOneWidget,
+      );
       // Resolve to avoid pending-microtask assertion on teardown.
       completer.complete();
     });
@@ -89,6 +118,7 @@ void main() {
             initializeDataProvider.overrideWith((ref) async {}),
             surahListProvider.overrideWith((ref) async => []),
             lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(home: LoadingScreen()),
         ),
@@ -105,6 +135,7 @@ void main() {
           overrides: [
             surahListProvider.overrideWith((ref) async => [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(home: HomeScreen()),
         ),
@@ -120,6 +151,7 @@ void main() {
           overrides: [
             surahListProvider.overrideWith((ref) async => []),
             lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(home: HomeScreen()),
         ),
@@ -134,6 +166,7 @@ void main() {
           overrides: [
             surahListProvider.overrideWith((ref) => Future.error('db error')),
             lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(home: HomeScreen()),
         ),
@@ -142,8 +175,9 @@ void main() {
       expect(find.textContaining('Failed to load surahs'), findsOneWidget);
     });
 
-    testWidgets('shows Last Read banner when a reading position exists',
-        (tester) async {
+    testWidgets('shows Last Read banner when a reading position exists', (
+      tester,
+    ) async {
       final position = ReadingPosition(
         verseId: '1:3',
         lastReadAt: DateTime(2026, 5, 24),
@@ -153,6 +187,7 @@ void main() {
           overrides: [
             surahListProvider.overrideWith((ref) async => [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => position),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(home: HomeScreen()),
         ),
@@ -163,13 +198,15 @@ void main() {
       expect(find.textContaining('Verse 3'), findsOneWidget);
     });
 
-    testWidgets('does not show Last Read banner when no position saved',
-        (tester) async {
+    testWidgets('does not show Last Read banner when no position saved', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             surahListProvider.overrideWith((ref) async => [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(home: HomeScreen()),
         ),
@@ -178,8 +215,9 @@ void main() {
       expect(find.text('Continue Reading'), findsNothing);
     });
 
-    testWidgets('tapping Last Read banner navigates to ReadingScreen',
-        (tester) async {
+    testWidgets('tapping Last Read banner navigates to ReadingScreen', (
+      tester,
+    ) async {
       final position = ReadingPosition(
         verseId: '1:1',
         lastReadAt: DateTime(2026, 5, 24),
@@ -189,7 +227,9 @@ void main() {
           overrides: [
             surahListProvider.overrideWith((ref) async => [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => position),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+            pageForVerseProvider('1:1').overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
           child: const MaterialApp(home: HomeScreen()),
@@ -200,6 +240,38 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(ReadingScreen), findsOneWidget);
     });
+
+    testWidgets('shows bookmarks and removes one from the home screen', (
+      tester,
+    ) async {
+      final repo = _FakeBookmarkRepository();
+      final bookmark = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime(2026, 5, 24),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookmarkRepositoryProvider.overrideWithValue(repo),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bookmarks'), findsOneWidget);
+      expect(find.text('The Opening · Verse 1'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Remove bookmark'));
+      await tester.pump();
+
+      expect(repo.removedVerseIds, ['1:1']);
+    });
   });
 
   group('ReadingScreen', () {
@@ -207,7 +279,8 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            pageForVerseProvider('1:1').overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
           child: const MaterialApp(
@@ -216,37 +289,35 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(VerseCard), findsOneWidget);
+      expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
     testWidgets('shows verse list when data is available', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: const MaterialApp(
-            home: ReadingScreen(surah: _surah1),
-          ),
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(VerseCard), findsOneWidget);
-      expect(find.text('بِسْمِ اللَّهِ'), findsOneWidget);
+      expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
     testWidgets('shows error state when verse load fails', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            versesBySurahProvider(1)
-                .overrideWith((ref) => Future.error('db error')),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(
+              1,
+            ).overrideWith((ref) => Future.error('db error')),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: const MaterialApp(
-            home: ReadingScreen(surah: _surah1),
-          ),
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
         ),
       );
       await tester.pumpAndSettle();
@@ -257,40 +328,45 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
-            bookmarksBySurahProvider(1)
-                .overrideWith((ref) async => {'1:1'}),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
           ],
-          child: const MaterialApp(
-            home: ReadingScreen(surah: _surah1),
-          ),
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.bookmark), findsOneWidget);
+      final richText = tester.widget<RichText>(
+        find.textContaining('بِسْمِ', findRichText: true),
+      );
+      expect((richText.text as TextSpan).style?.color, AppTheme.islamicGreen);
     });
 
-    testWidgets('does not show bookmark icon for unbookmarked verse',
-        (tester) async {
+    testWidgets('does not show bookmark icon for unbookmarked verse', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: const MaterialApp(
-            home: ReadingScreen(surah: _surah1),
-          ),
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.bookmark), findsNothing);
+      final richText = tester.widget<RichText>(
+        find.textContaining('بِسْمِ', findRichText: true),
+      );
+      expect((richText.text as TextSpan).style?.color, AppTheme.textPrimary);
     });
   });
 
   group('SurahTile', () {
-    testWidgets('renders Arabic name, English name and verse count',
-        (tester) async {
+    testWidgets('renders Arabic name, English name and verse count', (
+      tester,
+    ) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -336,24 +412,23 @@ void main() {
       expect(find.text('الم'), findsOneWidget);
     });
 
-    testWidgets('shows bookmark icon when isBookmarked is true', (tester) async {
+    testWidgets('shows bookmark icon when isBookmarked is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: VerseCard(verse: _verse1, isBookmarked: true),
-          ),
+          home: Scaffold(body: VerseCard(verse: _verse1, isBookmarked: true)),
         ),
       );
       expect(find.byIcon(Icons.bookmark), findsOneWidget);
     });
 
-    testWidgets('hides bookmark icon when isBookmarked is false',
-        (tester) async {
+    testWidgets('hides bookmark icon when isBookmarked is false', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: VerseCard(verse: _verse1, isBookmarked: false),
-          ),
+          home: Scaffold(body: VerseCard(verse: _verse1, isBookmarked: false)),
         ),
       );
       expect(find.byIcon(Icons.bookmark), findsNothing);
