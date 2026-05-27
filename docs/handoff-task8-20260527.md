@@ -59,7 +59,7 @@ Task 8 issue:
 Related existing issue:
 
 - Issue #11: https://github.com/Ramahadam/holy-quran/issues/11
-- Title: `feat: Ensure verse layout per page matches physical Madani Mushaf`
+- Title: `Phase 2: Mushaf Mode physical page fidelity`
 
 Important product interpretation from the PRD:
 
@@ -77,6 +77,25 @@ Recommended next step:
 3. If the user wants to stay strictly on Phase 1 MVP, create/triage a new issue for either:
    - prayer-time linked notifications, or
    - Supabase anonymous feedback integration.
+
+## Task 8 Outcome
+
+Task 8 triage split the broad Madani Mushaf page-fidelity request into two phase-aligned issues:
+
+- Issue #11: https://github.com/Ramahadam/holy-quran/issues/11
+  - Retitled to `Phase 2: Mushaf Mode physical page fidelity`.
+  - Scoped to HD Mushaf page images, coordinate mapping, and shared `VerseID` state.
+  - Explicitly excludes Phase 1 Classic Mode page-boundary validation.
+- Issue #16: https://github.com/Ramahadam/holy-quran/issues/16
+  - Title: `Phase 1: Validate Madani Mushaf page-boundary data`.
+  - Labeled `enhancement` and `ready-for-agent`.
+  - Selected as the smallest next implementation slice for Classic Mode data integrity.
+
+Recommended next implementation task:
+
+1. Pick up Issue #16 for Phase 1 page-boundary validation.
+2. Verify all 604 page assignments against an authoritative Madani Mushaf source.
+3. Add repeatable validation and documentation without implementing Phase 2 image rendering or coordinate mapping.
 
 ## Source Of Truth
 
