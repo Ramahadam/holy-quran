@@ -7,6 +7,7 @@ import '../../domain/models/verse.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
 
+const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 const _totalPages = 604;
 
 class ReadingScreen extends ConsumerStatefulWidget {
@@ -295,6 +296,9 @@ class _QuranPageContent extends ConsumerWidget {
           widgets.add(const SizedBox(height: 16));
         }
         widgets.add(_SurahHeader(surahNumber: verse.surahNumber));
+        if (_shouldShowBismillahBeforeVerse(verse)) {
+          widgets.add(const _BismillahHeader());
+        }
         lastSurah = verse.surahNumber;
       }
 
@@ -310,6 +314,11 @@ class _QuranPageContent extends ConsumerWidget {
 
     return widgets;
   }
+
+  bool _shouldShowBismillahBeforeVerse(Verse verse) =>
+      verse.verseNumber == 1 &&
+      verse.surahNumber != 1 &&
+      verse.surahNumber != 9;
 
   Future<void> _toggleBookmark(
     BuildContext context,
@@ -336,6 +345,29 @@ class _QuranPageContent extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+class _BismillahHeader extends StatelessWidget {
+  const _BismillahHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      child: Text(
+        'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
+        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+          fontFamily: _kfgqpcHafsFontFamily,
+          fontSize: 26,
+          fontWeight: FontWeight.w400,
+          height: 2.0,
+          color: AppTheme.islamicGreen,
+        ),
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.rtl,
+      ),
+    );
   }
 }
 
@@ -366,6 +398,7 @@ class _SurahHeader extends ConsumerWidget {
         child: Text(
           surahName ?? 'سورة $surahNumber',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontFamily: _kfgqpcHafsFontFamily,
             color: AppTheme.islamicGreen,
             fontWeight: FontWeight.w600,
           ),
@@ -391,13 +424,14 @@ class _ArabicVerse extends StatelessWidget {
         textAlign: TextAlign.center,
         text: TextSpan(
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+            fontFamily: _kfgqpcHafsFontFamily,
             fontSize: 24,
             fontWeight: FontWeight.w400,
             height: 2.2,
             color: isBookmarked ? AppTheme.islamicGreen : AppTheme.textPrimary,
           ),
           children: [
-            TextSpan(text: verse.arabicText),
+            ..._arabicTextSpans,
             TextSpan(
               text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
               style: TextStyle(color: AppTheme.goldAccent, fontSize: 20),
@@ -406,6 +440,41 @@ class _ArabicVerse extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  List<TextSpan> get _arabicTextSpans {
+    final leadingSpaceCount =
+        verse.arabicText.length - verse.arabicText.trimLeft().length;
+    final leadingSpace = verse.arabicText.substring(0, leadingSpaceCount);
+    final trimmedText = verse.arabicText.substring(leadingSpaceCount);
+    const bismillah = 'بِسْمِ';
+
+    if (!trimmedText.startsWith(bismillah)) {
+      return [TextSpan(text: verse.arabicText)];
+    }
+
+    final bismillahEnd = _findBismillahEnd(trimmedText);
+    return [
+      if (leadingSpace.isNotEmpty) TextSpan(text: leadingSpace),
+      TextSpan(
+        text: trimmedText.substring(0, bismillahEnd),
+        style: const TextStyle(
+          color: AppTheme.islamicGreen,
+          fontSize: 28,
+          height: 2.0,
+        ),
+      ),
+      TextSpan(text: trimmedText.substring(bismillahEnd)),
+    ];
+  }
+
+  int _findBismillahEnd(String text) {
+    const lastWord = 'ٱلرَّحِيمِ';
+    final lastWordStart = text.indexOf(lastWord);
+    if (lastWordStart == -1) {
+      return text.length;
+    }
+    return lastWordStart + lastWord.length;
   }
 
   String _toArabicNumeral(int number) {

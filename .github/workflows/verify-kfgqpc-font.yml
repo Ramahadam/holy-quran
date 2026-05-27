@@ -1,0 +1,25 @@
+name: Verify QPC Hafs font
+
+on:
+  pull_request:
+    paths:
+      - assets/fonts/**
+      - scripts/verify_qpc_hafs_font.sh
+      - .github/workflows/verify-kfgqpc-font.yml
+  push:
+    paths:
+      - assets/fonts/**
+      - scripts/verify_qpc_hafs_font.sh
+      - .github/workflows/verify-kfgqpc-font.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-qpc-hafs-font:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify checked-in font against pinned QUL/Tarteel CDN font
+        run: scripts/verify_qpc_hafs_font.sh

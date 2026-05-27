@@ -32,6 +32,8 @@ const _verse1 = Verse(
   translation: 'In the name of Allah',
 );
 
+const _bismillah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+
 class _FakeBookmarkRepository implements BookmarkRepository {
   final removedVerseIds = <String>[];
 
@@ -305,6 +307,175 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
+    });
+
+    testWidgets('uses KFGQPC font for Arabic Quran text', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final richText = tester.widget<RichText>(
+        find.textContaining('بِسْمِ', findRichText: true),
+      );
+      expect(
+        (richText.text as TextSpan).style?.fontFamily,
+        'KFGQPCHafsUthmanicScript',
+      );
+    });
+
+    testWidgets(
+      'gives Bismillah distinct styling when verse data includes it',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+              bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            ],
+            child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final richText = tester.widget<RichText>(
+          find.textContaining('بِسْمِ', findRichText: true),
+        );
+        final children = (richText.text as TextSpan).children!;
+        expect(children.first.style?.color, AppTheme.islamicGreen);
+        expect(children.first.style?.fontSize, 28);
+      },
+    );
+
+    testWidgets('styles only the Bismillah phrase when more text follows', (
+      tester,
+    ) async {
+      const verse = Verse(
+        verseId: '1:1',
+        surahNumber: 1,
+        verseNumber: 1,
+        arabicText: '$_bismillah ٱلْحَمْدُ لِلَّهِ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [verse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final richText = tester.widget<RichText>(
+        find.textContaining('بِسْمِ', findRichText: true),
+      );
+      final children = (richText.text as TextSpan).children!;
+      final bismillahSpan = children[0] as TextSpan;
+      final remainingTextSpan = children[1] as TextSpan;
+      expect(bismillahSpan.text, _bismillah);
+      expect(bismillahSpan.style?.color, AppTheme.islamicGreen);
+      expect(remainingTextSpan.text, ' ٱلْحَمْدُ لِلَّهِ');
+      expect(remainingTextSpan.style, isNull);
+    });
+
+    testWidgets(
+      'shows Bismillah before Surahs except Al-Fatihah and At-Tawbah',
+      (tester) async {
+        const surah2 = Surah(
+          surahNumber: 2,
+          nameArabic: 'البقرة',
+          nameEnglish: 'The Cow',
+          numberOfVerses: 286,
+        );
+        const verse = Verse(
+          verseId: '2:1',
+          surahNumber: 2,
+          verseNumber: 1,
+          arabicText: 'الٓمٓ',
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(2).overrideWith((ref) async => 2),
+              versesByPageProvider(2).overrideWith((ref) async => [verse]),
+              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+              surahListProvider.overrideWith((ref) async => [surah2]),
+            ],
+            child: const MaterialApp(home: ReadingScreen(surah: surah2)),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text(_bismillah), findsOneWidget);
+      },
+    );
+
+    testWidgets('does not repeat Bismillah on continuation pages', (
+      tester,
+    ) async {
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const verse = Verse(
+        verseId: '2:20',
+        surahNumber: 2,
+        verseNumber: 20,
+        arabicText: 'يَكَادُ ٱلْبَرْقُ يَخْطَفُ أَبْصَـٰرَهُمْ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 4),
+            versesByPageProvider(4).overrideWith((ref) async => [verse]),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah2]),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: surah2)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(_bismillah), findsNothing);
+    });
+
+    testWidgets('does not show Bismillah before At-Tawbah', (tester) async {
+      const surah9 = Surah(
+        surahNumber: 9,
+        nameArabic: 'التوبة',
+        nameEnglish: 'The Repentance',
+        numberOfVerses: 129,
+      );
+      const verse = Verse(
+        verseId: '9:1',
+        surahNumber: 9,
+        verseNumber: 1,
+        arabicText: 'بَرَآءَةٌ مِّنَ ٱللَّهِ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(9).overrideWith((ref) async => 187),
+            versesByPageProvider(187).overrideWith((ref) async => [verse]),
+            bookmarksBySurahProvider(9).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah9]),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: surah9)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(_bismillah), findsNothing);
     });
 
     testWidgets('shows error state when verse load fails', (tester) async {
