@@ -6,6 +6,7 @@ import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
+import '../widgets/mushaf_sample_page.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 const _totalPages = 604;
@@ -24,6 +25,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   PageController? _pageController;
   int _currentPage = 1;
   bool _resolved = false;
+  bool _showMushafSample = false;
 
   late final ReadingPositionRepository _positionRepo;
 
@@ -145,6 +147,21 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           ),
         ],
       ),
+      actions: [
+        IconButton(
+          tooltip: _showMushafSample
+              ? 'Show Classic Mode'
+              : 'Show Mushaf sample',
+          icon: Icon(
+            _showMushafSample ? Icons.menu_book : Icons.image_outlined,
+          ),
+          onPressed: () {
+            setState(() {
+              _showMushafSample = !_showMushafSample;
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -166,6 +183,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           return _QuranPage(
             key: ValueKey(pageNum),
             page: pageNum,
+            showMushafSample: _showMushafSample,
             onFirstVerseResolved: pageNum == _currentPage
                 ? (verseId) => _currentPageFirstVerseId ??= verseId
                 : null,
@@ -178,9 +196,15 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
 class _QuranPage extends ConsumerStatefulWidget {
   final int page;
+  final bool showMushafSample;
   final ValueChanged<String>? onFirstVerseResolved;
 
-  const _QuranPage({super.key, required this.page, this.onFirstVerseResolved});
+  const _QuranPage({
+    super.key,
+    required this.page,
+    required this.showMushafSample,
+    this.onFirstVerseResolved,
+  });
 
   @override
   ConsumerState<_QuranPage> createState() => _QuranPageState();
@@ -207,6 +231,10 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
         }
 
         final surahNumbers = verses.map((v) => v.surahNumber).toSet();
+
+        if (widget.showMushafSample) {
+          return MushafSamplePage(page: widget.page);
+        }
 
         return _QuranPageContent(
           verses: verses,

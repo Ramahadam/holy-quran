@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:holy_quran_app/presentation/app.dart';
 import 'package:holy_quran_app/presentation/screens/loading_screen.dart';
@@ -14,6 +15,7 @@ import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
+import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
 import 'package:holy_quran_app/presentation/widgets/verse_card.dart';
 
@@ -127,6 +129,41 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(HomeScreen), findsOneWidget);
+    });
+  });
+
+  group('MushafSamplePage', () {
+    test('knows the checked-in sample pages', () {
+      expect(MushafSampleAssets.containsPage(1), isTrue);
+      expect(MushafSampleAssets.containsPage(2), isTrue);
+      expect(MushafSampleAssets.containsPage(3), isTrue);
+      expect(MushafSampleAssets.containsPage(604), isTrue);
+      expect(MushafSampleAssets.containsPage(4), isFalse);
+      expect(
+        MushafSampleAssets.pathForPage(604),
+        'assets/mushaf/madani-svg-sample/604.svg',
+      );
+    });
+
+    testWidgets('renders a local SVG sample page', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 1))),
+      );
+      await tester.pump();
+
+      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.byType(AspectRatio), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('explains unsupported sample pages', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+      );
+      await tester.pump();
+
+      expect(find.textContaining('pages 1, 2, 3, 604'), findsOneWidget);
+      expect(find.textContaining('Current page: 4'), findsOneWidget);
     });
   });
 
