@@ -1,0 +1,4262 @@
+{
+  "schemaVersion": 1,
+  "mushaf": {
+    "id": "madani-hafs-kfgqpc",
+    "source": "mushafdatabase-ligature-svg",
+    "sourceCommit": "ebe340a589838c7cf2d79d7a20fc8ec07e4c760c",
+    "pageCount": 604,
+    "importedPageCount": 4,
+    "coordinateSpace": {
+      "type": "normalized",
+      "width": 1.0,
+      "height": 1.0
+    }
+  },
+  "pages": [
+    {
+      "page": 1,
+      "sourceViewBox": "0 0 382.68 547.09",
+      "firstVerseId": "1:1",
+      "lastVerseId": "1:7",
+      "items": [
+        {
+          "type": "word",
+          "verseId": "1:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.562689,
+            "y": 0.517995,
+            "w": 0.079178,
+            "h": 0.023506
+          },
+          "sourceId": "md-word-002",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.536297,
+            "y": 0.505803,
+            "w": 0.03499,
+            "h": 0.031823
+          },
+          "sourceId": "md-word-003",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "1:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.419933,
+            "y": 0.505091,
+            "w": 0.116965,
+            "h": 0.038641
+          },
+          "sourceId": "md-word-004",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "1:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.40253,
+            "y": 0.503738,
+            "w": 0.081243,
+            "h": 0.036082
+          },
+          "sourceId": "md-word-005",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.371773,
+            "y": 0.511488,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-006"
+        },
+        {
+          "type": "word",
+          "verseId": "1:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.59214,
+            "y": 0.551975,
+            "w": 0.095589,
+            "h": 0.027509
+          },
+          "sourceId": "md-word-007",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.556575,
+            "y": 0.552944,
+            "w": 0.035722,
+            "h": 0.031165
+          },
+          "sourceId": "md-word-008",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "1:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.479252,
+            "y": 0.558921,
+            "w": 0.074475,
+            "h": 0.02952
+          },
+          "sourceId": "md-word-009",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "1:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.350998,
+            "y": 0.552085,
+            "w": 0.128175,
+            "h": 0.032828
+          },
+          "sourceId": "md-word-010",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.313343,
+            "y": 0.558665,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-011"
+        },
+        {
+          "type": "word",
+          "verseId": "1:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.652085,
+            "y": 0.597635,
+            "w": 0.088769,
+            "h": 0.039811
+          },
+          "sourceId": "md-word-012",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.552028,
+            "y": 0.596721,
+            "w": 0.09768,
+            "h": 0.034912
+          },
+          "sourceId": "md-word-013",
+          "wordIndex": 2
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.519729,
+            "y": 0.605878,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-014"
+        },
+        {
+          "type": "word",
+          "verseId": "1:4",
+          "line": 9,
+          "bounds": {
+            "x": 0.426858,
+            "y": 0.605988,
+            "w": 0.086574,
+            "h": 0.026687
+          },
+          "sourceId": "md-word-015",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:4",
+          "line": 9,
+          "bounds": {
+            "x": 0.37909,
+            "y": 0.605019,
+            "w": 0.045077,
+            "h": 0.027619
+          },
+          "sourceId": "md-word-016",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "1:4",
+          "line": 9,
+          "bounds": {
+            "x": 0.300408,
+            "y": 0.599152,
+            "w": 0.082157,
+            "h": 0.039134
+          },
+          "sourceId": "md-word-017",
+          "wordIndex": 3
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:4",
+          "line": 9,
+          "bounds": {
+            "x": 0.258885,
+            "y": 0.606262,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-018"
+        },
+        {
+          "type": "word",
+          "verseId": "1:5",
+          "line": 10,
+          "bounds": {
+            "x": 0.677877,
+            "y": 0.647517,
+            "w": 0.065067,
+            "h": 0.03069
+          },
+          "sourceId": "md-word-019",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:5",
+          "line": 10,
+          "bounds": {
+            "x": 0.607453,
+            "y": 0.647425,
+            "w": 0.064597,
+            "h": 0.026906
+          },
+          "sourceId": "md-word-020",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "1:5",
+          "line": 10,
+          "bounds": {
+            "x": 0.580119,
+            "y": 0.64982,
+            "w": 0.021271,
+            "h": 0.024566
+          },
+          "sourceId": "md-word-021",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "1:5",
+          "line": 10,
+          "bounds": {
+            "x": 0.520174,
+            "y": 0.646749,
+            "w": 0.065747,
+            "h": 0.029538
+          },
+          "sourceId": "md-word-022",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "1:5",
+          "line": 10,
+          "bounds": {
+            "x": 0.389464,
+            "y": 0.646146,
+            "w": 0.126215,
+            "h": 0.030543
+          },
+          "sourceId": "md-word-023",
+          "wordIndex": 5
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:5",
+          "line": 10,
+          "bounds": {
+            "x": 0.35254,
+            "y": 0.652562,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-024"
+        },
+        {
+          "type": "word",
+          "verseId": "1:6",
+          "line": 10,
+          "bounds": {
+            "x": 0.258623,
+            "y": 0.642764,
+            "w": 0.091147,
+            "h": 0.033669
+          },
+          "sourceId": "md-word-025",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:6",
+          "line": 11,
+          "bounds": {
+            "x": 0.640039,
+            "y": 0.687657,
+            "w": 0.085581,
+            "h": 0.033285
+          },
+          "sourceId": "md-word-026",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "1:6",
+          "line": 11,
+          "bounds": {
+            "x": 0.515548,
+            "y": 0.686944,
+            "w": 0.120649,
+            "h": 0.034839
+          },
+          "sourceId": "md-word-027",
+          "wordIndex": 3
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:6",
+          "line": 11,
+          "bounds": {
+            "x": 0.482727,
+            "y": 0.69654,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-028"
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 11,
+          "bounds": {
+            "x": 0.409324,
+            "y": 0.694493,
+            "w": 0.067811,
+            "h": 0.027454
+          },
+          "sourceId": "md-word-029",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 11,
+          "bounds": {
+            "x": 0.351416,
+            "y": 0.684275,
+            "w": 0.056,
+            "h": 0.038202
+          },
+          "sourceId": "md-word-030",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 11,
+          "bounds": {
+            "x": 0.269938,
+            "y": 0.684695,
+            "w": 0.078133,
+            "h": 0.03111
+          },
+          "sourceId": "md-word-031",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 12,
+          "bounds": {
+            "x": 0.602226,
+            "y": 0.736771,
+            "w": 0.07782,
+            "h": 0.035204
+          },
+          "sourceId": "md-word-032",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 12,
+          "bounds": {
+            "x": 0.549232,
+            "y": 0.739312,
+            "w": 0.054536,
+            "h": 0.031987
+          },
+          "sourceId": "md-word-033",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 12,
+          "bounds": {
+            "x": 0.405143,
+            "y": 0.733536,
+            "w": 0.15185,
+            "h": 0.037672
+          },
+          "sourceId": "md-word-034",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 12,
+          "bounds": {
+            "x": 0.318255,
+            "y": 0.735272,
+            "w": 0.083229,
+            "h": 0.03685
+          },
+          "sourceId": "md-word-035",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 13,
+          "bounds": {
+            "x": 0.587932,
+            "y": 0.788792,
+            "w": 0.021271,
+            "h": 0.022282
+          },
+          "sourceId": "md-word-036",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 13,
+          "bounds": {
+            "x": 0.570241,
+            "y": 0.7783,
+            "w": 0.024564,
+            "h": 0.027948
+          },
+          "sourceId": "md-word-037",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "1:7",
+          "line": 13,
+          "bounds": {
+            "x": 0.435298,
+            "y": 0.776709,
+            "w": 0.132826,
+            "h": 0.0344
+          },
+          "sourceId": "md-word-038",
+          "wordIndex": 10
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "1:7",
+          "line": 13,
+          "bounds": {
+            "x": 0.396389,
+            "y": 0.784405,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-039"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "sourceViewBox": "0 0 382.68 547.09",
+      "firstVerseId": "2:1",
+      "lastVerseId": "2:5",
+      "items": [
+        {
+          "type": "word",
+          "verseId": "2:1",
+          "line": 8,
+          "bounds": {
+            "x": 0.649394,
+            "y": 0.550293,
+            "w": 0.036401,
+            "h": 0.030251
+          },
+          "sourceId": "md-word-003",
+          "wordIndex": 1
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:1",
+          "line": 8,
+          "bounds": {
+            "x": 0.618271,
+            "y": 0.556855,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-004"
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.571078,
+            "y": 0.5549,
+            "w": 0.044136,
+            "h": 0.026924
+          },
+          "sourceId": "md-word-005",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.473816,
+            "y": 0.550787,
+            "w": 0.098019,
+            "h": 0.031622
+          },
+          "sourceId": "md-word-006",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.451395,
+            "y": 0.550677,
+            "w": 0.022708,
+            "h": 0.02676
+          },
+          "sourceId": "md-word-007",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.408096,
+            "y": 0.55596,
+            "w": 0.045443,
+            "h": 0.026997
+          },
+          "sourceId": "md-word-008",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.410343,
+            "y": 0.545596,
+            "w": 0.011968,
+            "h": 0.008079
+          },
+          "sourceId": "md-word-009",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.374229,
+            "y": 0.559634,
+            "w": 0.038466,
+            "h": 0.023342
+          },
+          "sourceId": "md-word-010",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.375091,
+            "y": 0.545943,
+            "w": 0.01304,
+            "h": 0.008298
+          },
+          "sourceId": "md-word-011",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 8,
+          "bounds": {
+            "x": 0.316844,
+            "y": 0.555302,
+            "w": 0.055477,
+            "h": 0.025444
+          },
+          "sourceId": "md-word-012",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:2",
+          "line": 9,
+          "bounds": {
+            "x": 0.655509,
+            "y": 0.595588,
+            "w": 0.081112,
+            "h": 0.03175
+          },
+          "sourceId": "md-word-013",
+          "wordIndex": 9
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:2",
+          "line": 9,
+          "bounds": {
+            "x": 0.618846,
+            "y": 0.602369,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-014"
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.563813,
+            "y": 0.591585,
+            "w": 0.051793,
+            "h": 0.03844
+          },
+          "sourceId": "md-word-015",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.493441,
+            "y": 0.599846,
+            "w": 0.070059,
+            "h": 0.031275
+          },
+          "sourceId": "md-word-016",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.422677,
+            "y": 0.59407,
+            "w": 0.06917,
+            "h": 0.03897
+          },
+          "sourceId": "md-word-017",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.400282,
+            "y": 0.604672,
+            "w": 0.021898,
+            "h": 0.025078
+          },
+          "sourceId": "md-word-018",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.336391,
+            "y": 0.598019,
+            "w": 0.075677,
+            "h": 0.031457
+          },
+          "sourceId": "md-word-019",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 9,
+          "bounds": {
+            "x": 0.262935,
+            "y": 0.593961,
+            "w": 0.072959,
+            "h": 0.032645
+          },
+          "sourceId": "md-word-020",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 10,
+          "bounds": {
+            "x": 0.71697,
+            "y": 0.649052,
+            "w": 0.022133,
+            "h": 0.026175
+          },
+          "sourceId": "md-word-021",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 10,
+          "bounds": {
+            "x": 0.687964,
+            "y": 0.647773,
+            "w": 0.040739,
+            "h": 0.022775
+          },
+          "sourceId": "md-word-022",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 10,
+          "bounds": {
+            "x": 0.602514,
+            "y": 0.644757,
+            "w": 0.083673,
+            "h": 0.040249
+          },
+          "sourceId": "md-word-023",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:3",
+          "line": 10,
+          "bounds": {
+            "x": 0.523544,
+            "y": 0.644117,
+            "w": 0.077062,
+            "h": 0.032627
+          },
+          "sourceId": "md-word-024",
+          "wordIndex": 10
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:3",
+          "line": 10,
+          "bounds": {
+            "x": 0.488267,
+            "y": 0.64812,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-025"
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 10,
+          "bounds": {
+            "x": 0.464487,
+            "y": 0.649729,
+            "w": 0.022395,
+            "h": 0.024493
+          },
+          "sourceId": "md-word-026",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 10,
+          "bounds": {
+            "x": 0.425212,
+            "y": 0.637811,
+            "w": 0.051453,
+            "h": 0.038604
+          },
+          "sourceId": "md-word-027",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 10,
+          "bounds": {
+            "x": 0.350841,
+            "y": 0.647371,
+            "w": 0.07356,
+            "h": 0.028387
+          },
+          "sourceId": "md-word-028",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 10,
+          "bounds": {
+            "x": 0.304981,
+            "y": 0.643441,
+            "w": 0.044633,
+            "h": 0.033303
+          },
+          "sourceId": "md-word-029",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 10,
+          "bounds": {
+            "x": 0.260871,
+            "y": 0.634886,
+            "w": 0.044241,
+            "h": 0.044581
+          },
+          "sourceId": "md-word-030",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.674976,
+            "y": 0.68709,
+            "w": 0.059528,
+            "h": 0.03568
+          },
+          "sourceId": "md-word-031",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.653392,
+            "y": 0.693195,
+            "w": 0.022395,
+            "h": 0.023981
+          },
+          "sourceId": "md-word-032",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.634342,
+            "y": 0.686103,
+            "w": 0.024929,
+            "h": 0.026668
+          },
+          "sourceId": "md-word-033",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.593629,
+            "y": 0.679102,
+            "w": 0.040347,
+            "h": 0.043393
+          },
+          "sourceId": "md-word-034",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.561801,
+            "y": 0.702444,
+            "w": 0.032168,
+            "h": 0.016414
+          },
+          "sourceId": "md-word-035",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.504364,
+            "y": 0.687967,
+            "w": 0.054928,
+            "h": 0.031933
+          },
+          "sourceId": "md-word-036",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.481708,
+            "y": 0.693305,
+            "w": 0.022264,
+            "h": 0.023451
+          },
+          "sourceId": "md-word-037",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.411179,
+            "y": 0.686048,
+            "w": 0.077689,
+            "h": 0.037215
+          },
+          "sourceId": "md-word-038",
+          "wordIndex": 13
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.375301,
+            "y": 0.690965,
+            "w": 0.032926,
+            "h": 0.0378
+          },
+          "sourceId": "md-word-039",
+          "wordIndex": 14
+        },
+        {
+          "type": "word",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.304171,
+            "y": 0.691842,
+            "w": 0.068778,
+            "h": 0.028387
+          },
+          "sourceId": "md-word-040",
+          "wordIndex": 15
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:4",
+          "line": 11,
+          "bounds": {
+            "x": 0.267038,
+            "y": 0.69208,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-041"
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.610353,
+            "y": 0.724561,
+            "w": 0.071705,
+            "h": 0.042827
+          },
+          "sourceId": "md-word-042",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.575415,
+            "y": 0.73264,
+            "w": 0.034389,
+            "h": 0.032591
+          },
+          "sourceId": "md-word-043",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.513118,
+            "y": 0.734852,
+            "w": 0.059893,
+            "h": 0.026376
+          },
+          "sourceId": "md-word-044",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.478468,
+            "y": 0.739239,
+            "w": 0.03222,
+            "h": 0.024493
+          },
+          "sourceId": "md-word-045",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.404516,
+            "y": 0.735784,
+            "w": 0.070947,
+            "h": 0.034418
+          },
+          "sourceId": "md-word-046",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.413322,
+            "y": 0.726827,
+            "w": 0.017299,
+            "h": 0.009578
+          },
+          "sourceId": "md-word-047",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.384943,
+            "y": 0.739805,
+            "w": 0.023701,
+            "h": 0.022885
+          },
+          "sourceId": "md-word-048",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 12,
+          "bounds": {
+            "x": 0.317602,
+            "y": 0.724086,
+            "w": 0.075442,
+            "h": 0.04343
+          },
+          "sourceId": "md-word-049",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 13,
+          "bounds": {
+            "x": 0.56964,
+            "y": 0.783948,
+            "w": 0.040896,
+            "h": 0.024073
+          },
+          "sourceId": "md-word-050",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:5",
+          "line": 13,
+          "bounds": {
+            "x": 0.430752,
+            "y": 0.776454,
+            "w": 0.142547,
+            "h": 0.035058
+          },
+          "sourceId": "md-word-051",
+          "wordIndex": 10
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:5",
+          "line": 13,
+          "bounds": {
+            "x": 0.393253,
+            "y": 0.784496,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-052"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "sourceViewBox": "0 0 382.68 547.09",
+      "firstVerseId": "2:6",
+      "lastVerseId": "2:16",
+      "items": [
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.727893,
+            "y": 0.142682,
+            "w": 0.031776,
+            "h": 0.034437
+          },
+          "sourceId": "md-word-001",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.664315,
+            "y": 0.134713,
+            "w": 0.058587,
+            "h": 0.041017
+          },
+          "sourceId": "md-word-002",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.556941,
+            "y": 0.136541,
+            "w": 0.1045,
+            "h": 0.038897
+          },
+          "sourceId": "md-word-003",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.499869,
+            "y": 0.140653,
+            "w": 0.05532,
+            "h": 0.034912
+          },
+          "sourceId": "md-word-004",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.416118,
+            "y": 0.141476,
+            "w": 0.077271,
+            "h": 0.037252
+          },
+          "sourceId": "md-word-005",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.290817,
+            "y": 0.135133,
+            "w": 0.124229,
+            "h": 0.03833
+          },
+          "sourceId": "md-word-006",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.260609,
+            "y": 0.134457,
+            "w": 0.028954,
+            "h": 0.036667
+          },
+          "sourceId": "md-word-007",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.231734,
+            "y": 0.137729,
+            "w": 0.028614,
+            "h": 0.034802
+          },
+          "sourceId": "md-word-008",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 1,
+          "bounds": {
+            "x": 0.118559,
+            "y": 0.140818,
+            "w": 0.1149,
+            "h": 0.033267
+          },
+          "sourceId": "md-word-009",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 2,
+          "bounds": {
+            "x": 0.735001,
+            "y": 0.189055,
+            "w": 0.02378,
+            "h": 0.028295
+          },
+          "sourceId": "md-word-010",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:6",
+          "line": 2,
+          "bounds": {
+            "x": 0.650256,
+            "y": 0.194392,
+            "w": 0.083255,
+            "h": 0.031366
+          },
+          "sourceId": "md-word-011",
+          "wordIndex": 11
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:6",
+          "line": 2,
+          "bounds": {
+            "x": 0.610693,
+            "y": 0.195361,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-012"
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.539981,
+            "y": 0.193661,
+            "w": 0.063578,
+            "h": 0.027363
+          },
+          "sourceId": "md-word-013",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.499321,
+            "y": 0.189146,
+            "w": 0.03938,
+            "h": 0.028971
+          },
+          "sourceId": "md-word-014",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.459078,
+            "y": 0.19176,
+            "w": 0.036427,
+            "h": 0.03345
+          },
+          "sourceId": "md-word-015",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.361921,
+            "y": 0.188196,
+            "w": 0.090572,
+            "h": 0.041565
+          },
+          "sourceId": "md-word-016",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.339762,
+            "y": 0.196805,
+            "w": 0.021376,
+            "h": 0.025151
+          },
+          "sourceId": "md-word-017",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.308717,
+            "y": 0.192162,
+            "w": 0.037446,
+            "h": 0.03323
+          },
+          "sourceId": "md-word-018",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.183913,
+            "y": 0.195708,
+            "w": 0.120336,
+            "h": 0.033157
+          },
+          "sourceId": "md-word-019",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.192746,
+            "y": 0.184686,
+            "w": 0.017325,
+            "h": 0.009633
+          },
+          "sourceId": "md-word-020",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.161127,
+            "y": 0.197134,
+            "w": 0.022656,
+            "h": 0.024365
+          },
+          "sourceId": "md-word-021",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 2,
+          "bounds": {
+            "x": 0.120597,
+            "y": 0.191321,
+            "w": 0.044659,
+            "h": 0.034272
+          },
+          "sourceId": "md-word-022",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.650988,
+            "y": 0.236926,
+            "w": 0.10774,
+            "h": 0.041437
+          },
+          "sourceId": "md-word-023",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.572227,
+            "y": 0.240015,
+            "w": 0.078212,
+            "h": 0.036959
+          },
+          "sourceId": "md-word-024",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.576722,
+            "y": 0.225996,
+            "w": 0.017325,
+            "h": 0.009633
+          },
+          "sourceId": "md-word-025",
+          "wordIndex": 13
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.546279,
+            "y": 0.244073,
+            "w": 0.019938,
+            "h": 0.027052
+          },
+          "sourceId": "md-word-026",
+          "wordIndex": 14
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.496237,
+            "y": 0.238443,
+            "w": 0.056967,
+            "h": 0.034492
+          },
+          "sourceId": "md-word-027",
+          "wordIndex": 15
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.414916,
+            "y": 0.24177,
+            "w": 0.079989,
+            "h": 0.030397
+          },
+          "sourceId": "md-word-028",
+          "wordIndex": 16
+        },
+        {
+          "type": "word",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.312846,
+            "y": 0.242757,
+            "w": 0.096138,
+            "h": 0.030708
+          },
+          "sourceId": "md-word-029",
+          "wordIndex": 17
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:7",
+          "line": 3,
+          "bounds": {
+            "x": 0.275949,
+            "y": 0.245444,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-030"
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 3,
+          "bounds": {
+            "x": 0.247335,
+            "y": 0.246267,
+            "w": 0.021689,
+            "h": 0.026065
+          },
+          "sourceId": "md-word-031",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 3,
+          "bounds": {
+            "x": 0.215454,
+            "y": 0.248899,
+            "w": 0.036767,
+            "h": 0.024237
+          },
+          "sourceId": "md-word-032",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 3,
+          "bounds": {
+            "x": 0.120231,
+            "y": 0.236634,
+            "w": 0.090258,
+            "h": 0.036758
+          },
+          "sourceId": "md-word-033",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.723999,
+            "y": 0.294906,
+            "w": 0.034049,
+            "h": 0.027436
+          },
+          "sourceId": "md-word-034",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.655352,
+            "y": 0.283646,
+            "w": 0.06478,
+            "h": 0.040085
+          },
+          "sourceId": "md-word-035",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.589971,
+            "y": 0.289532,
+            "w": 0.059867,
+            "h": 0.026815
+          },
+          "sourceId": "md-word-036",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.538257,
+            "y": 0.285419,
+            "w": 0.050199,
+            "h": 0.039116
+          },
+          "sourceId": "md-word-037",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.511916,
+            "y": 0.297684,
+            "w": 0.021402,
+            "h": 0.023817
+          },
+          "sourceId": "md-word-038",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.439035,
+            "y": 0.285931,
+            "w": 0.07599,
+            "h": 0.041712
+          },
+          "sourceId": "md-word-039",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.356094,
+            "y": 0.284469,
+            "w": 0.085267,
+            "h": 0.04173
+          },
+          "sourceId": "md-word-040",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.337645,
+            "y": 0.296002,
+            "w": 0.020461,
+            "h": 0.024804
+          },
+          "sourceId": "md-word-041",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.32032,
+            "y": 0.291908,
+            "w": 0.021454,
+            "h": 0.023195
+          },
+          "sourceId": "md-word-042",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.272761,
+            "y": 0.291543,
+            "w": 0.043823,
+            "h": 0.040725
+          },
+          "sourceId": "md-word-043",
+          "wordIndex": 13
+        },
+        {
+          "type": "word",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.159062,
+            "y": 0.293498,
+            "w": 0.109256,
+            "h": 0.032061
+          },
+          "sourceId": "md-word-044",
+          "wordIndex": 14
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:8",
+          "line": 4,
+          "bounds": {
+            "x": 0.119421,
+            "y": 0.294613,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-045"
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.656423,
+            "y": 0.338189,
+            "w": 0.103193,
+            "h": 0.032938
+          },
+          "sourceId": "md-word-046",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.609831,
+            "y": 0.335448,
+            "w": 0.038988,
+            "h": 0.032243
+          },
+          "sourceId": "md-word-047",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.585633,
+            "y": 0.345921,
+            "w": 0.019938,
+            "h": 0.024566
+          },
+          "sourceId": "md-word-048",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.526942,
+            "y": 0.332523,
+            "w": 0.064153,
+            "h": 0.040853
+          },
+          "sourceId": "md-word-049",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.443399,
+            "y": 0.335466,
+            "w": 0.077323,
+            "h": 0.038001
+          },
+          "sourceId": "md-word-050",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.421684,
+            "y": 0.345903,
+            "w": 0.019938,
+            "h": 0.024859
+          },
+          "sourceId": "md-word-051",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.404071,
+            "y": 0.342942,
+            "w": 0.022682,
+            "h": 0.022611
+          },
+          "sourceId": "md-word-052",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.271376,
+            "y": 0.339761,
+            "w": 0.126058,
+            "h": 0.031695
+          },
+          "sourceId": "md-word-053",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.221464,
+            "y": 0.33064,
+            "w": 0.046357,
+            "h": 0.043082
+          },
+          "sourceId": "md-word-054",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 5,
+          "bounds": {
+            "x": 0.119813,
+            "y": 0.331682,
+            "w": 0.098202,
+            "h": 0.037891
+          },
+          "sourceId": "md-word-055",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 6,
+          "bounds": {
+            "x": 0.739391,
+            "y": 0.395017,
+            "w": 0.02067,
+            "h": 0.025371
+          },
+          "sourceId": "md-word-056",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 6,
+          "bounds": {
+            "x": 0.722614,
+            "y": 0.39032,
+            "w": 0.022107,
+            "h": 0.023488
+          },
+          "sourceId": "md-word-057",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:9",
+          "line": 6,
+          "bounds": {
+            "x": 0.617801,
+            "y": 0.389899,
+            "w": 0.101338,
+            "h": 0.031786
+          },
+          "sourceId": "md-word-058",
+          "wordIndex": 13
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:9",
+          "line": 6,
+          "bounds": {
+            "x": 0.575677,
+            "y": 0.392403,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-059"
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.543352,
+            "y": 0.395456,
+            "w": 0.026105,
+            "h": 0.02899
+          },
+          "sourceId": "md-word-060",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.449096,
+            "y": 0.385037,
+            "w": 0.091382,
+            "h": 0.042717
+          },
+          "sourceId": "md-word-061",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.377574,
+            "y": 0.388803,
+            "w": 0.069039,
+            "h": 0.033011
+          },
+          "sourceId": "md-word-062",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.255043,
+            "y": 0.387505,
+            "w": 0.117958,
+            "h": 0.032828
+          },
+          "sourceId": "md-word-063",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.213939,
+            "y": 0.383191,
+            "w": 0.039746,
+            "h": 0.032737
+          },
+          "sourceId": "md-word-064",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.12172,
+            "y": 0.392148,
+            "w": 0.084823,
+            "h": 0.027052
+          },
+          "sourceId": "md-word-065",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 6,
+          "bounds": {
+            "x": 0.122243,
+            "y": 0.381473,
+            "w": 0.017325,
+            "h": 0.009633
+          },
+          "sourceId": "md-word-066",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.735994,
+            "y": 0.444625,
+            "w": 0.021689,
+            "h": 0.024493
+          },
+          "sourceId": "md-word-067",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.682999,
+            "y": 0.435321,
+            "w": 0.058822,
+            "h": 0.032993
+          },
+          "sourceId": "md-word-068",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.615684,
+            "y": 0.438246,
+            "w": 0.071731,
+            "h": 0.030251
+          },
+          "sourceId": "md-word-069",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.555556,
+            "y": 0.428906,
+            "w": 0.054615,
+            "h": 0.052149
+          },
+          "sourceId": "md-word-070",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.516515,
+            "y": 0.440001,
+            "w": 0.03972,
+            "h": 0.031805
+          },
+          "sourceId": "md-word-071",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.421606,
+            "y": 0.434663,
+            "w": 0.090755,
+            "h": 0.03387
+          },
+          "sourceId": "md-word-072",
+          "wordIndex": 13
+        },
+        {
+          "type": "word",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.296514,
+            "y": 0.432251,
+            "w": 0.123654,
+            "h": 0.037398
+          },
+          "sourceId": "md-word-073",
+          "wordIndex": 14
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:10",
+          "line": 7,
+          "bounds": {
+            "x": 0.258179,
+            "y": 0.441938,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-074"
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 7,
+          "bounds": {
+            "x": 0.233276,
+            "y": 0.444113,
+            "w": 0.02067,
+            "h": 0.025626
+          },
+          "sourceId": "md-word-075",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 7,
+          "bounds": {
+            "x": 0.2119,
+            "y": 0.43757,
+            "w": 0.031384,
+            "h": 0.027692
+          },
+          "sourceId": "md-word-076",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 7,
+          "bounds": {
+            "x": 0.166013,
+            "y": 0.437277,
+            "w": 0.048526,
+            "h": 0.033505
+          },
+          "sourceId": "md-word-077",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 7,
+          "bounds": {
+            "x": 0.119813,
+            "y": 0.434755,
+            "w": 0.045025,
+            "h": 0.032371
+          },
+          "sourceId": "md-word-078",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.735967,
+            "y": 0.483796,
+            "w": 0.023414,
+            "h": 0.028185
+          },
+          "sourceId": "md-word-079",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.639072,
+            "y": 0.481822,
+            "w": 0.093028,
+            "h": 0.038385
+          },
+          "sourceId": "md-word-080",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.610014,
+            "y": 0.491893,
+            "w": 0.027543,
+            "h": 0.029684
+          },
+          "sourceId": "md-word-081",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.525217,
+            "y": 0.483431,
+            "w": 0.08302,
+            "h": 0.034693
+          },
+          "sourceId": "md-word-082",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.470602,
+            "y": 0.480268,
+            "w": 0.053073,
+            "h": 0.041346
+          },
+          "sourceId": "md-word-083",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.422128,
+            "y": 0.48429,
+            "w": 0.050355,
+            "h": 0.036466
+          },
+          "sourceId": "md-word-084",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.371355,
+            "y": 0.485587,
+            "w": 0.047507,
+            "h": 0.03568
+          },
+          "sourceId": "md-word-085",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.261263,
+            "y": 0.489773,
+            "w": 0.108733,
+            "h": 0.031201
+          },
+          "sourceId": "md-word-086",
+          "wordIndex": 12
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:11",
+          "line": 8,
+          "bounds": {
+            "x": 0.221334,
+            "y": 0.49129,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-087"
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 8,
+          "bounds": {
+            "x": 0.176753,
+            "y": 0.480305,
+            "w": 0.039798,
+            "h": 0.032024
+          },
+          "sourceId": "md-word-088",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 8,
+          "bounds": {
+            "x": 0.118742,
+            "y": 0.483193,
+            "w": 0.062925,
+            "h": 0.038878
+          },
+          "sourceId": "md-word-089",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.722144,
+            "y": 0.537425,
+            "w": 0.037446,
+            "h": 0.038677
+          },
+          "sourceId": "md-word-090",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.590337,
+            "y": 0.53238,
+            "w": 0.126921,
+            "h": 0.036118
+          },
+          "sourceId": "md-word-091",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.563212,
+            "y": 0.538796,
+            "w": 0.020931,
+            "h": 0.026303
+          },
+          "sourceId": "md-word-092",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.480689,
+            "y": 0.533166,
+            "w": 0.088507,
+            "h": 0.036009
+          },
+          "sourceId": "md-word-093",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.454505,
+            "y": 0.526202,
+            "w": 0.023884,
+            "h": 0.034546
+          },
+          "sourceId": "md-word-094",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.322123,
+            "y": 0.536201,
+            "w": 0.131729,
+            "h": 0.032353
+          },
+          "sourceId": "md-word-095",
+          "wordIndex": 8
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:12",
+          "line": 9,
+          "bounds": {
+            "x": 0.280914,
+            "y": 0.540277,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-096"
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 9,
+          "bounds": {
+            "x": 0.254991,
+            "y": 0.542342,
+            "w": 0.022107,
+            "h": 0.024603
+          },
+          "sourceId": "md-word-097",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 9,
+          "bounds": {
+            "x": 0.228886,
+            "y": 0.533623,
+            "w": 0.033501,
+            "h": 0.029282
+          },
+          "sourceId": "md-word-098",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 9,
+          "bounds": {
+            "x": 0.173043,
+            "y": 0.535268,
+            "w": 0.055556,
+            "h": 0.033468
+          },
+          "sourceId": "md-word-099",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 9,
+          "bounds": {
+            "x": 0.119996,
+            "y": 0.532618,
+            "w": 0.053805,
+            "h": 0.033048
+          },
+          "sourceId": "md-word-100",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.686291,
+            "y": 0.581659,
+            "w": 0.072384,
+            "h": 0.037654
+          },
+          "sourceId": "md-word-101",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.602854,
+            "y": 0.583505,
+            "w": 0.087305,
+            "h": 0.029831
+          },
+          "sourceId": "md-word-102",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.546932,
+            "y": 0.588331,
+            "w": 0.055843,
+            "h": 0.030726
+          },
+          "sourceId": "md-word-103",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.464592,
+            "y": 0.581604,
+            "w": 0.076696,
+            "h": 0.035131
+          },
+          "sourceId": "md-word-104",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.403993,
+            "y": 0.577528,
+            "w": 0.055686,
+            "h": 0.039153
+          },
+          "sourceId": "md-word-105",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.336417,
+            "y": 0.576724,
+            "w": 0.064493,
+            "h": 0.041876
+          },
+          "sourceId": "md-word-106",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.285016,
+            "y": 0.578863,
+            "w": 0.057829,
+            "h": 0.034035
+          },
+          "sourceId": "md-word-107",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.227161,
+            "y": 0.587856,
+            "w": 0.05715,
+            "h": 0.030251
+          },
+          "sourceId": "md-word-108",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.118402,
+            "y": 0.582043,
+            "w": 0.102775,
+            "h": 0.034345
+          },
+          "sourceId": "md-word-109",
+          "wordIndex": 13
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 10,
+          "bounds": {
+            "x": 0.123889,
+            "y": 0.573324,
+            "w": 0.013954,
+            "h": 0.010949
+          },
+          "sourceId": "md-word-110",
+          "wordIndex": 14
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.719687,
+            "y": 0.628873,
+            "w": 0.039145,
+            "h": 0.030708
+          },
+          "sourceId": "md-word-111",
+          "wordIndex": 15
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.654934,
+            "y": 0.630317,
+            "w": 0.069144,
+            "h": 0.038202
+          },
+          "sourceId": "md-word-112",
+          "wordIndex": 16
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.607949,
+            "y": 0.635508,
+            "w": 0.045443,
+            "h": 0.027162
+          },
+          "sourceId": "md-word-113",
+          "wordIndex": 17
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.508545,
+            "y": 0.630609,
+            "w": 0.1022,
+            "h": 0.034035
+          },
+          "sourceId": "md-word-114",
+          "wordIndex": 18
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.484321,
+            "y": 0.640004,
+            "w": 0.019938,
+            "h": 0.024182
+          },
+          "sourceId": "md-word-115",
+          "wordIndex": 19
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.401981,
+            "y": 0.631413,
+            "w": 0.087201,
+            "h": 0.036356
+          },
+          "sourceId": "md-word-116",
+          "wordIndex": 20
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.376294,
+            "y": 0.623901,
+            "w": 0.024302,
+            "h": 0.035387
+          },
+          "sourceId": "md-word-117",
+          "wordIndex": 21
+        },
+        {
+          "type": "word",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.252247,
+            "y": 0.6341,
+            "w": 0.121407,
+            "h": 0.033888
+          },
+          "sourceId": "md-word-118",
+          "wordIndex": 22
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:13",
+          "line": 11,
+          "bounds": {
+            "x": 0.215062,
+            "y": 0.639712,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-119"
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 11,
+          "bounds": {
+            "x": 0.191701,
+            "y": 0.641339,
+            "w": 0.021637,
+            "h": 0.024603
+          },
+          "sourceId": "md-word-120",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 11,
+          "bounds": {
+            "x": 0.166275,
+            "y": 0.633918,
+            "w": 0.033448,
+            "h": 0.028295
+          },
+          "sourceId": "md-word-121",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 11,
+          "bounds": {
+            "x": 0.118977,
+            "y": 0.63039,
+            "w": 0.044267,
+            "h": 0.03961
+          },
+          "sourceId": "md-word-122",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.697894,
+            "y": 0.675666,
+            "w": 0.061487,
+            "h": 0.040816
+          },
+          "sourceId": "md-word-123",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.617252,
+            "y": 0.681296,
+            "w": 0.072959,
+            "h": 0.035387
+          },
+          "sourceId": "md-word-124",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.552916,
+            "y": 0.675264,
+            "w": 0.061122,
+            "h": 0.040469
+          },
+          "sourceId": "md-word-125",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.481734,
+            "y": 0.683873,
+            "w": 0.069405,
+            "h": 0.025572
+          },
+          "sourceId": "md-word-126",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.457353,
+            "y": 0.689521,
+            "w": 0.019938,
+            "h": 0.027016
+          },
+          "sourceId": "md-word-127",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.432711,
+            "y": 0.684238,
+            "w": 0.033082,
+            "h": 0.028405
+          },
+          "sourceId": "md-word-128",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.376346,
+            "y": 0.680692,
+            "w": 0.054197,
+            "h": 0.035369
+          },
+          "sourceId": "md-word-129",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.341277,
+            "y": 0.681003,
+            "w": 0.035016,
+            "h": 0.036265
+          },
+          "sourceId": "md-word-130",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.208294,
+            "y": 0.68539,
+            "w": 0.125823,
+            "h": 0.031348
+          },
+          "sourceId": "md-word-131",
+          "wordIndex": 12
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.149629,
+            "y": 0.67541,
+            "w": 0.061043,
+            "h": 0.040304
+          },
+          "sourceId": "md-word-132",
+          "wordIndex": 13
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 12,
+          "bounds": {
+            "x": 0.121146,
+            "y": 0.680436,
+            "w": 0.027543,
+            "h": 0.0361
+          },
+          "sourceId": "md-word-133",
+          "wordIndex": 14
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 13,
+          "bounds": {
+            "x": 0.690812,
+            "y": 0.728016,
+            "w": 0.068177,
+            "h": 0.0378
+          },
+          "sourceId": "md-word-134",
+          "wordIndex": 15
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 13,
+          "bounds": {
+            "x": 0.642809,
+            "y": 0.73253,
+            "w": 0.047481,
+            "h": 0.032079
+          },
+          "sourceId": "md-word-135",
+          "wordIndex": 16
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 13,
+          "bounds": {
+            "x": 0.593211,
+            "y": 0.733298,
+            "w": 0.045835,
+            "h": 0.033358
+          },
+          "sourceId": "md-word-136",
+          "wordIndex": 17
+        },
+        {
+          "type": "word",
+          "verseId": "2:14",
+          "line": 13,
+          "bounds": {
+            "x": 0.450063,
+            "y": 0.737685,
+            "w": 0.136851,
+            "h": 0.033852
+          },
+          "sourceId": "md-word-137",
+          "wordIndex": 18
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:14",
+          "line": 13,
+          "bounds": {
+            "x": 0.412094,
+            "y": 0.736771,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-138"
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 13,
+          "bounds": {
+            "x": 0.370806,
+            "y": 0.729715,
+            "w": 0.037107,
+            "h": 0.028295
+          },
+          "sourceId": "md-word-139",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 13,
+          "bounds": {
+            "x": 0.264869,
+            "y": 0.732274,
+            "w": 0.1074,
+            "h": 0.038586
+          },
+          "sourceId": "md-word-140",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 13,
+          "bounds": {
+            "x": 0.207458,
+            "y": 0.741834,
+            "w": 0.059998,
+            "h": 0.027253
+          },
+          "sourceId": "md-word-141",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 13,
+          "bounds": {
+            "x": 0.188277,
+            "y": 0.740518,
+            "w": 0.021036,
+            "h": 0.023835
+          },
+          "sourceId": "md-word-142",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 13,
+          "bounds": {
+            "x": 0.119499,
+            "y": 0.72924,
+            "w": 0.075755,
+            "h": 0.033614
+          },
+          "sourceId": "md-word-143",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 14,
+          "bounds": {
+            "x": 0.733302,
+            "y": 0.788846,
+            "w": 0.025112,
+            "h": 0.028588
+          },
+          "sourceId": "md-word-144",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 14,
+          "bounds": {
+            "x": 0.629168,
+            "y": 0.78307,
+            "w": 0.101103,
+            "h": 0.030836
+          },
+          "sourceId": "md-word-145",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:15",
+          "line": 14,
+          "bounds": {
+            "x": 0.522813,
+            "y": 0.782705,
+            "w": 0.105493,
+            "h": 0.02941
+          },
+          "sourceId": "md-word-146",
+          "wordIndex": 8
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:15",
+          "line": 14,
+          "bounds": {
+            "x": 0.482387,
+            "y": 0.786306,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-147"
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 14,
+          "bounds": {
+            "x": 0.384708,
+            "y": 0.773438,
+            "w": 0.091617,
+            "h": 0.043887
+          },
+          "sourceId": "md-word-148",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 14,
+          "bounds": {
+            "x": 0.315224,
+            "y": 0.774772,
+            "w": 0.063081,
+            "h": 0.039372
+          },
+          "sourceId": "md-word-149",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 14,
+          "bounds": {
+            "x": 0.211169,
+            "y": 0.777806,
+            "w": 0.099012,
+            "h": 0.034217
+          },
+          "sourceId": "md-word-150",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 14,
+          "bounds": {
+            "x": 0.120414,
+            "y": 0.778775,
+            "w": 0.089736,
+            "h": 0.031421
+          },
+          "sourceId": "md-word-151",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.662407,
+            "y": 0.826171,
+            "w": 0.096634,
+            "h": 0.03769
+          },
+          "sourceId": "md-word-152",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.617722,
+            "y": 0.831874,
+            "w": 0.040112,
+            "h": 0.024512
+          },
+          "sourceId": "md-word-153",
+          "wordIndex": 6
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.534572,
+            "y": 0.834177,
+            "w": 0.079022,
+            "h": 0.030525
+          },
+          "sourceId": "md-word-154",
+          "wordIndex": 7
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.412982,
+            "y": 0.824965,
+            "w": 0.118951,
+            "h": 0.035789
+          },
+          "sourceId": "md-word-155",
+          "wordIndex": 8
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.390875,
+            "y": 0.836407,
+            "w": 0.021794,
+            "h": 0.024274
+          },
+          "sourceId": "md-word-156",
+          "wordIndex": 9
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.375614,
+            "y": 0.831655,
+            "w": 0.022656,
+            "h": 0.023488
+          },
+          "sourceId": "md-word-157",
+          "wordIndex": 10
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.283187,
+            "y": 0.826135,
+            "w": 0.088925,
+            "h": 0.035479
+          },
+          "sourceId": "md-word-158",
+          "wordIndex": 11
+        },
+        {
+          "type": "word",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.157651,
+            "y": 0.830266,
+            "w": 0.12355,
+            "h": 0.031914
+          },
+          "sourceId": "md-word-159",
+          "wordIndex": 12
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "2:16",
+          "line": 15,
+          "bounds": {
+            "x": 0.119421,
+            "y": 0.834195,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-160"
+        }
+      ]
+    },
+    {
+      "page": 604,
+      "sourceViewBox": "0 0 382.68 547.09",
+      "firstVerseId": "112:1",
+      "lastVerseId": "114:6",
+      "items": [
+        {
+          "type": "word",
+          "verseId": "112:1",
+          "line": 3,
+          "bounds": {
+            "x": 0.839239,
+            "y": 0.238096,
+            "w": 0.036715,
+            "h": 0.034875
+          },
+          "sourceId": "md-word-003",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "112:1",
+          "line": 3,
+          "bounds": {
+            "x": 0.792516,
+            "y": 0.240874,
+            "w": 0.044606,
+            "h": 0.034546
+          },
+          "sourceId": "md-word-004",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "112:1",
+          "line": 3,
+          "bounds": {
+            "x": 0.756664,
+            "y": 0.235409,
+            "w": 0.042255,
+            "h": 0.031366
+          },
+          "sourceId": "md-word-005",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "112:1",
+          "line": 3,
+          "bounds": {
+            "x": 0.699854,
+            "y": 0.232704,
+            "w": 0.04978,
+            "h": 0.034291
+          },
+          "sourceId": "md-word-006",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "112:1",
+          "line": 3,
+          "bounds": {
+            "x": 0.656946,
+            "y": 0.245079,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-007"
+        },
+        {
+          "type": "word",
+          "verseId": "112:2",
+          "line": 3,
+          "bounds": {
+            "x": 0.607218,
+            "y": 0.235683,
+            "w": 0.041706,
+            "h": 0.031403
+          },
+          "sourceId": "md-word-008",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "112:2",
+          "line": 3,
+          "bounds": {
+            "x": 0.503737,
+            "y": 0.236341,
+            "w": 0.09572,
+            "h": 0.033358
+          },
+          "sourceId": "md-word-009",
+          "wordIndex": 2
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "112:2",
+          "line": 3,
+          "bounds": {
+            "x": 0.464095,
+            "y": 0.245261,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-010"
+        },
+        {
+          "type": "word",
+          "verseId": "112:3",
+          "line": 3,
+          "bounds": {
+            "x": 0.430856,
+            "y": 0.235519,
+            "w": 0.02621,
+            "h": 0.037471
+          },
+          "sourceId": "md-word-011",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "112:3",
+          "line": 3,
+          "bounds": {
+            "x": 0.387765,
+            "y": 0.245206,
+            "w": 0.043613,
+            "h": 0.031933
+          },
+          "sourceId": "md-word-012",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "112:3",
+          "line": 3,
+          "bounds": {
+            "x": 0.360144,
+            "y": 0.247784,
+            "w": 0.020775,
+            "h": 0.024365
+          },
+          "sourceId": "md-word-013",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "112:3",
+          "line": 3,
+          "bounds": {
+            "x": 0.334535,
+            "y": 0.235226,
+            "w": 0.026393,
+            "h": 0.037855
+          },
+          "sourceId": "md-word-014",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "112:3",
+          "line": 3,
+          "bounds": {
+            "x": 0.28452,
+            "y": 0.236999,
+            "w": 0.048396,
+            "h": 0.037252
+          },
+          "sourceId": "md-word-015",
+          "wordIndex": 5
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "112:3",
+          "line": 3,
+          "bounds": {
+            "x": 0.24642,
+            "y": 0.245261,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-016"
+        },
+        {
+          "type": "word",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.713494,
+            "y": 0.296185,
+            "w": 0.020069,
+            "h": 0.024475
+          },
+          "sourceId": "md-word-017",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.692458,
+            "y": 0.283866,
+            "w": 0.026942,
+            "h": 0.037873
+          },
+          "sourceId": "md-word-018",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.626581,
+            "y": 0.283628,
+            "w": 0.063682,
+            "h": 0.040396
+          },
+          "sourceId": "md-word-019",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.586757,
+            "y": 0.279643,
+            "w": 0.035696,
+            "h": 0.036393
+          },
+          "sourceId": "md-word-020",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.483485,
+            "y": 0.284414,
+            "w": 0.102566,
+            "h": 0.036246
+          },
+          "sourceId": "md-word-021",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.426048,
+            "y": 0.281946,
+            "w": 0.053413,
+            "h": 0.032956
+          },
+          "sourceId": "md-word-022",
+          "wordIndex": 6
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "112:4",
+          "line": 4,
+          "bounds": {
+            "x": 0.38753,
+            "y": 0.294065,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-023"
+        },
+        {
+          "type": "word",
+          "verseId": "113:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.840572,
+            "y": 0.432598,
+            "w": 0.035408,
+            "h": 0.037252
+          },
+          "sourceId": "md-word-026",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "113:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.778483,
+            "y": 0.430953,
+            "w": 0.057019,
+            "h": 0.040999
+          },
+          "sourceId": "md-word-027",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "113:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.713155,
+            "y": 0.441865,
+            "w": 0.061409,
+            "h": 0.033505
+          },
+          "sourceId": "md-word-028",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "113:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.634734,
+            "y": 0.431647,
+            "w": 0.071444,
+            "h": 0.041766
+          },
+          "sourceId": "md-word-029",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "113:1",
+          "line": 7,
+          "bounds": {
+            "x": 0.595014,
+            "y": 0.442121,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-030"
+        },
+        {
+          "type": "word",
+          "verseId": "113:2",
+          "line": 7,
+          "bounds": {
+            "x": 0.552942,
+            "y": 0.452119,
+            "w": 0.034598,
+            "h": 0.018187
+          },
+          "sourceId": "md-word-031",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "113:2",
+          "line": 7,
+          "bounds": {
+            "x": 0.49595,
+            "y": 0.438081,
+            "w": 0.050538,
+            "h": 0.035936
+          },
+          "sourceId": "md-word-032",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "113:2",
+          "line": 7,
+          "bounds": {
+            "x": 0.477135,
+            "y": 0.441043,
+            "w": 0.02391,
+            "h": 0.022921
+          },
+          "sourceId": "md-word-033",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "113:2",
+          "line": 7,
+          "bounds": {
+            "x": 0.408252,
+            "y": 0.435449,
+            "w": 0.063656,
+            "h": 0.034364
+          },
+          "sourceId": "md-word-034",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "113:2",
+          "line": 7,
+          "bounds": {
+            "x": 0.36767,
+            "y": 0.442304,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-035"
+        },
+        {
+          "type": "word",
+          "verseId": "113:3",
+          "line": 7,
+          "bounds": {
+            "x": 0.33903,
+            "y": 0.446563,
+            "w": 0.020304,
+            "h": 0.023872
+          },
+          "sourceId": "md-word-036",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "113:3",
+          "line": 7,
+          "bounds": {
+            "x": 0.305294,
+            "y": 0.45201,
+            "w": 0.034023,
+            "h": 0.018242
+          },
+          "sourceId": "md-word-037",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "113:3",
+          "line": 7,
+          "bounds": {
+            "x": 0.246185,
+            "y": 0.438356,
+            "w": 0.051244,
+            "h": 0.036374
+          },
+          "sourceId": "md-word-038",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "113:3",
+          "line": 8,
+          "bounds": {
+            "x": 0.791706,
+            "y": 0.487708,
+            "w": 0.083177,
+            "h": 0.040286
+          },
+          "sourceId": "md-word-039",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "113:3",
+          "line": 8,
+          "bounds": {
+            "x": 0.753423,
+            "y": 0.486355,
+            "w": 0.035617,
+            "h": 0.034492
+          },
+          "sourceId": "md-word-040",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "113:3",
+          "line": 8,
+          "bounds": {
+            "x": 0.681666,
+            "y": 0.485916,
+            "w": 0.06167,
+            "h": 0.032061
+          },
+          "sourceId": "md-word-041",
+          "wordIndex": 6
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "113:3",
+          "line": 8,
+          "bounds": {
+            "x": 0.639438,
+            "y": 0.491656,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-042"
+        },
+        {
+          "type": "word",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.610275,
+            "y": 0.495988,
+            "w": 0.019938,
+            "h": 0.022501
+          },
+          "sourceId": "md-word-043",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.579544,
+            "y": 0.499241,
+            "w": 0.032926,
+            "h": 0.019046
+          },
+          "sourceId": "md-word-044",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.516593,
+            "y": 0.48652,
+            "w": 0.055268,
+            "h": 0.039061
+          },
+          "sourceId": "md-word-045",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.409846,
+            "y": 0.481566,
+            "w": 0.112862,
+            "h": 0.039189
+          },
+          "sourceId": "md-word-046",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.373524,
+            "y": 0.49151,
+            "w": 0.025557,
+            "h": 0.029154
+          },
+          "sourceId": "md-word-047",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.28776,
+            "y": 0.481566,
+            "w": 0.080981,
+            "h": 0.03663
+          },
+          "sourceId": "md-word-048",
+          "wordIndex": 6
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "113:4",
+          "line": 8,
+          "bounds": {
+            "x": 0.24642,
+            "y": 0.491473,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-049"
+        },
+        {
+          "type": "word",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.707223,
+            "y": 0.545358,
+            "w": 0.019938,
+            "h": 0.023342
+          },
+          "sourceId": "md-word-050",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.677485,
+            "y": 0.551427,
+            "w": 0.037525,
+            "h": 0.017803
+          },
+          "sourceId": "md-word-051",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.608733,
+            "y": 0.537681,
+            "w": 0.062663,
+            "h": 0.036594
+          },
+          "sourceId": "md-word-052",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.535669,
+            "y": 0.538559,
+            "w": 0.077846,
+            "h": 0.032408
+          },
+          "sourceId": "md-word-053",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.497387,
+            "y": 0.537188,
+            "w": 0.034729,
+            "h": 0.032627
+          },
+          "sourceId": "md-word-054",
+          "wordIndex": 5
+        },
+        {
+          "type": "word",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.418417,
+            "y": 0.539674,
+            "w": 0.074632,
+            "h": 0.024128
+          },
+          "sourceId": "md-word-055",
+          "wordIndex": 6
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "113:5",
+          "line": 9,
+          "bounds": {
+            "x": 0.380736,
+            "y": 0.538814,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-056"
+        },
+        {
+          "type": "word",
+          "verseId": "114:1",
+          "line": 12,
+          "bounds": {
+            "x": 0.840676,
+            "y": 0.680235,
+            "w": 0.035251,
+            "h": 0.036155
+          },
+          "sourceId": "md-word-059",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "114:1",
+          "line": 12,
+          "bounds": {
+            "x": 0.776184,
+            "y": 0.677512,
+            "w": 0.059763,
+            "h": 0.040249
+          },
+          "sourceId": "md-word-060",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "114:1",
+          "line": 12,
+          "bounds": {
+            "x": 0.705289,
+            "y": 0.692244,
+            "w": 0.069013,
+            "h": 0.029648
+          },
+          "sourceId": "md-word-061",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "114:1",
+          "line": 12,
+          "bounds": {
+            "x": 0.596843,
+            "y": 0.679139,
+            "w": 0.104317,
+            "h": 0.034729
+          },
+          "sourceId": "md-word-062",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "114:1",
+          "line": 12,
+          "bounds": {
+            "x": 0.55843,
+            "y": 0.687602,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-063"
+        },
+        {
+          "type": "word",
+          "verseId": "114:2",
+          "line": 12,
+          "bounds": {
+            "x": 0.46339,
+            "y": 0.686816,
+            "w": 0.08775,
+            "h": 0.028898
+          },
+          "sourceId": "md-word-064",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "114:2",
+          "line": 12,
+          "bounds": {
+            "x": 0.345354,
+            "y": 0.680382,
+            "w": 0.114195,
+            "h": 0.033669
+          },
+          "sourceId": "md-word-065",
+          "wordIndex": 2
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "114:2",
+          "line": 12,
+          "bounds": {
+            "x": 0.305216,
+            "y": 0.687602,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-066"
+        },
+        {
+          "type": "word",
+          "verseId": "114:3",
+          "line": 12,
+          "bounds": {
+            "x": 0.246734,
+            "y": 0.679139,
+            "w": 0.053962,
+            "h": 0.03493
+          },
+          "sourceId": "md-word-067",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "114:3",
+          "line": 13,
+          "bounds": {
+            "x": 0.775086,
+            "y": 0.72882,
+            "w": 0.099953,
+            "h": 0.035771
+          },
+          "sourceId": "md-word-068",
+          "wordIndex": 2
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "114:3",
+          "line": 13,
+          "bounds": {
+            "x": 0.733511,
+            "y": 0.737685,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-069"
+        },
+        {
+          "type": "word",
+          "verseId": "114:4",
+          "line": 13,
+          "bounds": {
+            "x": 0.692093,
+            "y": 0.747811,
+            "w": 0.033762,
+            "h": 0.018132
+          },
+          "sourceId": "md-word-070",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "114:4",
+          "line": 13,
+          "bounds": {
+            "x": 0.621538,
+            "y": 0.735784,
+            "w": 0.062663,
+            "h": 0.035954
+          },
+          "sourceId": "md-word-071",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "114:4",
+          "line": 13,
+          "bounds": {
+            "x": 0.508597,
+            "y": 0.729898,
+            "w": 0.114482,
+            "h": 0.039335
+          },
+          "sourceId": "md-word-072",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "114:4",
+          "line": 13,
+          "bounds": {
+            "x": 0.358942,
+            "y": 0.728838,
+            "w": 0.14469,
+            "h": 0.035095
+          },
+          "sourceId": "md-word-073",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "114:4",
+          "line": 13,
+          "bounds": {
+            "x": 0.319066,
+            "y": 0.737685,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-074"
+        },
+        {
+          "type": "word",
+          "verseId": "114:5",
+          "line": 13,
+          "bounds": {
+            "x": 0.244303,
+            "y": 0.724963,
+            "w": 0.067341,
+            "h": 0.040889
+          },
+          "sourceId": "md-word-075",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "114:5",
+          "line": 14,
+          "bounds": {
+            "x": 0.665595,
+            "y": 0.781535,
+            "w": 0.10889,
+            "h": 0.038769
+          },
+          "sourceId": "md-word-076",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "114:5",
+          "line": 14,
+          "bounds": {
+            "x": 0.631494,
+            "y": 0.789048,
+            "w": 0.029894,
+            "h": 0.02835
+          },
+          "sourceId": "md-word-077",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "114:5",
+          "line": 14,
+          "bounds": {
+            "x": 0.510531,
+            "y": 0.783674,
+            "w": 0.115449,
+            "h": 0.03451
+          },
+          "sourceId": "md-word-078",
+          "wordIndex": 4
+        },
+        {
+          "type": "word",
+          "verseId": "114:5",
+          "line": 14,
+          "bounds": {
+            "x": 0.384839,
+            "y": 0.778227,
+            "w": 0.123445,
+            "h": 0.033066
+          },
+          "sourceId": "md-word-079",
+          "wordIndex": 5
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "114:5",
+          "line": 14,
+          "bounds": {
+            "x": 0.347549,
+            "y": 0.785392,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-080"
+        },
+        {
+          "type": "word",
+          "verseId": "114:6",
+          "line": 15,
+          "bounds": {
+            "x": 0.683182,
+            "y": 0.838363,
+            "w": 0.034023,
+            "h": 0.025425
+          },
+          "sourceId": "md-word-081",
+          "wordIndex": 1
+        },
+        {
+          "type": "word",
+          "verseId": "114:6",
+          "line": 15,
+          "bounds": {
+            "x": 0.574475,
+            "y": 0.825934,
+            "w": 0.101834,
+            "h": 0.039079
+          },
+          "sourceId": "md-word-082",
+          "wordIndex": 2
+        },
+        {
+          "type": "word",
+          "verseId": "114:6",
+          "line": 15,
+          "bounds": {
+            "x": 0.544998,
+            "y": 0.837358,
+            "w": 0.019938,
+            "h": 0.022775
+          },
+          "sourceId": "md-word-083",
+          "wordIndex": 3
+        },
+        {
+          "type": "word",
+          "verseId": "114:6",
+          "line": 15,
+          "bounds": {
+            "x": 0.439767,
+            "y": 0.826372,
+            "w": 0.107322,
+            "h": 0.035259
+          },
+          "sourceId": "md-word-084",
+          "wordIndex": 4
+        },
+        {
+          "type": "ayahMarker",
+          "verseId": "114:6",
+          "line": 15,
+          "bounds": {
+            "x": 0.403993,
+            "y": 0.835658,
+            "w": 0.032403,
+            "h": 0.028076
+          },
+          "sourceId": "md-aya-mark-085"
+        }
+      ]
+    }
+  ]
+}
