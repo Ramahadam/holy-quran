@@ -10,6 +10,7 @@ import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
+import 'package:holy_quran_app/data/repositories/reading_position_repository.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
@@ -34,7 +35,19 @@ const _verse1 = Verse(
   translation: 'In the name of Allah',
 );
 
+const _verse2 = Verse(
+  verseId: '1:2',
+  surahNumber: 1,
+  verseNumber: 2,
+  arabicText: 'ٱلْحَمْدُ لِلَّهِ',
+  translation: 'Praise be to Allah',
+);
+
 const _bismillah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+const _mushafPageOneVerseTwoWordCenter = Offset(
+  0.59214 + 0.095589 / 2,
+  0.551975 + 0.027509 / 2,
+);
 
 class _FakeBookmarkRepository implements BookmarkRepository {
   final removedVerseIds = <String>[];
@@ -52,6 +65,18 @@ class _FakeBookmarkRepository implements BookmarkRepository {
 
   @override
   Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber) async => {};
+}
+
+class _FakeReadingPositionRepository implements ReadingPositionRepository {
+  ReadingPosition? savedPosition;
+
+  @override
+  Future<ReadingPosition?> getLastPosition() async => savedPosition;
+
+  @override
+  Future<void> savePosition(ReadingPosition position) async {
+    savedPosition = position;
+  }
 }
 
 void main() {
@@ -372,6 +397,47 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
+    });
+
+    testWidgets('saves tapped Mushaf verse as the last-read VerseID', (
+      tester,
+    ) async {
+      final positionRepo = _FakeReadingPositionRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            readingPositionRepositoryProvider.overrideWithValue(positionRepo),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(
+              1,
+            ).overrideWith((ref) async => [_verse1, _verse2]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pumpAndSettle();
+
+      final pageRect = tester.getRect(find.byType(SvgPicture));
+      await tester.tapAt(
+        pageRect.topLeft +
+            Offset(
+              _mushafPageOneVerseTwoWordCenter.dx * pageRect.width,
+              _mushafPageOneVerseTwoWordCenter.dy * pageRect.height,
+            ),
+      );
+      await tester.runAsync(() async {
+        await Future<void>.delayed(Duration.zero);
+      });
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+
+      expect(positionRepo.savedPosition?.verseId, '1:2');
     });
 
     testWidgets('uses KFGQPC font for Arabic Quran text', (tester) async {
