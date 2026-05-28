@@ -11,6 +11,8 @@ import '../widgets/mushaf_sample_page.dart';
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 const _totalPages = 604;
 
+enum ReadingMode { classic, mushaf }
+
 class ReadingScreen extends ConsumerStatefulWidget {
   final Surah surah;
   final String? initialVerseId;
@@ -25,7 +27,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   PageController? _pageController;
   int _currentPage = 1;
   bool _resolved = false;
-  bool _showMushafSample = false;
+  ReadingMode _readingMode = ReadingMode.classic;
 
   late final ReadingPositionRepository _positionRepo;
 
@@ -147,21 +149,33 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          tooltip: _showMushafSample
-              ? 'Show Classic Mode'
-              : 'Show Mushaf sample',
-          icon: Icon(
-            _showMushafSample ? Icons.menu_book : Icons.image_outlined,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(56),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: SegmentedButton<ReadingMode>(
+            showSelectedIcon: false,
+            selected: {_readingMode},
+            segments: const [
+              ButtonSegment(
+                value: ReadingMode.classic,
+                icon: Icon(Icons.menu_book),
+                label: Text('Classic'),
+              ),
+              ButtonSegment(
+                value: ReadingMode.mushaf,
+                icon: Icon(Icons.image_outlined),
+                label: Text('Mushaf'),
+              ),
+            ],
+            onSelectionChanged: (selection) {
+              setState(() {
+                _readingMode = selection.single;
+              });
+            },
           ),
-          onPressed: () {
-            setState(() {
-              _showMushafSample = !_showMushafSample;
-            });
-          },
         ),
-      ],
+      ),
     );
   }
 
@@ -183,7 +197,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           return _QuranPage(
             key: ValueKey(pageNum),
             page: pageNum,
-            showMushafSample: _showMushafSample,
+            readingMode: _readingMode,
             onFirstVerseResolved: pageNum == _currentPage
                 ? (verseId) => _currentPageFirstVerseId ??= verseId
                 : null,
@@ -196,13 +210,13 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
 class _QuranPage extends ConsumerStatefulWidget {
   final int page;
-  final bool showMushafSample;
+  final ReadingMode readingMode;
   final ValueChanged<String>? onFirstVerseResolved;
 
   const _QuranPage({
     super.key,
     required this.page,
-    required this.showMushafSample,
+    required this.readingMode,
     this.onFirstVerseResolved,
   });
 
@@ -232,7 +246,7 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
 
         final surahNumbers = verses.map((v) => v.surahNumber).toSet();
 
-        if (widget.showMushafSample) {
+        if (widget.readingMode == ReadingMode.mushaf) {
           return MushafSamplePage(page: widget.page);
         }
 

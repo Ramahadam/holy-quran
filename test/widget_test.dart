@@ -346,6 +346,34 @@ void main() {
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
+    testWidgets('switches between Classic and Mushaf modes', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
+      expect(find.byType(SvgPicture), findsNothing);
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.textContaining('بِسْمِ', findRichText: true), findsNothing);
+
+      await tester.tap(find.text('Classic'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
+    });
+
     testWidgets('uses KFGQPC font for Arabic Quran text', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
