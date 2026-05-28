@@ -201,6 +201,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
             onFirstVerseResolved: pageNum == _currentPage
                 ? (verseId) => _currentPageFirstVerseId ??= verseId
                 : null,
+            onVerseHit: pageNum == _currentPage
+                ? (verseId) => _currentPageFirstVerseId = verseId
+                : null,
           );
         },
       ),
@@ -212,12 +215,14 @@ class _QuranPage extends ConsumerStatefulWidget {
   final int page;
   final ReadingMode readingMode;
   final ValueChanged<String>? onFirstVerseResolved;
+  final ValueChanged<String>? onVerseHit;
 
   const _QuranPage({
     super.key,
     required this.page,
     required this.readingMode,
     this.onFirstVerseResolved,
+    this.onVerseHit,
   });
 
   @override
@@ -247,7 +252,12 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
         final surahNumbers = verses.map((v) => v.surahNumber).toSet();
 
         if (widget.readingMode == ReadingMode.mushaf) {
-          return MushafSamplePage(page: widget.page);
+          return MushafSamplePage(
+            page: widget.page,
+            onHit: widget.onVerseHit == null
+                ? null
+                : (hit) => widget.onVerseHit?.call(hit.verseId),
+          );
         }
 
         return _QuranPageContent(
