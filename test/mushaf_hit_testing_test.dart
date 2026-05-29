@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_hit_testing.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 
@@ -91,37 +90,25 @@ void main() {
   });
 
   group('MushafSamplePage hit testing', () {
-    testWidgets('resolves a tap on the rendered page to a Mushaf hit result', (
-      tester,
-    ) async {
-      MushafHitResult? capturedHit;
+    testWidgets('exposes QCF verse taps as stable VerseIDs', (tester) async {
+      String? tappedVerseId;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MushafSamplePage(page: 1, onHit: (hit) => capturedHit = hit),
+            body: MushafSamplePage(
+              page: 1,
+              onVerseTap: (verseId) => tappedVerseId = verseId,
+            ),
           ),
         ),
       );
       await tester.pump();
 
-      final pageRect = tester.getRect(find.byType(SvgPicture));
-      await tester.tapAt(
-        pageRect.topLeft +
-            Offset(
-              _firstWordCenter.dx * pageRect.width,
-              _firstWordCenter.dy * pageRect.height,
-            ),
-      );
-      await tester.runAsync(() async {
-        await Future<void>.delayed(Duration.zero);
-      });
-      await tester.pump();
+      final qcfPage = tester.widget<MushafQcfPage>(find.byType(MushafQcfPage));
+      qcfPage.onTap?.call(1, 1);
 
-      final hit = capturedHit;
-      expect(hit, isNotNull);
-      expect(hit!.verseId, '1:1');
-      expect(hit.wordIndex, 1);
+      expect(tappedVerseId, '1:1');
     });
   });
 }
