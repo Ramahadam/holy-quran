@@ -503,18 +503,15 @@ class _InspiredQcfPage extends StatelessWidget {
     spans.add(
       WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: SizedBox(
-          width: 32 * sp,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: _AyahNumberMarker(
-              number: verse,
-              size: 20 * sp,
-              onTap: onTap == null ? null : () => onTap?.call(surah, verse),
-              onLongPress: onLongPress == null
-                  ? null
-                  : () => onLongPress?.call(surah, verse),
-            ),
+        child: Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: 2.4 * sp),
+          child: _AyahNumberMarker(
+            number: verse,
+            size: 18.5 * sp,
+            onTap: onTap == null ? null : () => onTap?.call(surah, verse),
+            onLongPress: onLongPress == null
+                ? null
+                : () => onLongPress?.call(surah, verse),
           ),
         ),
       ),
