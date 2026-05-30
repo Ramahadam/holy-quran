@@ -114,7 +114,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
   QcfThemeData get _qcfTheme => const QcfThemeData(
     pageBackgroundColor: Colors.transparent,
     verseTextColor: Color(0xFF17120C),
-    verseNumberColor: Color(0xFF6E5A32),
+    verseNumberColor: Color(0xFF4D3518),
     basmalaColor: AppTheme.islamicGreen,
     headerTextColor: Color(0xFF17120C),
     headerBackgroundColor: Color(0x00FFFFFF),
@@ -185,7 +185,7 @@ class MushafQcfPage extends StatelessWidget {
   double get _scale {
     if (pageNumber == 1) return 1.16;
     if (pageNumber == 2) return 1.06;
-    return 1.0;
+    return 1.03;
   }
 
   double get _heightScale {
@@ -234,14 +234,14 @@ class _MushafPageHeader extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 44,
+                width: 34,
                 height: 28,
                 alignment: Alignment.center,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
+                margin: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4EDD8),
-                  border: Border.all(color: const Color(0xFF6E5A32)),
-                  borderRadius: BorderRadius.circular(4),
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFFFFBF2),
+                  border: Border.all(color: const Color(0xFF8A7A55)),
                 ),
                 child: Text(
                   convertToArabicNumber(pageNumber.toString()),
@@ -317,24 +317,20 @@ class _MushafHeaderLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 28,
-      alignment: textAlign == TextAlign.left
-          ? Alignment.centerLeft
-          : Alignment.centerRight,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF4EDD8),
-        border: Border.all(color: const Color(0xFF8A7A55)),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: style,
-        textAlign: textAlign,
-        textDirection: TextDirection.rtl,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
+      child: Align(
+        alignment: textAlign == TextAlign.left
+            ? Alignment.centerLeft
+            : Alignment.centerRight,
+        child: Text(
+          text,
+          style: style,
+          textAlign: textAlign,
+          textDirection: TextDirection.rtl,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }
@@ -347,13 +343,13 @@ class _MushafHeaderRulePainter extends CustomPainter {
       ..color = const Color(0xFF8A7A55)
       ..strokeWidth = .8;
     canvas.drawLine(
-      Offset(0, size.height - 1),
-      Offset(size.width, size.height - 1),
+      Offset(0, size.height - 3),
+      Offset(size.width, size.height - 3),
       paint,
     );
     canvas.drawCircle(
-      Offset(size.width / 2, size.height - 1),
-      2.2,
+      Offset(size.width / 2, size.height - 3),
+      1.8,
       Paint()..color = const Color(0xFF8A7A55),
     );
   }
@@ -505,14 +501,21 @@ class _InspiredQcfPage extends StatelessWidget {
     }
 
     spans.add(
-      TextSpan(
-        text: getVerseNumberQCF(surah, verse),
-        recognizer: recognizer,
-        style: TextStyle(
-          fontFamily: pageFont,
-          package: 'qcf_quran',
-          color: theme.verseNumberColor,
-          height: theme.verseNumberHeight * h,
+      WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: SizedBox(
+          width: 32 * sp,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: _AyahNumberMarker(
+              number: verse,
+              size: 20 * sp,
+              onTap: onTap == null ? null : () => onTap?.call(surah, verse),
+              onLongPress: onLongPress == null
+                  ? null
+                  : () => onLongPress?.call(surah, verse),
+            ),
+          ),
         ),
       ),
     );
@@ -575,16 +578,98 @@ class _InspiredQcfPage extends StatelessWidget {
   }
 }
 
+class _AyahNumberMarker extends StatelessWidget {
+  final int number;
+  final double size;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  const _AyahNumberMarker({
+    required this.number,
+    required this.size,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final marker = CustomPaint(
+      painter: const _AyahNumberMarkerPainter(),
+      child: SizedBox.square(
+        dimension: size,
+        child: Center(
+          child: Text(
+            _toArabicDigits(number),
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: const Color(0xFF2F2416),
+              fontSize: size * (number < 100 ? .48 : .36),
+              fontWeight: FontWeight.w800,
+              height: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (onTap == null && onLongPress == null) return marker;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: marker,
+    );
+  }
+
+  static String _toArabicDigits(int value) {
+    const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return value
+        .toString()
+        .split('')
+        .map((char) => digits[int.parse(char)])
+        .join();
+  }
+}
+
+class _AyahNumberMarkerPainter extends CustomPainter {
+  const _AyahNumberMarkerPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.shortestSide / 2 - 2;
+    final fill = Paint()
+      ..color = const Color(0xFFF1ECD9)
+      ..style = PaintingStyle.fill;
+    final ring = Paint()
+      ..color = const Color(0xFF6E552D)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.3
+      ..isAntiAlias = true;
+    final innerRing = Paint()
+      ..color = const Color(0xFFB8A06B)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = .8
+      ..isAntiAlias = true;
+
+    canvas.drawCircle(center, radius, fill);
+    canvas.drawCircle(center, radius, ring);
+    canvas.drawCircle(center, radius - 3.2, innerRing);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AyahNumberMarkerPainter oldDelegate) => false;
+}
+
 class _MushafPageFrame extends StatelessWidget {
   const _MushafPageFrame();
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppTheme.mushafPage,
-        border: Border.all(color: const Color(0xFF5E4A2E), width: 1.2),
-      ),
+      decoration: const BoxDecoration(color: AppTheme.mushafPage),
       child: CustomPaint(
         painter: _MushafFramePainter(),
         child: const SizedBox.expand(),
@@ -596,15 +681,15 @@ class _MushafPageFrame extends StatelessWidget {
 class _MushafFramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final borderPaint = Paint()
-      ..color = const Color(0xFF4F432C)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3;
-
-    final outer = Rect.fromLTWH(4, 4, size.width - 8, size.height - 8);
-    final inner = Rect.fromLTWH(9, 9, size.width - 18, size.height - 18);
-    canvas.drawRect(outer, borderPaint);
-    canvas.drawRect(inner, borderPaint);
+    final separatorPaint = Paint()
+      ..color = const Color(0xFFB8A67A)
+      ..strokeWidth = .8;
+    canvas.drawLine(Offset.zero, Offset(0, size.height), separatorPaint);
+    canvas.drawLine(
+      Offset(size.width, 0),
+      Offset(size.width, size.height),
+      separatorPaint,
+    );
   }
 
   @override
