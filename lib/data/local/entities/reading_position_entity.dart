@@ -6,6 +6,7 @@ part 'reading_position_entity.g.dart';
 /// Isar database entity for ReadingPosition model.
 /// Singleton: exactly one row ever exists, always written at id=1 by the
 /// repository. No secondary index needed — all access is by fixed primary key.
+@Name('ReadingPositionEntity_web_289')
 @collection
 class ReadingPositionEntity {
   Id id = Isar.autoIncrement;
