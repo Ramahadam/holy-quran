@@ -50,6 +50,7 @@ dependencies:
   # UI
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.3.0
+  qcf_quran: ^0.0.5
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,7 @@ flutter:
     - assets/quran/verses.json
     - assets/quran/checksums.txt
     - assets/mushaf/madani-svg-sample/
+    - assets/mushaf/madani-images/
 
   fonts:
     - family: KFGQPCHafsUthmanicScript
