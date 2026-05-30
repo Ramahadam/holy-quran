@@ -501,18 +501,14 @@ class _InspiredQcfPage extends StatelessWidget {
     }
 
     spans.add(
-      WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(horizontal: 2.4 * sp),
-          child: _AyahNumberMarker(
-            number: verse,
-            size: 18.5 * sp,
-            onTap: onTap == null ? null : () => onTap?.call(surah, verse),
-            onLongPress: onLongPress == null
-                ? null
-                : () => onLongPress?.call(surah, verse),
-          ),
+      TextSpan(
+        text: getVerseNumberQCF(surah, verse),
+        recognizer: recognizer,
+        style: TextStyle(
+          fontFamily: pageFont,
+          package: 'qcf_quran',
+          color: theme.verseNumberColor,
+          height: theme.verseNumberHeight * h,
         ),
       ),
     );
@@ -573,91 +569,6 @@ class _InspiredQcfPage extends StatelessWidget {
     final normalized = word.replaceAll(RegExp(r'[^\u0600-\u06FF]'), '');
     return normalized.contains('الله');
   }
-}
-
-class _AyahNumberMarker extends StatelessWidget {
-  final int number;
-  final double size;
-  final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
-
-  const _AyahNumberMarker({
-    required this.number,
-    required this.size,
-    this.onTap,
-    this.onLongPress,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final marker = CustomPaint(
-      painter: const _AyahNumberMarkerPainter(),
-      child: SizedBox.square(
-        dimension: size,
-        child: Center(
-          child: Text(
-            _toArabicDigits(number),
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: const Color(0xFF2F2416),
-              fontSize: size * (number < 100 ? .48 : .36),
-              fontWeight: FontWeight.w800,
-              height: 1,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    if (onTap == null && onLongPress == null) return marker;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: marker,
-    );
-  }
-
-  static String _toArabicDigits(int value) {
-    const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return value
-        .toString()
-        .split('')
-        .map((char) => digits[int.parse(char)])
-        .join();
-  }
-}
-
-class _AyahNumberMarkerPainter extends CustomPainter {
-  const _AyahNumberMarkerPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide / 2 - 2;
-    final fill = Paint()
-      ..color = const Color(0xFFF1ECD9)
-      ..style = PaintingStyle.fill;
-    final ring = Paint()
-      ..color = const Color(0xFF6E552D)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3
-      ..isAntiAlias = true;
-    final innerRing = Paint()
-      ..color = const Color(0xFFB8A06B)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = .8
-      ..isAntiAlias = true;
-
-    canvas.drawCircle(center, radius, fill);
-    canvas.drawCircle(center, radius, ring);
-    canvas.drawCircle(center, radius - 3.2, innerRing);
-  }
-
-  @override
-  bool shouldRepaint(covariant _AyahNumberMarkerPainter oldDelegate) => false;
 }
 
 class _MushafPageFrame extends StatelessWidget {
