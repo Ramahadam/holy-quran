@@ -1,4 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/backup/quran_backup_codec.dart';
+import '../../data/backup/quran_backup_file_service.dart';
+import '../../data/backup/quran_backup_service.dart';
 import '../../data/repositories/bookmark_repository.dart';
 import '../../data/repositories/bookmark_repository_impl.dart';
 import '../../data/repositories/quran_repository.dart';
@@ -22,6 +25,24 @@ final readingPositionRepositoryProvider = Provider<ReadingPositionRepository>((
   ref,
 ) {
   return ReadingPositionRepositoryImpl();
+});
+
+final quranBackupCodecProvider = Provider<QuranBackupCodec>((ref) {
+  return QuranBackupCodec();
+});
+
+final quranBackupServiceProvider = Provider<QuranBackupService>((ref) {
+  return QuranBackupService(
+    bookmarkRepository: ref.watch(bookmarkRepositoryProvider),
+    readingPositionRepository: ref.watch(readingPositionRepositoryProvider),
+    codec: ref.watch(quranBackupCodecProvider),
+  );
+});
+
+final quranBackupFileServiceProvider = Provider<QuranBackupFileService>((ref) {
+  return QuranBackupFileService(
+    backupService: ref.watch(quranBackupServiceProvider),
+  );
 });
 
 final initializeDataProvider = FutureProvider<void>((ref) async {
