@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:holy_quran_app/presentation/app.dart';
 import 'package:holy_quran_app/presentation/screens/loading_screen.dart';
@@ -162,10 +161,15 @@ void main() {
       expect(MushafSampleAssets.containsPage(1), isTrue);
       expect(MushafSampleAssets.containsPage(2), isTrue);
       expect(MushafSampleAssets.containsPage(3), isTrue);
+      expect(MushafSampleAssets.containsPage(4), isTrue);
       expect(MushafSampleAssets.containsPage(604), isTrue);
-      expect(MushafSampleAssets.containsPage(4), isFalse);
+      expect(MushafSampleAssets.containsPage(605), isFalse);
       expect(
-        MushafSampleAssets.pathForPage(604),
+        MushafSampleAssets.imagePathForPage(604),
+        'assets/mushaf/madani-images/604.png',
+      );
+      expect(
+        MushafSampleAssets.svgPathForPage(604),
         'assets/mushaf/madani-svg-sample/604.svg',
       );
     });
@@ -176,19 +180,18 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(SvgPicture), findsOneWidget);
       expect(find.byType(AspectRatio), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('explains unsupported sample pages', (tester) async {
+    testWidgets('explains unsupported page numbers', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 605))),
       );
       await tester.pump();
 
-      expect(find.textContaining('pages 1, 2, 3, 604'), findsOneWidget);
-      expect(find.textContaining('Current page: 4'), findsOneWidget);
+      expect(find.textContaining('pages run from 1 to 604'), findsOneWidget);
+      expect(find.textContaining('Current page: 605'), findsOneWidget);
     });
   });
 
@@ -385,12 +388,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
-      expect(find.byType(SvgPicture), findsNothing);
+      expect(find.byType(MushafSamplePage), findsNothing);
 
       await tester.tap(find.text('Mushaf'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.byType(MushafSamplePage), findsOneWidget);
       expect(find.textContaining('بِسْمِ', findRichText: true), findsNothing);
 
       await tester.tap(find.text('Classic'));
@@ -422,7 +425,7 @@ void main() {
       await tester.tap(find.text('Mushaf'));
       await tester.pumpAndSettle();
 
-      final pageRect = tester.getRect(find.byType(SvgPicture));
+      final pageRect = tester.getRect(find.byType(AspectRatio));
       await tester.tapAt(
         pageRect.topLeft +
             Offset(

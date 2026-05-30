@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_hit_testing.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 
@@ -105,7 +104,7 @@ void main() {
       );
       await tester.pump();
 
-      final pageRect = tester.getRect(find.byType(SvgPicture));
+      final pageRect = tester.getRect(find.byType(AspectRatio));
       await tester.tapAt(
         pageRect.topLeft +
             Offset(

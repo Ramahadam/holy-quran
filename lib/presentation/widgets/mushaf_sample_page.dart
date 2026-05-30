@@ -5,16 +5,27 @@ import '../theme/app_theme.dart';
 import 'mushaf_hit_testing.dart';
 
 class MushafSampleAssets {
-  static const Set<int> pages = {1, 2, 3, 604};
+  static const int firstPage = 1;
+  static const int lastPage = 604;
+  static const Set<int> svgSamplePages = {1, 2, 3, 604};
   static const String coordinatesPath =
       'assets/mushaf/madani-svg-sample/coordinates.sample.json';
 
-  static bool containsPage(int page) => pages.contains(page);
+  static bool containsPage(int page) => page >= firstPage && page <= lastPage;
 
-  static String pathForPage(int page) {
+  static bool hasSvgSampleForPage(int page) => svgSamplePages.contains(page);
+
+  static String imagePathForPage(int page) {
+    final pageName = page.toString().padLeft(3, '0');
+    return 'assets/mushaf/madani-images/$pageName.png';
+  }
+
+  static String svgPathForPage(int page) {
     final pageName = page.toString().padLeft(3, '0');
     return 'assets/mushaf/madani-svg-sample/$pageName.svg';
   }
+
+  static String pathForPage(int page) => svgPathForPage(page);
 }
 
 class MushafSamplePage extends StatefulWidget {
@@ -84,11 +95,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
                   color: Colors.white,
                   border: Border.all(color: AppTheme.divider),
                 ),
-                child: SvgPicture.asset(
-                  MushafSampleAssets.pathForPage(widget.page),
-                  fit: BoxFit.contain,
-                  semanticsLabel: 'Mushaf page ${widget.page} sample',
-                ),
+                child: _MushafPageImage(page: widget.page),
               ),
             ),
           ),
@@ -105,13 +112,73 @@ class _UnsupportedMushafSamplePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pages = MushafSampleAssets.pages.map((page) => '$page').join(', ');
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'Mushaf sample is available for pages $pages.\nCurrent page: $page',
+          'Mushaf pages run from 1 to 604.\nCurrent page: $page',
+          textAlign: TextAlign.center,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+        ),
+      ),
+    );
+  }
+}
+
+class _MushafPageImage extends StatelessWidget {
+  final int page;
+
+  const _MushafPageImage({required this.page});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      MushafSampleAssets.imagePathForPage(page),
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        if (MushafSampleAssets.hasSvgSampleForPage(page)) {
+          return _MushafSvgPage(
+            page: page,
+            semanticsLabel: 'Mushaf page $page',
+          );
+        }
+
+        return _MissingMushafImagePage(page: page);
+      },
+    );
+  }
+}
+
+class _MushafSvgPage extends StatelessWidget {
+  final int page;
+  final String semanticsLabel;
+
+  const _MushafSvgPage({required this.page, required this.semanticsLabel});
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      MushafSampleAssets.svgPathForPage(page),
+      fit: BoxFit.contain,
+      semanticsLabel: semanticsLabel,
+    );
+  }
+}
+
+class _MissingMushafImagePage extends StatelessWidget {
+  final int page;
+
+  const _MissingMushafImagePage({required this.page});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          'Mushaf image missing for page ${page.toString().padLeft(3, '0')}',
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
