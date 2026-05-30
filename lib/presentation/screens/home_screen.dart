@@ -8,6 +8,8 @@ import '../theme/app_theme.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
+enum _BackupAction { export, import }
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -31,6 +33,36 @@ class HomeScreen extends ConsumerWidget {
             Text('Holy Quran', style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
+        actions: [
+          PopupMenuButton<_BackupAction>(
+            tooltip: 'Backup',
+            icon: const Icon(Icons.more_vert),
+            onSelected: (action) {
+              switch (action) {
+                case _BackupAction.export:
+                  _exportBackup(context, ref);
+                case _BackupAction.import:
+                  _importBackup(context, ref);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: _BackupAction.export,
+                child: ListTile(
+                  leading: Icon(Icons.upload_file),
+                  title: Text('Export backup'),
+                ),
+              ),
+              PopupMenuItem(
+                value: _BackupAction.import,
+                child: ListTile(
+                  leading: Icon(Icons.download),
+                  title: Text('Import backup'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: surahsAsync.when(
         data: (surahs) {
@@ -101,6 +133,132 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    final passphrase = await _promptPassphrase(context, confirm: true);
+    if (passphrase == null) return;
+
+    try {
+      final exported = await ref
+          .read(quranBackupFileServiceProvider)
+          .exportBackup(passphrase);
+      if (!context.mounted) return;
+      _showSnackBar(context, exported ? 'Backup exported' : 'Export canceled');
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, 'Export failed');
+      }
+    }
+  }
+
+  Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+    final passphrase = await _promptPassphrase(context);
+    if (passphrase == null) return;
+
+    try {
+      final imported = await ref
+          .read(quranBackupFileServiceProvider)
+          .importBackup(passphrase);
+      if (!context.mounted) return;
+      if (imported) {
+        ref.invalidate(lastReadPositionProvider);
+        ref.invalidate(recentBookmarksProvider);
+        ref.invalidate(bookmarksBySurahProvider);
+      }
+      _showSnackBar(context, imported ? 'Backup imported' : 'Import canceled');
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, 'Import failed. Check the file and passphrase.');
+      }
+    }
+  }
+
+  Future<String?> _promptPassphrase(
+    BuildContext context, {
+    bool confirm = false,
+  }) {
+    final passphraseController = TextEditingController();
+    final confirmController = TextEditingController();
+    String? errorText;
+
+    return showDialog<String>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text(confirm ? 'Export backup' : 'Import backup'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: passphraseController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Passphrase'),
+                ),
+                if (confirm) ...[
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: confirmController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm passphrase',
+                    ),
+                  ),
+                ],
+                if (errorText != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    errorText!,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: Colors.red),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  final passphrase = passphraseController.text;
+                  if (passphrase.trim().isEmpty) {
+                    setState(() {
+                      errorText = 'Passphrase is required';
+                    });
+                    return;
+                  }
+                  if (confirm && passphrase != confirmController.text) {
+                    setState(() {
+                      errorText = 'Passphrases do not match';
+                    });
+                    return;
+                  }
+                  Navigator.of(context).pop(passphrase);
+                },
+                child: Text(confirm ? 'Export' : 'Import'),
+              ),
+            ],
+          );
+        },
+      ),
+    ).whenComplete(() {
+      passphraseController.dispose();
+      confirmController.dispose();
+    });
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
