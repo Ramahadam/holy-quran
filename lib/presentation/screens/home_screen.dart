@@ -180,77 +180,10 @@ class HomeScreen extends ConsumerWidget {
     BuildContext context, {
     bool confirm = false,
   }) {
-    final passphraseController = TextEditingController();
-    final confirmController = TextEditingController();
-    String? errorText;
-
     return showDialog<String>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(confirm ? 'Export backup' : 'Import backup'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: passphraseController,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Passphrase'),
-                ),
-                if (confirm) ...[
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: confirmController,
-                    obscureText: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm passphrase',
-                    ),
-                  ),
-                ],
-                if (errorText != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    errorText!,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.red),
-                  ),
-                ],
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  final passphrase = passphraseController.text;
-                  if (passphrase.trim().isEmpty) {
-                    setState(() {
-                      errorText = 'Passphrase is required';
-                    });
-                    return;
-                  }
-                  if (confirm && passphrase != confirmController.text) {
-                    setState(() {
-                      errorText = 'Passphrases do not match';
-                    });
-                    return;
-                  }
-                  Navigator.of(context).pop(passphrase);
-                },
-                child: Text(confirm ? 'Export' : 'Import'),
-              ),
-            ],
-          );
-        },
-      ),
-    ).whenComplete(() {
-      passphraseController.dispose();
-      confirmController.dispose();
-    });
+      builder: (context) => _BackupPassphraseDialog(confirm: confirm),
+    );
   }
 
   void _showSnackBar(BuildContext context, String message) {
@@ -261,6 +194,104 @@ class HomeScreen extends ConsumerWidget {
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+}
+
+class _BackupPassphraseDialog extends StatefulWidget {
+  final bool confirm;
+
+  const _BackupPassphraseDialog({required this.confirm});
+
+  @override
+  State<_BackupPassphraseDialog> createState() =>
+      _BackupPassphraseDialogState();
+}
+
+class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
+  final TextEditingController _passphraseController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _passphraseController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final confirm = widget.confirm;
+    return AlertDialog(
+      title: Text(confirm ? 'Export backup' : 'Import backup'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _passphraseController,
+              autofocus: true,
+              obscureText: true,
+              textInputAction: confirm
+                  ? TextInputAction.next
+                  : TextInputAction.done,
+              onSubmitted: (_) {
+                if (!confirm) _submit();
+              },
+              decoration: const InputDecoration(labelText: 'Passphrase'),
+            ),
+            if (confirm) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _confirmController,
+                obscureText: true,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _submit(),
+                decoration: const InputDecoration(
+                  labelText: 'Confirm passphrase',
+                ),
+              ),
+            ],
+            if (_errorText != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _errorText!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.red),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(confirm ? 'Export' : 'Import'),
+        ),
+      ],
+    );
+  }
+
+  void _submit() {
+    final passphrase = _passphraseController.text;
+    if (passphrase.trim().isEmpty) {
+      setState(() {
+        _errorText = 'Passphrase is required';
+      });
+      return;
+    }
+    if (widget.confirm && passphrase != _confirmController.text) {
+      setState(() {
+        _errorText = 'Passphrases do not match';
+      });
+      return;
+    }
+    Navigator.of(context).pop(passphrase);
   }
 }
 
