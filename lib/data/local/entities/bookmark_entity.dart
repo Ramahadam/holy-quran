@@ -3,15 +3,14 @@ import 'package:holy_quran_app/domain/models/bookmark.dart';
 
 part 'bookmark_entity.g.dart';
 
-@Name('BookmarkEntity_web_1206')
 @collection
 class BookmarkEntity {
   Id id = Isar.autoIncrement;
 
-  @Index(name: 'verseId_web_3661', unique: true, replace: true)
+  @Index(unique: true, replace: true)
   late String verseId;
 
-  @Index(name: 'surahNumber_web_46')
+  @Index()
   late int surahNumber;
 
   late DateTime timestamp;
@@ -28,10 +27,6 @@ class BookmarkEntity {
 
   /// Convert entity to domain model
   Bookmark toDomain() {
-    return Bookmark(
-      verseId: verseId,
-      timestamp: timestamp,
-      note: note,
-    );
+    return Bookmark(verseId: verseId, timestamp: timestamp, note: note);
   }
 }

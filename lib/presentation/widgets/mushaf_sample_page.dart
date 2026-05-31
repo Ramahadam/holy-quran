@@ -18,16 +18,6 @@ class MushafSampleAssets {
     final pageName = page.toString().padLeft(3, '0');
     return 'assets/mushaf/madani-svg-sample/$pageName.svg';
   }
-
-  static String imagePathForPage(int page) {
-    final pageName = page.toString().padLeft(3, '0');
-    return 'assets/mushaf/madani-images/$pageName.png';
-  }
-
-  /// Check if full-color image asset exists for the page
-  static bool hasImageForPage(int page) {
-    return false;
-  }
 }
 
 class MushafSamplePage extends StatefulWidget {
@@ -360,7 +350,7 @@ class _MushafHeaderRulePainter extends CustomPainter {
   }
 }
 
-class _InspiredQcfPage extends StatelessWidget {
+class _InspiredQcfPage extends StatefulWidget {
   final int pageNumber;
   final QcfThemeData theme;
   final double sp;
@@ -378,16 +368,46 @@ class _InspiredQcfPage extends StatelessWidget {
   });
 
   @override
+  State<_InspiredQcfPage> createState() => _InspiredQcfPageState();
+}
+
+class _InspiredQcfPageState extends State<_InspiredQcfPage> {
+  final Map<String, GestureRecognizer> _recognizers = {};
+
+  @override
+  void didUpdateWidget(covariant _InspiredQcfPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pageNumber != widget.pageNumber ||
+        oldWidget.onTap != widget.onTap ||
+        oldWidget.onLongPress != widget.onLongPress) {
+      _disposeRecognizers();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  void _disposeRecognizers() {
+    for (final recognizer in _recognizers.values) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final ranges = getPageData(pageNumber);
-    final pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
-    final baseFontSize = getFontSize(pageNumber, context) * sp;
+    final ranges = getPageData(widget.pageNumber);
+    final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
+    final baseFontSize = getFontSize(widget.pageNumber, context) * widget.sp;
     final screenSize = MediaQuery.of(context).size;
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
     final verseSpans = <InlineSpan>[];
 
-    if (pageNumber == 1 || pageNumber == 2) {
+    if (widget.pageNumber == 1 || widget.pageNumber == 2) {
       verseSpans.add(
         WidgetSpan(child: SizedBox(height: screenSize.height * .175)),
       );
@@ -400,14 +420,16 @@ class _InspiredQcfPage extends StatelessWidget {
 
       for (var verse = start; verse <= end; verse += 1) {
         if (verse == start && verse == 1) {
-          if (theme.showHeader) {
+          if (widget.theme.showHeader) {
             verseSpans.add(
               WidgetSpan(
-                child: HeaderWidget(suraNumber: surah, theme: theme),
+                child: HeaderWidget(suraNumber: surah, theme: widget.theme),
               ),
             );
           }
-          if (theme.showBasmala && pageNumber != 1 && pageNumber != 187) {
+          if (widget.theme.showBasmala &&
+              widget.pageNumber != 1 &&
+              widget.pageNumber != 187) {
             verseSpans.add(
               TextSpan(
                 text: ' ﱁ  ﱂﱃﱄ\n',
@@ -415,9 +437,9 @@ class _InspiredQcfPage extends StatelessWidget {
                   fontFamily: 'QCF_P001',
                   package: 'qcf_quran',
                   fontSize: getScreenType(context) == ScreenType.large
-                      ? theme.basmalaFontSizeLarge * sp
-                      : theme.basmalaFontSizeSmall * sp,
-                  color: theme.basmalaColor,
+                      ? widget.theme.basmalaFontSizeLarge * widget.sp
+                      : widget.theme.basmalaFontSizeSmall * widget.sp,
+                  color: widget.theme.basmalaColor,
                 ),
               ),
             );
@@ -454,17 +476,17 @@ class _InspiredQcfPage extends StatelessWidget {
                 package: 'qcf_quran',
                 fontSize: isPortrait
                     ? baseFontSize
-                    : (pageNumber == 1 || pageNumber == 2)
-                    ? 20 * sp
-                    : baseFontSize - (17 * sp),
-                color: theme.verseTextColor,
+                    : (widget.pageNumber == 1 || widget.pageNumber == 2)
+                    ? 20 * widget.sp
+                    : baseFontSize - (17 * widget.sp),
+                color: widget.theme.verseTextColor,
                 height: isPortrait
-                    ? (pageNumber == 1 || pageNumber == 2)
-                          ? 2.2 * h
-                          : theme.verseHeight * h
-                    : 4 * h,
-                letterSpacing: theme.letterSpacing,
-                wordSpacing: theme.wordSpacing,
+                    ? (widget.pageNumber == 1 || widget.pageNumber == 2)
+                          ? 2.2 * widget.h
+                          : widget.theme.verseHeight * widget.h
+                    : 4 * widget.h,
+                letterSpacing: widget.theme.letterSpacing,
+                wordSpacing: widget.theme.wordSpacing,
               ),
             ),
           ],
@@ -507,8 +529,8 @@ class _InspiredQcfPage extends StatelessWidget {
         style: TextStyle(
           fontFamily: pageFont,
           package: 'qcf_quran',
-          color: theme.verseNumberColor,
-          height: theme.verseNumberHeight * h,
+          color: widget.theme.verseNumberColor,
+          height: widget.theme.verseNumberHeight * widget.h,
         ),
       ),
     );
@@ -517,12 +539,23 @@ class _InspiredQcfPage extends StatelessWidget {
   }
 
   GestureRecognizer? _verseRecognizer(int surah, int verse) {
-    if (onTap != null) {
-      return TapGestureRecognizer()..onTap = () => onTap?.call(surah, verse);
+    if (widget.onTap != null) {
+      final key = 'tap:$surah:$verse';
+      return _recognizers.putIfAbsent(
+        key,
+        () =>
+            TapGestureRecognizer()
+              ..onTap = () => widget.onTap?.call(surah, verse),
+      );
     }
-    if (onLongPress != null) {
-      return LongPressGestureRecognizer()
-        ..onLongPress = () => onLongPress?.call(surah, verse);
+    if (widget.onLongPress != null) {
+      final key = 'long:$surah:$verse';
+      return _recognizers.putIfAbsent(
+        key,
+        () =>
+            LongPressGestureRecognizer()
+              ..onLongPress = () => widget.onLongPress?.call(surah, verse),
+      );
     }
     return null;
   }

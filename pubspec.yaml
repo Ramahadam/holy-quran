@@ -80,7 +80,6 @@ flutter:
     - assets/quran/verses.json
     - assets/quran/checksums.txt
     - assets/mushaf/madani-svg-sample/
-    - assets/mushaf/madani-images/
 
   fonts:
     - family: KFGQPCHafsUthmanicScript

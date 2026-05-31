@@ -14,7 +14,7 @@ extension GetVerseEntityCollection on Isar {
 }
 
 const VerseEntitySchema = CollectionSchema(
-  name: r'VerseEntity_web_2455',
+  name: r'VerseEntity',
   id: -3163405091030009,
   properties: {
     r'arabicText': PropertySchema(
@@ -54,9 +54,9 @@ const VerseEntitySchema = CollectionSchema(
   deserializeProp: _verseEntityDeserializeProp,
   idName: r'id',
   indexes: {
-    r'verseId_web_3661': IndexSchema(
+    r'verseId': IndexSchema(
       id: -4709412240250781,
-      name: r'verseId_web_3661',
+      name: r'verseId',
       unique: true,
       replace: false,
       properties: [
@@ -67,9 +67,9 @@ const VerseEntitySchema = CollectionSchema(
         )
       ],
     ),
-    r'surahNumber_web_46': IndexSchema(
+    r'surahNumber': IndexSchema(
       id: 2306805615641216,
-      name: r'surahNumber_web_46',
+      name: r'surahNumber',
       unique: false,
       replace: false,
       properties: [
@@ -80,9 +80,9 @@ const VerseEntitySchema = CollectionSchema(
         )
       ],
     ),
-    r'page_web_268': IndexSchema(
+    r'page': IndexSchema(
       id: -4650717874588592,
-      name: r'page_web_268',
+      name: r'page',
       unique: false,
       replace: false,
       properties: [
@@ -189,57 +189,56 @@ void _verseEntityAttach(
 
 extension VerseEntityByIndex on IsarCollection<VerseEntity> {
   Future<VerseEntity?> getByVerseId(String verseId) {
-    return getByIndex(r'verseId_web_3661', [verseId]);
+    return getByIndex(r'verseId', [verseId]);
   }
 
   VerseEntity? getByVerseIdSync(String verseId) {
-    return getByIndexSync(r'verseId_web_3661', [verseId]);
+    return getByIndexSync(r'verseId', [verseId]);
   }
 
   Future<bool> deleteByVerseId(String verseId) {
-    return deleteByIndex(r'verseId_web_3661', [verseId]);
+    return deleteByIndex(r'verseId', [verseId]);
   }
 
   bool deleteByVerseIdSync(String verseId) {
-    return deleteByIndexSync(r'verseId_web_3661', [verseId]);
+    return deleteByIndexSync(r'verseId', [verseId]);
   }
 
   Future<List<VerseEntity?>> getAllByVerseId(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'verseId_web_3661', values);
+    return getAllByIndex(r'verseId', values);
   }
 
   List<VerseEntity?> getAllByVerseIdSync(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'verseId_web_3661', values);
+    return getAllByIndexSync(r'verseId', values);
   }
 
   Future<int> deleteAllByVerseId(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'verseId_web_3661', values);
+    return deleteAllByIndex(r'verseId', values);
   }
 
   int deleteAllByVerseIdSync(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'verseId_web_3661', values);
+    return deleteAllByIndexSync(r'verseId', values);
   }
 
   Future<Id> putByVerseId(VerseEntity object) {
-    return putByIndex(r'verseId_web_3661', object);
+    return putByIndex(r'verseId', object);
   }
 
   Id putByVerseIdSync(VerseEntity object, {bool saveLinks = true}) {
-    return putByIndexSync(r'verseId_web_3661', object, saveLinks: saveLinks);
+    return putByIndexSync(r'verseId', object, saveLinks: saveLinks);
   }
 
   Future<List<Id>> putAllByVerseId(List<VerseEntity> objects) {
-    return putAllByIndex(r'verseId_web_3661', objects);
+    return putAllByIndex(r'verseId', objects);
   }
 
   List<Id> putAllByVerseIdSync(List<VerseEntity> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'verseId_web_3661', objects,
-        saveLinks: saveLinks);
+    return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
   }
 }
 
@@ -254,7 +253,7 @@ extension VerseEntityQueryWhereSort
   QueryBuilder<VerseEntity, VerseEntity, QAfterWhere> anySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'surahNumber_web_46'),
+        const IndexWhereClause.any(indexName: r'surahNumber'),
       );
     });
   }
@@ -262,7 +261,7 @@ extension VerseEntityQueryWhereSort
   QueryBuilder<VerseEntity, VerseEntity, QAfterWhere> anyPage() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'page_web_268'),
+        const IndexWhereClause.any(indexName: r'page'),
       );
     });
   }
@@ -340,7 +339,7 @@ extension VerseEntityQueryWhere
       String verseId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'verseId_web_3661',
+        indexName: r'verseId',
         value: [verseId],
       ));
     });
@@ -352,13 +351,13 @@ extension VerseEntityQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [],
               upper: [verseId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [verseId],
               includeLower: false,
               upper: [],
@@ -366,13 +365,13 @@ extension VerseEntityQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [verseId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [],
               upper: [verseId],
               includeUpper: false,
@@ -385,7 +384,7 @@ extension VerseEntityQueryWhere
       int surahNumber) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         value: [surahNumber],
       ));
     });
@@ -397,13 +396,13 @@ extension VerseEntityQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [],
               upper: [surahNumber],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [surahNumber],
               includeLower: false,
               upper: [],
@@ -411,13 +410,13 @@ extension VerseEntityQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [surahNumber],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [],
               upper: [surahNumber],
               includeUpper: false,
@@ -433,7 +432,7 @@ extension VerseEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         lower: [surahNumber],
         includeLower: include,
         upper: [],
@@ -447,7 +446,7 @@ extension VerseEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         lower: [],
         upper: [surahNumber],
         includeUpper: include,
@@ -463,7 +462,7 @@ extension VerseEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         lower: [lowerSurahNumber],
         includeLower: includeLower,
         upper: [upperSurahNumber],
@@ -476,7 +475,7 @@ extension VerseEntityQueryWhere
       int page) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'page_web_268',
+        indexName: r'page',
         value: [page],
       ));
     });
@@ -488,13 +487,13 @@ extension VerseEntityQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'page_web_268',
+              indexName: r'page',
               lower: [],
               upper: [page],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'page_web_268',
+              indexName: r'page',
               lower: [page],
               includeLower: false,
               upper: [],
@@ -502,13 +501,13 @@ extension VerseEntityQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'page_web_268',
+              indexName: r'page',
               lower: [page],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'page_web_268',
+              indexName: r'page',
               lower: [],
               upper: [page],
               includeUpper: false,
@@ -523,7 +522,7 @@ extension VerseEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'page_web_268',
+        indexName: r'page',
         lower: [page],
         includeLower: include,
         upper: [],
@@ -537,7 +536,7 @@ extension VerseEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'page_web_268',
+        indexName: r'page',
         lower: [],
         upper: [page],
         includeUpper: include,
@@ -553,7 +552,7 @@ extension VerseEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'page_web_268',
+        indexName: r'page',
         lower: [lowerPage],
         includeLower: includeLower,
         upper: [upperPage],

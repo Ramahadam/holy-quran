@@ -14,7 +14,7 @@ extension GetBookmarkEntityCollection on Isar {
 }
 
 const BookmarkEntitySchema = CollectionSchema(
-  name: r'BookmarkEntity_web_1206',
+  name: r'BookmarkEntity',
   id: 5746000027166370,
   properties: {
     r'note': PropertySchema(
@@ -44,9 +44,9 @@ const BookmarkEntitySchema = CollectionSchema(
   deserializeProp: _bookmarkEntityDeserializeProp,
   idName: r'id',
   indexes: {
-    r'verseId_web_3661': IndexSchema(
+    r'verseId': IndexSchema(
       id: -4709412240250781,
-      name: r'verseId_web_3661',
+      name: r'verseId',
       unique: true,
       replace: true,
       properties: [
@@ -57,9 +57,9 @@ const BookmarkEntitySchema = CollectionSchema(
         )
       ],
     ),
-    r'surahNumber_web_46': IndexSchema(
+    r'surahNumber': IndexSchema(
       id: 2306805615641216,
-      name: r'surahNumber_web_46',
+      name: r'surahNumber',
       unique: false,
       replace: false,
       properties: [
@@ -157,57 +157,56 @@ void _bookmarkEntityAttach(
 
 extension BookmarkEntityByIndex on IsarCollection<BookmarkEntity> {
   Future<BookmarkEntity?> getByVerseId(String verseId) {
-    return getByIndex(r'verseId_web_3661', [verseId]);
+    return getByIndex(r'verseId', [verseId]);
   }
 
   BookmarkEntity? getByVerseIdSync(String verseId) {
-    return getByIndexSync(r'verseId_web_3661', [verseId]);
+    return getByIndexSync(r'verseId', [verseId]);
   }
 
   Future<bool> deleteByVerseId(String verseId) {
-    return deleteByIndex(r'verseId_web_3661', [verseId]);
+    return deleteByIndex(r'verseId', [verseId]);
   }
 
   bool deleteByVerseIdSync(String verseId) {
-    return deleteByIndexSync(r'verseId_web_3661', [verseId]);
+    return deleteByIndexSync(r'verseId', [verseId]);
   }
 
   Future<List<BookmarkEntity?>> getAllByVerseId(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'verseId_web_3661', values);
+    return getAllByIndex(r'verseId', values);
   }
 
   List<BookmarkEntity?> getAllByVerseIdSync(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'verseId_web_3661', values);
+    return getAllByIndexSync(r'verseId', values);
   }
 
   Future<int> deleteAllByVerseId(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'verseId_web_3661', values);
+    return deleteAllByIndex(r'verseId', values);
   }
 
   int deleteAllByVerseIdSync(List<String> verseIdValues) {
     final values = verseIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'verseId_web_3661', values);
+    return deleteAllByIndexSync(r'verseId', values);
   }
 
   Future<Id> putByVerseId(BookmarkEntity object) {
-    return putByIndex(r'verseId_web_3661', object);
+    return putByIndex(r'verseId', object);
   }
 
   Id putByVerseIdSync(BookmarkEntity object, {bool saveLinks = true}) {
-    return putByIndexSync(r'verseId_web_3661', object, saveLinks: saveLinks);
+    return putByIndexSync(r'verseId', object, saveLinks: saveLinks);
   }
 
   Future<List<Id>> putAllByVerseId(List<BookmarkEntity> objects) {
-    return putAllByIndex(r'verseId_web_3661', objects);
+    return putAllByIndex(r'verseId', objects);
   }
 
   List<Id> putAllByVerseIdSync(List<BookmarkEntity> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'verseId_web_3661', objects,
-        saveLinks: saveLinks);
+    return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
   }
 }
 
@@ -222,7 +221,7 @@ extension BookmarkEntityQueryWhereSort
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhere> anySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'surahNumber_web_46'),
+        const IndexWhereClause.any(indexName: r'surahNumber'),
       );
     });
   }
@@ -303,7 +302,7 @@ extension BookmarkEntityQueryWhere
       verseIdEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'verseId_web_3661',
+        indexName: r'verseId',
         value: [verseId],
       ));
     });
@@ -315,13 +314,13 @@ extension BookmarkEntityQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [],
               upper: [verseId],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [verseId],
               includeLower: false,
               upper: [],
@@ -329,13 +328,13 @@ extension BookmarkEntityQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [verseId],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId_web_3661',
+              indexName: r'verseId',
               lower: [],
               upper: [verseId],
               includeUpper: false,
@@ -348,7 +347,7 @@ extension BookmarkEntityQueryWhere
       surahNumberEqualTo(int surahNumber) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         value: [surahNumber],
       ));
     });
@@ -360,13 +359,13 @@ extension BookmarkEntityQueryWhere
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [],
               upper: [surahNumber],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [surahNumber],
               includeLower: false,
               upper: [],
@@ -374,13 +373,13 @@ extension BookmarkEntityQueryWhere
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [surahNumber],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber_web_46',
+              indexName: r'surahNumber',
               lower: [],
               upper: [surahNumber],
               includeUpper: false,
@@ -396,7 +395,7 @@ extension BookmarkEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         lower: [surahNumber],
         includeLower: include,
         upper: [],
@@ -411,7 +410,7 @@ extension BookmarkEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         lower: [],
         upper: [surahNumber],
         includeUpper: include,
@@ -428,7 +427,7 @@ extension BookmarkEntityQueryWhere
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber_web_46',
+        indexName: r'surahNumber',
         lower: [lowerSurahNumber],
         includeLower: includeLower,
         upper: [upperSurahNumber],

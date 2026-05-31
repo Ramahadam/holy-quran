@@ -5,7 +5,6 @@ part 'surah_entity.g.dart';
 
 /// Isar database entity for Surah model.
 /// Uses surahNumber as primary key (1-114).
-@Name('SurahEntity_web_360')
 @collection
 class SurahEntity {
   Id get id => surahNumber;

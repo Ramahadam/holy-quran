@@ -14,7 +14,7 @@ extension GetSurahEntityCollection on Isar {
 }
 
 const SurahEntitySchema = CollectionSchema(
-  name: r'SurahEntity_web_360',
+  name: r'SurahEntity',
   id: -3401727801195606,
   properties: {
     r'nameArabic': PropertySchema(

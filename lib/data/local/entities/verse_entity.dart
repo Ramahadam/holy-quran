@@ -5,22 +5,21 @@ part 'verse_entity.g.dart';
 
 /// Isar database entity for Verse model.
 /// Maps between domain model and database representation.
-@Name('VerseEntity_web_2455')
 @collection
 class VerseEntity {
   Id id = Isar.autoIncrement;
 
-  @Index(name: 'verseId_web_3661', unique: true)
+  @Index(unique: true)
   late String verseId;
 
-  @Index(name: 'surahNumber_web_46')
+  @Index()
   late int surahNumber;
 
   late int verseNumber;
   late String arabicText;
   String? translation;
 
-  @Index(name: 'page_web_268')
+  @Index()
   late int page;
 
   VerseEntity();
