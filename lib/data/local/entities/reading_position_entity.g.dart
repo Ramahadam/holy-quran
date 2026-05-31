@@ -14,9 +14,9 @@ extension GetReadingPositionEntityCollection on Isar {
       this.collection();
 }
 
-const ReadingPositionEntitySchema = CollectionSchema(
-  name: r'ReadingPositionEntity_web_289',
-  id: -8797394496102186,
+final ReadingPositionEntitySchema = CollectionSchema(
+  name: r'ReadingPositionEntity',
+  id: int.parse('8410079443906433630'),
   properties: {
     r'lastReadAt': PropertySchema(
       id: 0,

@@ -11,7 +11,8 @@ class ReadingPositionRepositoryImpl implements ReadingPositionRepository {
   @override
   Future<void> savePosition(ReadingPosition position) async {
     final isar = await IsarService.getInstance();
-    final entity = ReadingPositionEntity.fromDomain(position)..id = _singletonId;
+    final entity = ReadingPositionEntity.fromDomain(position)
+      ..id = _singletonId;
     await isar.writeTxn(() async {
       await isar.readingPositionEntitys.put(entity);
     });
@@ -22,5 +23,13 @@ class ReadingPositionRepositoryImpl implements ReadingPositionRepository {
     final isar = await IsarService.getInstance();
     final entity = await isar.readingPositionEntitys.get(_singletonId);
     return entity?.toDomain();
+  }
+
+  @override
+  Future<void> clearPosition() async {
+    final isar = await IsarService.getInstance();
+    await isar.writeTxn(() async {
+      await isar.readingPositionEntitys.delete(_singletonId);
+    });
   }
 }

@@ -27,10 +27,6 @@ class BookmarkEntity {
 
   /// Convert entity to domain model
   Bookmark toDomain() {
-    return Bookmark(
-      verseId: verseId,
-      timestamp: timestamp,
-      note: note,
-    );
+    return Bookmark(verseId: verseId, timestamp: timestamp, note: note);
   }
 }

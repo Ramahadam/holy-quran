@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/reading_position_repository.dart';
 import '../../domain/models/reading_position.dart';
@@ -6,12 +7,21 @@ import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
+import 'verse_detail_screen.dart';
 import '../widgets/mushaf_sample_page.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 const _totalPages = 604;
 
 enum ReadingMode { classic, mushaf }
+
+void _openVerseDetail(BuildContext context, Verse verse) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (context) => VerseDetailScreen(verse: verse),
+    ),
+  );
+}
 
 class ReadingScreen extends ConsumerStatefulWidget {
   final Surah surah;
@@ -28,6 +38,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   int _currentPage = 1;
   bool _resolved = false;
   ReadingMode _readingMode = ReadingMode.classic;
+  bool _showMushafControls = false;
 
   late final ReadingPositionRepository _positionRepo;
 
@@ -41,6 +52,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   void deactivate() {
     _saveReadingPosition();
     if (mounted) ref.invalidate(lastReadPositionProvider);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.deactivate();
   }
 
@@ -169,8 +181,10 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               ),
             ],
             onSelectionChanged: (selection) {
+              final mode = selection.single;
               setState(() {
-                _readingMode = selection.single;
+                _readingMode = mode;
+                _showMushafControls = false;
               });
             },
           ),
@@ -179,33 +193,80 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     );
   }
 
+  void _setImmersiveMode(bool immersive) {
+    if (immersive) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+  }
+
   Widget _buildPageView() {
+    final showAppBar =
+        _readingMode == ReadingMode.classic || _showMushafControls;
+    final isMushafImmersive =
+        _readingMode == ReadingMode.mushaf && !_showMushafControls;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setImmersiveMode(isMushafImmersive);
+    });
+
+    final pageView = PageView.builder(
+      controller: _pageController,
+      reverse: true,
+      itemCount: _totalPages,
+      onPageChanged: (index) {
+        final pageNum = index + 1;
+        _currentPage = pageNum;
+        _currentPageFirstVerseId = null;
+        setState(() {});
+      },
+      itemBuilder: (context, index) {
+        final pageNum = index + 1;
+        return _QuranPage(
+          key: ValueKey(pageNum),
+          page: pageNum,
+          readingMode: _readingMode,
+          onFirstVerseResolved: pageNum == _currentPage
+              ? (verseId) => _currentPageFirstVerseId ??= verseId
+              : null,
+          onVerseHit: pageNum == _currentPage
+              ? (verseId) => _currentPageFirstVerseId = verseId
+              : null,
+        );
+      },
+    );
+
     return Scaffold(
-      appBar: _buildAppBar(),
-      body: PageView.builder(
-        controller: _pageController,
-        reverse: true,
-        itemCount: _totalPages,
-        onPageChanged: (index) {
-          final pageNum = index + 1;
-          _currentPage = pageNum;
-          _currentPageFirstVerseId = null;
-          setState(() {});
-        },
-        itemBuilder: (context, index) {
-          final pageNum = index + 1;
-          return _QuranPage(
-            key: ValueKey(pageNum),
-            page: pageNum,
-            readingMode: _readingMode,
-            onFirstVerseResolved: pageNum == _currentPage
-                ? (verseId) => _currentPageFirstVerseId ??= verseId
-                : null,
-            onVerseHit: pageNum == _currentPage
-                ? (verseId) => _currentPageFirstVerseId = verseId
-                : null,
-          );
-        },
+      appBar: showAppBar ? _buildAppBar() : null,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
+                setState(() {
+                  _showMushafControls = false;
+                });
+              }
+            },
+            child: pageView,
+          ),
+          if (isMushafImmersive)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 56,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _showMushafControls = true;
+                  });
+                },
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -254,9 +315,15 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
         if (widget.readingMode == ReadingMode.mushaf) {
           return MushafSamplePage(
             page: widget.page,
-            onHit: widget.onVerseHit == null
-                ? null
-                : (hit) => widget.onVerseHit?.call(hit.verseId),
+            onVerseTap: (verseId) {
+              widget.onVerseHit?.call(verseId);
+              final verse = verses
+                  .where((verse) => verse.verseId == verseId)
+                  .firstOrNull;
+              if (verse != null) {
+                _openVerseDetail(context, verse);
+              }
+            },
           );
         }
 
@@ -264,6 +331,7 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
           verses: verses,
           page: widget.page,
           surahNumbers: surahNumbers,
+          onVerseFocused: widget.onVerseHit,
         );
       },
       loading: () => const Center(
@@ -289,11 +357,13 @@ class _QuranPageContent extends ConsumerWidget {
   final List<Verse> verses;
   final int page;
   final Set<int> surahNumbers;
+  final ValueChanged<String>? onVerseFocused;
 
   const _QuranPageContent({
     required this.verses,
     required this.page,
     required this.surahNumbers,
+    this.onVerseFocused,
   });
 
   @override
@@ -314,7 +384,7 @@ class _QuranPageContent extends ConsumerWidget {
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: _buildVerseWidgets(context, ref, allBookmarks),
+                children: _buildVerseWidgets(context, allBookmarks),
               ),
             ),
           ),
@@ -333,11 +403,7 @@ class _QuranPageContent extends ConsumerWidget {
     );
   }
 
-  List<Widget> _buildVerseWidgets(
-    BuildContext context,
-    WidgetRef ref,
-    Set<String> bookmarks,
-  ) {
+  List<Widget> _buildVerseWidgets(BuildContext context, Set<String> bookmarks) {
     final widgets = <Widget>[];
     int? lastSurah;
 
@@ -358,7 +424,10 @@ class _QuranPageContent extends ConsumerWidget {
       widgets.add(
         GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onLongPress: () => _toggleBookmark(context, ref, verse, bookmarks),
+          onLongPress: () {
+            onVerseFocused?.call(verse.verseId);
+            _openVerseDetail(context, verse);
+          },
           child: _ArabicVerse(verse: verse, isBookmarked: isBookmarked),
         ),
       );
@@ -371,33 +440,6 @@ class _QuranPageContent extends ConsumerWidget {
       verse.verseNumber == 1 &&
       verse.surahNumber != 1 &&
       verse.surahNumber != 9;
-
-  Future<void> _toggleBookmark(
-    BuildContext context,
-    WidgetRef ref,
-    Verse verse,
-    Set<String> bookmarks,
-  ) async {
-    final repo = ref.read(bookmarkRepositoryProvider);
-    final wasBookmarked = bookmarks.contains(verse.verseId);
-    if (wasBookmarked) {
-      await repo.removeBookmark(verse.verseId);
-    } else {
-      await repo.addBookmark(verse.verseId, DateTime.now());
-    }
-    ref.invalidate(recentBookmarksProvider);
-    ref.invalidate(bookmarksBySurahProvider(verse.surahNumber));
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(wasBookmarked ? 'Bookmark removed' : 'Bookmarked'),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 }
 
 class _BismillahHeader extends StatelessWidget {

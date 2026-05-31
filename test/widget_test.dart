@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:holy_quran_app/presentation/app.dart';
 import 'package:holy_quran_app/presentation/screens/loading_screen.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
+import 'package:holy_quran_app/presentation/screens/verse_detail_screen.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
 import 'package:holy_quran_app/data/repositories/reading_position_repository.dart';
@@ -44,16 +44,15 @@ const _verse2 = Verse(
 );
 
 const _bismillah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
-const _mushafPageOneVerseTwoWordCenter = Offset(
-  0.59214 + 0.095589 / 2,
-  0.551975 + 0.027509 / 2,
-);
 
 class _FakeBookmarkRepository implements BookmarkRepository {
+  final addedVerseIds = <String>[];
   final removedVerseIds = <String>[];
 
   @override
-  Future<void> addBookmark(String verseId, DateTime timestamp) async {}
+  Future<void> addBookmark(String verseId, DateTime timestamp) async {
+    addedVerseIds.add(verseId);
+  }
 
   @override
   Future<void> saveBookmark(Bookmark bookmark) async {}
@@ -78,6 +77,11 @@ class _FakeBookmarkRepository implements BookmarkRepository {
 
 class _FakeReadingPositionRepository implements ReadingPositionRepository {
   ReadingPosition? savedPosition;
+
+  @override
+  Future<void> clearPosition() async {
+    savedPosition = null;
+  }
 
   @override
   Future<ReadingPosition?> getLastPosition() async => savedPosition;
@@ -167,37 +171,34 @@ void main() {
   });
 
   group('MushafSamplePage', () {
-    test('knows the checked-in sample pages', () {
+    test('supports the full QCF Mushaf page range', () {
       expect(MushafSampleAssets.containsPage(1), isTrue);
       expect(MushafSampleAssets.containsPage(2), isTrue);
       expect(MushafSampleAssets.containsPage(3), isTrue);
       expect(MushafSampleAssets.containsPage(604), isTrue);
-      expect(MushafSampleAssets.containsPage(4), isFalse);
-      expect(
-        MushafSampleAssets.pathForPage(604),
-        'assets/mushaf/madani-svg-sample/604.svg',
-      );
+      expect(MushafSampleAssets.containsPage(605), isFalse);
     });
 
-    testWidgets('renders a local SVG sample page', (tester) async {
+    testWidgets('renders a QCF font Mushaf page', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 1))),
       );
       await tester.pump();
 
-      expect(find.byType(SvgPicture), findsOneWidget);
-      expect(find.byType(AspectRatio), findsOneWidget);
+      expect(find.byType(MushafQcfPage), findsOneWidget);
+      expect(find.text('سورة الفاتحة'), findsOneWidget);
+      expect(find.text('الجزء الأول'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('explains unsupported sample pages', (tester) async {
+    testWidgets('explains unsupported page numbers', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 605))),
       );
       await tester.pump();
 
-      expect(find.textContaining('pages 1, 2, 3, 604'), findsOneWidget);
-      expect(find.textContaining('Current page: 4'), findsOneWidget);
+      expect(find.textContaining('between 1 and 604'), findsOneWidget);
+      expect(find.textContaining('Current page: 605'), findsOneWidget);
     });
   });
 
@@ -394,13 +395,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
-      expect(find.byType(SvgPicture), findsNothing);
+      expect(find.byType(MushafQcfPage), findsNothing);
 
       await tester.tap(find.text('Mushaf'));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SvgPicture), findsOneWidget);
+      expect(find.byType(MushafQcfPage), findsOneWidget);
       expect(find.textContaining('بِسْمِ', findRichText: true), findsNothing);
+
+      await tester.tapAt(const Offset(12, 12));
+      await tester.pumpAndSettle();
 
       await tester.tap(find.text('Classic'));
       await tester.pumpAndSettle();
@@ -431,22 +435,49 @@ void main() {
       await tester.tap(find.text('Mushaf'));
       await tester.pumpAndSettle();
 
-      final pageRect = tester.getRect(find.byType(SvgPicture));
-      await tester.tapAt(
-        pageRect.topLeft +
-            Offset(
-              _mushafPageOneVerseTwoWordCenter.dx * pageRect.width,
-              _mushafPageOneVerseTwoWordCenter.dy * pageRect.height,
-            ),
-      );
-      await tester.runAsync(() async {
-        await Future<void>.delayed(Duration.zero);
-      });
+      final qcfPage = tester.widget<MushafQcfPage>(find.byType(MushafQcfPage));
+      qcfPage.onTap?.call(1, 2);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(VerseDetailScreen), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
 
       expect(positionRepo.savedPosition?.verseId, '1:2');
+    });
+
+    testWidgets('opens Focus Mode from a Classic verse long press', (
+      tester,
+    ) async {
+      final positionRepo = _FakeReadingPositionRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            readingPositionRepositoryProvider.overrideWithValue(positionRepo),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(
+              1,
+            ).overrideWith((ref) async => [_verse1, _verse2]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.longPress(find.textContaining('بِسْمِ', findRichText: true));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(VerseDetailScreen), findsOneWidget);
+      expect(find.text('1:1'), findsOneWidget);
+      expect(find.text('In the name of Allah'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+
+      expect(positionRepo.savedPosition?.verseId, '1:1');
     });
 
     testWidgets('uses KFGQPC font for Arabic Quran text', (tester) async {
@@ -760,6 +791,45 @@ void main() {
       final topLeft = tester.getTopLeft(find.byType(VerseCard));
       await tester.longPressAt(topLeft + const Offset(10, 10));
       expect(toggled, isTrue);
+    });
+  });
+
+  group('VerseDetailScreen', () {
+    testWidgets('renders large Quran text and translation', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: VerseDetailScreen(verse: _verse1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final arabicText = tester.widget<Text>(find.text(_verse1.arabicText));
+      expect(arabicText.style?.fontSize, 36);
+      expect(find.text('In the name of Allah'), findsOneWidget);
+      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+    });
+
+    testWidgets('can bookmark the focused verse locally', (tester) async {
+      final bookmarkRepo = _FakeBookmarkRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookmarkRepositoryProvider.overrideWithValue(bookmarkRepo),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: VerseDetailScreen(verse: _verse1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.bookmark_border));
+      await tester.pumpAndSettle();
+
+      expect(bookmarkRepo.addedVerseIds, ['1:1']);
     });
   });
 }

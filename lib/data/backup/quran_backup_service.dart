@@ -35,6 +35,8 @@ class QuranBackupService {
     final lastRead = data.lastRead;
     if (lastRead != null) {
       await readingPositionRepository.savePosition(lastRead);
+    } else {
+      await readingPositionRepository.clearPosition();
     }
   }
 }

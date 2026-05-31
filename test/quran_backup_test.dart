@@ -100,6 +100,31 @@ void main() {
       expect(bookmarkRepo.replaced, isFalse);
       expect(positionRepo.savedPosition, isNull);
     });
+
+    test('clears stale last-read state when backup has none', () async {
+      final bookmarkRepo = _FakeBookmarkRepository([]);
+      final positionRepo = _FakeReadingPositionRepository(
+        ReadingPosition(verseId: '2:1', lastReadAt: DateTime.utc(2026, 5, 29)),
+      );
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: positionRepo,
+        codec: _testCodec(),
+      );
+      final bytes = await _testCodec().encode(
+        QuranBackupData(
+          bookmarks: const [],
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await service.importBackup(bytes, 'passphrase');
+
+      expect(positionRepo.savedPosition, isNull);
+      expect(positionRepo.cleared, isTrue);
+    });
   });
 }
 
@@ -154,8 +179,15 @@ class _FakeBookmarkRepository implements BookmarkRepository {
 
 class _FakeReadingPositionRepository implements ReadingPositionRepository {
   ReadingPosition? savedPosition;
+  bool cleared = false;
 
   _FakeReadingPositionRepository(this.savedPosition);
+
+  @override
+  Future<void> clearPosition() async {
+    savedPosition = null;
+    cleared = true;
+  }
 
   @override
   Future<ReadingPosition?> getLastPosition() async => savedPosition;
@@ -163,5 +195,6 @@ class _FakeReadingPositionRepository implements ReadingPositionRepository {
   @override
   Future<void> savePosition(ReadingPosition position) async {
     savedPosition = position;
+    cleared = false;
   }
 }
