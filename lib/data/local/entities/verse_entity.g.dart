@@ -15,7 +15,7 @@ extension GetVerseEntityCollection on Isar {
 
 const VerseEntitySchema = CollectionSchema(
   name: r'VerseEntity',
-  id: -5496938192407533235,
+  id: -3163405091030009,
   properties: {
     r'arabicText': PropertySchema(
       id: 0,
@@ -55,7 +55,7 @@ const VerseEntitySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
-      id: 1744958713610519296,
+      id: -4709412240250781,
       name: r'verseId',
       unique: true,
       replace: false,
@@ -68,7 +68,7 @@ const VerseEntitySchema = CollectionSchema(
       ],
     ),
     r'surahNumber': IndexSchema(
-      id: 9024003441292455669,
+      id: 2306805615641216,
       name: r'surahNumber',
       unique: false,
       replace: false,
@@ -81,7 +81,7 @@ const VerseEntitySchema = CollectionSchema(
       ],
     ),
     r'page': IndexSchema(
-      id: -1004952015509011454,
+      id: -4650717874588592,
       name: r'page',
       unique: false,
       replace: false,

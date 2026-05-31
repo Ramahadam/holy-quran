@@ -15,7 +15,7 @@ extension GetBookmarkEntityCollection on Isar {
 
 const BookmarkEntitySchema = CollectionSchema(
   name: r'BookmarkEntity',
-  id: -7369956597930324689,
+  id: 5746000027166370,
   properties: {
     r'note': PropertySchema(
       id: 0,
@@ -45,7 +45,7 @@ const BookmarkEntitySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
-      id: 1744958713610519296,
+      id: -4709412240250781,
       name: r'verseId',
       unique: true,
       replace: true,
@@ -58,7 +58,7 @@ const BookmarkEntitySchema = CollectionSchema(
       ],
     ),
     r'surahNumber': IndexSchema(
-      id: 9024003441292455669,
+      id: 2306805615641216,
       name: r'surahNumber',
       unique: false,
       replace: false,

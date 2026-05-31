@@ -24,9 +24,6 @@ class ReadingPositionEntity {
 
   /// Convert entity to domain model
   ReadingPosition toDomain() {
-    return ReadingPosition(
-      verseId: verseId,
-      lastReadAt: lastReadAt,
-    );
+    return ReadingPosition(verseId: verseId, lastReadAt: lastReadAt);
   }
 }
