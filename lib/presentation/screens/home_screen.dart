@@ -210,7 +210,15 @@ class _BackupPassphraseDialog extends StatefulWidget {
 class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
   final TextEditingController _passphraseController = TextEditingController();
   final TextEditingController _confirmController = TextEditingController();
+  late NavigatorState _navigator;
   String? _errorText;
+  bool _submitted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _navigator = Navigator.of(context);
+  }
 
   @override
   void dispose() {
@@ -266,7 +274,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => _navigator.pop(),
           child: const Text('Cancel'),
         ),
         FilledButton(
@@ -278,6 +286,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
   }
 
   void _submit() {
+    if (!mounted || _submitted) return;
     final passphrase = _passphraseController.text;
     if (passphrase.trim().isEmpty) {
       setState(() {
@@ -291,7 +300,8 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
       });
       return;
     }
-    Navigator.of(context).pop(passphrase);
+    _submitted = true;
+    _navigator.pop(passphrase);
   }
 }
 

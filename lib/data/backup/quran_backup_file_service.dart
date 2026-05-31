@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'quran_backup_service.dart';
 
@@ -16,20 +17,22 @@ class QuranBackupFileService {
   const QuranBackupFileService({required this.backupService});
 
   Future<bool> exportBackup(String passphrase) async {
-    final location = await getSaveLocation(
-      acceptedTypeGroups: const [_backupTypeGroup],
-      suggestedName: _backupFileName,
-    );
-    if (location == null) return false;
-
     final bytes = await backupService.exportBackup(passphrase);
-    final file = XFile.fromData(
-      Uint8List.fromList(bytes),
-      mimeType: 'application/octet-stream',
-      name: _backupFileName,
+    final result = await SharePlus.instance.share(
+      ShareParams(
+        files: [
+          XFile.fromData(
+            Uint8List.fromList(bytes),
+            mimeType: 'application/octet-stream',
+            name: _backupFileName,
+          ),
+        ],
+        fileNameOverrides: const [_backupFileName],
+        subject: 'Holy Quran backup',
+        title: 'Export Holy Quran backup',
+      ),
     );
-    await file.saveTo(location.path);
-    return true;
+    return result.status != ShareResultStatus.dismissed;
   }
 
   Future<bool> importBackup(String passphrase) async {
