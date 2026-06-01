@@ -81,6 +81,54 @@ void main() {
       expect(decoded.lastRead?.verseId, '1:7');
     });
 
+    test('round trips exported state into a fresh repository', () async {
+      final sourceBookmarks = [
+        Bookmark(
+          verseId: '2:255',
+          timestamp: DateTime.utc(2026, 5, 30, 10),
+          note: 'Ayat al-Kursi',
+        ),
+        Bookmark(verseId: '18:10', timestamp: DateTime.utc(2026, 5, 30, 11)),
+      ];
+      final sourcePosition = ReadingPosition(
+        verseId: '36:12',
+        lastReadAt: DateTime.utc(2026, 5, 30, 12),
+      );
+      final sourceService = QuranBackupService(
+        bookmarkRepository: _FakeBookmarkRepository(sourceBookmarks),
+        readingPositionRepository: _FakeReadingPositionRepository(
+          sourcePosition,
+        ),
+        codec: _testCodec(),
+      );
+      final targetBookmarkRepo = _FakeBookmarkRepository([
+        Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 29)),
+      ]);
+      final targetPositionRepo = _FakeReadingPositionRepository(
+        ReadingPosition(verseId: '1:7', lastReadAt: DateTime.utc(2026, 5, 29)),
+      );
+      final targetService = QuranBackupService(
+        bookmarkRepository: targetBookmarkRepo,
+        readingPositionRepository: targetPositionRepo,
+        codec: _testCodec(),
+      );
+
+      final bytes = await sourceService.exportBackup('round trip passphrase');
+      await targetService.importBackup(bytes, 'round trip passphrase');
+
+      expect(targetBookmarkRepo.bookmarks, hasLength(2));
+      expect(targetBookmarkRepo.bookmarks.map((item) => item.verseId), [
+        '2:255',
+        '18:10',
+      ]);
+      expect(targetBookmarkRepo.bookmarks.first.note, 'Ayat al-Kursi');
+      expect(targetPositionRepo.savedPosition?.verseId, '36:12');
+      expect(
+        targetPositionRepo.savedPosition?.lastReadAt,
+        sourcePosition.lastReadAt,
+      );
+    });
+
     test('validates import before applying restored state', () async {
       final bookmarkRepo = _FakeBookmarkRepository([
         Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 30)),
