@@ -8,10 +8,13 @@ import 'bookmark_repository.dart';
 class BookmarkRepositoryImpl implements BookmarkRepository {
   @override
   Future<void> addBookmark(String verseId, DateTime timestamp) async {
+    await saveBookmark(Bookmark(verseId: verseId, timestamp: timestamp));
+  }
+
+  @override
+  Future<void> saveBookmark(Bookmark bookmark) async {
     final isar = await IsarService.getInstance();
-    final entity = BookmarkEntity.fromDomain(
-      Bookmark(verseId: verseId, timestamp: timestamp),
-    );
+    final entity = BookmarkEntity.fromDomain(bookmark);
     await isar.writeTxn(() async {
       await isar.bookmarkEntitys.putByVerseId(entity);
     });
@@ -23,6 +26,16 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
     await isar.writeTxn(() async {
       await isar.bookmarkEntitys.deleteByVerseId(verseId);
     });
+  }
+
+  @override
+  Future<List<Bookmark>> getAllBookmarks() async {
+    final isar = await IsarService.getInstance();
+    final entities = await isar.bookmarkEntitys
+        .where()
+        .sortByTimestampDesc()
+        .findAll();
+    return entities.map((e) => e.toDomain()).toList();
   }
 
   @override
@@ -44,5 +57,15 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
         .surahNumberEqualTo(surahNumber)
         .findAll();
     return entities.map((e) => e.verseId).toSet();
+  }
+
+  @override
+  Future<void> replaceAllBookmarks(List<Bookmark> bookmarks) async {
+    final isar = await IsarService.getInstance();
+    final entities = bookmarks.map(BookmarkEntity.fromDomain).toList();
+    await isar.writeTxn(() async {
+      await isar.bookmarkEntitys.clear();
+      await isar.bookmarkEntitys.putAllByVerseId(entities);
+    });
   }
 }

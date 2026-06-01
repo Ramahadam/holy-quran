@@ -4,4 +4,6 @@ abstract class ReadingPositionRepository {
   Future<void> savePosition(ReadingPosition position);
 
   Future<ReadingPosition?> getLastPosition();
+
+  Future<void> clearPosition();
 }

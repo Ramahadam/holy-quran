@@ -13,9 +13,9 @@ extension GetVerseEntityCollection on Isar {
   IsarCollection<VerseEntity> get verseEntitys => this.collection();
 }
 
-const VerseEntitySchema = CollectionSchema(
+final VerseEntitySchema = CollectionSchema(
   name: r'VerseEntity',
-  id: -3163405091030009,
+  id: int.parse('-5496938192407533235'),
   properties: {
     r'arabicText': PropertySchema(
       id: 0,
@@ -55,7 +55,7 @@ const VerseEntitySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
-      id: -4709412240250781,
+      id: int.parse('1744958713610519296'),
       name: r'verseId',
       unique: true,
       replace: false,
@@ -68,7 +68,7 @@ const VerseEntitySchema = CollectionSchema(
       ],
     ),
     r'surahNumber': IndexSchema(
-      id: 2306805615641216,
+      id: int.parse('9024003441292455669'),
       name: r'surahNumber',
       unique: false,
       replace: false,
@@ -81,7 +81,7 @@ const VerseEntitySchema = CollectionSchema(
       ],
     ),
     r'page': IndexSchema(
-      id: -4650717874588592,
+      id: int.parse('-1004952015509011454'),
       name: r'page',
       unique: false,
       replace: false,
@@ -238,7 +238,8 @@ extension VerseEntityByIndex on IsarCollection<VerseEntity> {
 
   List<Id> putAllByVerseIdSync(List<VerseEntity> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
+    return putAllByIndexSync(r'verseId', objects,
+        saveLinks: saveLinks);
   }
 }
 

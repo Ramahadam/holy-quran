@@ -55,19 +55,33 @@ class _FakeBookmarkRepository implements BookmarkRepository {
   }
 
   @override
+  Future<void> saveBookmark(Bookmark bookmark) async {}
+
+  @override
   Future<void> removeBookmark(String verseId) async {
     removedVerseIds.add(verseId);
   }
+
+  @override
+  Future<List<Bookmark>> getAllBookmarks() async => const [];
 
   @override
   Future<List<Bookmark>> getRecentBookmarks({int limit = 3}) async => const [];
 
   @override
   Future<Set<String>> getBookmarkedVerseIdsBySurah(int surahNumber) async => {};
+
+  @override
+  Future<void> replaceAllBookmarks(List<Bookmark> bookmarks) async {}
 }
 
 class _FakeReadingPositionRepository implements ReadingPositionRepository {
   ReadingPosition? savedPosition;
+
+  @override
+  Future<void> clearPosition() async {
+    savedPosition = null;
+  }
 
   @override
   Future<ReadingPosition?> getLastPosition() async => savedPosition;

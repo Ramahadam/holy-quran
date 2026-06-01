@@ -8,6 +8,8 @@ import '../theme/app_theme.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
+enum _BackupAction { export, import }
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -31,6 +33,36 @@ class HomeScreen extends ConsumerWidget {
             Text('Holy Quran', style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
+        actions: [
+          PopupMenuButton<_BackupAction>(
+            tooltip: 'Backup',
+            icon: const Icon(Icons.more_vert),
+            onSelected: (action) {
+              switch (action) {
+                case _BackupAction.export:
+                  _exportBackup(context, ref);
+                case _BackupAction.import:
+                  _importBackup(context, ref);
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: _BackupAction.export,
+                child: ListTile(
+                  leading: Icon(Icons.upload_file),
+                  title: Text('Export backup'),
+                ),
+              ),
+              PopupMenuItem(
+                value: _BackupAction.import,
+                child: ListTile(
+                  leading: Icon(Icons.download),
+                  title: Text('Import backup'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: surahsAsync.when(
         data: (surahs) {
@@ -103,6 +135,173 @@ class HomeScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    final passphrase = await _promptPassphrase(context, confirm: true);
+    if (passphrase == null) return;
+
+    try {
+      final exported = await ref
+          .read(quranBackupFileServiceProvider)
+          .exportBackup(passphrase);
+      if (!context.mounted) return;
+      _showSnackBar(context, exported ? 'Backup exported' : 'Export canceled');
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, 'Export failed');
+      }
+    }
+  }
+
+  Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+    final passphrase = await _promptPassphrase(context);
+    if (passphrase == null) return;
+
+    try {
+      final imported = await ref
+          .read(quranBackupFileServiceProvider)
+          .importBackup(passphrase);
+      if (!context.mounted) return;
+      if (imported) {
+        ref.invalidate(lastReadPositionProvider);
+        ref.invalidate(recentBookmarksProvider);
+        ref.invalidate(bookmarksBySurahProvider);
+      }
+      _showSnackBar(context, imported ? 'Backup imported' : 'Import canceled');
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, 'Import failed. Check the file and passphrase.');
+      }
+    }
+  }
+
+  Future<String?> _promptPassphrase(
+    BuildContext context, {
+    bool confirm = false,
+  }) {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => _BackupPassphraseDialog(confirm: confirm),
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+class _BackupPassphraseDialog extends StatefulWidget {
+  final bool confirm;
+
+  const _BackupPassphraseDialog({required this.confirm});
+
+  @override
+  State<_BackupPassphraseDialog> createState() =>
+      _BackupPassphraseDialogState();
+}
+
+class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
+  final TextEditingController _passphraseController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
+  late NavigatorState _navigator;
+  String? _errorText;
+  bool _submitted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _navigator = Navigator.of(context);
+  }
+
+  @override
+  void dispose() {
+    _passphraseController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final confirm = widget.confirm;
+    return AlertDialog(
+      title: Text(confirm ? 'Export backup' : 'Import backup'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _passphraseController,
+              autofocus: true,
+              obscureText: true,
+              textInputAction: confirm
+                  ? TextInputAction.next
+                  : TextInputAction.done,
+              onSubmitted: (_) {
+                if (!confirm) _submit();
+              },
+              decoration: const InputDecoration(labelText: 'Passphrase'),
+            ),
+            if (confirm) ...[
+              const SizedBox(height: 8),
+              TextField(
+                controller: _confirmController,
+                obscureText: true,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _submit(),
+                decoration: const InputDecoration(
+                  labelText: 'Confirm passphrase',
+                ),
+              ),
+            ],
+            if (_errorText != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _errorText!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.red),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => _navigator.pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(confirm ? 'Export' : 'Import'),
+        ),
+      ],
+    );
+  }
+
+  void _submit() {
+    if (!mounted || _submitted) return;
+    final passphrase = _passphraseController.text;
+    if (passphrase.trim().isEmpty) {
+      setState(() {
+        _errorText = 'Passphrase is required';
+      });
+      return;
+    }
+    if (widget.confirm && passphrase != _confirmController.text) {
+      setState(() {
+        _errorText = 'Passphrases do not match';
+      });
+      return;
+    }
+    _submitted = true;
+    _navigator.pop(passphrase);
   }
 }
 
