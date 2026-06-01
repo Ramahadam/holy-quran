@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/feedback/anonymous_feedback_service.dart';
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/surah.dart';
 import '../providers/quran_providers.dart';
@@ -8,7 +9,7 @@ import '../theme/app_theme.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
-enum _BackupAction { export, import }
+enum _HomeMenuAction { exportBackup, importBackup, feedback }
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -34,27 +35,37 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          PopupMenuButton<_BackupAction>(
-            tooltip: 'Backup',
+          PopupMenuButton<_HomeMenuAction>(
+            tooltip: 'Menu',
             icon: const Icon(Icons.more_vert),
             onSelected: (action) {
               switch (action) {
-                case _BackupAction.export:
+                case _HomeMenuAction.exportBackup:
                   _exportBackup(context, ref);
-                case _BackupAction.import:
+                case _HomeMenuAction.importBackup:
                   _importBackup(context, ref);
+                case _HomeMenuAction.feedback:
+                  _showFeedbackDialog(context);
               }
             },
             itemBuilder: (context) => const [
               PopupMenuItem(
-                value: _BackupAction.export,
+                value: _HomeMenuAction.feedback,
+                child: ListTile(
+                  leading: Icon(Icons.feedback_outlined),
+                  title: Text('Send feedback'),
+                ),
+              ),
+              PopupMenuDivider(),
+              PopupMenuItem(
+                value: _HomeMenuAction.exportBackup,
                 child: ListTile(
                   leading: Icon(Icons.upload_file),
                   title: Text('Export backup'),
                 ),
               ),
               PopupMenuItem(
-                value: _BackupAction.import,
+                value: _HomeMenuAction.importBackup,
                 child: ListTile(
                   leading: Icon(Icons.download),
                   title: Text('Import backup'),
@@ -186,6 +197,13 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _showFeedbackDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => const _FeedbackDialog(),
+    );
+  }
+
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -302,6 +320,116 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
     }
     _submitted = true;
     _navigator.pop(passphrase);
+  }
+}
+
+class _FeedbackDialog extends ConsumerStatefulWidget {
+  const _FeedbackDialog();
+
+  @override
+  ConsumerState<_FeedbackDialog> createState() => _FeedbackDialogState();
+}
+
+class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
+  final TextEditingController _feedbackController = TextEditingController();
+  bool _submitting = false;
+  String? _errorText;
+
+  @override
+  void dispose() {
+    _feedbackController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Send feedback'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _feedbackController,
+              autofocus: true,
+              minLines: 4,
+              maxLines: 6,
+              maxLength: AnonymousFeedbackService.maxLength,
+              textInputAction: TextInputAction.newline,
+              decoration: const InputDecoration(
+                labelText: 'Feedback',
+                hintText: 'Share what would make the app better.',
+                alignLabelWithHint: true,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Sent anonymously. Do not include private information.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            if (_errorText != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                _errorText!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.red),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _submitting ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _submitting ? null : _submit,
+          child: _submitting
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Send'),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _submit() async {
+    setState(() {
+      _submitting = true;
+      _errorText = null;
+    });
+
+    try {
+      await ref
+          .read(anonymousFeedbackServiceProvider)
+          .submitFeedback(_feedbackController.text);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Feedback sent'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on FeedbackValidationException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorText = e.message;
+        _submitting = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorText = 'Feedback could not be sent. Please try again later.';
+        _submitting = false;
+      });
+    }
   }
 }
 

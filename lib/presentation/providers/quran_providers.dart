@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/backup/quran_backup_codec.dart';
 import '../../data/backup/quran_backup_file_service.dart';
 import '../../data/backup/quran_backup_service.dart';
+import '../../data/feedback/anonymous_feedback_service.dart';
 import '../../data/repositories/bookmark_repository.dart';
 import '../../data/repositories/bookmark_repository_impl.dart';
 import '../../data/repositories/quran_repository.dart';
@@ -12,6 +14,19 @@ import '../../domain/models/bookmark.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
+
+const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const String supabasePublishableKey = String.fromEnvironment(
+  'SUPABASE_PUBLISHABLE_KEY',
+);
+const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
+    ? supabasePublishableKey
+    : supabaseAnonKey;
+
+bool get isSupabaseFeedbackConfigured =>
+    supabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
 
 final quranRepositoryProvider = Provider<QuranRepository>((ref) {
   return QuranRepositoryImpl();
@@ -43,6 +58,15 @@ final quranBackupFileServiceProvider = Provider<QuranBackupFileService>((ref) {
   return QuranBackupFileService(
     backupService: ref.watch(quranBackupServiceProvider),
   );
+});
+
+final anonymousFeedbackServiceProvider = Provider<AnonymousFeedbackService>((
+  ref,
+) {
+  final transport = isSupabaseFeedbackConfigured
+      ? SupabaseFeedbackTransport(client: Supabase.instance.client)
+      : const UnconfiguredFeedbackTransport();
+  return AnonymousFeedbackService(transport: transport);
 });
 
 final initializeDataProvider = FutureProvider<void>((ref) async {
