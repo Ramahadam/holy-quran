@@ -11,7 +11,7 @@ void main() async {
   if (isSupabaseFeedbackConfigured) {
     try {
       await Supabase.initialize(
-        url: supabaseUrl,
+        url: configuredSupabaseUrl,
         anonKey: configuredSupabaseKey,
       );
     } catch (e) {

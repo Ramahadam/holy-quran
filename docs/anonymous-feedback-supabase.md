@@ -11,7 +11,34 @@ last-read position to this payload.
 
 ## Build Configuration
 
-Provide Supabase values at build time with Dart defines:
+For local development, keep `.env` ignored by git and run:
+
+```bash
+bash scripts/flutter_run_with_env.sh
+```
+
+The script reads `.env` and forwards only the public values the Flutter app
+needs. It accepts either naming style:
+
+```text
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your-public-key
+APP_VERSION=1.0.0+1
+```
+
+or:
+
+```text
+PROJECT_URL=https://your-project.supabase.co
+PUBLISHABLE_KEY=your-public-key
+APP_VERSION=1.0.0+1
+```
+
+Do not pass the whole `.env` file with `--dart-define-from-file` if it contains
+database passwords, service-role keys, or other private values.
+
+For CI or release builds, provide Supabase values at build time with Dart
+defines:
 
 ```bash
 flutter run \

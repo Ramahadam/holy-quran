@@ -16,17 +16,24 @@ import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
 
 const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const String projectUrl = String.fromEnvironment('PROJECT_URL');
 const String supabasePublishableKey = String.fromEnvironment(
   'SUPABASE_PUBLISHABLE_KEY',
 );
+const String publishableKey = String.fromEnvironment('PUBLISHABLE_KEY');
 const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+String get configuredSupabaseUrl =>
+    supabaseUrl.isNotEmpty ? supabaseUrl : projectUrl;
 
 String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
     ? supabasePublishableKey
+    : publishableKey.isNotEmpty
+    ? publishableKey
     : supabaseAnonKey;
 
 bool get isSupabaseFeedbackConfigured =>
-    supabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
+    configuredSupabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
 
 final quranRepositoryProvider = Provider<QuranRepository>((ref) {
   return QuranRepositoryImpl();
