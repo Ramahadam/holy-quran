@@ -11,31 +11,35 @@ last-read position to this payload.
 
 ## Build Configuration
 
-For local development, keep `.env` ignored by git and run:
+For local development, use Flutter's built-in Dart define file support. Create
+`config/supabase.local.json` from `config/supabase.local.example.json`:
+
+```json
+{
+  "SUPABASE_URL": "https://your-project.supabase.co",
+  "SUPABASE_PUBLISHABLE_KEY": "your-public-publishable-key",
+  "APP_VERSION": "1.0.0+1"
+}
+```
+
+Then run:
+
+```bash
+flutter run --dart-define-from-file=config/supabase.local.json
+```
+
+The local config file is ignored by git. It must contain only public mobile app
+configuration. Do not put database passwords, service-role keys, or private API
+keys in a Flutter Dart define file.
+
+If you already have a `.env` file from local development, you can also use:
 
 ```bash
 bash scripts/flutter_run_with_env.sh
 ```
 
-The script reads `.env` and forwards only the public values the Flutter app
-needs. It accepts either naming style:
-
-```text
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_PUBLISHABLE_KEY=your-public-key
-APP_VERSION=1.0.0+1
-```
-
-or:
-
-```text
-PROJECT_URL=https://your-project.supabase.co
-PUBLISHABLE_KEY=your-public-key
-APP_VERSION=1.0.0+1
-```
-
-Do not pass the whole `.env` file with `--dart-define-from-file` if it contains
-database passwords, service-role keys, or other private values.
+That helper reads `.env` and forwards only `SUPABASE_URL` /
+`SUPABASE_PUBLISHABLE_KEY` or `PROJECT_URL` / `PUBLISHABLE_KEY` to Flutter.
 
 For CI or release builds, provide Supabase values at build time with Dart
 defines:
