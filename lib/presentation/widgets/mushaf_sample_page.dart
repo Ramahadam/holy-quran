@@ -140,6 +140,7 @@ class MushafQcfPage extends StatelessWidget {
           builder: (context, constraints) {
             final contentHeight =
                 constraints.maxHeight - _headerInset - _bottomInset;
+            final contentScale = _contentScaleFor(contentHeight);
             final mediaQuery = MediaQuery.of(context);
 
             return Padding(
@@ -156,8 +157,9 @@ class MushafQcfPage extends StatelessWidget {
                 child: _InspiredQcfPage(
                   pageNumber: pageNumber,
                   theme: theme,
-                  sp: _scale,
+                  sp: _scale * contentScale,
                   h: _heightScale,
+                  contentScale: contentScale,
                   onTap: onTap,
                   onLongPress: onLongPress,
                 ),
@@ -171,6 +173,15 @@ class MushafQcfPage extends StatelessWidget {
 
   static const double _headerInset = 54;
   static const double _bottomInset = 12;
+  static const double _referenceContentHeight = 848;
+  static const double _minimumContentScale = .62;
+
+  static double _contentScaleFor(double contentHeight) {
+    final scale = contentHeight / _referenceContentHeight;
+    if (scale > 1) return 1;
+    if (scale < _minimumContentScale) return _minimumContentScale;
+    return scale;
+  }
 
   double get _scale {
     if (pageNumber == 1) return 1.16;
@@ -355,6 +366,7 @@ class _InspiredQcfPage extends StatefulWidget {
   final QcfThemeData theme;
   final double sp;
   final double h;
+  final double contentScale;
   final void Function(int surahNumber, int verseNumber)? onTap;
   final void Function(int surahNumber, int verseNumber)? onLongPress;
 
@@ -363,6 +375,7 @@ class _InspiredQcfPage extends StatefulWidget {
     required this.theme,
     required this.sp,
     required this.h,
+    required this.contentScale,
     this.onTap,
     this.onLongPress,
   });
@@ -405,11 +418,16 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
     final screenSize = MediaQuery.of(context).size;
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
+    final theme = _scaledTheme(widget.theme, widget.contentScale);
     final verseSpans = <InlineSpan>[];
 
     if (widget.pageNumber == 1 || widget.pageNumber == 2) {
       verseSpans.add(
-        WidgetSpan(child: SizedBox(height: screenSize.height * .175)),
+        WidgetSpan(
+          child: SizedBox(
+            height: screenSize.height * .175 * widget.contentScale,
+          ),
+        ),
       );
     }
 
@@ -423,7 +441,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           if (widget.theme.showHeader) {
             verseSpans.add(
               WidgetSpan(
-                child: HeaderWidget(suraNumber: surah, theme: widget.theme),
+                child: HeaderWidget(suraNumber: surah, theme: theme),
               ),
             );
           }
@@ -437,9 +455,9 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
                   fontFamily: 'QCF_P001',
                   package: 'qcf_quran',
                   fontSize: getScreenType(context) == ScreenType.large
-                      ? widget.theme.basmalaFontSizeLarge * widget.sp
-                      : widget.theme.basmalaFontSizeSmall * widget.sp,
-                  color: widget.theme.basmalaColor,
+                      ? theme.basmalaFontSizeLarge * widget.sp
+                      : theme.basmalaFontSizeSmall * widget.sp,
+                  color: theme.basmalaColor,
                 ),
               ),
             );
@@ -492,6 +510,17 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           ],
         ),
       ),
+    );
+  }
+
+  QcfThemeData _scaledTheme(QcfThemeData theme, double scale) {
+    if (scale >= .999) return theme;
+
+    return theme.copyWith(
+      headerWidthLarge: theme.headerWidthLarge * scale,
+      headerWidthSmall: theme.headerWidthSmall * scale,
+      headerFontSizeLarge: theme.headerFontSizeLarge * scale,
+      headerFontSizeSmall: theme.headerFontSizeSmall * scale,
     );
   }
 

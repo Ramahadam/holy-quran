@@ -23,7 +23,8 @@ The app avoids the "busy" feel of modern social media. It uses a soft, cream-col
 ### 3.3 Hybrid "Abstract Renderer" Architecture
 The app uses a unified interface to support two distinct reading modes:
 *   **v1: Classic Mode (Vector Fonts):** Uses the KFGQPC Hafs Digital Font. Extremely lightweight (~20MB total), fast, and supports dynamic text scaling.
-*   **v2: Mushaf Mode (HD Images):** Uses high-resolution page images with **Coordinate Mapping (JSON)** to enable word-level interaction (Tafseer/Translation) on the images.
+*   **v2: Mushaf Mode (QCF Package Renderer):** Uses page-specific QCF Mushaf fonts/package rendering to recreate the Madani page flow with crisp vector text, a calm cream page treatment, clear ayah markers, and tap/long-press verse interactions. This is the current implementation path because it keeps the app lightweight, offline-first, and interactive without bundling hundreds of HD page images.
+*   **Future Asset Option:** High-resolution Mushaf page images with coordinate mapping remain a possible future enhancement if the product explicitly reopens exact scanned-page fidelity. They are not the active Mushaf Mode implementation.
 *   **Unified State:** Bookmarks and "Last Read" positions are saved as `VerseIDs`, ensuring a seamless transition between modes.
 
 ## 4. User Experience & Features
@@ -48,6 +49,7 @@ The app uses a unified interface to support two distinct reading modes:
 ## 6. Feedback & Dashboard
 *   **Heartbeat Feedback:** Non-intrusive prompts (e.g., after a 7-day streak) ask users for feedback.
 *   **Anonymous Pipeline:** Feedback is sent anonymously to a **Supabase Dashboard**, allowing the developer to review and prioritize improvements without compromising user privacy.
+*   **Release Configuration:** Supabase feedback requires public Dart defines at app launch/build time. Local Android testing must run from the project root with `flutter run -d emulator-5554 --dart-define-from-file=config/supabase.local.json`. Google Play builds must also inject the same public values during the release build, e.g. `flutter build appbundle --release --dart-define-from-file=config/supabase.local.json`; this is not injected automatically by Google Play.
 
 ## 7. Roadmap
 
@@ -58,7 +60,8 @@ The app uses a unified interface to support two distinct reading modes:
 *   Supabase feedback integration.
 
 ### Phase 2: Enhanced Experience (v2 - Mushaf Mode)
-*   HD Image rendering with Coordinate Mapping.
+*   QCF/package-rendered Mushaf pages with responsive physical-page-like layout.
+*   Verse-level tap and long-press interactions anchored to `VerseID`.
 *   "Focus Mode" for elderly accessibility.
 *   Manual Export/Import backup system.
 

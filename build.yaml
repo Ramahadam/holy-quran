@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      isar_generator:
+        options:
+          # Generate web-compatible code (uses smaller integer IDs)
+          web: true

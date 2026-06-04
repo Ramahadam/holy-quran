@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -189,6 +190,44 @@ void main() {
       expect(find.text('سورة الفاتحة'), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('fits opening Mushaf page on a compact mobile viewport', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 2;
+      tester.view.physicalSize = const Size(720, 1280);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 1))),
+      );
+      await tester.pumpAndSettle();
+
+      final bodyTextFinder = find.byWidgetPredicate((widget) {
+        if (widget is! Text) return false;
+        return widget.data == null && widget.textSpan is TextSpan;
+      });
+
+      expect(bodyTextFinder, findsOneWidget);
+      final bodyText = tester.widget<Text>(bodyTextFinder);
+      expect(bodyText.style?.fontSize, lessThan(22));
+
+      final paragraphFinder = find.descendant(
+        of: bodyTextFinder,
+        matching: find.byType(RichText),
+      );
+      final paragraph = tester.renderObject<RenderParagraph>(
+        paragraphFinder.first,
+      );
+
+      expect(
+        paragraph.getMaxIntrinsicHeight(paragraph.size.width),
+        lessThanOrEqualTo(tester.getSize(bodyTextFinder).height),
+      );
     });
 
     testWidgets('explains unsupported page numbers', (tester) async {
