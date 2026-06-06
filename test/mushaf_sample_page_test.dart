@@ -90,12 +90,30 @@ void main() {
       expect(find.text('surah002'), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(find.text('٣'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('mushafHeaderBackground')),
+        findsOneWidget,
+      );
 
       final dividerCenter = tester.getCenter(
         find.byKey(const ValueKey('mushafHeaderDivider')),
       );
+      final surahSlotCenter = tester.getCenter(
+        find.byKey(const ValueKey('mushafHeaderSurahSlot')),
+      );
+      final juzSlotCenter = tester.getCenter(
+        find.byKey(const ValueKey('mushafHeaderJuzSlot')),
+      );
       final pageRect = tester.getRect(find.byType(MushafQcfPage));
       expect(dividerCenter.dx, closeTo(pageRect.center.dx, 1));
+      expect(
+        surahSlotCenter.dx,
+        closeTo(pageRect.left + pageRect.width * .25, 1),
+      );
+      expect(
+        juzSlotCenter.dx,
+        closeTo(pageRect.left + pageRect.width * .75, 1),
+      );
     });
   });
 }

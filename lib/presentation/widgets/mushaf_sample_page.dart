@@ -175,7 +175,7 @@ class MushafQcfPage extends StatelessWidget {
     );
   }
 
-  static const double _headerInset = 48;
+  static const double _headerInset = 92;
   static const double _openingHeaderInset = 4;
   static const double _bottomInset = 36;
 
@@ -263,6 +263,10 @@ class _MushafPageHeader extends StatelessWidget {
 
   const _MushafPageHeader({required this.pageNumber});
 
+  static const double _height = 88;
+  static const String _backgroundAsset =
+      'assets/mushaf/chrome/quran_header_surah_juzah_empty_slots_v2.png';
+
   @override
   Widget build(BuildContext context) {
     final pageData = getPageData(pageNumber);
@@ -288,45 +292,71 @@ class _MushafPageHeader extends StatelessWidget {
       top: 0,
       left: 0,
       right: 0,
-      height: 42,
+      height: _height,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: _MushafFrameBand(
-          horizontalPadding: 18,
-          child: Row(
-            children: [
-              Expanded(
-                child: Center(
-                  child: Text(
-                    'surah${surah.toString().padLeft(3, '0')}',
-                    style: surahStyle,
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.ltr,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              _backgroundAsset,
+              key: const ValueKey('mushafHeaderBackground'),
+              fit: BoxFit.fill,
+            ),
+            Transform.translate(
+              offset: const Offset(0, 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      key: const ValueKey('mushafHeaderSurahSlot'),
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 32,
+                        end: 38,
+                      ),
+                      child: Center(
+                        child: Text(
+                          'surah${surah.toString().padLeft(3, '0')}',
+                          style: surahStyle,
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.ltr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Padding(
+                      key: const ValueKey('mushafHeaderJuzSlot'),
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 38,
+                        end: 32,
+                      ),
+                      child: Center(
+                        child: Text(
+                          mushafJuzLabel(juz),
+                          style: metaStyle,
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Container(
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
                 key: const ValueKey('mushafHeaderDivider'),
                 width: 1,
                 height: 18,
-                color: const Color(0xFF8A7A55).withValues(alpha: .55),
               ),
-              Expanded(
-                child: Center(
-                  child: Text(
-                    mushafJuzLabel(juz),
-                    style: metaStyle,
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
