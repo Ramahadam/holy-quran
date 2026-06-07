@@ -115,5 +115,34 @@ void main() {
         closeTo(pageRect.left + pageRect.width * .75, 1),
       );
     });
+
+    testWidgets('uses the decorated header on pages that start a surah', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox(
+            width: 360,
+            height: 760,
+            child: MushafQcfPage(
+              pageNumber: 1,
+              theme: QcfThemeData(
+                pageBackgroundColor: Colors.transparent,
+                verseTextColor: Colors.black,
+                verseNumberColor: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('surah001'), findsOneWidget);
+      expect(find.text('الجزء الأول'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('mushafHeaderBackground')),
+        findsOneWidget,
+      );
+      expect(find.byType(HeaderWidget), findsNothing);
+    });
   });
 }

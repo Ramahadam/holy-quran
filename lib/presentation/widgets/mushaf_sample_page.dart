@@ -131,9 +131,6 @@ class MushafQcfPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showPageHeader = !mushafPageStartsWithSurah(pageNumber: pageNumber);
-    final headerInset = showPageHeader ? _headerInset : _openingHeaderInset;
-
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -141,7 +138,7 @@ class MushafQcfPage extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final contentHeight =
-                constraints.maxHeight - headerInset - _bottomInset;
+                constraints.maxHeight - _headerInset - _bottomInset;
             final contentScale = mushafContentScaleForPage(
               pageNumber: pageNumber,
               contentHeight: contentHeight,
@@ -149,7 +146,10 @@ class MushafQcfPage extends StatelessWidget {
             final mediaQuery = MediaQuery.of(context);
 
             return Padding(
-              padding: EdgeInsets.only(top: headerInset, bottom: _bottomInset),
+              padding: const EdgeInsets.only(
+                top: _headerInset,
+                bottom: _bottomInset,
+              ),
               child: MediaQuery(
                 data: mediaQuery.copyWith(
                   size: Size(constraints.maxWidth, contentHeight),
@@ -169,14 +169,13 @@ class MushafQcfPage extends StatelessWidget {
             );
           },
         ),
-        if (showPageHeader) _MushafPageHeader(pageNumber: pageNumber),
+        _MushafPageHeader(pageNumber: pageNumber),
         _MushafPageFooter(pageNumber: pageNumber),
       ],
     );
   }
 
   static const double _headerInset = 76;
-  static const double _openingHeaderInset = 4;
   static const double _bottomInset = 36;
 
   double get _scale {
@@ -483,6 +482,9 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         MediaQuery.of(context).orientation == Orientation.portrait;
     final theme = _scaledTheme(widget.theme, widget.contentScale);
     final verseSpans = <InlineSpan>[];
+    final pageStartsWithSurah = mushafPageStartsWithSurah(
+      pageNumber: widget.pageNumber,
+    );
 
     if (widget.pageNumber == 1 || widget.pageNumber == 2) {
       verseSpans.add(
@@ -501,7 +503,8 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
 
       for (var verse = start; verse <= end; verse += 1) {
         if (verse == start && verse == 1) {
-          if (widget.theme.showHeader) {
+          final isPageOpeningSurah = pageStartsWithSurah && r == ranges.first;
+          if (widget.theme.showHeader && !isPageOpeningSurah) {
             verseSpans.add(
               WidgetSpan(
                 child: HeaderWidget(suraNumber: surah, theme: theme),
