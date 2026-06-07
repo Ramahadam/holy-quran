@@ -175,7 +175,7 @@ class MushafQcfPage extends StatelessWidget {
     );
   }
 
-  static const double _headerInset = 92;
+  static const double _headerInset = 76;
   static const double _openingHeaderInset = 4;
   static const double _bottomInset = 36;
 
@@ -263,7 +263,7 @@ class _MushafPageHeader extends StatelessWidget {
 
   const _MushafPageHeader({required this.pageNumber});
 
-  static const double _height = 88;
+  static const double _height = 72;
   static const String _backgroundAsset =
       'assets/mushaf/chrome/quran_header_surah_juzah_empty_slots_v2.png';
 
