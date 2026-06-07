@@ -265,7 +265,7 @@ class _MushafPageHeader extends StatelessWidget {
 
   static const double _height = 88;
   static const String _backgroundAsset =
-      'assets/mushaf/chrome/quran_header_surah_juzah_empty_slots_v2.png';
+      'assets/mushaf/chrome/quran_header_transparent_2525x623.png';
 
   @override
   Widget build(BuildContext context) {
