@@ -138,7 +138,9 @@ class MushafQcfPage extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final contentHeight =
-                constraints.maxHeight - _headerInset - _bottomInset;
+                constraints.maxHeight - _contentTopInset - _contentBottomInset;
+            final contentWidth =
+                constraints.maxWidth - (_contentHorizontalInset * 2);
             final contentScale = mushafContentScaleForPage(
               pageNumber: pageNumber,
               contentHeight: contentHeight,
@@ -147,12 +149,14 @@ class MushafQcfPage extends StatelessWidget {
 
             return Padding(
               padding: const EdgeInsets.only(
-                top: _headerInset,
-                bottom: _bottomInset,
+                top: _contentTopInset,
+                left: _contentHorizontalInset,
+                right: _contentHorizontalInset,
+                bottom: _contentBottomInset,
               ),
               child: MediaQuery(
                 data: mediaQuery.copyWith(
-                  size: Size(constraints.maxWidth, contentHeight),
+                  size: Size(contentWidth, contentHeight),
                   padding: EdgeInsets.zero,
                   viewPadding: EdgeInsets.zero,
                 ),
@@ -175,8 +179,10 @@ class MushafQcfPage extends StatelessWidget {
     );
   }
 
-  static const double _headerInset = 76;
-  static const double _bottomInset = 36;
+  // Tuning knobs for the empty space between the frame and the Quran text.
+  static const double _contentTopInset = 64;
+  static const double _contentHorizontalInset = 0;
+  static const double _contentBottomInset = 0;
 
   double get _scale {
     if (pageNumber == 1) return 1.16;
@@ -548,6 +554,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         width: screenSize.width,
         child: ListView(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
           children: [
             Text.rich(
