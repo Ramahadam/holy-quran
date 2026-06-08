@@ -7,6 +7,11 @@ import 'package:qcf_quran/src/data/quran_text.dart';
 import '../theme/app_theme.dart';
 import 'mushaf_hit_testing.dart';
 
+const _qcfBasmalaFontFamily = 'QCF_P001';
+const _referenceBasmalaTextScale = 1.16;
+const _referenceBasmalaHeightScale = 1.06;
+const _allahHighlightColor = Color(0xFFB34437);
+
 class MushafSampleAssets {
   static const Set<int> sampleCoordinatePages = {1, 2, 3, 604};
   static const String coordinatesPath =
@@ -105,7 +110,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
     pageBackgroundColor: Colors.transparent,
     verseTextColor: Color(0xFF17120C),
     verseNumberColor: Color(0xFF4D3518),
-    basmalaColor: AppTheme.islamicGreen,
+    basmalaColor: Color(0xFF17120C),
     headerTextColor: Color(0xFF17120C),
     headerBackgroundColor: Color(0x00FFFFFF),
     verseHeight: 2.08,
@@ -138,7 +143,9 @@ class MushafQcfPage extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final contentHeight =
-                constraints.maxHeight - _headerInset - _bottomInset;
+                constraints.maxHeight - _contentTopInset - _contentBottomInset;
+            final contentWidth =
+                constraints.maxWidth - (_contentHorizontalInset * 2);
             final contentScale = mushafContentScaleForPage(
               pageNumber: pageNumber,
               contentHeight: contentHeight,
@@ -147,12 +154,14 @@ class MushafQcfPage extends StatelessWidget {
 
             return Padding(
               padding: const EdgeInsets.only(
-                top: _headerInset,
-                bottom: _bottomInset,
+                top: _contentTopInset,
+                left: _contentHorizontalInset,
+                right: _contentHorizontalInset,
+                bottom: _contentBottomInset,
               ),
               child: MediaQuery(
                 data: mediaQuery.copyWith(
-                  size: Size(constraints.maxWidth, contentHeight),
+                  size: Size(contentWidth, contentHeight),
                   padding: EdgeInsets.zero,
                   viewPadding: EdgeInsets.zero,
                 ),
@@ -175,8 +184,10 @@ class MushafQcfPage extends StatelessWidget {
     );
   }
 
-  static const double _headerInset = 76;
-  static const double _bottomInset = 36;
+  // Tuning knobs for the empty space between the frame and the Quran text.
+  static const double _contentTopInset = 64;
+  static const double _contentHorizontalInset = 0;
+  static const double _contentBottomInset = 0;
 
   double get _scale {
     if (pageNumber == 1) return 1.16;
@@ -514,19 +525,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           if (widget.theme.showBasmala &&
               widget.pageNumber != 1 &&
               widget.pageNumber != 187) {
-            verseSpans.add(
-              TextSpan(
-                text: ' ﱁ  ﱂﱃﱄ\n',
-                style: TextStyle(
-                  fontFamily: 'QCF_P001',
-                  package: 'qcf_quran',
-                  fontSize: getScreenType(context) == ScreenType.large
-                      ? theme.basmalaFontSizeLarge * widget.sp
-                      : theme.basmalaFontSizeSmall * widget.sp,
-                  color: theme.basmalaColor,
-                ),
-              ),
-            );
+            verseSpans.addAll(_buildInsertedBasmalaSpans(context));
           }
         }
 
@@ -548,6 +547,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         width: screenSize.width,
         child: ListView(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
           children: [
             Text.rich(
@@ -611,7 +611,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           text: char,
           recognizer: recognizer,
           style: allahGlyphIndexes.contains(i)
-              ? const TextStyle(color: Color(0xFFB34437))
+              ? const TextStyle(color: _allahHighlightColor)
               : null,
         ),
       );
@@ -634,6 +634,36 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
       spans.add(TextSpan(text: '\n', recognizer: recognizer));
     }
 
+    return spans;
+  }
+
+  List<InlineSpan> _buildInsertedBasmalaSpans(BuildContext context) {
+    final verseText = getVerseQCF(1, 1, verseEndSymbol: false);
+    final displayText =
+        '${verseText.substring(0, 1)}\u200A${verseText.substring(1)}';
+    final allahGlyphIndexes = _allahGlyphIndexes(1, 1, displayText);
+    final fontSize =
+        getFontSize(1, context) *
+        _referenceBasmalaTextScale *
+        widget.contentScale;
+    final spans = <InlineSpan>[];
+
+    for (var i = 0; i < displayText.length; i += 1) {
+      spans.add(
+        TextSpan(
+          text: displayText[i],
+          style: TextStyle(
+            fontFamily: _qcfBasmalaFontFamily,
+            package: 'qcf_quran',
+            fontSize: fontSize,
+            height: 2.2 * _referenceBasmalaHeightScale,
+            color: allahGlyphIndexes.contains(i) ? _allahHighlightColor : null,
+          ),
+        ),
+      );
+    }
+
+    spans.add(const TextSpan(text: '\n'));
     return spans;
   }
 

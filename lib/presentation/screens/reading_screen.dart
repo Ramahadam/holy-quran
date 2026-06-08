@@ -11,6 +11,10 @@ import 'verse_detail_screen.dart';
 import '../widgets/mushaf_sample_page.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
+const _bismillahOpeningWord = 'بِسْمِ';
+const _bismillahLastWord = 'ٱلرَّحِيمِ';
+const _bismillahFontSize = 28.0;
+const _bismillahLineHeight = 2.0;
 const _totalPages = 604;
 
 enum ReadingMode { classic, mushaf }
@@ -448,15 +452,15 @@ class _BismillahHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Text(
         'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
           fontFamily: _kfgqpcHafsFontFamily,
-          fontSize: 26,
+          fontSize: _bismillahFontSize,
           fontWeight: FontWeight.w400,
-          height: 2.0,
-          color: AppTheme.islamicGreen,
+          height: _bismillahLineHeight,
+          color: AppTheme.textPrimary,
         ),
         textAlign: TextAlign.center,
         textDirection: TextDirection.rtl,
@@ -541,9 +545,8 @@ class _ArabicVerse extends StatelessWidget {
         verse.arabicText.length - verse.arabicText.trimLeft().length;
     final leadingSpace = verse.arabicText.substring(0, leadingSpaceCount);
     final trimmedText = verse.arabicText.substring(leadingSpaceCount);
-    const bismillah = 'بِسْمِ';
 
-    if (!trimmedText.startsWith(bismillah)) {
+    if (!trimmedText.startsWith(_bismillahOpeningWord)) {
       return [TextSpan(text: verse.arabicText)];
     }
 
@@ -553,9 +556,8 @@ class _ArabicVerse extends StatelessWidget {
       TextSpan(
         text: trimmedText.substring(0, bismillahEnd),
         style: const TextStyle(
-          color: AppTheme.islamicGreen,
-          fontSize: 28,
-          height: 2.0,
+          fontSize: _bismillahFontSize,
+          height: _bismillahLineHeight,
         ),
       ),
       TextSpan(text: trimmedText.substring(bismillahEnd)),
@@ -563,12 +565,11 @@ class _ArabicVerse extends StatelessWidget {
   }
 
   int _findBismillahEnd(String text) {
-    const lastWord = 'ٱلرَّحِيمِ';
-    final lastWordStart = text.indexOf(lastWord);
+    final lastWordStart = text.indexOf(_bismillahLastWord);
     if (lastWordStart == -1) {
       return text.length;
     }
-    return lastWordStart + lastWord.length;
+    return lastWordStart + _bismillahLastWord.length;
   }
 
   String _toArabicNumeral(int number) {

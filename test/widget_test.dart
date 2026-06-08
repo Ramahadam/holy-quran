@@ -545,7 +545,7 @@ void main() {
     });
 
     testWidgets(
-      'gives Bismillah distinct styling when verse data includes it',
+      'uses the Al-Fatihah Bismillah treatment when verse data includes it',
       (tester) async {
         await tester.pumpWidget(
           ProviderScope(
@@ -562,8 +562,9 @@ void main() {
           find.textContaining('بِسْمِ', findRichText: true),
         );
         final children = (richText.text as TextSpan).children!;
-        expect(children.first.style?.color, AppTheme.islamicGreen);
+        expect(children.first.style?.color, isNull);
         expect(children.first.style?.fontSize, 28);
+        expect(children.first.style?.height, 2.0);
       },
     );
 
@@ -595,7 +596,9 @@ void main() {
       final bismillahSpan = children[0] as TextSpan;
       final remainingTextSpan = children[1] as TextSpan;
       expect(bismillahSpan.text, _bismillah);
-      expect(bismillahSpan.style?.color, AppTheme.islamicGreen);
+      expect(bismillahSpan.style?.color, isNull);
+      expect(bismillahSpan.style?.fontSize, 28);
+      expect(bismillahSpan.style?.height, 2.0);
       expect(remainingTextSpan.text, ' ٱلْحَمْدُ لِلَّهِ');
       expect(remainingTextSpan.style, isNull);
     });
@@ -628,7 +631,10 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.text(_bismillah), findsOneWidget);
+        final bismillah = tester.widget<Text>(find.text(_bismillah));
+        expect(bismillah.style?.color, AppTheme.textPrimary);
+        expect(bismillah.style?.fontSize, 28);
+        expect(bismillah.style?.height, 2.0);
       },
     );
 
