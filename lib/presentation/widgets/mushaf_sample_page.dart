@@ -135,12 +135,14 @@ class MushafQcfPage extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         const _MushafPageFrame(),
-        _MushafPageHeader(pageNumber: pageNumber),
         LayoutBuilder(
           builder: (context, constraints) {
             final contentHeight =
                 constraints.maxHeight - _headerInset - _bottomInset;
-            final contentScale = _contentScaleFor(contentHeight);
+            final contentScale = mushafContentScaleForPage(
+              pageNumber: pageNumber,
+              contentHeight: contentHeight,
+            );
             final mediaQuery = MediaQuery.of(context);
 
             return Padding(
@@ -167,26 +169,19 @@ class MushafQcfPage extends StatelessWidget {
             );
           },
         ),
+        _MushafPageHeader(pageNumber: pageNumber),
+        _MushafPageFooter(pageNumber: pageNumber),
       ],
     );
   }
 
-  static const double _headerInset = 54;
-  static const double _bottomInset = 12;
-  static const double _referenceContentHeight = 848;
-  static const double _minimumContentScale = .62;
-
-  static double _contentScaleFor(double contentHeight) {
-    final scale = contentHeight / _referenceContentHeight;
-    if (scale > 1) return 1;
-    if (scale < _minimumContentScale) return _minimumContentScale;
-    return scale;
-  }
+  static const double _headerInset = 76;
+  static const double _bottomInset = 36;
 
   double get _scale {
     if (pageNumber == 1) return 1.16;
     if (pageNumber == 2) return 1.06;
-    return 1.03;
+    return 1.08;
   }
 
   double get _heightScale {
@@ -196,10 +191,80 @@ class MushafQcfPage extends StatelessWidget {
   }
 }
 
+@visibleForTesting
+double mushafContentScaleForPage({
+  required int pageNumber,
+  required double contentHeight,
+}) {
+  const referenceContentHeight = 848.0;
+  const minimumContentScale = .62;
+  const maximumOpeningPageScale = 1.0;
+  const maximumReadingPageScale = 1.18;
+
+  final maximumScale = pageNumber == 1 || pageNumber == 2
+      ? maximumOpeningPageScale
+      : maximumReadingPageScale;
+  final scale = contentHeight / referenceContentHeight;
+  if (scale > maximumScale) return maximumScale;
+  if (scale < minimumContentScale) return minimumContentScale;
+  return scale;
+}
+
+@visibleForTesting
+bool mushafPageStartsWithSurah({required int pageNumber}) {
+  final first = getPageData(pageNumber).first;
+  return int.parse(first['start'].toString()) == 1;
+}
+
+@visibleForTesting
+String mushafJuzLabel(int juz) {
+  const names = [
+    'الأول',
+    'الثاني',
+    'الثالث',
+    'الرابع',
+    'الخامس',
+    'السادس',
+    'السابع',
+    'الثامن',
+    'التاسع',
+    'العاشر',
+    'الحادي عشر',
+    'الثاني عشر',
+    'الثالث عشر',
+    'الرابع عشر',
+    'الخامس عشر',
+    'السادس عشر',
+    'السابع عشر',
+    'الثامن عشر',
+    'التاسع عشر',
+    'العشرون',
+    'الحادي والعشرون',
+    'الثاني والعشرون',
+    'الثالث والعشرون',
+    'الرابع والعشرون',
+    'الخامس والعشرون',
+    'السادس والعشرون',
+    'السابع والعشرون',
+    'الثامن والعشرون',
+    'التاسع والعشرون',
+    'الثلاثون',
+  ];
+
+  if (juz >= 1 && juz <= names.length) {
+    return 'الجزء ${names[juz - 1]}';
+  }
+  return 'الجزء ${convertToArabicNumber(juz.toString())}';
+}
+
 class _MushafPageHeader extends StatelessWidget {
   final int pageNumber;
 
   const _MushafPageHeader({required this.pageNumber});
+
+  static const double _height = 72;
+  static const String _backgroundAsset =
+      'assets/mushaf/chrome/quran_header_surah_juzah_empty_slots_v2.png';
 
   @override
   Widget build(BuildContext context) {
@@ -208,156 +273,153 @@ class _MushafPageHeader extends StatelessWidget {
     final surah = int.parse(first['surah'].toString());
     final verse = int.parse(first['start'].toString());
     final juz = getJuzNumber(surah, verse);
-    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+    final surahStyle = TextStyle(
       color: const Color(0xFF2B2113),
-      fontSize: 14,
+      fontFamily: SurahFontHelper.fontFamily,
+      package: 'qcf_quran',
+      fontSize: 21,
+      height: 1,
+    );
+    final metaStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: const Color(0xFF2B2113),
+      fontSize: 12,
       fontWeight: FontWeight.w600,
-      height: 1.1,
+      height: 1,
     );
 
     return Positioned(
-      top: 13,
-      left: 22,
-      right: 22,
+      top: 0,
+      left: 0,
+      right: 0,
+      height: _height,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(
+              _backgroundAsset,
+              key: const ValueKey('mushafHeaderBackground'),
+              fit: BoxFit.fill,
+            ),
+            Transform.translate(
+              offset: const Offset(0, 2),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      key: const ValueKey('mushafHeaderSurahSlot'),
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 32,
+                        end: 38,
+                      ),
+                      child: Center(
+                        child: Text(
+                          'surah${surah.toString().padLeft(3, '0')}',
+                          style: surahStyle,
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.ltr,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      key: const ValueKey('mushafHeaderJuzSlot'),
+                      padding: const EdgeInsetsDirectional.only(
+                        start: 38,
+                        end: 32,
+                      ),
+                      child: Center(
+                        child: Text(
+                          mushafJuzLabel(juz),
+                          style: metaStyle,
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                key: const ValueKey('mushafHeaderDivider'),
+                width: 1,
+                height: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MushafPageFooter extends StatelessWidget {
+  final int pageNumber;
+
+  const _MushafPageFooter({required this.pageNumber});
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: const Color(0xFF2B2113),
+      fontSize: 16,
+      fontWeight: FontWeight.w700,
+      height: 1,
+    );
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
       height: 34,
-      child: CustomPaint(
-        painter: _MushafHeaderRulePainter(),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _MushafHeaderLabel(
-                  text: 'سورة ${getSurahNameArabic(surah)}',
-                  style: textStyle,
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              Container(
-                width: 34,
-                height: 28,
-                alignment: Alignment.center,
-                margin: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFFFFBF2),
-                  border: Border.all(color: const Color(0xFF8A7A55)),
-                ),
-                child: Text(
-                  convertToArabicNumber(pageNumber.toString()),
-                  style: textStyle?.copyWith(fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Expanded(
-                child: _MushafHeaderLabel(
-                  text: _juzLabel(juz),
-                  style: textStyle,
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
+      child: _MushafFrameBand(
+        horizontalPadding: 18,
+        child: Center(
+          child: Text(
+            convertToArabicNumber(pageNumber.toString()),
+            style: textStyle,
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.rtl,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
     );
   }
-
-  static String _juzLabel(int juz) {
-    const names = [
-      'الأول',
-      'الثاني',
-      'الثالث',
-      'الرابع',
-      'الخامس',
-      'السادس',
-      'السابع',
-      'الثامن',
-      'التاسع',
-      'العاشر',
-      'الحادي عشر',
-      'الثاني عشر',
-      'الثالث عشر',
-      'الرابع عشر',
-      'الخامس عشر',
-      'السادس عشر',
-      'السابع عشر',
-      'الثامن عشر',
-      'التاسع عشر',
-      'العشرون',
-      'الحادي والعشرون',
-      'الثاني والعشرون',
-      'الثالث والعشرون',
-      'الرابع والعشرون',
-      'الخامس والعشرون',
-      'السادس والعشرون',
-      'السابع والعشرون',
-      'الثامن والعشرون',
-      'التاسع والعشرون',
-      'الثلاثون',
-    ];
-
-    if (juz >= 1 && juz <= names.length) {
-      return 'الجزء ${names[juz - 1]}';
-    }
-    return 'الجزء ${convertToArabicNumber(juz.toString())}';
-  }
 }
 
-class _MushafHeaderLabel extends StatelessWidget {
-  final String text;
-  final TextStyle? style;
-  final TextAlign textAlign;
+class _MushafFrameBand extends StatelessWidget {
+  final Widget child;
+  final double horizontalPadding;
 
-  const _MushafHeaderLabel({
-    required this.text,
-    required this.style,
-    required this.textAlign,
-  });
+  const _MushafFrameBand({required this.child, this.horizontalPadding = 12});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 28,
-      child: Align(
-        alignment: textAlign == TextAlign.left
-            ? Alignment.centerLeft
-            : Alignment.centerRight,
-        child: Text(
-          text,
-          style: style,
-          textAlign: textAlign,
-          textDirection: TextDirection.rtl,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(
+          'assets/mainframe.png',
+          package: 'qcf_quran',
+          fit: BoxFit.fill,
         ),
-      ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: child,
+        ),
+      ],
     );
-  }
-}
-
-class _MushafHeaderRulePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF8A7A55)
-      ..strokeWidth = .8;
-    canvas.drawLine(
-      Offset(0, size.height - 3),
-      Offset(size.width, size.height - 3),
-      paint,
-    );
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height - 3),
-      1.8,
-      Paint()..color = const Color(0xFF8A7A55),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _MushafHeaderRulePainter oldDelegate) {
-    return false;
   }
 }
 
@@ -420,6 +482,9 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         MediaQuery.of(context).orientation == Orientation.portrait;
     final theme = _scaledTheme(widget.theme, widget.contentScale);
     final verseSpans = <InlineSpan>[];
+    final pageStartsWithSurah = mushafPageStartsWithSurah(
+      pageNumber: widget.pageNumber,
+    );
 
     if (widget.pageNumber == 1 || widget.pageNumber == 2) {
       verseSpans.add(
@@ -438,7 +503,8 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
 
       for (var verse = start; verse <= end; verse += 1) {
         if (verse == start && verse == 1) {
-          if (widget.theme.showHeader) {
+          final isPageOpeningSurah = pageStartsWithSurah && r == ranges.first;
+          if (widget.theme.showHeader && !isPageOpeningSurah) {
             verseSpans.add(
               WidgetSpan(
                 child: HeaderWidget(suraNumber: surah, theme: theme),
@@ -564,6 +630,10 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
       ),
     );
 
+    if (mushafQcfVerseEndsWithLineBreak(surah: surah, verse: verse)) {
+      spans.add(TextSpan(text: '\n', recognizer: recognizer));
+    }
+
     return spans;
   }
 
@@ -631,6 +701,11 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
     final normalized = word.replaceAll(RegExp(r'[^\u0600-\u06FF]'), '');
     return normalized.contains('الله');
   }
+}
+
+@visibleForTesting
+bool mushafQcfVerseEndsWithLineBreak({required int surah, required int verse}) {
+  return getVerseQCF(surah, verse).endsWith('\n');
 }
 
 class _MushafPageFrame extends StatelessWidget {

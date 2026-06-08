@@ -82,6 +82,7 @@ flutter:
     - assets/quran/surahs.json
     - assets/quran/verses.json
     - assets/quran/checksums.txt
+    - assets/mushaf/chrome/
     - assets/mushaf/madani-svg-sample/
 
   fonts:
