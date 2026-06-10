@@ -55,6 +55,22 @@ void main() {
     });
   });
 
+  group('inserted Bismillah sizing', () {
+    test('compacts spacing only on dense late Juz 30 pages', () {
+      expect(mushafInsertedBasmalaTextScaleForPage(594), 1.16);
+      expect(mushafInsertedBasmalaTextScaleForPage(595), 1.08);
+      expect(mushafInsertedBasmalaTextScaleForPage(600), 1.08);
+      expect(mushafInsertedBasmalaTextScaleForPage(601), 1.16);
+    });
+
+    test('reduces Bismillah line height on dense late Juz 30 pages', () {
+      expect(mushafInsertedBasmalaLineHeightForPage(594), closeTo(2.332, .001));
+      expect(mushafInsertedBasmalaLineHeightForPage(595), 1.9);
+      expect(mushafInsertedBasmalaLineHeightForPage(600), 1.9);
+      expect(mushafInsertedBasmalaLineHeightForPage(601), closeTo(2.332, .001));
+    });
+  });
+
   group('mushafJuzLabel', () {
     test('renders late juz names without shifting the order', () {
       expect(mushafJuzLabel(27), 'الجزء السابع والعشرون');
@@ -67,6 +83,11 @@ void main() {
   });
 
   group('MushafQcfPage chrome', () {
+    test('keeps page header compact and reserves matching top space', () {
+      expect(mushafPageHeaderHeight, 56);
+      expect(mushafPageContentTopInset, mushafPageHeaderHeight);
+    });
+
     testWidgets('renders decorated header metadata and footer page number', (
       tester,
     ) async {
@@ -93,6 +114,12 @@ void main() {
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
         findsOneWidget,
+      );
+      expect(
+        tester
+            .getRect(find.byKey(const ValueKey('mushafHeaderBackground')))
+            .height,
+        mushafPageHeaderHeight,
       );
 
       final dividerCenter = tester.getCenter(

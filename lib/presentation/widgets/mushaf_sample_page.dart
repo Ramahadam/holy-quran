@@ -10,7 +10,15 @@ import 'mushaf_hit_testing.dart';
 const _qcfBasmalaFontFamily = 'QCF_P001';
 const _referenceBasmalaTextScale = 1.16;
 const _referenceBasmalaHeightScale = 1.06;
+const _compactBasmalaTextScale = 1.08;
+const _compactBasmalaLineHeight = 1.9;
 const _allahHighlightColor = Color(0xFFB34437);
+
+@visibleForTesting
+const double mushafPageHeaderHeight = 56;
+
+@visibleForTesting
+const double mushafPageContentTopInset = mushafPageHeaderHeight;
 
 class MushafSampleAssets {
   static const Set<int> sampleCoordinatePages = {1, 2, 3, 604};
@@ -185,7 +193,7 @@ class MushafQcfPage extends StatelessWidget {
   }
 
   // Tuning knobs for the empty space between the frame and the Quran text.
-  static const double _contentTopInset = 64;
+  static const double _contentTopInset = mushafPageContentTopInset;
   static const double _contentHorizontalInset = 0;
   static const double _contentBottomInset = 0;
 
@@ -225,6 +233,26 @@ double mushafContentScaleForPage({
 bool mushafPageStartsWithSurah({required int pageNumber}) {
   final first = getPageData(pageNumber).first;
   return int.parse(first['start'].toString()) == 1;
+}
+
+@visibleForTesting
+double mushafInsertedBasmalaTextScaleForPage(int pageNumber) {
+  if (_usesCompactInsertedBasmala(pageNumber)) {
+    return _compactBasmalaTextScale;
+  }
+  return _referenceBasmalaTextScale;
+}
+
+@visibleForTesting
+double mushafInsertedBasmalaLineHeightForPage(int pageNumber) {
+  if (_usesCompactInsertedBasmala(pageNumber)) {
+    return _compactBasmalaLineHeight;
+  }
+  return 2.2 * _referenceBasmalaHeightScale;
+}
+
+bool _usesCompactInsertedBasmala(int pageNumber) {
+  return pageNumber >= 595 && pageNumber <= 600;
 }
 
 @visibleForTesting
@@ -273,7 +301,7 @@ class _MushafPageHeader extends StatelessWidget {
 
   const _MushafPageHeader({required this.pageNumber});
 
-  static const double _height = 72;
+  static const double _height = mushafPageHeaderHeight;
   static const String _backgroundAsset =
       'assets/mushaf/chrome/quran_header_surah_juzah_empty_slots_v2.png';
 
@@ -288,12 +316,12 @@ class _MushafPageHeader extends StatelessWidget {
       color: const Color(0xFF2B2113),
       fontFamily: SurahFontHelper.fontFamily,
       package: 'qcf_quran',
-      fontSize: 21,
+      fontSize: 18,
       height: 1,
     );
     final metaStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: const Color(0xFF2B2113),
-      fontSize: 12,
+      fontSize: 11,
       fontWeight: FontWeight.w600,
       height: 1,
     );
@@ -314,15 +342,15 @@ class _MushafPageHeader extends StatelessWidget {
               fit: BoxFit.fill,
             ),
             Transform.translate(
-              offset: const Offset(0, 2),
+              offset: const Offset(0, 1),
               child: Row(
                 children: [
                   Expanded(
                     child: Padding(
                       key: const ValueKey('mushafHeaderSurahSlot'),
                       padding: const EdgeInsetsDirectional.only(
-                        start: 32,
-                        end: 38,
+                        start: 28,
+                        end: 34,
                       ),
                       child: Center(
                         child: Text(
@@ -340,8 +368,8 @@ class _MushafPageHeader extends StatelessWidget {
                     child: Padding(
                       key: const ValueKey('mushafHeaderJuzSlot'),
                       padding: const EdgeInsetsDirectional.only(
-                        start: 38,
-                        end: 32,
+                        start: 34,
+                        end: 28,
                       ),
                       child: Center(
                         child: Text(
@@ -363,7 +391,7 @@ class _MushafPageHeader extends StatelessWidget {
               child: SizedBox(
                 key: const ValueKey('mushafHeaderDivider'),
                 width: 1,
-                height: 18,
+                height: 15,
               ),
             ),
           ],
@@ -644,8 +672,11 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
     final allahGlyphIndexes = _allahGlyphIndexes(1, 1, displayText);
     final fontSize =
         getFontSize(1, context) *
-        _referenceBasmalaTextScale *
+        mushafInsertedBasmalaTextScaleForPage(widget.pageNumber) *
         widget.contentScale;
+    final lineHeight = mushafInsertedBasmalaLineHeightForPage(
+      widget.pageNumber,
+    );
     final spans = <InlineSpan>[];
 
     for (var i = 0; i < displayText.length; i += 1) {
@@ -656,7 +687,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
             fontFamily: _qcfBasmalaFontFamily,
             package: 'qcf_quran',
             fontSize: fontSize,
-            height: 2.2 * _referenceBasmalaHeightScale,
+            height: lineHeight,
             color: allahGlyphIndexes.contains(i) ? _allahHighlightColor : null,
           ),
         ),
