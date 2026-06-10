@@ -10,15 +10,23 @@ import 'mushaf_hit_testing.dart';
 const _qcfBasmalaFontFamily = 'QCF_P001';
 const _referenceBasmalaTextScale = 1.16;
 const _referenceBasmalaHeightScale = 1.06;
-const _compactBasmalaTextScale = 1.08;
-const _compactBasmalaLineHeight = 1.9;
+const _juz30BasmalaTextScale = 1.0;
+const _juz30BasmalaLineHeight = 1.72;
 const _allahHighlightColor = Color(0xFFB34437);
+const _singleSlotChromeAsset =
+    'assets/mushaf/chrome/quran_single_slot_centered.png';
 
 @visibleForTesting
 const double mushafPageHeaderHeight = 56;
 
 @visibleForTesting
 const double mushafPageContentTopInset = mushafPageHeaderHeight;
+
+@visibleForTesting
+const double mushafSingleSlotChromeHeight = mushafPageHeaderHeight;
+
+@visibleForTesting
+const double mushafSurahTitleFontSize = 22;
 
 class MushafSampleAssets {
   static const Set<int> sampleCoordinatePages = {1, 2, 3, 604};
@@ -237,22 +245,22 @@ bool mushafPageStartsWithSurah({required int pageNumber}) {
 
 @visibleForTesting
 double mushafInsertedBasmalaTextScaleForPage(int pageNumber) {
-  if (_usesCompactInsertedBasmala(pageNumber)) {
-    return _compactBasmalaTextScale;
+  if (_isJuz30Page(pageNumber)) {
+    return _juz30BasmalaTextScale;
   }
   return _referenceBasmalaTextScale;
 }
 
 @visibleForTesting
 double mushafInsertedBasmalaLineHeightForPage(int pageNumber) {
-  if (_usesCompactInsertedBasmala(pageNumber)) {
-    return _compactBasmalaLineHeight;
+  if (_isJuz30Page(pageNumber)) {
+    return _juz30BasmalaLineHeight;
   }
   return 2.2 * _referenceBasmalaHeightScale;
 }
 
-bool _usesCompactInsertedBasmala(int pageNumber) {
-  return pageNumber >= 595 && pageNumber <= 600;
+bool _isJuz30Page(int pageNumber) {
+  return pageNumber >= 582 && pageNumber <= 604;
 }
 
 @visibleForTesting
@@ -316,7 +324,7 @@ class _MushafPageHeader extends StatelessWidget {
       color: const Color(0xFF2B2113),
       fontFamily: SurahFontHelper.fontFamily,
       package: 'qcf_quran',
-      fontSize: 18,
+      fontSize: mushafSurahTitleFontSize,
       height: 1,
     );
     final metaStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -410,7 +418,7 @@ class _MushafPageFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: const Color(0xFF2B2113),
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: FontWeight.w700,
       height: 1,
     );
@@ -419,8 +427,9 @@ class _MushafPageFooter extends StatelessWidget {
       left: 0,
       right: 0,
       bottom: 0,
-      height: 34,
-      child: _MushafFrameBand(
+      height: mushafSingleSlotChromeHeight,
+      child: _MushafSingleSlotChrome(
+        key: const ValueKey('mushafFooterSingleSlotChrome'),
         horizontalPadding: 18,
         child: Center(
           child: Text(
@@ -437,11 +446,15 @@ class _MushafPageFooter extends StatelessWidget {
   }
 }
 
-class _MushafFrameBand extends StatelessWidget {
+class _MushafSingleSlotChrome extends StatelessWidget {
   final Widget child;
   final double horizontalPadding;
 
-  const _MushafFrameBand({required this.child, this.horizontalPadding = 12});
+  const _MushafSingleSlotChrome({
+    super.key,
+    required this.child,
+    this.horizontalPadding = 12,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -449,8 +462,8 @@ class _MushafFrameBand extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         Image.asset(
-          'assets/mainframe.png',
-          package: 'qcf_quran',
+          _singleSlotChromeAsset,
+          key: const ValueKey('mushafSingleSlotChromeBackground'),
           fit: BoxFit.fill,
         ),
         Padding(
@@ -519,7 +532,6 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
     final screenSize = MediaQuery.of(context).size;
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
-    final theme = _scaledTheme(widget.theme, widget.contentScale);
     final verseSpans = <InlineSpan>[];
     final pageStartsWithSurah = mushafPageStartsWithSurah(
       pageNumber: widget.pageNumber,
@@ -546,7 +558,10 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           if (widget.theme.showHeader && !isPageOpeningSurah) {
             verseSpans.add(
               WidgetSpan(
-                child: HeaderWidget(suraNumber: surah, theme: theme),
+                child: _MushafInlineSurahHeader(
+                  surahNumber: surah,
+                  contentScale: widget.contentScale,
+                ),
               ),
             );
           }
@@ -604,17 +619,6 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           ],
         ),
       ),
-    );
-  }
-
-  QcfThemeData _scaledTheme(QcfThemeData theme, double scale) {
-    if (scale >= .999) return theme;
-
-    return theme.copyWith(
-      headerWidthLarge: theme.headerWidthLarge * scale,
-      headerWidthSmall: theme.headerWidthSmall * scale,
-      headerFontSizeLarge: theme.headerFontSizeLarge * scale,
-      headerFontSizeSmall: theme.headerFontSizeSmall * scale,
     );
   }
 
@@ -761,6 +765,50 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
   bool _isAllahWord(String word) {
     final normalized = word.replaceAll(RegExp(r'[^\u0600-\u06FF]'), '');
     return normalized.contains('الله');
+  }
+}
+
+class _MushafInlineSurahHeader extends StatelessWidget {
+  final int surahNumber;
+  final double contentScale;
+
+  const _MushafInlineSurahHeader({
+    required this.surahNumber,
+    required this.contentScale,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = contentScale.clamp(.9, 1.0);
+
+    return Padding(
+      key: const ValueKey('mushafInlineSurahHeader'),
+      padding: EdgeInsets.symmetric(vertical: 2 * contentScale),
+      child: SizedBox(
+        height: mushafSingleSlotChromeHeight * scale,
+        child: _MushafSingleSlotChrome(
+          horizontalPadding: 112 * scale,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                'surah${surahNumber.toString().padLeft(3, '0')}',
+                style: TextStyle(
+                  color: const Color(0xFF2B2113),
+                  fontFamily: SurahFontHelper.fontFamily,
+                  package: 'qcf_quran',
+                  fontSize: mushafSurahTitleFontSize * scale,
+                  height: 1,
+                ),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.ltr,
+                maxLines: 1,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

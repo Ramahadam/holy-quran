@@ -56,18 +56,18 @@ void main() {
   });
 
   group('inserted Bismillah sizing', () {
-    test('compacts spacing only on dense late Juz 30 pages', () {
-      expect(mushafInsertedBasmalaTextScaleForPage(594), 1.16);
-      expect(mushafInsertedBasmalaTextScaleForPage(595), 1.08);
-      expect(mushafInsertedBasmalaTextScaleForPage(600), 1.08);
-      expect(mushafInsertedBasmalaTextScaleForPage(601), 1.16);
+    test('uses smaller Bismillah text throughout Juz 30', () {
+      expect(mushafInsertedBasmalaTextScaleForPage(581), 1.16);
+      expect(mushafInsertedBasmalaTextScaleForPage(582), 1.0);
+      expect(mushafInsertedBasmalaTextScaleForPage(600), 1.0);
+      expect(mushafInsertedBasmalaTextScaleForPage(604), 1.0);
     });
 
-    test('reduces Bismillah line height on dense late Juz 30 pages', () {
-      expect(mushafInsertedBasmalaLineHeightForPage(594), closeTo(2.332, .001));
-      expect(mushafInsertedBasmalaLineHeightForPage(595), 1.9);
-      expect(mushafInsertedBasmalaLineHeightForPage(600), 1.9);
-      expect(mushafInsertedBasmalaLineHeightForPage(601), closeTo(2.332, .001));
+    test('uses tighter Bismillah line height throughout Juz 30', () {
+      expect(mushafInsertedBasmalaLineHeightForPage(581), closeTo(2.332, .001));
+      expect(mushafInsertedBasmalaLineHeightForPage(582), 1.72);
+      expect(mushafInsertedBasmalaLineHeightForPage(600), 1.72);
+      expect(mushafInsertedBasmalaLineHeightForPage(604), 1.72);
     });
   });
 
@@ -86,6 +86,8 @@ void main() {
     test('keeps page header compact and reserves matching top space', () {
       expect(mushafPageHeaderHeight, 56);
       expect(mushafPageContentTopInset, mushafPageHeaderHeight);
+      expect(mushafSingleSlotChromeHeight, mushafPageHeaderHeight);
+      expect(mushafSurahTitleFontSize, 22);
     });
 
     testWidgets('renders decorated header metadata and footer page number', (
@@ -111,6 +113,16 @@ void main() {
       expect(find.text('surah002'), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(find.text('٣'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('mushafFooterSingleSlotChrome')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .getRect(find.byKey(const ValueKey('mushafFooterSingleSlotChrome')))
+            .height,
+        mushafSingleSlotChromeHeight,
+      );
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
         findsOneWidget,
@@ -168,6 +180,37 @@ void main() {
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
         findsOneWidget,
+      );
+      expect(find.byType(HeaderWidget), findsNothing);
+    });
+
+    testWidgets('uses single-slot decoration for middle surah openings', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox(
+            width: 360,
+            height: 760,
+            child: MushafQcfPage(
+              pageNumber: 595,
+              theme: QcfThemeData(
+                pageBackgroundColor: Colors.transparent,
+                verseTextColor: Colors.black,
+                verseNumberColor: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
+        findsWidgets,
+      );
+      expect(
+        find.byKey(const ValueKey('mushafSingleSlotChromeBackground')),
+        findsWidgets,
       );
       expect(find.byType(HeaderWidget), findsNothing);
     });
