@@ -28,6 +28,12 @@ const double mushafSingleSlotChromeHeight = mushafPageHeaderHeight;
 @visibleForTesting
 const double mushafSurahTitleFontSize = 22;
 
+@visibleForTesting
+const String mushafSurahTitleFontFamily = 'KFGQPCHafsUthmanicScript';
+
+@visibleForTesting
+const double mushafJuzTitleFontSize = 16;
+
 class MushafSampleAssets {
   static const Set<int> sampleCoordinatePages = {1, 2, 3, 604};
   static const String coordinatesPath =
@@ -320,17 +326,17 @@ class _MushafPageHeader extends StatelessWidget {
     final surah = int.parse(first['surah'].toString());
     final verse = int.parse(first['start'].toString());
     final juz = getJuzNumber(surah, verse);
-    final surahStyle = TextStyle(
-      color: const Color(0xFF2B2113),
-      fontFamily: SurahFontHelper.fontFamily,
-      package: 'qcf_quran',
+    const surahStyle = TextStyle(
+      color: Color(0xFF2B2113),
+      fontFamily: mushafSurahTitleFontFamily,
       fontSize: mushafSurahTitleFontSize,
+      fontWeight: FontWeight.w400,
       height: 1,
     );
     final metaStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: const Color(0xFF2B2113),
-      fontSize: 11,
-      fontWeight: FontWeight.w600,
+      fontSize: mushafJuzTitleFontSize,
+      fontWeight: FontWeight.w400,
       height: 1,
     );
 
@@ -361,13 +367,15 @@ class _MushafPageHeader extends StatelessWidget {
                         end: 34,
                       ),
                       child: Center(
-                        child: Text(
-                          'surah${surah.toString().padLeft(3, '0')}',
-                          style: surahStyle,
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.ltr,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            getSurahNameArabic(surah),
+                            style: surahStyle,
+                            textAlign: TextAlign.center,
+                            textDirection: TextDirection.rtl,
+                            maxLines: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -380,13 +388,15 @@ class _MushafPageHeader extends StatelessWidget {
                         end: 28,
                       ),
                       child: Center(
-                        child: Text(
-                          mushafJuzLabel(juz),
-                          style: metaStyle,
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.rtl,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            mushafJuzLabel(juz),
+                            style: metaStyle,
+                            textAlign: TextAlign.center,
+                            textDirection: TextDirection.rtl,
+                            maxLines: 1,
+                          ),
                         ),
                       ),
                     ),
@@ -792,16 +802,16 @@ class _MushafInlineSurahHeader extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                'surah${surahNumber.toString().padLeft(3, '0')}',
-                style: TextStyle(
-                  color: const Color(0xFF2B2113),
-                  fontFamily: SurahFontHelper.fontFamily,
-                  package: 'qcf_quran',
-                  fontSize: mushafSurahTitleFontSize * scale,
+                getSurahNameArabic(surahNumber),
+                style: const TextStyle(
+                  color: Color(0xFF2B2113),
+                  fontFamily: mushafSurahTitleFontFamily,
+                  fontSize: mushafSurahTitleFontSize,
+                  fontWeight: FontWeight.w400,
                   height: 1,
                 ),
                 textAlign: TextAlign.center,
-                textDirection: TextDirection.ltr,
+                textDirection: TextDirection.rtl,
                 maxLines: 1,
               ),
             ),
