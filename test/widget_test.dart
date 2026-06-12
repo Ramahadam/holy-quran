@@ -187,7 +187,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MushafQcfPage), findsOneWidget);
-      expect(find.text('surah001'), findsOneWidget);
+      expect(find.text('الفاتحة'), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),

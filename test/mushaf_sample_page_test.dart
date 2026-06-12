@@ -84,15 +84,15 @@ void main() {
 
   group('MushafQcfPage chrome', () {
     test('keeps page header compact and reserves matching top space', () {
-      expect(mushafPageHeaderHeight, 56);
+      expect(mushafPageHeaderHeight, 57);
       expect(mushafPageContentTopInset, mushafPageHeaderHeight);
       expect(mushafSingleSlotChromeHeight, mushafPageHeaderHeight);
-      expect(mushafSurahTitleFontSize, 22);
+      expect(mushafSurahTitleFontSize, 18);
       expect(mushafSurahTitleFontFamily, 'KFGQPCHafsUthmanicScript');
-      expect(mushafJuzTitleFontSize, 16);
+      expect(mushafJuzTitleFontSize, 18);
     });
 
-    testWidgets('renders decorated header metadata and footer page number', (
+    testWidgets('renders decorated header metadata without footer chrome', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -114,7 +114,6 @@ void main() {
 
       expect(find.text(getSurahNameArabic(2)), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
-      expect(find.text('٣'), findsOneWidget);
       expect(
         tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontSize,
         mushafSurahTitleFontSize,
@@ -137,17 +136,11 @@ void main() {
       );
       expect(
         tester.widget<Text>(find.text('الجزء الأول')).style?.fontWeight,
-        FontWeight.w400,
+        FontWeight.w700,
       );
       expect(
         find.byKey(const ValueKey('mushafFooterSingleSlotChrome')),
-        findsOneWidget,
-      );
-      expect(
-        tester
-            .getRect(find.byKey(const ValueKey('mushafFooterSingleSlotChrome')))
-            .height,
-        mushafSingleSlotChromeHeight,
+        findsNothing,
       );
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
@@ -258,7 +251,7 @@ void main() {
         expect(title.style?.fontSize, mushafSurahTitleFontSize);
         expect(title.style?.fontFamily, mushafSurahTitleFontFamily);
         expect(title.style?.color, const Color(0xFF2B2113));
-        expect(title.style?.fontWeight, FontWeight.w400);
+        expect(title.style?.fontWeight, FontWeight.w700);
         expect(title.textDirection, TextDirection.rtl);
       }
       expect(find.byType(HeaderWidget), findsNothing);

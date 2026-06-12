@@ -17,7 +17,7 @@ const _singleSlotChromeAsset =
     'assets/mushaf/chrome/quran_single_slot_centered.png';
 
 @visibleForTesting
-const double mushafPageHeaderHeight = 56;
+const double mushafPageHeaderHeight = 57;
 
 @visibleForTesting
 const double mushafPageContentTopInset = mushafPageHeaderHeight;
@@ -26,13 +26,13 @@ const double mushafPageContentTopInset = mushafPageHeaderHeight;
 const double mushafSingleSlotChromeHeight = mushafPageHeaderHeight;
 
 @visibleForTesting
-const double mushafSurahTitleFontSize = 22;
+const double mushafSurahTitleFontSize = 18;
 
 @visibleForTesting
 const String mushafSurahTitleFontFamily = 'KFGQPCHafsUthmanicScript';
 
 @visibleForTesting
-const double mushafJuzTitleFontSize = 16;
+const double mushafJuzTitleFontSize = 18;
 
 class MushafSampleAssets {
   static const Set<int> sampleCoordinatePages = {1, 2, 3, 604};
@@ -135,7 +135,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
     basmalaColor: Color(0xFF17120C),
     headerTextColor: Color(0xFF17120C),
     headerBackgroundColor: Color(0x00FFFFFF),
-    verseHeight: 2.08,
+    verseHeight: 2.2,
     letterSpacing: 0,
     wordSpacing: 0,
     headerBorderRadius: 8,
@@ -201,7 +201,6 @@ class MushafQcfPage extends StatelessWidget {
           },
         ),
         _MushafPageHeader(pageNumber: pageNumber),
-        _MushafPageFooter(pageNumber: pageNumber),
       ],
     );
   }
@@ -330,13 +329,13 @@ class _MushafPageHeader extends StatelessWidget {
       color: Color(0xFF2B2113),
       fontFamily: mushafSurahTitleFontFamily,
       fontSize: mushafSurahTitleFontSize,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w700,
       height: 1,
     );
     final metaStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: const Color(0xFF2B2113),
       fontSize: mushafJuzTitleFontSize,
-      fontWeight: FontWeight.w400,
+      fontWeight: FontWeight.w700,
       height: 1,
     );
 
@@ -419,49 +418,11 @@ class _MushafPageHeader extends StatelessWidget {
   }
 }
 
-class _MushafPageFooter extends StatelessWidget {
-  final int pageNumber;
-
-  const _MushafPageFooter({required this.pageNumber});
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: const Color(0xFF2B2113),
-      fontSize: 15,
-      fontWeight: FontWeight.w700,
-      height: 1,
-    );
-
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: mushafSingleSlotChromeHeight,
-      child: _MushafSingleSlotChrome(
-        key: const ValueKey('mushafFooterSingleSlotChrome'),
-        horizontalPadding: 18,
-        child: Center(
-          child: Text(
-            convertToArabicNumber(pageNumber.toString()),
-            style: textStyle,
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.rtl,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _MushafSingleSlotChrome extends StatelessWidget {
   final Widget child;
   final double horizontalPadding;
 
   const _MushafSingleSlotChrome({
-    super.key,
     required this.child,
     this.horizontalPadding = 12,
   });
@@ -807,7 +768,7 @@ class _MushafInlineSurahHeader extends StatelessWidget {
                   color: Color(0xFF2B2113),
                   fontFamily: mushafSurahTitleFontFamily,
                   fontSize: mushafSurahTitleFontSize,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w700,
                   height: 1,
                 ),
                 textAlign: TextAlign.center,
