@@ -37,9 +37,9 @@ class SurahTile extends StatelessWidget {
             Text(
               surah.nameArabic,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.islamicGreen,
-                    fontSize: 20,
-                  ),
+                color: AppTheme.islamicGreen,
+                fontSize: 20,
+              ),
               textDirection: TextDirection.rtl,
             ),
           ],
@@ -67,9 +67,9 @@ class _SurahNumber extends StatelessWidget {
       child: Text(
         '$number',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppTheme.islamicGreen,
-            ),
+          fontWeight: FontWeight.w600,
+          color: AppTheme.islamicGreen,
+        ),
       ),
     );
   }

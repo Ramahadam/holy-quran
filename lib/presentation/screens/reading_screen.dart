@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,6 +18,7 @@ const _bismillahLastWord = 'ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
 const _bismillahLineHeight = 2.0;
 const _totalPages = 604;
+const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
 
 enum ReadingMode { classic, mushaf }
 
@@ -43,6 +46,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   bool _resolved = false;
   ReadingMode _readingMode = ReadingMode.classic;
   bool _showMushafControls = false;
+  bool _showMushafPageNumberOverlay = false;
+  Timer? _mushafPageNumberOverlayTimer;
 
   late final ReadingPositionRepository _positionRepo;
 
@@ -62,6 +67,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
   @override
   void dispose() {
+    _mushafPageNumberOverlayTimer?.cancel();
     _pageController?.dispose();
     super.dispose();
   }
@@ -189,7 +195,15 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               setState(() {
                 _readingMode = mode;
                 _showMushafControls = false;
+                if (mode == ReadingMode.mushaf) {
+                  _showMushafPageNumberOverlay = true;
+                } else {
+                  _hideMushafPageNumberOverlay();
+                }
               });
+              if (mode == ReadingMode.mushaf) {
+                _scheduleMushafPageNumberOverlayHide();
+              }
             },
           ),
         ),
@@ -205,11 +219,29 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     }
   }
 
+  void _scheduleMushafPageNumberOverlayHide() {
+    _mushafPageNumberOverlayTimer?.cancel();
+    _mushafPageNumberOverlayTimer = Timer(_mushafPageNumberOverlayDuration, () {
+      if (!mounted) return;
+      setState(() {
+        _showMushafPageNumberOverlay = false;
+      });
+    });
+  }
+
+  void _hideMushafPageNumberOverlay() {
+    _mushafPageNumberOverlayTimer?.cancel();
+    _showMushafPageNumberOverlay = false;
+  }
+
   Widget _buildPageView() {
     final showAppBar =
         _readingMode == ReadingMode.classic || _showMushafControls;
     final isMushafImmersive =
         _readingMode == ReadingMode.mushaf && !_showMushafControls;
+    final showMushafPageNumber =
+        _readingMode == ReadingMode.mushaf &&
+        (_showMushafControls || _showMushafPageNumberOverlay);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setImmersiveMode(isMushafImmersive);
@@ -221,9 +253,14 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       itemCount: _totalPages,
       onPageChanged: (index) {
         final pageNum = index + 1;
-        _currentPage = pageNum;
-        _currentPageFirstVerseId = null;
-        setState(() {});
+        setState(() {
+          _currentPage = pageNum;
+          _currentPageFirstVerseId = null;
+          _showMushafPageNumberOverlay = _readingMode == ReadingMode.mushaf;
+        });
+        if (_readingMode == ReadingMode.mushaf) {
+          _scheduleMushafPageNumberOverlayHide();
+        }
       },
       itemBuilder: (context, index) {
         final pageNum = index + 1;
@@ -250,6 +287,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
                 setState(() {
                   _showMushafControls = false;
+                  _hideMushafPageNumberOverlay();
                 });
               }
             },
@@ -266,11 +304,75 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
                 onTap: () {
                   setState(() {
                     _showMushafControls = true;
+                    _showMushafPageNumberOverlay = true;
                   });
+                  _scheduleMushafPageNumberOverlayHide();
                 },
               ),
             ),
+          if (showMushafPageNumber)
+            _MushafPageNumberOverlay(pageNumber: _currentPage),
         ],
+      ),
+    );
+  }
+}
+
+String _toArabicPageNumber(int number) {
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return number
+      .toString()
+      .split('')
+      .map((digit) => arabicDigits[int.parse(digit)])
+      .join();
+}
+
+class _MushafPageNumberOverlay extends StatelessWidget {
+  final int pageNumber;
+
+  const _MushafPageNumberOverlay({required this.pageNumber});
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: bottomPadding + 10,
+      child: IgnorePointer(
+        child: Center(
+          child: DecoratedBox(
+            key: const ValueKey('mushafPageNumberOverlay'),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7EEDB).withValues(alpha: .92),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: const Color(0xFFB98B42).withValues(alpha: .46),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: .12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+              child: Text(
+                _toArabicPageNumber(pageNumber),
+                key: const ValueKey('mushafPageNumberText'),
+                textDirection: TextDirection.rtl,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF2B2113),
+                  fontWeight: FontWeight.w700,
+                  height: 1,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

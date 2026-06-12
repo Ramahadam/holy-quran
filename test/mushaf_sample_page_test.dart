@@ -55,6 +55,22 @@ void main() {
     });
   });
 
+  group('inserted Bismillah sizing', () {
+    test('uses smaller Bismillah text throughout Juz 30', () {
+      expect(mushafInsertedBasmalaTextScaleForPage(581), 1.16);
+      expect(mushafInsertedBasmalaTextScaleForPage(582), 1.0);
+      expect(mushafInsertedBasmalaTextScaleForPage(600), 1.0);
+      expect(mushafInsertedBasmalaTextScaleForPage(604), 1.0);
+    });
+
+    test('uses tighter Bismillah line height throughout Juz 30', () {
+      expect(mushafInsertedBasmalaLineHeightForPage(581), closeTo(2.332, .001));
+      expect(mushafInsertedBasmalaLineHeightForPage(582), 1.72);
+      expect(mushafInsertedBasmalaLineHeightForPage(600), 1.72);
+      expect(mushafInsertedBasmalaLineHeightForPage(604), 1.72);
+    });
+  });
+
   group('mushafJuzLabel', () {
     test('renders late juz names without shifting the order', () {
       expect(mushafJuzLabel(27), 'الجزء السابع والعشرون');
@@ -67,7 +83,16 @@ void main() {
   });
 
   group('MushafQcfPage chrome', () {
-    testWidgets('renders decorated header metadata and footer page number', (
+    test('keeps page header compact and reserves matching top space', () {
+      expect(mushafPageHeaderHeight, 57);
+      expect(mushafPageContentTopInset, mushafPageHeaderHeight);
+      expect(mushafSingleSlotChromeHeight, mushafPageHeaderHeight);
+      expect(mushafSurahTitleFontSize, 18);
+      expect(mushafSurahTitleFontFamily, 'KFGQPCHafsUthmanicScript');
+      expect(mushafJuzTitleFontSize, 18);
+    });
+
+    testWidgets('renders decorated header metadata without footer chrome', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -87,12 +112,45 @@ void main() {
         ),
       );
 
-      expect(find.text('surah002'), findsOneWidget);
+      expect(find.text(getSurahNameArabic(2)), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
-      expect(find.text('٣'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontSize,
+        mushafSurahTitleFontSize,
+      );
+      expect(
+        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontFamily,
+        mushafSurahTitleFontFamily,
+      );
+      expect(
+        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.color,
+        tester.widget<Text>(find.text('الجزء الأول')).style?.color,
+      );
+      expect(
+        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontWeight,
+        tester.widget<Text>(find.text('الجزء الأول')).style?.fontWeight,
+      );
+      expect(
+        tester.widget<Text>(find.text('الجزء الأول')).style?.fontSize,
+        mushafJuzTitleFontSize,
+      );
+      expect(
+        tester.widget<Text>(find.text('الجزء الأول')).style?.fontWeight,
+        FontWeight.w700,
+      );
+      expect(
+        find.byKey(const ValueKey('mushafFooterSingleSlotChrome')),
+        findsNothing,
+      );
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
         findsOneWidget,
+      );
+      expect(
+        tester
+            .getRect(find.byKey(const ValueKey('mushafHeaderBackground')))
+            .height,
+        mushafPageHeaderHeight,
       );
 
       final dividerCenter = tester.getCenter(
@@ -136,12 +194,66 @@ void main() {
         ),
       );
 
-      expect(find.text('surah001'), findsOneWidget);
+      expect(find.text(getSurahNameArabic(1)), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
         findsOneWidget,
       );
+      expect(find.byType(HeaderWidget), findsNothing);
+    });
+
+    testWidgets('uses single-slot decoration for middle surah openings', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox(
+            width: 360,
+            height: 760,
+            child: MushafQcfPage(
+              pageNumber: 595,
+              theme: QcfThemeData(
+                pageBackgroundColor: Colors.transparent,
+                verseTextColor: Colors.black,
+                verseNumberColor: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
+        findsWidgets,
+      );
+      expect(
+        find.byKey(const ValueKey('mushafSingleSlotChromeBackground')),
+        findsWidgets,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Text && widget.data?.startsWith('surah') == true,
+        ),
+        findsNothing,
+      );
+      final surahTitleTexts = tester.widgetList<Text>(
+        find.descendant(
+          of: find.byKey(const ValueKey('mushafInlineSurahHeader')),
+          matching: find.byType(Text),
+        ),
+      );
+      expect(surahTitleTexts, isNotEmpty);
+      for (final title in surahTitleTexts) {
+        expect(title.data, isNotNull);
+        expect(title.data!.contains(RegExp(r'[\u0600-\u06FF]')), isTrue);
+        expect(title.style?.fontSize, mushafSurahTitleFontSize);
+        expect(title.style?.fontFamily, mushafSurahTitleFontFamily);
+        expect(title.style?.color, const Color(0xFF2B2113));
+        expect(title.style?.fontWeight, FontWeight.w700);
+        expect(title.textDirection, TextDirection.rtl);
+      }
       expect(find.byType(HeaderWidget), findsNothing);
     });
   });

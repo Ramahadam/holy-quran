@@ -20,47 +20,51 @@ class VerseCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onLongPress: onBookmarkToggle,
       child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (isBookmarked)
-                const Icon(Icons.bookmark, color: AppTheme.islamicGreen, size: 18)
-              else
-                const SizedBox(width: 18),
-              _VerseNumber(number: verse.verseNumber),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            verse.arabicText,
-            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w400,
-                  height: 2.0,
-                  color: AppTheme.textPrimary,
-                ),
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.right,
-          ),
-          if (verse.translation != null) ...[
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (isBookmarked)
+                  const Icon(
+                    Icons.bookmark,
+                    color: AppTheme.islamicGreen,
+                    size: 18,
+                  )
+                else
+                  const SizedBox(width: 18),
+                _VerseNumber(number: verse.verseNumber),
+              ],
+            ),
             const SizedBox(height: 12),
             Text(
-              verse.translation!,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    height: 1.6,
-                    color: AppTheme.textSecondary,
-                    fontStyle: FontStyle.italic,
-                  ),
+              verse.arabicText,
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                fontSize: 26,
+                fontWeight: FontWeight.w400,
+                height: 2.0,
+                color: AppTheme.textPrimary,
+              ),
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
             ),
+            if (verse.translation != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                verse.translation!,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.6,
+                  color: AppTheme.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            const Divider(color: AppTheme.divider, thickness: 1),
           ],
-          const SizedBox(height: 8),
-          const Divider(color: AppTheme.divider, thickness: 1),
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -85,9 +89,9 @@ class _VerseNumber extends StatelessWidget {
         child: Text(
           '$number',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppTheme.islamicGreen,
-              ),
+            fontWeight: FontWeight.w600,
+            color: AppTheme.islamicGreen,
+          ),
         ),
       ),
     );

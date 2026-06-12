@@ -187,7 +187,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MushafQcfPage), findsOneWidget);
-      expect(find.text('surah001'), findsOneWidget);
+      expect(find.text('الفاتحة'), findsOneWidget);
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(
         find.byKey(const ValueKey('mushafHeaderBackground')),
@@ -453,6 +453,49 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
+    });
+
+    testWidgets('shows Mushaf page number as a temporary overlay', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageNumberOverlay')),
+        findsNothing,
+      );
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageNumberOverlay')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageNumberText')))
+            .data,
+        '١',
+      );
+
+      await tester.pump(const Duration(milliseconds: 1501));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageNumberOverlay')),
+        findsNothing,
+      );
     });
 
     testWidgets('saves tapped Mushaf verse as the last-read VerseID', (
