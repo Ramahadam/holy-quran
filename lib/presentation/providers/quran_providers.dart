@@ -4,6 +4,10 @@ import '../../data/backup/quran_backup_codec.dart';
 import '../../data/backup/quran_backup_file_service.dart';
 import '../../data/backup/quran_backup_service.dart';
 import '../../data/feedback/anonymous_feedback_service.dart';
+import '../../data/notifications/prayer_reminder_scheduler.dart';
+import '../../data/notifications/prayer_reminder_service.dart';
+import '../../data/notifications/prayer_reminder_settings.dart';
+import '../../data/notifications/prayer_reminder_settings_store.dart';
 import '../../data/repositories/bookmark_repository.dart';
 import '../../data/repositories/bookmark_repository_impl.dart';
 import '../../data/repositories/quran_repository.dart';
@@ -74,6 +78,39 @@ final anonymousFeedbackServiceProvider = Provider<AnonymousFeedbackService>((
       ? SupabaseFeedbackTransport(client: Supabase.instance.client)
       : const UnconfiguredFeedbackTransport();
   return AnonymousFeedbackService(transport: transport);
+});
+
+final prayerReminderSettingsStoreProvider =
+    Provider<PrayerReminderSettingsStore>((ref) {
+      return PrayerReminderSettingsStore();
+    });
+
+final prayerReminderSchedulerProvider = Provider<PrayerReminderScheduler>((
+  ref,
+) {
+  final settingsStore = ref.watch(prayerReminderSettingsStoreProvider);
+  late final LocalPrayerReminderScheduler scheduler;
+  scheduler = LocalPrayerReminderScheduler(
+    onSnoozeRequested: () async {
+      final settings = await settingsStore.load();
+      if (!settings.enabled) return;
+      await scheduler.snooze(settings);
+    },
+  );
+  return scheduler;
+});
+
+final prayerReminderServiceProvider = Provider<PrayerReminderService>((ref) {
+  return PrayerReminderService(
+    settingsStore: ref.watch(prayerReminderSettingsStoreProvider),
+    scheduler: ref.watch(prayerReminderSchedulerProvider),
+  );
+});
+
+final prayerReminderSettingsProvider = FutureProvider<PrayerReminderSettings>((
+  ref,
+) {
+  return ref.watch(prayerReminderServiceProvider).loadSettings();
 });
 
 final initializeDataProvider = FutureProvider<void>((ref) async {
