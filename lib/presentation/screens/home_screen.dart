@@ -11,14 +11,26 @@ import 'reading_screen.dart';
 
 enum _HomeMenuAction { exportBackup, importBackup, feedback }
 
-class HomeScreen extends ConsumerWidget {
+enum _FeedbackPromptAction { notNow, giveFeedback }
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _heartbeatPromptScheduled = false;
+
+  @override
+  Widget build(BuildContext context) {
     final surahsAsync = ref.watch(surahListProvider);
     final lastPositionAsync = ref.watch(lastReadPositionProvider);
     final bookmarksAsync = ref.watch(recentBookmarksProvider);
+    final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
+
+    _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
     return Scaffold(
       appBar: AppBar(
@@ -41,9 +53,9 @@ class HomeScreen extends ConsumerWidget {
             onSelected: (action) {
               switch (action) {
                 case _HomeMenuAction.exportBackup:
-                  _exportBackup(context, ref);
+                  _exportBackup(context);
                 case _HomeMenuAction.importBackup:
-                  _importBackup(context, ref);
+                  _importBackup(context);
                 case _HomeMenuAction.feedback:
                   _showFeedbackDialog(context);
               }
@@ -148,7 +160,16 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+  void _maybeScheduleHeartbeatPrompt(AsyncValue<bool> promptAsync) {
+    if (_heartbeatPromptScheduled || promptAsync.valueOrNull != true) return;
+    _heartbeatPromptScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showHeartbeatFeedbackPrompt(context);
+    });
+  }
+
+  Future<void> _exportBackup(BuildContext context) async {
     final passphrase = await _promptPassphrase(context, confirm: true);
     if (passphrase == null) return;
 
@@ -165,7 +186,7 @@ class HomeScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+  Future<void> _importBackup(BuildContext context) async {
     final passphrase = await _promptPassphrase(context);
     if (passphrase == null) return;
 
@@ -200,8 +221,47 @@ class HomeScreen extends ConsumerWidget {
   Future<void> _showFeedbackDialog(BuildContext context) {
     return showDialog<void>(
       context: context,
-      builder: (context) => const _FeedbackDialog(),
+      builder: (context) => _FeedbackDialog(
+        onSubmitted: () async {
+          await ref.read(feedbackPromptServiceProvider).markFeedbackSubmitted();
+          ref.invalidate(feedbackPromptShouldShowProvider);
+        },
+      ),
     );
+  }
+
+  Future<void> _showHeartbeatFeedbackPrompt(BuildContext context) async {
+    final action = await showDialog<_FeedbackPromptAction>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('How is your Quran reading experience?'),
+        content: const Text(
+          'If you have a moment, share what would make the app better. Your note is anonymous.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                Navigator.of(context).pop(_FeedbackPromptAction.notNow),
+            child: const Text('Not now'),
+          ),
+          FilledButton.icon(
+            onPressed: () =>
+                Navigator.of(context).pop(_FeedbackPromptAction.giveFeedback),
+            icon: const Icon(Icons.feedback_outlined),
+            label: const Text('Give feedback'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted || action == null) return;
+
+    await ref.read(feedbackPromptServiceProvider).dismissPrompt();
+    ref.invalidate(feedbackPromptShouldShowProvider);
+
+    if (!mounted || action == _FeedbackPromptAction.notNow) return;
+    await _showFeedbackDialog(this.context);
   }
 
   void _showSnackBar(BuildContext context, String message) {
@@ -324,7 +384,9 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
 }
 
 class _FeedbackDialog extends ConsumerStatefulWidget {
-  const _FeedbackDialog();
+  final Future<void> Function()? onSubmitted;
+
+  const _FeedbackDialog({this.onSubmitted});
 
   @override
   ConsumerState<_FeedbackDialog> createState() => _FeedbackDialogState();
@@ -408,6 +470,11 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
       await ref
           .read(anonymousFeedbackServiceProvider)
           .submitFeedback(_feedbackController.text);
+      try {
+        await widget.onSubmitted?.call();
+      } catch (e) {
+        debugPrint('Failed to mark feedback prompt submitted: $e');
+      }
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(

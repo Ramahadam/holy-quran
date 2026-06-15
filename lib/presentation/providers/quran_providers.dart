@@ -4,6 +4,7 @@ import '../../data/backup/quran_backup_codec.dart';
 import '../../data/backup/quran_backup_file_service.dart';
 import '../../data/backup/quran_backup_service.dart';
 import '../../data/feedback/anonymous_feedback_service.dart';
+import '../../data/feedback/feedback_prompt_service.dart';
 import '../../data/repositories/bookmark_repository.dart';
 import '../../data/repositories/bookmark_repository_impl.dart';
 import '../../data/repositories/quran_repository.dart';
@@ -74,6 +75,22 @@ final anonymousFeedbackServiceProvider = Provider<AnonymousFeedbackService>((
       ? SupabaseFeedbackTransport(client: Supabase.instance.client)
       : const UnconfiguredFeedbackTransport();
   return AnonymousFeedbackService(transport: transport);
+});
+
+final feedbackPromptStoreProvider = Provider<FeedbackPromptStore>((ref) {
+  return SharedPreferencesFeedbackPromptStore();
+});
+
+final feedbackPromptServiceProvider = Provider<FeedbackPromptController>((ref) {
+  try {
+    return FeedbackPromptService(store: ref.watch(feedbackPromptStoreProvider));
+  } catch (_) {
+    return const DisabledFeedbackPromptController();
+  }
+});
+
+final feedbackPromptShouldShowProvider = FutureProvider<bool>((ref) {
+  return ref.watch(feedbackPromptServiceProvider).shouldPrompt();
 });
 
 final initializeDataProvider = FutureProvider<void>((ref) async {

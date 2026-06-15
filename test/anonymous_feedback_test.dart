@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:holy_quran_app/data/feedback/anonymous_feedback_service.dart';
+import 'package:holy_quran_app/data/feedback/feedback_prompt_service.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
@@ -87,6 +88,9 @@ void main() {
       tester,
     ) async {
       final feedbackService = _RecordingFeedbackService();
+      final promptService = _RecordingFeedbackPromptService(
+        shouldPrompt: false,
+      );
 
       await tester.pumpWidget(
         ProviderScope(
@@ -106,6 +110,10 @@ void main() {
               (ref) async => const <Bookmark>[],
             ),
             anonymousFeedbackServiceProvider.overrideWithValue(feedbackService),
+            feedbackPromptServiceProvider.overrideWithValue(promptService),
+            feedbackPromptShouldShowProvider.overrideWith(
+              (ref) async => promptService.shouldPrompt(),
+            ),
           ],
           child: const MaterialApp(home: HomeScreen()),
         ),
@@ -123,6 +131,100 @@ void main() {
 
       expect(feedbackService.submittedText, 'Thank you for the app.');
       expect(find.text('Feedback sent'), findsOneWidget);
+    });
+
+    testWidgets('shows heartbeat prompt and opens anonymous feedback', (
+      tester,
+    ) async {
+      final feedbackService = _RecordingFeedbackService();
+      final promptService = _RecordingFeedbackPromptService(shouldPrompt: true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith(
+              (ref) async => const [
+                Surah(
+                  surahNumber: 1,
+                  nameArabic: 'الفاتحة',
+                  nameEnglish: 'Al-Fatihah',
+                  numberOfVerses: 7,
+                ),
+              ],
+            ),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith(
+              (ref) async => const <Bookmark>[],
+            ),
+            anonymousFeedbackServiceProvider.overrideWithValue(feedbackService),
+            feedbackPromptServiceProvider.overrideWithValue(promptService),
+            feedbackPromptShouldShowProvider.overrideWith(
+              (ref) async => promptService.shouldPrompt(),
+            ),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('How is your Quran reading experience?'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Give feedback'));
+      await tester.pumpAndSettle();
+
+      expect(promptService.dismissed, isTrue);
+      expect(find.text('Send feedback'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'Mushaf mode is calm.');
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+
+      expect(feedbackService.submittedText, 'Mushaf mode is calm.');
+      expect(promptService.submitted, isTrue);
+      expect(find.text('Feedback sent'), findsOneWidget);
+    });
+
+    testWidgets('dismisses heartbeat prompt without opening feedback', (
+      tester,
+    ) async {
+      final promptService = _RecordingFeedbackPromptService(shouldPrompt: true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith(
+              (ref) async => const [
+                Surah(
+                  surahNumber: 1,
+                  nameArabic: 'الفاتحة',
+                  nameEnglish: 'Al-Fatihah',
+                  numberOfVerses: 7,
+                ),
+              ],
+            ),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith(
+              (ref) async => const <Bookmark>[],
+            ),
+            feedbackPromptServiceProvider.overrideWithValue(promptService),
+            feedbackPromptShouldShowProvider.overrideWith(
+              (ref) async => promptService.shouldPrompt(),
+            ),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Not now'));
+      await tester.pumpAndSettle();
+
+      expect(promptService.dismissed, isTrue);
+      expect(find.text('How is your Quran reading experience?'), findsNothing);
+      expect(find.text('Send feedback'), findsNothing);
     });
   });
 }
@@ -149,4 +251,34 @@ class _RecordingFeedbackService extends AnonymousFeedbackService {
   Future<void> submitFeedback(String text, {FeedbackMetadata? metadata}) async {
     submittedText = text;
   }
+}
+
+class _RecordingFeedbackPromptService implements FeedbackPromptController {
+  bool shouldShowPrompt;
+  bool dismissed = false;
+  bool submitted = false;
+  int recordedSessions = 0;
+
+  _RecordingFeedbackPromptService({required bool shouldPrompt})
+    : shouldShowPrompt = shouldPrompt;
+
+  @override
+  Future<void> dismissPrompt({DateTime? now}) async {
+    dismissed = true;
+    shouldShowPrompt = false;
+  }
+
+  @override
+  Future<void> markFeedbackSubmitted({DateTime? now}) async {
+    submitted = true;
+    shouldShowPrompt = false;
+  }
+
+  @override
+  Future<void> recordReadingSession({DateTime? now}) async {
+    recordedSessions++;
+  }
+
+  @override
+  Future<bool> shouldPrompt({DateTime? now}) async => shouldShowPrompt;
 }

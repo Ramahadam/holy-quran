@@ -73,15 +73,26 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   }
 
   void _saveReadingPosition() {
+    final now = DateTime.now();
     // Save the first verse on the current page as the reading position.
     final verseId = '${widget.surah.surahNumber}:1';
     // We'll use a more precise verseId from _currentPageFirstVerse if available.
     final id = _currentPageFirstVerseId ?? verseId;
     _positionRepo
-        .savePosition(ReadingPosition(verseId: id, lastReadAt: DateTime.now()))
+        .savePosition(ReadingPosition(verseId: id, lastReadAt: now))
         .catchError((Object e) {
           debugPrint('Failed to save reading position: $e');
         });
+    try {
+      ref
+          .read(feedbackPromptServiceProvider)
+          .recordReadingSession(now: now)
+          .catchError((Object e) {
+            debugPrint('Failed to record feedback prompt engagement: $e');
+          });
+    } catch (e) {
+      debugPrint('Failed to start feedback prompt engagement recording: $e');
+    }
   }
 
   String? _currentPageFirstVerseId;
