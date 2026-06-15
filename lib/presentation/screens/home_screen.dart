@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +15,9 @@ enum _HomeMenuAction { exportBackup, importBackup, feedback }
 
 enum _FeedbackPromptAction { notNow, giveFeedback }
 
+typedef _OpenReading =
+    Future<void> Function(Surah surah, {String? initialVerseId});
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,6 +27,13 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _heartbeatPromptScheduled = false;
+  Timer? _heartbeatPromptRefreshTimer;
+
+  @override
+  void dispose() {
+    _heartbeatPromptRefreshTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,11 +124,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _LastReadBanner(
                   surah: lastSurah,
                   verseId: lastPosition!.verseId,
+                  onOpenReading: _openReadingScreen,
                 ),
               if (bookmarks.isNotEmpty)
                 _BookmarksSection(
                   bookmarks: bookmarks,
                   surahsByNumber: surahsByNumber,
+                  onOpenReading: _openReadingScreen,
                 ),
               Expanded(
                 child: surahs.isEmpty
@@ -129,11 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           final surah = surahs[index];
                           return SurahTile(
                             surah: surah,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ReadingScreen(surah: surah),
-                              ),
-                            ),
+                            onTap: () => unawaited(_openReadingScreen(surah)),
                           );
                         },
                       ),
@@ -162,10 +172,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _maybeScheduleHeartbeatPrompt(AsyncValue<bool> promptAsync) {
     if (_heartbeatPromptScheduled || promptAsync.valueOrNull != true) return;
+    if (ModalRoute.of(context)?.isCurrent == false) return;
     _heartbeatPromptScheduled = true;
+    _heartbeatPromptRefreshTimer?.cancel();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _showHeartbeatFeedbackPrompt(context);
+    });
+  }
+
+  Future<void> _openReadingScreen(Surah surah, {String? initialVerseId}) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) =>
+            ReadingScreen(surah: surah, initialVerseId: initialVerseId),
+      ),
+    );
+    if (!mounted) return;
+    ref.invalidate(feedbackPromptShouldShowProvider);
+    _scheduleHeartbeatPromptRefresh();
+  }
+
+  void _scheduleHeartbeatPromptRefresh() {
+    final delay = feedbackPromptTestDelay;
+    if (delay == null) return;
+    _heartbeatPromptRefreshTimer?.cancel();
+    _heartbeatPromptRefreshTimer = Timer(delay, () {
+      if (!mounted) return;
+      ref.invalidate(feedbackPromptShouldShowProvider);
     });
   }
 
@@ -503,18 +537,19 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
 class _LastReadBanner extends ConsumerWidget {
   final Surah surah;
   final String verseId;
+  final _OpenReading onOpenReading;
 
-  const _LastReadBanner({required this.surah, required this.verseId});
+  const _LastReadBanner({
+    required this.surah,
+    required this.verseId,
+    required this.onOpenReading,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final verseNum = verseId.split(':').elementAtOrNull(1) ?? '';
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => ReadingScreen(surah: surah, initialVerseId: verseId),
-        ),
-      ),
+      onTap: () => unawaited(onOpenReading(surah, initialVerseId: verseId)),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -561,10 +596,12 @@ class _LastReadBanner extends ConsumerWidget {
 class _BookmarksSection extends ConsumerWidget {
   final List<Bookmark> bookmarks;
   final Map<int, Surah> surahsByNumber;
+  final _OpenReading onOpenReading;
 
   const _BookmarksSection({
     required this.bookmarks,
     required this.surahsByNumber,
+    required this.onOpenReading,
   });
 
   @override
@@ -592,6 +629,7 @@ class _BookmarksSection extends ConsumerWidget {
             (bookmark) => _BookmarkRow(
               bookmark: bookmark,
               surah: _surahForBookmark(bookmark),
+              onOpenReading: onOpenReading,
             ),
           ),
         ],
@@ -609,8 +647,13 @@ class _BookmarksSection extends ConsumerWidget {
 class _BookmarkRow extends ConsumerWidget {
   final Bookmark bookmark;
   final Surah? surah;
+  final _OpenReading onOpenReading;
 
-  const _BookmarkRow({required this.bookmark, required this.surah});
+  const _BookmarkRow({
+    required this.bookmark,
+    required this.surah,
+    required this.onOpenReading,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -621,13 +664,8 @@ class _BookmarkRow extends ConsumerWidget {
     return InkWell(
       onTap: surah == null
           ? null
-          : () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ReadingScreen(
-                  surah: surah!,
-                  initialVerseId: bookmark.verseId,
-                ),
-              ),
+          : () => unawaited(
+              onOpenReading(surah!, initialVerseId: bookmark.verseId),
             ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),

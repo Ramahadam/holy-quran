@@ -5,8 +5,25 @@ import 'package:holy_quran_app/data/feedback/anonymous_feedback_service.dart';
 import 'package:holy_quran_app/data/feedback/feedback_prompt_service.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
+import 'package:holy_quran_app/domain/models/verse.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
+import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
+
+const _surah1 = Surah(
+  surahNumber: 1,
+  nameArabic: 'الفاتحة',
+  nameEnglish: 'Al-Fatihah',
+  numberOfVerses: 7,
+);
+
+const _verse1 = Verse(
+  verseId: '1:1',
+  surahNumber: 1,
+  verseNumber: 1,
+  arabicText: 'بِسْمِ اللَّهِ',
+  translation: 'In the name of Allah',
+);
 
 void main() {
   group('AnonymousFeedbackService', () {
@@ -95,16 +112,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            surahListProvider.overrideWith(
-              (ref) async => const [
-                Surah(
-                  surahNumber: 1,
-                  nameArabic: 'الفاتحة',
-                  nameEnglish: 'Al-Fatihah',
-                  numberOfVerses: 7,
-                ),
-              ],
-            ),
+            surahListProvider.overrideWith((ref) async => const [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith(
               (ref) async => const <Bookmark>[],
@@ -142,16 +150,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            surahListProvider.overrideWith(
-              (ref) async => const [
-                Surah(
-                  surahNumber: 1,
-                  nameArabic: 'الفاتحة',
-                  nameEnglish: 'Al-Fatihah',
-                  numberOfVerses: 7,
-                ),
-              ],
-            ),
+            surahListProvider.overrideWith((ref) async => const [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith(
               (ref) async => const <Bookmark>[],
@@ -195,16 +194,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            surahListProvider.overrideWith(
-              (ref) async => const [
-                Surah(
-                  surahNumber: 1,
-                  nameArabic: 'الفاتحة',
-                  nameEnglish: 'Al-Fatihah',
-                  numberOfVerses: 7,
-                ),
-              ],
-            ),
+            surahListProvider.overrideWith((ref) async => const [_surah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith(
               (ref) async => const <Bookmark>[],
@@ -225,6 +215,55 @@ void main() {
       expect(promptService.dismissed, isTrue);
       expect(find.text('How is your Quran reading experience?'), findsNothing);
       expect(find.text('Send feedback'), findsNothing);
+    });
+
+    testWidgets('rechecks heartbeat prompt after returning from reading', (
+      tester,
+    ) async {
+      final promptService = _RecordingFeedbackPromptService(
+        shouldPrompt: false,
+        promptResponses: [false, true],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => const [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith(
+              (ref) async => const <Bookmark>[],
+            ),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(
+              1,
+            ).overrideWith((ref) async => const [_verse1]),
+            bookmarksBySurahProvider(
+              1,
+            ).overrideWith((ref) async => const <String>{}),
+            feedbackPromptServiceProvider.overrideWithValue(promptService),
+            feedbackPromptShouldShowProvider.overrideWith(
+              (ref) async => promptService.shouldPrompt(),
+            ),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('How is your Quran reading experience?'), findsNothing);
+
+      await tester.tap(find.text('Al-Fatihah'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ReadingScreen), findsOneWidget);
+
+      Navigator.of(tester.element(find.byType(ReadingScreen))).pop();
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('How is your Quran reading experience?'),
+        findsOneWidget,
+      );
     });
   });
 }
@@ -258,9 +297,13 @@ class _RecordingFeedbackPromptService implements FeedbackPromptController {
   bool dismissed = false;
   bool submitted = false;
   int recordedSessions = 0;
+  final List<bool> _promptResponses;
 
-  _RecordingFeedbackPromptService({required bool shouldPrompt})
-    : shouldShowPrompt = shouldPrompt;
+  _RecordingFeedbackPromptService({
+    required bool shouldPrompt,
+    List<bool> promptResponses = const [],
+  }) : shouldShowPrompt = shouldPrompt,
+       _promptResponses = List.of(promptResponses);
 
   @override
   Future<void> dismissPrompt({DateTime? now}) async {
@@ -280,5 +323,10 @@ class _RecordingFeedbackPromptService implements FeedbackPromptController {
   }
 
   @override
-  Future<bool> shouldPrompt({DateTime? now}) async => shouldShowPrompt;
+  Future<bool> shouldPrompt({DateTime? now}) async {
+    if (_promptResponses.isNotEmpty) {
+      shouldShowPrompt = _promptResponses.removeAt(0);
+    }
+    return shouldShowPrompt;
+  }
 }
