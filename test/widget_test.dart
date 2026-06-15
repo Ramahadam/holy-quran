@@ -552,7 +552,7 @@ void main() {
       expect(positionRepo.savedPosition?.verseId, '1:2');
     });
 
-    testWidgets('records local engagement when saving reading position', (
+    testWidgets('records local engagement when opening and saving reading', (
       tester,
     ) async {
       final positionRepo = _FakeReadingPositionRepository();
@@ -578,7 +578,7 @@ void main() {
       await tester.pump();
 
       expect(positionRepo.savedPosition?.verseId, '1:1');
-      expect(feedbackPromptService.recordedSessions, 1);
+      expect(feedbackPromptService.recordedSessions, 2);
     });
 
     testWidgets('opens Focus Mode from a Classic verse long press', (

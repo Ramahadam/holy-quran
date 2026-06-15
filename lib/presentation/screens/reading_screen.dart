@@ -48,6 +48,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   bool _showMushafControls = false;
   bool _showMushafPageNumberOverlay = false;
   Timer? _mushafPageNumberOverlayTimer;
+  DateTime? _openedAt;
+  ProviderContainer? _providerContainer;
+  bool _didRecordSessionStart = false;
 
   late final ReadingPositionRepository _positionRepo;
 
@@ -55,6 +58,19 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   void initState() {
     super.initState();
     _positionRepo = ref.read(readingPositionRepositoryProvider);
+    _openedAt = DateTime.now();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _providerContainer = ProviderScope.containerOf(context, listen: false);
+    if (_didRecordSessionStart) return;
+    _didRecordSessionStart = true;
+    final openedAt = _openedAt;
+    if (openedAt != null) {
+      _recordFeedbackPromptEngagement(openedAt);
+    }
   }
 
   @override
@@ -83,13 +99,23 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         .catchError((Object e) {
           debugPrint('Failed to save reading position: $e');
         });
+    _recordFeedbackPromptEngagement(now);
+  }
+
+  void _recordFeedbackPromptEngagement(DateTime timestamp) {
     try {
-      ref
+      final future = ref
           .read(feedbackPromptServiceProvider)
-          .recordReadingSession(now: now)
-          .catchError((Object e) {
-            debugPrint('Failed to record feedback prompt engagement: $e');
-          });
+          .recordReadingSession(now: timestamp);
+      unawaited(
+        future
+            .then((_) {
+              _providerContainer?.invalidate(feedbackPromptShouldShowProvider);
+            })
+            .catchError((Object e) {
+              debugPrint('Failed to record feedback prompt engagement: $e');
+            }),
+      );
     } catch (e) {
       debugPrint('Failed to start feedback prompt engagement recording: $e');
     }

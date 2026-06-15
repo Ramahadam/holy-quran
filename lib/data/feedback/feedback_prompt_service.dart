@@ -17,12 +17,14 @@ abstract class FeedbackPromptStore {
 class FeedbackPromptState {
   final int readingDayCount;
   final String? lastReadingDay;
+  final int? firstReadingSessionEpochMillis;
   final int? dismissedUntilEpochMillis;
   final int? submittedAtEpochMillis;
 
   const FeedbackPromptState({
     this.readingDayCount = 0,
     this.lastReadingDay,
+    this.firstReadingSessionEpochMillis,
     this.dismissedUntilEpochMillis,
     this.submittedAtEpochMillis,
   });
@@ -30,6 +32,7 @@ class FeedbackPromptState {
   factory FeedbackPromptState.fromJson(Map<String, Object?> json) {
     final readingDayCount = json['reading_day_count'];
     final lastReadingDay = json['last_reading_day'];
+    final firstReadingSession = json['first_reading_session_epoch_millis'];
     final dismissedUntil = json['dismissed_until_epoch_millis'];
     final submittedAt = json['submitted_at_epoch_millis'];
 
@@ -38,6 +41,9 @@ class FeedbackPromptState {
           ? readingDayCount
           : 0,
       lastReadingDay: lastReadingDay is String ? lastReadingDay : null,
+      firstReadingSessionEpochMillis: firstReadingSession is int
+          ? firstReadingSession
+          : null,
       dismissedUntilEpochMillis: dismissedUntil is int ? dismissedUntil : null,
       submittedAtEpochMillis: submittedAt is int ? submittedAt : null,
     );
@@ -46,6 +52,7 @@ class FeedbackPromptState {
   Map<String, Object?> toJson() => {
     'reading_day_count': readingDayCount,
     'last_reading_day': lastReadingDay,
+    'first_reading_session_epoch_millis': firstReadingSessionEpochMillis,
     'dismissed_until_epoch_millis': dismissedUntilEpochMillis,
     'submitted_at_epoch_millis': submittedAtEpochMillis,
   };
@@ -88,8 +95,13 @@ class FeedbackPromptService implements FeedbackPromptController {
   static const promptCooldown = Duration(days: 30);
 
   final FeedbackPromptStore _store;
+  final Duration? _testPromptDelay;
 
-  FeedbackPromptService({required FeedbackPromptStore store}) : _store = store;
+  FeedbackPromptService({
+    required FeedbackPromptStore store,
+    Duration? testPromptDelay,
+  }) : _store = store,
+       _testPromptDelay = testPromptDelay;
 
   @override
   Future<void> recordReadingSession({DateTime? now}) async {
@@ -103,6 +115,9 @@ class FeedbackPromptService implements FeedbackPromptController {
       FeedbackPromptState(
         readingDayCount: state.readingDayCount + 1,
         lastReadingDay: currentDay,
+        firstReadingSessionEpochMillis:
+            state.firstReadingSessionEpochMillis ??
+            currentTime.millisecondsSinceEpoch,
         dismissedUntilEpochMillis: state.dismissedUntilEpochMillis,
         submittedAtEpochMillis: state.submittedAtEpochMillis,
       ),
@@ -115,7 +130,18 @@ class FeedbackPromptService implements FeedbackPromptController {
     final state = await _store.load();
 
     if (state.submittedAtEpochMillis != null) return false;
-    if (state.readingDayCount < requiredReadingDays) return false;
+    final testPromptDelay = _testPromptDelay;
+    if (testPromptDelay != null) {
+      final firstSession = state.firstReadingSessionEpochMillis;
+      if (firstSession == null) return false;
+      if (currentTime.isBefore(
+        DateTime.fromMillisecondsSinceEpoch(firstSession).add(testPromptDelay),
+      )) {
+        return false;
+      }
+    } else if (state.readingDayCount < requiredReadingDays) {
+      return false;
+    }
 
     final dismissedUntil = state.dismissedUntilEpochMillis;
     if (dismissedUntil != null &&
@@ -137,6 +163,7 @@ class FeedbackPromptService implements FeedbackPromptController {
       FeedbackPromptState(
         readingDayCount: state.readingDayCount,
         lastReadingDay: state.lastReadingDay,
+        firstReadingSessionEpochMillis: state.firstReadingSessionEpochMillis,
         dismissedUntilEpochMillis: currentTime
             .add(promptCooldown)
             .millisecondsSinceEpoch,
@@ -154,6 +181,7 @@ class FeedbackPromptService implements FeedbackPromptController {
       FeedbackPromptState(
         readingDayCount: state.readingDayCount,
         lastReadingDay: state.lastReadingDay,
+        firstReadingSessionEpochMillis: state.firstReadingSessionEpochMillis,
         dismissedUntilEpochMillis: state.dismissedUntilEpochMillis,
         submittedAtEpochMillis: currentTime.millisecondsSinceEpoch,
       ),

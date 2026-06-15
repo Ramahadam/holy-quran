@@ -36,6 +36,14 @@ String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
 bool get isSupabaseFeedbackConfigured =>
     configuredSupabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
 
+const int feedbackPromptTestDelaySeconds = int.fromEnvironment(
+  'FEEDBACK_PROMPT_TEST_DELAY_SECONDS',
+);
+
+Duration? get feedbackPromptTestDelay => feedbackPromptTestDelaySeconds > 0
+    ? Duration(seconds: feedbackPromptTestDelaySeconds)
+    : null;
+
 final quranRepositoryProvider = Provider<QuranRepository>((ref) {
   return QuranRepositoryImpl();
 });
@@ -83,7 +91,10 @@ final feedbackPromptStoreProvider = Provider<FeedbackPromptStore>((ref) {
 
 final feedbackPromptServiceProvider = Provider<FeedbackPromptController>((ref) {
   try {
-    return FeedbackPromptService(store: ref.watch(feedbackPromptStoreProvider));
+    return FeedbackPromptService(
+      store: ref.watch(feedbackPromptStoreProvider),
+      testPromptDelay: feedbackPromptTestDelay,
+    );
   } catch (_) {
     return const DisabledFeedbackPromptController();
   }

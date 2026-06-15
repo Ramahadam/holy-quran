@@ -31,6 +31,28 @@ void main() {
       expect((await store.load()).readingDayCount, 1);
     });
 
+    test(
+      'uses optional test delay for manual QA without changing production rule',
+      () async {
+        final store = _MemoryFeedbackPromptStore();
+        final service = FeedbackPromptService(
+          store: store,
+          testPromptDelay: const Duration(minutes: 2),
+        );
+
+        await service.recordReadingSession(now: DateTime(2026, 6, 1, 9));
+
+        expect(
+          await service.shouldPrompt(now: DateTime(2026, 6, 1, 9, 1, 59)),
+          isFalse,
+        );
+        expect(
+          await service.shouldPrompt(now: DateTime(2026, 6, 1, 9, 2)),
+          isTrue,
+        );
+      },
+    );
+
     test('dismisses prompts for the cooldown period', () async {
       final store = _MemoryFeedbackPromptStore();
       final service = FeedbackPromptService(store: store);
