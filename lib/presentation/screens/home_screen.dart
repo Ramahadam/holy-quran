@@ -252,16 +252,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Future<void> _showFeedbackDialog(BuildContext context) {
-    return showDialog<void>(
-      context: context,
-      builder: (context) => _FeedbackDialog(
-        onSubmitted: () async {
-          await ref.read(feedbackPromptServiceProvider).markFeedbackSubmitted();
-          ref.invalidate(feedbackPromptShouldShowProvider);
-        },
-      ),
-    );
+  Future<bool> _showFeedbackDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => _FeedbackDialog(
+            onSubmitted: () async {
+              await ref
+                  .read(feedbackPromptServiceProvider)
+                  .markFeedbackSubmitted();
+              ref.invalidate(feedbackPromptShouldShowProvider);
+            },
+          ),
+        ) ??
+        false;
   }
 
   Future<void> _showHeartbeatFeedbackPrompt(BuildContext context) async {
@@ -291,10 +294,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (!mounted || action == null) return;
 
-    await ref.read(feedbackPromptServiceProvider).dismissPrompt();
-    ref.invalidate(feedbackPromptShouldShowProvider);
+    if (action == _FeedbackPromptAction.notNow) {
+      await ref.read(feedbackPromptServiceProvider).dismissPrompt();
+      ref.invalidate(feedbackPromptShouldShowProvider);
+      return;
+    }
 
-    if (!mounted || action == _FeedbackPromptAction.notNow) return;
+    if (!mounted) return;
     await _showFeedbackDialog(this.context);
   }
 
@@ -478,7 +484,9 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _submitting ? null : () => Navigator.of(context).pop(),
+          onPressed: _submitting
+              ? null
+              : () => Navigator.of(context).pop(false),
           child: const Text('Cancel'),
         ),
         FilledButton(
@@ -510,7 +518,7 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
         debugPrint('Failed to mark feedback prompt submitted: $e');
       }
       if (!mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Feedback sent'),
@@ -524,8 +532,9 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
         _errorText = e.message;
         _submitting = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      debugPrint('Failed to submit anonymous feedback: $e');
       setState(() {
         _errorText = 'Feedback could not be sent. Please try again later.';
         _submitting = false;

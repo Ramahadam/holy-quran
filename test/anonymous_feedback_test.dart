@@ -174,7 +174,7 @@ void main() {
       await tester.tap(find.text('Give feedback'));
       await tester.pumpAndSettle();
 
-      expect(promptService.dismissed, isTrue);
+      expect(promptService.dismissed, isFalse);
       expect(find.text('Send feedback'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'Mushaf mode is calm.');
@@ -185,6 +185,70 @@ void main() {
       expect(promptService.submitted, isTrue);
       expect(find.text('Feedback sent'), findsOneWidget);
     });
+
+    testWidgets(
+      'keeps heartbeat prompt eligible when feedback submit fails and is canceled',
+      (tester) async {
+        final feedbackService = _RecordingFeedbackService(shouldFail: true);
+        final promptService = _RecordingFeedbackPromptService(
+          shouldPrompt: true,
+        );
+
+        List<Override> overrides() => [
+          surahListProvider.overrideWith((ref) async => const [_surah1]),
+          lastReadPositionProvider.overrideWith((ref) async => null),
+          recentBookmarksProvider.overrideWith(
+            (ref) async => const <Bookmark>[],
+          ),
+          anonymousFeedbackServiceProvider.overrideWithValue(feedbackService),
+          feedbackPromptServiceProvider.overrideWithValue(promptService),
+          feedbackPromptShouldShowProvider.overrideWith(
+            (ref) async => promptService.shouldPrompt(),
+          ),
+        ];
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: overrides(),
+            child: const MaterialApp(home: HomeScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Give feedback'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'Please add retry.');
+        await tester.tap(find.text('Send'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Feedback could not be sent. Please try again later.'),
+          findsOneWidget,
+        );
+        expect(promptService.dismissed, isFalse);
+        expect(promptService.submitted, isFalse);
+
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        expect(promptService.dismissed, isFalse);
+        expect(promptService.submitted, isFalse);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: overrides(),
+            child: const MaterialApp(home: HomeScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('How is your Quran reading experience?'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('dismisses heartbeat prompt without opening feedback', (
       tester,
@@ -283,11 +347,16 @@ class _FakeFeedbackTransport implements FeedbackTransport {
 
 class _RecordingFeedbackService extends AnonymousFeedbackService {
   String? submittedText;
+  final bool shouldFail;
 
-  _RecordingFeedbackService() : super(transport: _FakeFeedbackTransport());
+  _RecordingFeedbackService({this.shouldFail = false})
+    : super(transport: _FakeFeedbackTransport());
 
   @override
   Future<void> submitFeedback(String text, {FeedbackMetadata? metadata}) async {
+    if (shouldFail) {
+      throw FeedbackSubmissionException();
+    }
     submittedText = text;
   }
 }
