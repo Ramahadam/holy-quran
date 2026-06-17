@@ -42,7 +42,9 @@ class UnconfiguredFeedbackTransport implements FeedbackTransport {
 
   @override
   Future<void> submit(Map<String, dynamic> payload) {
-    throw const FeedbackSubmissionException();
+    throw const FeedbackSubmissionException(
+      'Supabase feedback is not configured.',
+    );
   }
 }
 
@@ -73,8 +75,8 @@ class AnonymousFeedbackService {
       await transport.submit(payload);
     } on FeedbackSubmissionException {
       rethrow;
-    } catch (_) {
-      throw const FeedbackSubmissionException();
+    } catch (e) {
+      throw FeedbackSubmissionException('Feedback transport failed.', e);
     }
   }
 }
@@ -86,5 +88,16 @@ class FeedbackValidationException implements Exception {
 }
 
 class FeedbackSubmissionException implements Exception {
-  const FeedbackSubmissionException();
+  final String message;
+  final Object? cause;
+
+  const FeedbackSubmissionException([
+    this.message = 'Feedback could not be submitted.',
+    this.cause,
+  ]);
+
+  @override
+  String toString() => cause == null
+      ? 'FeedbackSubmissionException: $message'
+      : 'FeedbackSubmissionException: $message Cause: $cause';
 }

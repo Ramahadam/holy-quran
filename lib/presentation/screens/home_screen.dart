@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,14 +14,36 @@ import 'reading_screen.dart';
 
 enum _HomeMenuAction { exportBackup, importBackup, feedback, reminders }
 
-class HomeScreen extends ConsumerWidget {
+enum _FeedbackPromptAction { notNow, giveFeedback }
+
+typedef _OpenReading =
+    Future<void> Function(Surah surah, {String? initialVerseId});
+
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _heartbeatPromptScheduled = false;
+  Timer? _heartbeatPromptRefreshTimer;
+
+  @override
+  void dispose() {
+    _heartbeatPromptRefreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final surahsAsync = ref.watch(surahListProvider);
     final lastPositionAsync = ref.watch(lastReadPositionProvider);
     final bookmarksAsync = ref.watch(recentBookmarksProvider);
+    final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
+
+    _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,9 +66,9 @@ class HomeScreen extends ConsumerWidget {
             onSelected: (action) {
               switch (action) {
                 case _HomeMenuAction.exportBackup:
-                  _exportBackup(context, ref);
+                  _exportBackup(context);
                 case _HomeMenuAction.importBackup:
-                  _importBackup(context, ref);
+                  _importBackup(context);
                 case _HomeMenuAction.feedback:
                   _showFeedbackDialog(context);
                 case _HomeMenuAction.reminders:
@@ -110,11 +134,13 @@ class HomeScreen extends ConsumerWidget {
                 _LastReadBanner(
                   surah: lastSurah,
                   verseId: lastPosition!.verseId,
+                  onOpenReading: _openReadingScreen,
                 ),
               if (bookmarks.isNotEmpty)
                 _BookmarksSection(
                   bookmarks: bookmarks,
                   surahsByNumber: surahsByNumber,
+                  onOpenReading: _openReadingScreen,
                 ),
               Expanded(
                 child: surahs.isEmpty
@@ -127,11 +153,7 @@ class HomeScreen extends ConsumerWidget {
                           final surah = surahs[index];
                           return SurahTile(
                             surah: surah,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => ReadingScreen(surah: surah),
-                              ),
-                            ),
+                            onTap: () => unawaited(_openReadingScreen(surah)),
                           );
                         },
                       ),
@@ -158,7 +180,40 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+  void _maybeScheduleHeartbeatPrompt(AsyncValue<bool> promptAsync) {
+    if (_heartbeatPromptScheduled || promptAsync.valueOrNull != true) return;
+    if (ModalRoute.of(context)?.isCurrent == false) return;
+    _heartbeatPromptScheduled = true;
+    _heartbeatPromptRefreshTimer?.cancel();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _showHeartbeatFeedbackPrompt(context);
+    });
+  }
+
+  Future<void> _openReadingScreen(Surah surah, {String? initialVerseId}) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) =>
+            ReadingScreen(surah: surah, initialVerseId: initialVerseId),
+      ),
+    );
+    if (!mounted) return;
+    ref.invalidate(feedbackPromptShouldShowProvider);
+    _scheduleHeartbeatPromptRefresh();
+  }
+
+  void _scheduleHeartbeatPromptRefresh() {
+    final delay = feedbackPromptTestDelay;
+    if (delay == null) return;
+    _heartbeatPromptRefreshTimer?.cancel();
+    _heartbeatPromptRefreshTimer = Timer(delay, () {
+      if (!mounted) return;
+      ref.invalidate(feedbackPromptShouldShowProvider);
+    });
+  }
+
+  Future<void> _exportBackup(BuildContext context) async {
     final passphrase = await _promptPassphrase(context, confirm: true);
     if (passphrase == null) return;
 
@@ -175,7 +230,7 @@ class HomeScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+  Future<void> _importBackup(BuildContext context) async {
     final passphrase = await _promptPassphrase(context);
     if (passphrase == null) return;
 
@@ -207,11 +262,56 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showFeedbackDialog(BuildContext context) {
-    return showDialog<void>(
+  Future<bool> _showFeedbackDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => _FeedbackDialog(
+            onSubmitted: () async {
+              await ref
+                  .read(feedbackPromptServiceProvider)
+                  .markFeedbackSubmitted();
+              ref.invalidate(feedbackPromptShouldShowProvider);
+            },
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _showHeartbeatFeedbackPrompt(BuildContext context) async {
+    final action = await showDialog<_FeedbackPromptAction>(
       context: context,
-      builder: (context) => const _FeedbackDialog(),
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('How is your Quran reading experience?'),
+        content: const Text(
+          'If you have a moment, share what would make the app better. Your note is anonymous.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                Navigator.of(context).pop(_FeedbackPromptAction.notNow),
+            child: const Text('Not now'),
+          ),
+          FilledButton.icon(
+            onPressed: () =>
+                Navigator.of(context).pop(_FeedbackPromptAction.giveFeedback),
+            icon: const Icon(Icons.feedback_outlined),
+            label: const Text('Give feedback'),
+          ),
+        ],
+      ),
     );
+
+    if (!mounted || action == null) return;
+
+    if (action == _FeedbackPromptAction.notNow) {
+      await ref.read(feedbackPromptServiceProvider).dismissPrompt();
+      ref.invalidate(feedbackPromptShouldShowProvider);
+      return;
+    }
+
+    if (!mounted) return;
+    await _showFeedbackDialog(this.context);
   }
 
   Future<void> _showPrayerReminderDialog(BuildContext context) {
@@ -563,7 +663,9 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
 }
 
 class _FeedbackDialog extends ConsumerStatefulWidget {
-  const _FeedbackDialog();
+  final Future<void> Function()? onSubmitted;
+
+  const _FeedbackDialog({this.onSubmitted});
 
   @override
   ConsumerState<_FeedbackDialog> createState() => _FeedbackDialogState();
@@ -621,7 +723,9 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _submitting ? null : () => Navigator.of(context).pop(),
+          onPressed: _submitting
+              ? null
+              : () => Navigator.of(context).pop(false),
           child: const Text('Cancel'),
         ),
         FilledButton(
@@ -647,8 +751,13 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
       await ref
           .read(anonymousFeedbackServiceProvider)
           .submitFeedback(_feedbackController.text);
+      try {
+        await widget.onSubmitted?.call();
+      } catch (e) {
+        debugPrint('Failed to mark feedback prompt submitted: $e');
+      }
       if (!mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Feedback sent'),
@@ -662,8 +771,9 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
         _errorText = e.message;
         _submitting = false;
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
+      debugPrint('Failed to submit anonymous feedback: $e');
       setState(() {
         _errorText = 'Feedback could not be sent. Please try again later.';
         _submitting = false;
@@ -675,18 +785,19 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
 class _LastReadBanner extends ConsumerWidget {
   final Surah surah;
   final String verseId;
+  final _OpenReading onOpenReading;
 
-  const _LastReadBanner({required this.surah, required this.verseId});
+  const _LastReadBanner({
+    required this.surah,
+    required this.verseId,
+    required this.onOpenReading,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final verseNum = verseId.split(':').elementAtOrNull(1) ?? '';
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => ReadingScreen(surah: surah, initialVerseId: verseId),
-        ),
-      ),
+      onTap: () => unawaited(onOpenReading(surah, initialVerseId: verseId)),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -733,10 +844,12 @@ class _LastReadBanner extends ConsumerWidget {
 class _BookmarksSection extends ConsumerWidget {
   final List<Bookmark> bookmarks;
   final Map<int, Surah> surahsByNumber;
+  final _OpenReading onOpenReading;
 
   const _BookmarksSection({
     required this.bookmarks,
     required this.surahsByNumber,
+    required this.onOpenReading,
   });
 
   @override
@@ -764,6 +877,7 @@ class _BookmarksSection extends ConsumerWidget {
             (bookmark) => _BookmarkRow(
               bookmark: bookmark,
               surah: _surahForBookmark(bookmark),
+              onOpenReading: onOpenReading,
             ),
           ),
         ],
@@ -781,8 +895,13 @@ class _BookmarksSection extends ConsumerWidget {
 class _BookmarkRow extends ConsumerWidget {
   final Bookmark bookmark;
   final Surah? surah;
+  final _OpenReading onOpenReading;
 
-  const _BookmarkRow({required this.bookmark, required this.surah});
+  const _BookmarkRow({
+    required this.bookmark,
+    required this.surah,
+    required this.onOpenReading,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -793,13 +912,8 @@ class _BookmarkRow extends ConsumerWidget {
     return InkWell(
       onTap: surah == null
           ? null
-          : () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ReadingScreen(
-                  surah: surah!,
-                  initialVerseId: bookmark.verseId,
-                ),
-              ),
+          : () => unawaited(
+              onOpenReading(surah!, initialVerseId: bookmark.verseId),
             ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),

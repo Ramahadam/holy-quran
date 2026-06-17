@@ -12,6 +12,7 @@ import 'package:holy_quran_app/presentation/screens/verse_detail_screen.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
 import 'package:holy_quran_app/data/repositories/reading_position_repository.dart';
+import 'package:holy_quran_app/data/feedback/feedback_prompt_service.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
@@ -140,6 +141,24 @@ class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   Future<void> snooze(PrayerReminderSettings settings) async {
     snoozedSettings = settings;
   }
+}
+
+class _FakeFeedbackPromptService implements FeedbackPromptController {
+  int recordedSessions = 0;
+
+  @override
+  Future<void> dismissPrompt({DateTime? now}) async {}
+
+  @override
+  Future<void> markFeedbackSubmitted({DateTime? now}) async {}
+
+  @override
+  Future<void> recordReadingSession({DateTime? now}) async {
+    recordedSessions++;
+  }
+
+  @override
+  Future<bool> shouldPrompt({DateTime? now}) async => false;
 }
 
 void main() {
@@ -665,6 +684,35 @@ void main() {
       await tester.pump();
 
       expect(positionRepo.savedPosition?.verseId, '1:2');
+    });
+
+    testWidgets('records local engagement when opening and saving reading', (
+      tester,
+    ) async {
+      final positionRepo = _FakeReadingPositionRepository();
+      final feedbackPromptService = _FakeFeedbackPromptService();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            readingPositionRepositoryProvider.overrideWithValue(positionRepo),
+            feedbackPromptServiceProvider.overrideWithValue(
+              feedbackPromptService,
+            ),
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+
+      expect(positionRepo.savedPosition?.verseId, '1:1');
+      expect(feedbackPromptService.recordedSessions, 2);
     });
 
     testWidgets('opens Focus Mode from a Classic verse long press', (

@@ -41,6 +41,7 @@ dependencies:
 
   # Backend (anonymous feedback only)
   supabase_flutter: ^2.9.2
+  shared_preferences: ^2.5.3
 
   # Utilities
   collection: ^1.18.0
