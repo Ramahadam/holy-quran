@@ -4,6 +4,7 @@ import '../../data/backup/quran_backup_codec.dart';
 import '../../data/backup/quran_backup_file_service.dart';
 import '../../data/backup/quran_backup_service.dart';
 import '../../data/feedback/anonymous_feedback_service.dart';
+import '../../data/feedback/feedback_prompt_service.dart';
 import '../../data/repositories/bookmark_repository.dart';
 import '../../data/repositories/bookmark_repository_impl.dart';
 import '../../data/repositories/quran_repository.dart';
@@ -34,6 +35,14 @@ String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
 
 bool get isSupabaseFeedbackConfigured =>
     configuredSupabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
+
+const int feedbackPromptTestDelaySeconds = int.fromEnvironment(
+  'FEEDBACK_PROMPT_TEST_DELAY_SECONDS',
+);
+
+Duration? get feedbackPromptTestDelay => feedbackPromptTestDelaySeconds > 0
+    ? Duration(seconds: feedbackPromptTestDelaySeconds)
+    : null;
 
 final quranRepositoryProvider = Provider<QuranRepository>((ref) {
   return QuranRepositoryImpl();
@@ -74,6 +83,25 @@ final anonymousFeedbackServiceProvider = Provider<AnonymousFeedbackService>((
       ? SupabaseFeedbackTransport(client: Supabase.instance.client)
       : const UnconfiguredFeedbackTransport();
   return AnonymousFeedbackService(transport: transport);
+});
+
+final feedbackPromptStoreProvider = Provider<FeedbackPromptStore>((ref) {
+  return SharedPreferencesFeedbackPromptStore();
+});
+
+final feedbackPromptServiceProvider = Provider<FeedbackPromptController>((ref) {
+  try {
+    return FeedbackPromptService(
+      store: ref.watch(feedbackPromptStoreProvider),
+      testPromptDelay: feedbackPromptTestDelay,
+    );
+  } catch (_) {
+    return const DisabledFeedbackPromptController();
+  }
+});
+
+final feedbackPromptShouldShowProvider = FutureProvider<bool>((ref) {
+  return ref.watch(feedbackPromptServiceProvider).shouldPrompt();
 });
 
 final initializeDataProvider = FutureProvider<void>((ref) async {
