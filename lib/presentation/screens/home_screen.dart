@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/feedback/anonymous_feedback_service.dart';
+import '../../data/notifications/prayer_reminder_settings.dart';
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/surah.dart';
 import '../providers/quran_providers.dart';
@@ -11,7 +12,7 @@ import '../theme/app_theme.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
-enum _HomeMenuAction { exportBackup, importBackup, feedback }
+enum _HomeMenuAction { exportBackup, importBackup, feedback, reminders }
 
 enum _FeedbackPromptAction { notNow, giveFeedback }
 
@@ -70,9 +71,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _importBackup(context);
                 case _HomeMenuAction.feedback:
                   _showFeedbackDialog(context);
+                case _HomeMenuAction.reminders:
+                  _showPrayerReminderDialog(context);
               }
             },
             itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: _HomeMenuAction.reminders,
+                child: ListTile(
+                  leading: Icon(Icons.notifications_active_outlined),
+                  title: Text('Reading reminders'),
+                ),
+              ),
               PopupMenuItem(
                 value: _HomeMenuAction.feedback,
                 child: ListTile(
@@ -304,6 +314,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     await _showFeedbackDialog(this.context);
   }
 
+  Future<void> _showPrayerReminderDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => const _PrayerReminderDialog(),
+    );
+  }
+
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -420,6 +437,228 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
     }
     _submitted = true;
     _navigator.pop(passphrase);
+  }
+}
+
+class _PrayerReminderDialog extends ConsumerStatefulWidget {
+  const _PrayerReminderDialog();
+
+  @override
+  ConsumerState<_PrayerReminderDialog> createState() =>
+      _PrayerReminderDialogState();
+}
+
+class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
+  bool _initialized = false;
+  bool _saving = false;
+  bool _enabled = PrayerReminderSettings.defaults.enabled;
+  PrayerReminderPrayer _prayer = PrayerReminderSettings.defaults.prayer;
+  int _prayerTimeMinutes = PrayerReminderSettings.defaults.prayerTimeMinutes;
+  int _offsetMinutes = PrayerReminderSettings.defaults.offsetMinutes;
+  int _snoozeMinutes = PrayerReminderSettings.defaults.snoozeMinutes;
+
+  @override
+  Widget build(BuildContext context) {
+    final settingsAsync = ref.watch(prayerReminderSettingsProvider);
+
+    return settingsAsync.when(
+      loading: () => const AlertDialog(
+        content: SizedBox(
+          height: 96,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (_, _) => AlertDialog(
+        title: const Text('Reading reminders'),
+        content: const Text('Reminder settings could not be loaded.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+      data: (settings) {
+        _initialize(settings);
+
+        return AlertDialog(
+          title: const Text('Reading reminders'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Enable reminder'),
+                  value: _enabled,
+                  onChanged: _saving
+                      ? null
+                      : (value) => setState(() => _enabled = value),
+                ),
+                DropdownButtonFormField<PrayerReminderPrayer>(
+                  initialValue: _prayer,
+                  decoration: const InputDecoration(labelText: 'Prayer'),
+                  items: PrayerReminderPrayer.values
+                      .map(
+                        (prayer) => DropdownMenuItem(
+                          value: prayer,
+                          child: Text(prayer.label),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: _saving || !_enabled
+                      ? null
+                      : (value) => setState(() {
+                          if (value != null) _prayer = value;
+                        }),
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Prayer time'),
+                  subtitle: Text(_formatTimeOfDay(_prayerTimeMinutes)),
+                  trailing: const Icon(Icons.schedule),
+                  enabled: !_saving && _enabled,
+                  onTap: _saving || !_enabled ? null : _pickPrayerTime,
+                ),
+                DropdownButtonFormField<int>(
+                  initialValue: _offsetMinutes,
+                  decoration: const InputDecoration(
+                    labelText: 'Reminder after',
+                  ),
+                  items: const [0, 5, 10, 15, 20, 30, 45, 60]
+                      .map(
+                        (minutes) => DropdownMenuItem(
+                          value: minutes,
+                          child: Text(
+                            minutes == 0 ? 'At prayer time' : '$minutes min',
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: _saving || !_enabled
+                      ? null
+                      : (value) => setState(() {
+                          if (value != null) _offsetMinutes = value;
+                        }),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int>(
+                  initialValue: _snoozeMinutes,
+                  decoration: const InputDecoration(labelText: 'Snooze'),
+                  items: const [5, 10, 15, 30, 45, 60]
+                      .map(
+                        (minutes) => DropdownMenuItem(
+                          value: minutes,
+                          child: Text('$minutes min'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: _saving || !_enabled
+                      ? null
+                      : (value) => setState(() {
+                          if (value != null) _snoozeMinutes = value;
+                        }),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: _saving ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _initialize(PrayerReminderSettings settings) {
+    if (_initialized) return;
+    _initialized = true;
+    _enabled = settings.enabled;
+    _prayer = settings.prayer;
+    _prayerTimeMinutes = settings.prayerTimeMinutes;
+    _offsetMinutes = settings.offsetMinutes;
+    _snoozeMinutes = settings.snoozeMinutes;
+  }
+
+  Future<void> _pickPrayerTime() async {
+    final currentTime = TimeOfDay(
+      hour: _prayerTimeMinutes ~/ 60,
+      minute: _prayerTimeMinutes % 60,
+    );
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: currentTime,
+    );
+    if (picked == null || !mounted) return;
+
+    setState(() {
+      _prayerTimeMinutes = picked.hour * 60 + picked.minute;
+    });
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+
+    final settings = PrayerReminderSettings(
+      enabled: _enabled,
+      prayer: _prayer,
+      prayerTimeMinutes: _prayerTimeMinutes,
+      offsetMinutes: _offsetMinutes,
+      snoozeMinutes: _snoozeMinutes,
+    );
+
+    late final bool saved;
+    try {
+      saved = await ref
+          .read(prayerReminderServiceProvider)
+          .saveSettings(settings);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Reminder could not be scheduled. Please try again.'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (!mounted) return;
+
+    ref.invalidate(prayerReminderSettingsProvider);
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          saved
+              ? _enabled
+                    ? 'Reading reminder scheduled'
+                    : 'Reading reminder disabled'
+              : 'Reminder permission was not granted',
+        ),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  String _formatTimeOfDay(int minutesOfDay) {
+    final time = TimeOfDay(hour: minutesOfDay ~/ 60, minute: minutesOfDay % 60);
+    return time.format(context);
   }
 }
 

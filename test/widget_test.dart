@@ -21,6 +21,10 @@ import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
 import 'package:holy_quran_app/presentation/widgets/verse_card.dart';
+import 'package:holy_quran_app/data/notifications/prayer_reminder_scheduler.dart';
+import 'package:holy_quran_app/data/notifications/prayer_reminder_service.dart';
+import 'package:holy_quran_app/data/notifications/prayer_reminder_settings.dart';
+import 'package:holy_quran_app/data/notifications/prayer_reminder_settings_store.dart';
 
 const _surah1 = Surah(
   surahNumber: 1,
@@ -91,6 +95,51 @@ class _FakeReadingPositionRepository implements ReadingPositionRepository {
   @override
   Future<void> savePosition(ReadingPosition position) async {
     savedPosition = position;
+  }
+}
+
+class _FakePrayerReminderSettingsStore
+    implements PrayerReminderSettingsRepository {
+  PrayerReminderSettings settings;
+
+  _FakePrayerReminderSettingsStore(this.settings);
+
+  @override
+  Future<PrayerReminderSettings> load() async => settings;
+
+  @override
+  Future<void> save(PrayerReminderSettings settings) async {
+    this.settings = settings;
+  }
+}
+
+class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
+  PrayerReminderSettings? scheduledSettings;
+  PrayerReminderSettings? snoozedSettings;
+  Object? requestPermissionError;
+  var canceled = false;
+  var permissionGranted = true;
+
+  @override
+  Future<void> cancel() async {
+    canceled = true;
+  }
+
+  @override
+  Future<bool> requestPermission() async {
+    final error = requestPermissionError;
+    if (error != null) throw error;
+    return permissionGranted;
+  }
+
+  @override
+  Future<void> schedule(PrayerReminderSettings settings) async {
+    scheduledSettings = settings;
+  }
+
+  @override
+  Future<void> snooze(PrayerReminderSettings settings) async {
+    snoozedSettings = settings;
   }
 }
 
@@ -407,6 +456,91 @@ void main() {
       await tester.pump();
 
       expect(repo.removedVerseIds, ['1:1']);
+    });
+
+    testWidgets('opens reading reminders dialog and schedules a reminder', (
+      tester,
+    ) async {
+      final store = _FakePrayerReminderSettingsStore(
+        PrayerReminderSettings.defaults,
+      );
+      final scheduler = _FakePrayerReminderScheduler();
+      final service = PrayerReminderService(
+        settingsStore: store,
+        scheduler: scheduler,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderServiceProvider.overrideWithValue(service),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enable reminder'), findsOneWidget);
+      await tester.tap(find.text('Enable reminder'));
+      await tester.pump();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(store.settings.enabled, isTrue);
+      expect(scheduler.scheduledSettings?.enabled, isTrue);
+      expect(find.text('Reading reminder scheduled'), findsOneWidget);
+    });
+
+    testWidgets('stops saving when reminder scheduling fails', (tester) async {
+      final store = _FakePrayerReminderSettingsStore(
+        PrayerReminderSettings.defaults,
+      );
+      final scheduler = _FakePrayerReminderScheduler()
+        ..requestPermissionError = Exception('notification init failed');
+      final service = PrayerReminderService(
+        settingsStore: store,
+        scheduler: scheduler,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderServiceProvider.overrideWithValue(service),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: const MaterialApp(home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Enable reminder'));
+      await tester.pump();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Enable reminder'), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(
+        find.text('Reminder could not be scheduled. Please try again.'),
+        findsOneWidget,
+      );
+      expect(scheduler.scheduledSettings, isNull);
     });
   });
 
