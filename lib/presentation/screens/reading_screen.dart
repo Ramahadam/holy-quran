@@ -51,6 +51,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   DateTime? _openedAt;
   ProviderContainer? _providerContainer;
   bool _didRecordSessionStart = false;
+  bool _didScrollToInitialClassicVerse = false;
 
   late final ReadingPositionRepository _positionRepo;
 
@@ -90,9 +91,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
   void _saveReadingPosition() {
     final now = DateTime.now();
-    // Save the first verse on the current page as the reading position.
     final verseId = '${widget.surah.surahNumber}:1';
-    // We'll use a more precise verseId from _currentPageFirstVerse if available.
     final id = _currentPageFirstVerseId ?? verseId;
     _positionRepo
         .savePosition(ReadingPosition(verseId: id, lastReadAt: now))
@@ -127,6 +126,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     if (_resolved) return;
     _resolved = true;
     _currentPage = startPage;
+    _currentPageFirstVerseId = widget.initialVerseId;
     _pageController = PageController(initialPage: startPage - 1);
   }
 
@@ -233,8 +233,10 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
                 _readingMode = mode;
                 _showMushafControls = false;
                 if (mode == ReadingMode.mushaf) {
+                  _currentPageFirstVerseId = null;
                   _showMushafPageNumberOverlay = true;
                 } else {
+                  _currentPageFirstVerseId = widget.initialVerseId;
                   _hideMushafPageNumberOverlay();
                 }
               });
@@ -284,7 +286,97 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       _setImmersiveMode(isMushafImmersive);
     });
 
-    final pageView = PageView.builder(
+    final reader = _readingMode == ReadingMode.classic
+        ? _buildClassicScroll()
+        : _buildMushafPageView();
+
+    return Scaffold(
+      appBar: showAppBar ? _buildAppBar() : null,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onTap: () {
+              if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
+                setState(() {
+                  _showMushafControls = false;
+                  _hideMushafPageNumberOverlay();
+                });
+              }
+            },
+            child: reader,
+          ),
+          if (isMushafImmersive)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 56,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  setState(() {
+                    _showMushafControls = true;
+                    _showMushafPageNumberOverlay = true;
+                  });
+                  _scheduleMushafPageNumberOverlayHide();
+                },
+              ),
+            ),
+          if (showMushafPageNumber)
+            _MushafPageNumberOverlay(pageNumber: _currentPage),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClassicScroll() {
+    final versesAsync = ref.watch(
+      versesBySurahProvider(widget.surah.surahNumber),
+    );
+
+    return versesAsync.when(
+      data: (verses) {
+        if (verses.isEmpty) {
+          return const Center(child: Text('No verses in this surah.'));
+        }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _currentPageFirstVerseId ??= verses.first.verseId;
+        });
+
+        return _ClassicSurahContent(
+          surah: widget.surah,
+          verses: verses,
+          initialVerseId: widget.initialVerseId,
+          shouldScrollToInitialVerse:
+              widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
+          onInitialVerseScrolled: () {
+            _didScrollToInitialClassicVerse = true;
+          },
+          onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
+          onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
+        );
+      },
+      loading: () => const Center(
+        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
+      ),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Failed to load verses.\nPlease restart the app.',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMushafPageView() {
+    return PageView.builder(
       controller: _pageController,
       reverse: true,
       itemCount: _totalPages,
@@ -313,44 +405,6 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               : null,
         );
       },
-    );
-
-    return Scaffold(
-      appBar: showAppBar ? _buildAppBar() : null,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
-                setState(() {
-                  _showMushafControls = false;
-                  _hideMushafPageNumberOverlay();
-                });
-              }
-            },
-            child: pageView,
-          ),
-          if (isMushafImmersive)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 56,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    _showMushafControls = true;
-                    _showMushafPageNumberOverlay = true;
-                  });
-                  _scheduleMushafPageNumberOverlayHide();
-                },
-              ),
-            ),
-          if (showMushafPageNumber)
-            _MushafPageNumberOverlay(pageNumber: _currentPage),
-        ],
-      ),
     );
   }
 }
@@ -569,6 +623,146 @@ class _QuranPageContent extends ConsumerWidget {
           behavior: HitTestBehavior.opaque,
           onLongPress: () {
             onVerseFocused?.call(verse.verseId);
+            _openVerseDetail(context, verse);
+          },
+          child: _ArabicVerse(verse: verse, isBookmarked: isBookmarked),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  bool _shouldShowBismillahBeforeVerse(Verse verse) =>
+      verse.verseNumber == 1 &&
+      verse.surahNumber != 1 &&
+      verse.surahNumber != 9;
+}
+
+class _ClassicSurahContent extends ConsumerStatefulWidget {
+  final Surah surah;
+  final List<Verse> verses;
+  final String? initialVerseId;
+  final bool shouldScrollToInitialVerse;
+  final VoidCallback onInitialVerseScrolled;
+  final ValueChanged<String>? onVerseFocused;
+  final ValueChanged<String>? onVerseVisible;
+
+  const _ClassicSurahContent({
+    required this.surah,
+    required this.verses,
+    required this.initialVerseId,
+    required this.shouldScrollToInitialVerse,
+    required this.onInitialVerseScrolled,
+    this.onVerseFocused,
+    this.onVerseVisible,
+  });
+
+  @override
+  ConsumerState<_ClassicSurahContent> createState() =>
+      _ClassicSurahContentState();
+}
+
+class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
+  late final ScrollController _scrollController;
+  String? _lastReportedVisibleVerseId;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_updateVisibleVerse);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateVisibleVerse();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_updateVisibleVerse);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bookmarksAsync = ref.watch(
+      bookmarksBySurahProvider(widget.surah.surahNumber),
+    );
+    final bookmarks = bookmarksAsync.valueOrNull ?? {};
+
+    if (widget.shouldScrollToInitialVerse && widget.initialVerseId != null) {
+      final initialVerseKey = GlobalObjectKey(
+        'classicVerse-${widget.initialVerseId}',
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final context = initialVerseKey.currentContext;
+        if (context != null) {
+          Scrollable.ensureVisible(
+            context,
+            alignment: 0.1,
+            duration: Duration.zero,
+          );
+        }
+        widget.onInitialVerseScrolled();
+      });
+    }
+
+    return SingleChildScrollView(
+      controller: _scrollController,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: _buildVerseWidgets(context, bookmarks),
+      ),
+    );
+  }
+
+  void _updateVisibleVerse() {
+    if (!_scrollController.hasClients) return;
+
+    final maxScrollExtent = _scrollController.position.maxScrollExtent;
+    if (widget.verses.isEmpty || maxScrollExtent <= 0) return;
+
+    final progress = (_scrollController.offset / maxScrollExtent).clamp(
+      0.0,
+      1.0,
+    );
+    final index = (progress * (widget.verses.length - 1)).round().clamp(
+      0,
+      widget.verses.length - 1,
+    );
+    final visibleVerseId = widget.verses[index].verseId;
+
+    if (visibleVerseId != _lastReportedVisibleVerseId) {
+      _lastReportedVisibleVerseId = visibleVerseId;
+      widget.onVerseVisible?.call(visibleVerseId);
+    }
+  }
+
+  List<Widget> _buildVerseWidgets(BuildContext context, Set<String> bookmarks) {
+    final widgets = <Widget>[];
+    int? lastSurah;
+
+    for (final verse in widget.verses) {
+      if (verse.surahNumber != lastSurah) {
+        if (lastSurah != null) {
+          widgets.add(const SizedBox(height: 16));
+        }
+        widgets.add(_SurahHeader(surahNumber: verse.surahNumber));
+        if (_shouldShowBismillahBeforeVerse(verse)) {
+          widgets.add(const _BismillahHeader());
+        }
+        lastSurah = verse.surahNumber;
+      }
+
+      final isBookmarked = bookmarks.contains(verse.verseId);
+      widgets.add(
+        GestureDetector(
+          key: GlobalObjectKey('classicVerse-${verse.verseId}'),
+          behavior: HitTestBehavior.opaque,
+          onLongPress: () {
+            widget.onVerseFocused?.call(verse.verseId);
             _openVerseDetail(context, verse);
           },
           child: _ArabicVerse(verse: verse, isBookmarked: isBookmarked),
