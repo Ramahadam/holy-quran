@@ -186,28 +186,28 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     return Scaffold(
       appBar: _buildAppBar(),
       body: const Center(
-        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      title: Column(
-        children: [
-          Text(
-            'القرآن الكريم',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(color: AppTheme.islamicGreen),
-            textDirection: TextDirection.rtl,
-          ),
-          Text(
-            'Page $_currentPage',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
-      ),
+title: Column(
+          children: [
+            Text(
+              'القرآن الكريم',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+              textDirection: TextDirection.rtl,
+            ),
+            Text(
+              'Page $_currentPage',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: Padding(
@@ -334,45 +334,45 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       versesBySurahProvider(widget.surah.surahNumber),
     );
 
-    return versesAsync.when(
-      data: (verses) {
-        if (verses.isEmpty) {
-          return const Center(child: Text('No verses in this surah.'));
-        }
+return versesAsync.when(
+        data: (verses) {
+          if (verses.isEmpty) {
+            return const Center(child: Text('No verses in this surah.'));
+          }
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _currentPageFirstVerseId ??= verses.first.verseId;
-        });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _currentPageFirstVerseId ??= verses.first.verseId;
+          });
 
-        return _ClassicSurahContent(
-          surah: widget.surah,
-          verses: verses,
-          initialVerseId: widget.initialVerseId,
-          shouldScrollToInitialVerse:
-              widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
-          onInitialVerseScrolled: () {
-            _didScrollToInitialClassicVerse = true;
-          },
-          onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
-          onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
-        );
-      },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
-      ),
-      error: (e, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Failed to load verses.\nPlease restart the app.',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+          return _ClassicSurahContent(
+            surah: widget.surah,
+            verses: verses,
+            initialVerseId: widget.initialVerseId,
+            shouldScrollToInitialVerse:
+                widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
+            onInitialVerseScrolled: () {
+              _didScrollToInitialClassicVerse = true;
+            },
+            onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
+            onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
+          );
+        },
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Failed to load verses.\nPlease restart the app.',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+            ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildMushafPageView() {
@@ -524,28 +524,28 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
           );
         }
 
-        return _QuranPageContent(
-          verses: verses,
-          page: widget.page,
-          surahNumbers: surahNumbers,
-          onVerseFocused: widget.onVerseHit,
-        );
-      },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
-      ),
-      error: (e, _) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            'Failed to load verses.\nPlease restart the app.',
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+return _QuranPageContent(
+           verses: verses,
+           page: widget.page,
+           surahNumbers: surahNumbers,
+           onVerseFocused: widget.onVerseHit,
+         );
+        },
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (e, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Failed to load verses.\nPlease restart the app.',
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+            ),
           ),
         ),
-      ),
     );
   }
 }
@@ -589,9 +589,7 @@ class _QuranPageContent extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               '$page',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
           ),
@@ -789,12 +787,11 @@ class _BismillahHeader extends StatelessWidget {
       child: Text(
         'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-          fontFamily: _kfgqpcHafsFontFamily,
-          fontSize: _bismillahFontSize,
-          fontWeight: FontWeight.w400,
-          height: _bismillahLineHeight,
-          color: AppTheme.textPrimary,
-        ),
+              fontFamily: _kfgqpcHafsFontFamily,
+              fontSize: _bismillahFontSize,
+              fontWeight: FontWeight.w400,
+              height: _bismillahLineHeight,
+            ),
         textAlign: TextAlign.center,
         textDirection: TextDirection.rtl,
       ),
@@ -819,10 +816,10 @@ class _SurahHeader extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppTheme.divider),
-          top: BorderSide(color: AppTheme.divider),
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
+          top: BorderSide(color: Theme.of(context).dividerColor),
         ),
       ),
       child: Center(
@@ -830,7 +827,7 @@ class _SurahHeader extends ConsumerWidget {
           surahName ?? 'سورة $surahNumber',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontFamily: _kfgqpcHafsFontFamily,
-            color: AppTheme.islamicGreen,
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w600,
           ),
           textDirection: TextDirection.rtl,
@@ -859,7 +856,9 @@ class _ArabicVerse extends StatelessWidget {
             fontSize: 24,
             fontWeight: FontWeight.w400,
             height: 2.2,
-            color: isBookmarked ? AppTheme.islamicGreen : AppTheme.textPrimary,
+            color: isBookmarked
+                ? Theme.of(context).colorScheme.onPrimaryContainer
+                : Theme.of(context).textTheme.headlineLarge?.color,
           ),
           children: [
             ..._arabicTextSpans,

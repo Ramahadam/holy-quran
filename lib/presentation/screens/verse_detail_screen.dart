@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/verse.dart';
 import '../providers/quran_providers.dart';
-import '../theme/app_theme.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 
@@ -19,7 +18,7 @@ class VerseDetailScreen extends ConsumerWidget {
         bookmarks.valueOrNull?.contains(verse.verseId) ?? false;
 
     return Scaffold(
-      backgroundColor: AppTheme.cream,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('${verse.surahNumber}:${verse.verseNumber}'),
         actions: [
@@ -27,7 +26,7 @@ class VerseDetailScreen extends ConsumerWidget {
             tooltip: isBookmarked ? 'Remove bookmark' : 'Bookmark verse',
             icon: Icon(
               isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: AppTheme.islamicGreen,
+              color: Theme.of(context).colorScheme.primary,
             ),
             onPressed: () => _toggleBookmark(context, ref, isBookmarked),
           ),
@@ -47,30 +46,28 @@ class VerseDetailScreen extends ConsumerWidget {
                     child: _VerseBadge(number: verse.verseNumber),
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    verse.arabicText,
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontFamily: _kfgqpcHafsFontFamily,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w400,
-                      height: 2.1,
-                      color: AppTheme.textPrimary,
-                    ),
-                    textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl,
-                  ),
-                  if (verse.translation != null) ...[
-                    const SizedBox(height: 28),
-                    const Divider(color: AppTheme.divider),
-                    const SizedBox(height: 20),
-                    Text(
-                      verse.translation!,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        height: 1.7,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
+Text(
+          verse.arabicText,
+          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+            fontFamily: _kfgqpcHafsFontFamily,
+            fontSize: 36,
+            fontWeight: FontWeight.w400,
+            height: 2.1,
+          ),
+          textAlign: TextAlign.right,
+          textDirection: TextDirection.rtl,
+        ),
+if (verse.translation != null) ...[
+            const SizedBox(height: 28),
+            Divider(color: Theme.of(context).dividerColor),
+            const SizedBox(height: 20),
+            Text(
+              verse.translation!,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                height: 1.7,
+              ),
+            ),
+          ],
                 ],
               ),
             ),
@@ -116,16 +113,16 @@ class _VerseBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppTheme.islamicGreenSubtle,
+        color: Theme.of(context).colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.islamicGreenBorder),
+        border: Border.all(color: Theme.of(context).colorScheme.primary),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Text(
           '$number',
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: AppTheme.islamicGreen,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
             fontWeight: FontWeight.w600,
           ),
         ),

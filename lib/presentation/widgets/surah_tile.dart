@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../domain/models/surah.dart';
-import '../theme/app_theme.dart';
 
 class SurahTile extends StatelessWidget {
   final Surah surah;
@@ -37,7 +36,7 @@ class SurahTile extends StatelessWidget {
             Text(
               surah.nameArabic,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppTheme.islamicGreen,
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 20,
               ),
               textDirection: TextDirection.rtl,
@@ -61,14 +60,14 @@ class _SurahNumber extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: AppTheme.islamicGreen, width: 1.5),
+        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5),
       ),
       alignment: Alignment.center,
       child: Text(
         '$number',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           fontWeight: FontWeight.w600,
-          color: AppTheme.islamicGreen,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );

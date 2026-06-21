@@ -11,6 +11,8 @@ class HolyQuranApp extends StatelessWidget {
       title: 'Holy Quran',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       home: const LoadingScreen(),
     );
   }
@@ -25,22 +27,26 @@ class DatabaseErrorApp extends StatelessWidget {
       title: 'Holy Quran',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       home: Scaffold(
-        backgroundColor: AppTheme.cream,
-        body: const Center(
-          child: Padding(
-            padding: EdgeInsets.all(32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, color: Colors.red, size: 64),
-                SizedBox(height: 24),
-                Text(
-                  'Could not open the database.\nPlease restart the app.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
-                ),
-              ],
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Builder(
+          builder: (context) => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 64),
+                  SizedBox(height: 24),
+                  Text(
+                    'Could not open the database.\nPlease restart the app.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

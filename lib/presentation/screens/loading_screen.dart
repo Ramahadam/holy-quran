@@ -36,7 +36,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
     final initState = ref.watch(initializeDataProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.cream,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -45,7 +45,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
               'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontSize: 24,
-                    color: AppTheme.islamicGreen,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.center,
@@ -79,9 +79,8 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
             Text(
               'Preparing your Digital Sanctuary...',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontStyle: FontStyle.italic,
-                  ),
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),
