@@ -426,6 +426,16 @@ class _MushafPageNumberOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? AppTheme.darkSurface.withValues(alpha: .92)
+        : const Color(0xFFF7EEDB).withValues(alpha: .92);
+    final borderColor = isDark
+        ? AppTheme.darkIslamicGreenBorder
+        : const Color(0xFFB98B42).withValues(alpha: .46);
+    final textColor = isDark
+        ? AppTheme.darkTextPrimary
+        : const Color(0xFF2B2113);
 
     return Positioned(
       left: 0,
@@ -436,14 +446,12 @@ class _MushafPageNumberOverlay extends StatelessWidget {
           child: DecoratedBox(
             key: const ValueKey('mushafPageNumberOverlay'),
             decoration: BoxDecoration(
-              color: const Color(0xFFF7EEDB).withValues(alpha: .92),
+              color: backgroundColor,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: const Color(0xFFB98B42).withValues(alpha: .46),
-              ),
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: .12),
+                  color: Colors.black.withValues(alpha: isDark ? .28 : .12),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -456,7 +464,7 @@ class _MushafPageNumberOverlay extends StatelessWidget {
                 key: const ValueKey('mushafPageNumberText'),
                 textDirection: TextDirection.rtl,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF2B2113),
+                  color: textColor,
                   fontWeight: FontWeight.w700,
                   height: 1,
                 ),

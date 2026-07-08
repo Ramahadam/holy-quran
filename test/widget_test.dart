@@ -308,6 +308,26 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('uses dark surrounding chrome in dark mode', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.dark,
+          home: Scaffold(body: MushafSamplePage(page: 1)),
+        ),
+      );
+      await tester.pump();
+
+      final background = tester.widget<ColoredBox>(
+        find.descendant(
+          of: find.byType(MushafSamplePage),
+          matching: find.byType(ColoredBox),
+        ),
+      );
+      expect(background.color, AppTheme.darkBackground);
+    });
+
     testWidgets('fits opening Mushaf page on a compact mobile viewport', (
       tester,
     ) async {
@@ -772,6 +792,43 @@ void main() {
         find.byKey(const ValueKey('mushafPageNumberOverlay')),
         findsNothing,
       );
+    });
+
+    testWidgets('uses dark Mushaf page overlay in dark mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: ThemeMode.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      final decoration = tester
+          .widget<DecoratedBox>(
+            find.byKey(const ValueKey('mushafPageNumberOverlay')),
+          )
+          .decoration as BoxDecoration;
+      final overlayText = tester.widget<Text>(
+        find.byKey(const ValueKey('mushafPageNumberText')),
+      );
+
+      expect(decoration.color, AppTheme.darkSurface.withValues(alpha: .92));
+      expect(overlayText.style?.color, AppTheme.darkTextPrimary);
     });
 
     testWidgets('saves tapped Mushaf verse as the last-read VerseID', (
