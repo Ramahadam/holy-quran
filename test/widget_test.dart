@@ -185,7 +185,9 @@ void main() {
         ProviderScope(
           overrides: [
             themeModeProvider.overrideWith((ref) => ThemeMode.dark),
-            initializeDataProvider.overrideWith((ref) => Completer<void>().future),
+            initializeDataProvider.overrideWith(
+              (ref) => Completer<void>().future,
+            ),
           ],
           child: const HolyQuranApp(),
         ),
@@ -213,9 +215,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            themeModeProvider.overrideWith((ref) => ThemeMode.dark),
-          ],
+          overrides: [themeModeProvider.overrideWith((ref) => ThemeMode.dark)],
           child: const DatabaseErrorApp(),
         ),
       );
@@ -236,7 +236,11 @@ void main() {
           overrides: [
             initializeDataProvider.overrideWith((ref) => completer.future),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: LoadingScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: LoadingScreen(),
+          ),
         ),
       );
       await tester.pump();
@@ -257,7 +261,11 @@ void main() {
               (ref) => Future.error('init failed'),
             ),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: LoadingScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: LoadingScreen(),
+          ),
         ),
       );
       await tester.pump();
@@ -275,7 +283,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: LoadingScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: LoadingScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -386,7 +398,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -402,7 +418,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -417,7 +437,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -482,7 +506,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => position),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -501,7 +529,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -526,7 +558,11 @@ void main() {
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -553,7 +589,11 @@ void main() {
             recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -587,7 +627,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -627,7 +671,11 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => null),
             recentBookmarksProvider.overrideWith((ref) async => const []),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -680,7 +728,11 @@ void main() {
             versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -702,7 +754,11 @@ void main() {
             ).overrideWith((ref) async => [_verse1, _verse2]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -726,7 +782,11 @@ void main() {
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -761,7 +821,11 @@ void main() {
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -794,9 +858,7 @@ void main() {
       );
     });
 
-    testWidgets('uses dark Mushaf page overlay in dark mode', (
-      tester,
-    ) async {
+    testWidgets('uses dark Mushaf page overlay in dark mode', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -818,11 +880,13 @@ void main() {
       await tester.tap(find.text('Mushaf'));
       await tester.pump();
 
-      final decoration = tester
-          .widget<DecoratedBox>(
-            find.byKey(const ValueKey('mushafPageNumberOverlay')),
-          )
-          .decoration as BoxDecoration;
+      final decoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const ValueKey('mushafPageNumberOverlay')),
+                  )
+                  .decoration
+              as BoxDecoration;
       final overlayText = tester.widget<Text>(
         find.byKey(const ValueKey('mushafPageNumberText')),
       );
@@ -849,7 +913,11 @@ void main() {
             ).overrideWith((ref) async => [_verse1, _verse2]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -889,7 +957,11 @@ void main() {
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -919,7 +991,11 @@ void main() {
             ).overrideWith((ref) async => [_verse1, _verse2]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -958,7 +1034,11 @@ void main() {
             versesBySurahProvider(1).overrideWith((ref) async => verses),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -984,7 +1064,11 @@ void main() {
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1007,7 +1091,11 @@ void main() {
               versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
               bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
             ],
-            child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: ReadingScreen(surah: _surah1),
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -1038,7 +1126,11 @@ void main() {
             versesBySurahProvider(1).overrideWith((ref) async => [verse]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1072,7 +1164,7 @@ void main() {
           arabicText: 'الٓمٓ',
         );
 
-await tester.pumpWidget(
+        await tester.pumpWidget(
           ProviderScope(
             overrides: [
               startPageForSurahProvider(2).overrideWith((ref) async => 2),
@@ -1080,13 +1172,20 @@ await tester.pumpWidget(
               bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
               surahListProvider.overrideWith((ref) async => [surah2]),
             ],
-            child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: surah2)),
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: ReadingScreen(surah: surah2),
+            ),
           ),
         );
         await tester.pumpAndSettle();
         final bismillah = tester.widget<Text>(find.text(_bismillah));
         final context = tester.element(find.text(_bismillah));
-        expect(bismillah.style?.color, Theme.of(context).textTheme.headlineLarge?.color);
+        expect(
+          bismillah.style?.color,
+          Theme.of(context).textTheme.headlineLarge?.color,
+        );
         expect(bismillah.style?.fontSize, 28);
         expect(bismillah.style?.height, 2.0);
       },
@@ -1116,7 +1215,11 @@ await tester.pumpWidget(
             bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
             surahListProvider.overrideWith((ref) async => [surah2]),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: surah2)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah2),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1137,17 +1240,21 @@ await tester.pumpWidget(
         arabicText: 'بَرَآءَةٌ مِّنَ ٱللَّهِ',
       );
 
-await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              startPageForSurahProvider(9).overrideWith((ref) async => 187),
-              versesBySurahProvider(9).overrideWith((ref) async => [verse]),
-              bookmarksBySurahProvider(9).overrideWith((ref) async => {}),
-              surahListProvider.overrideWith((ref) async => [surah9]),
-            ],
-            child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: surah9)),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(9).overrideWith((ref) async => 187),
+            versesBySurahProvider(9).overrideWith((ref) async => [verse]),
+            bookmarksBySurahProvider(9).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah9]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah9),
           ),
-        );
+        ),
+      );
       await tester.pumpAndSettle();
       expect(find.text(_bismillah), findsNothing);
     });
@@ -1162,7 +1269,11 @@ await tester.pumpWidget(
             ).overrideWith((ref) => Future.error('db error')),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1177,15 +1288,24 @@ await tester.pumpWidget(
             versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
       final richText = tester.widget<RichText>(
         find.textContaining('بِسْمِ', findRichText: true),
       );
-      final context = tester.element(find.textContaining('بِسْمِ', findRichText: true));
-      expect((richText.text as TextSpan).style?.color, Theme.of(context).colorScheme.onPrimaryContainer);
+      final context = tester.element(
+        find.textContaining('بِسْمِ', findRichText: true),
+      );
+      expect(
+        (richText.text as TextSpan).style?.color,
+        Theme.of(context).colorScheme.onPrimaryContainer,
+      );
     });
 
     testWidgets('does not show bookmark icon for unbookmarked verse', (
@@ -1199,15 +1319,24 @@ await tester.pumpWidget(
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: ReadingScreen(surah: _surah1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
       final richText = tester.widget<RichText>(
         find.textContaining('بِسْمِ', findRichText: true),
       );
-      final context = tester.element(find.textContaining('بِسْمِ', findRichText: true));
-      expect((richText.text as TextSpan).style?.color, Theme.of(context).textTheme.headlineLarge?.color);
+      final context = tester.element(
+        find.textContaining('بِسْمِ', findRichText: true),
+      );
+      expect(
+        (richText.text as TextSpan).style?.color,
+        Theme.of(context).textTheme.headlineLarge?.color,
+      );
     });
   });
 
@@ -1307,7 +1436,11 @@ await tester.pumpWidget(
           overrides: [
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: VerseDetailScreen(verse: _verse1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: VerseDetailScreen(verse: _verse1),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -1327,7 +1460,11 @@ await tester.pumpWidget(
             bookmarkRepositoryProvider.overrideWithValue(bookmarkRepo),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
-          child: MaterialApp(theme: AppTheme.light, darkTheme: AppTheme.dark, home: VerseDetailScreen(verse: _verse1)),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: VerseDetailScreen(verse: _verse1),
+          ),
         ),
       );
       await tester.pumpAndSettle();

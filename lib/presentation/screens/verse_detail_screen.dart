@@ -46,28 +46,28 @@ class VerseDetailScreen extends ConsumerWidget {
                     child: _VerseBadge(number: verse.verseNumber),
                   ),
                   const SizedBox(height: 24),
-Text(
-          verse.arabicText,
-          style: Theme.of(context).textTheme.displaySmall?.copyWith(
-            fontFamily: _kfgqpcHafsFontFamily,
-            fontSize: 36,
-            fontWeight: FontWeight.w400,
-            height: 2.1,
-          ),
-          textAlign: TextAlign.right,
-          textDirection: TextDirection.rtl,
-        ),
-if (verse.translation != null) ...[
-            const SizedBox(height: 28),
-            Divider(color: Theme.of(context).dividerColor),
-            const SizedBox(height: 20),
-            Text(
-              verse.translation!,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                height: 1.7,
-              ),
-            ),
-          ],
+                  Text(
+                    verse.arabicText,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontFamily: _kfgqpcHafsFontFamily,
+                      fontSize: 36,
+                      fontWeight: FontWeight.w400,
+                      height: 2.1,
+                    ),
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                  ),
+                  if (verse.translation != null) ...[
+                    const SizedBox(height: 28),
+                    Divider(color: Theme.of(context).dividerColor),
+                    const SizedBox(height: 20),
+                    Text(
+                      verse.translation!,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(height: 1.7),
+                    ),
+                  ],
                 ],
               ),
             ),

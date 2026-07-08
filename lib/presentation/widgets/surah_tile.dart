@@ -60,7 +60,10 @@ class _SurahNumber extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary,
+          width: 1.5,
+        ),
       ),
       alignment: Alignment.center,
       child: Text(

@@ -185,29 +185,27 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   Widget _buildLoading() {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      body: const Center(child: CircularProgressIndicator()),
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-title: Column(
-          children: [
-            Text(
-              'القرآن الكريم',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
-              textDirection: TextDirection.rtl,
+      title: Column(
+        children: [
+          Text(
+            'القرآن الكريم',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
             ),
-            Text(
-              'Page $_currentPage',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ),
+            textDirection: TextDirection.rtl,
+          ),
+          Text(
+            'Page $_currentPage',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(56),
         child: Padding(
@@ -334,45 +332,43 @@ title: Column(
       versesBySurahProvider(widget.surah.surahNumber),
     );
 
-return versesAsync.when(
-        data: (verses) {
-          if (verses.isEmpty) {
-            return const Center(child: Text('No verses in this surah.'));
-          }
+    return versesAsync.when(
+      data: (verses) {
+        if (verses.isEmpty) {
+          return const Center(child: Text('No verses in this surah.'));
+        }
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _currentPageFirstVerseId ??= verses.first.verseId;
-          });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _currentPageFirstVerseId ??= verses.first.verseId;
+        });
 
-          return _ClassicSurahContent(
-            surah: widget.surah,
-            verses: verses,
-            initialVerseId: widget.initialVerseId,
-            shouldScrollToInitialVerse:
-                widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
-            onInitialVerseScrolled: () {
-              _didScrollToInitialClassicVerse = true;
-            },
-            onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
-            onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Failed to load verses.\nPlease restart the app.',
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.red),
-            ),
+        return _ClassicSurahContent(
+          surah: widget.surah,
+          verses: verses,
+          initialVerseId: widget.initialVerseId,
+          shouldScrollToInitialVerse:
+              widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
+          onInitialVerseScrolled: () {
+            _didScrollToInitialClassicVerse = true;
+          },
+          onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
+          onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Failed to load verses.\nPlease restart the app.',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildMushafPageView() {
@@ -532,28 +528,26 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
           );
         }
 
-return _QuranPageContent(
-           verses: verses,
-           page: widget.page,
-           surahNumbers: surahNumbers,
-           onVerseFocused: widget.onVerseHit,
-         );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Failed to load verses.\nPlease restart the app.',
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.red),
-            ),
+        return _QuranPageContent(
+          verses: verses,
+          page: widget.page,
+          surahNumbers: surahNumbers,
+          onVerseFocused: widget.onVerseHit,
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Failed to load verses.\nPlease restart the app.',
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
           ),
         ),
+      ),
     );
   }
 }
@@ -795,11 +789,11 @@ class _BismillahHeader extends StatelessWidget {
       child: Text(
         'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
         style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-              fontFamily: _kfgqpcHafsFontFamily,
-              fontSize: _bismillahFontSize,
-              fontWeight: FontWeight.w400,
-              height: _bismillahLineHeight,
-            ),
+          fontFamily: _kfgqpcHafsFontFamily,
+          fontSize: _bismillahFontSize,
+          fontWeight: FontWeight.w400,
+          height: _bismillahLineHeight,
+        ),
         textAlign: TextAlign.center,
         textDirection: TextDirection.rtl,
       ),
