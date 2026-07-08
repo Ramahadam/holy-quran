@@ -11,7 +11,13 @@ import '../providers/quran_providers.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
-enum _HomeMenuAction { exportBackup, importBackup, feedback, reminders }
+enum _HomeMenuAction {
+  toggleDarkMode,
+  exportBackup,
+  importBackup,
+  feedback,
+  reminders,
+}
 
 enum _FeedbackPromptAction { notNow, giveFeedback }
 
@@ -41,6 +47,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final lastPositionAsync = ref.watch(lastReadPositionProvider);
     final bookmarksAsync = ref.watch(recentBookmarksProvider);
     final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final darkModeEnabled = themeMode == ThemeMode.dark;
 
     _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
@@ -50,9 +58,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             Text(
               'القرآن الكريم',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(color: Theme.of(context).colorScheme.primary),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
               textDirection: TextDirection.rtl,
             ),
             Text('Holy Quran', style: Theme.of(context).textTheme.bodyMedium),
@@ -64,6 +72,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: const Icon(Icons.more_vert),
             onSelected: (action) {
               switch (action) {
+                case _HomeMenuAction.toggleDarkMode:
+                  ref.read(themeModeProvider.notifier).state = darkModeEnabled
+                      ? ThemeMode.system
+                      : ThemeMode.dark;
                 case _HomeMenuAction.exportBackup:
                   _exportBackup(context);
                 case _HomeMenuAction.importBackup:
@@ -74,30 +86,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _showPrayerReminderDialog(context);
               }
             },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
+            itemBuilder: (context) => [
+              CheckedPopupMenuItem(
+                value: _HomeMenuAction.toggleDarkMode,
+                checked: darkModeEnabled,
+                child: ListTile(
+                  leading: Icon(
+                    darkModeEnabled
+                        ? Icons.dark_mode
+                        : Icons.dark_mode_outlined,
+                  ),
+                  title: const Text('Dark mode'),
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
                 value: _HomeMenuAction.reminders,
                 child: ListTile(
                   leading: Icon(Icons.notifications_active_outlined),
                   title: Text('Reading reminders'),
                 ),
               ),
-              PopupMenuItem(
+              const PopupMenuItem(
                 value: _HomeMenuAction.feedback,
                 child: ListTile(
                   leading: Icon(Icons.feedback_outlined),
                   title: Text('Send feedback'),
                 ),
               ),
-              PopupMenuDivider(),
-              PopupMenuItem(
+              const PopupMenuDivider(),
+              const PopupMenuItem(
                 value: _HomeMenuAction.exportBackup,
                 child: ListTile(
                   leading: Icon(Icons.upload_file),
                   title: Text('Export backup'),
                 ),
               ),
-              PopupMenuItem(
+              const PopupMenuItem(
                 value: _HomeMenuAction.importBackup,
                 child: ListTile(
                   leading: Icon(Icons.download),
@@ -146,8 +171,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ? const Center(child: Text('No surahs found.'))
                     : ListView.separated(
                         itemCount: surahs.length,
-                        separatorBuilder: (context, index) =>
-                            Divider(height: 1, color: Theme.of(context).dividerColor),
+                        separatorBuilder: (context, index) => Divider(
+                          height: 1,
+                          color: Theme.of(context).dividerColor,
+                        ),
                         itemBuilder: (context, index) {
                           final surah = surahs[index];
                           return SurahTile(
@@ -160,9 +187,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           );
         },
-loading: () => const Center(
-           child: CircularProgressIndicator(),
-         ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -808,7 +833,11 @@ class _LastReadBanner extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.menu_book, color: Theme.of(context).colorScheme.primary, size: 18),
+            Icon(
+              Icons.menu_book,
+              color: Theme.of(context).colorScheme.primary,
+              size: 18,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -817,8 +846,8 @@ class _LastReadBanner extends ConsumerWidget {
                   Text(
                     'Continue Reading',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Text(
                     '${surah.nameEnglish}${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}',
@@ -856,7 +885,9 @@ class _BookmarksSection extends ConsumerWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+        border: Border(
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -865,9 +896,9 @@ class _BookmarksSection extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Text(
               'Bookmarks',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           ...bookmarks.map(
@@ -918,7 +949,10 @@ class _BookmarkRow extends ConsumerWidget {
           children: [
             IconButton(
               tooltip: 'Remove bookmark',
-              icon: Icon(Icons.bookmark, color: Theme.of(context).colorScheme.primary),
+              icon: Icon(
+                Icons.bookmark,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               onPressed: () => _removeBookmark(context, ref),
             ),
             Expanded(

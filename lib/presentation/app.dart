@@ -1,38 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'providers/quran_providers.dart';
 import 'screens/loading_screen.dart';
 import 'theme/app_theme.dart';
 
-class HolyQuranApp extends StatelessWidget {
+class HolyQuranApp extends ConsumerWidget {
   const HolyQuranApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Holy Quran',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       home: const LoadingScreen(),
     );
   }
 }
 
-class DatabaseErrorApp extends StatelessWidget {
+class DatabaseErrorApp extends ConsumerWidget {
   const DatabaseErrorApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'Holy Quran',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
-      home: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: Builder(
-          builder: (context) => const Center(
+      themeMode: themeMode,
+      home: Builder(
+        builder: (context) => Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: const Center(
             child: Padding(
               padding: EdgeInsets.all(32),
               child: Column(

@@ -179,6 +179,22 @@ void main() {
       await tester.pump();
       expect(find.byType(MaterialApp), findsOneWidget);
     });
+
+    testWidgets('uses the selected app theme mode', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            themeModeProvider.overrideWith((ref) => ThemeMode.dark),
+            initializeDataProvider.overrideWith((ref) => Completer<void>().future),
+          ],
+          child: const HolyQuranApp(),
+        ),
+      );
+      await tester.pump();
+
+      final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+      expect(app.themeMode, ThemeMode.dark);
+    });
   });
 
   group('DatabaseErrorApp', () {
@@ -190,6 +206,23 @@ void main() {
         findsOneWidget,
       );
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    });
+
+    testWidgets('uses the selected dark theme for the error surface', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            themeModeProvider.overrideWith((ref) => ThemeMode.dark),
+          ],
+          child: const DatabaseErrorApp(),
+        ),
+      );
+      await tester.pump();
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      expect(scaffold.backgroundColor, AppTheme.darkBackground);
     });
   });
 
@@ -369,6 +402,50 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.textContaining('Failed to load surahs'), findsOneWidget);
+    });
+
+    testWidgets('applies dark mode from the home menu', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: Consumer(
+            builder: (context, ref, _) => MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: ref.watch(themeModeProvider),
+              home: HomeScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.system,
+      );
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      final darkModeItem = find.ancestor(
+        of: find.text('Dark mode'),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget.runtimeType.toString().startsWith('CheckedPopupMenuItem'),
+        ),
+      );
+      expect(darkModeItem, findsOneWidget);
+      await tester.tap(darkModeItem);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.dark,
+      );
     });
 
     testWidgets('shows Last Read banner when a reading position exists', (
