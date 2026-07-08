@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/backup/quran_backup_codec.dart';
@@ -39,6 +40,8 @@ String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
 
 bool get isSupabaseFeedbackConfigured =>
     configuredSupabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
+
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
 const int feedbackPromptTestDelaySeconds = int.fromEnvironment(
   'FEEDBACK_PROMPT_TEST_DELAY_SECONDS',

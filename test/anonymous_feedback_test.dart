@@ -9,6 +9,7 @@ import 'package:holy_quran_app/domain/models/verse.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
+import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 
 const _surah1 = Surah(
   surahNumber: 1,
@@ -301,6 +302,9 @@ void main() {
             versesByPageProvider(
               1,
             ).overrideWith((ref) async => const [_verse1]),
+            versesBySurahProvider(
+              1,
+            ).overrideWith((ref) async => const [_verse1]),
             bookmarksBySurahProvider(
               1,
             ).overrideWith((ref) async => const <String>{}),
@@ -309,7 +313,11 @@ void main() {
               (ref) async => promptService.shouldPrompt(),
             ),
           ],
-          child: const MaterialApp(home: HomeScreen()),
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
         ),
       );
       await tester.pumpAndSettle();

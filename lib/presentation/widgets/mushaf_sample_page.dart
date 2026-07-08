@@ -104,25 +104,51 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
       return _UnsupportedMushafSamplePage(page: widget.page);
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final page = GestureDetector(
+      key: _pageKey,
+      behavior: HitTestBehavior.opaque,
+      onTapUp: _handleTapUp,
+      child: MushafQcfPage(
+        pageNumber: widget.page,
+        theme: _qcfTheme,
+        onTap: (surahNumber, verseNumber) {
+          widget.onVerseTap?.call('$surahNumber:$verseNumber');
+        },
+        onLongPress: (surahNumber, verseNumber) {
+          widget.onVerseTap?.call('$surahNumber:$verseNumber');
+        },
+      ),
+    );
+
     return ColoredBox(
-      color: AppTheme.mushafBackground,
+      color: isDark ? AppTheme.darkBackground : AppTheme.mushafBackground,
       child: SafeArea(
         child: SizedBox.expand(
-          child: GestureDetector(
-            key: _pageKey,
-            behavior: HitTestBehavior.opaque,
-            onTapUp: _handleTapUp,
-            child: MushafQcfPage(
-              pageNumber: widget.page,
-              theme: _qcfTheme,
-              onTap: (surahNumber, verseNumber) {
-                widget.onVerseTap?.call('$surahNumber:$verseNumber');
-              },
-              onLongPress: (surahNumber, verseNumber) {
-                widget.onVerseTap?.call('$surahNumber:$verseNumber');
-              },
-            ),
-          ),
+          child: isDark
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 12,
+                  ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppTheme.darkDivider),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: .28),
+                          blurRadius: 18,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: page,
+                    ),
+                  ),
+                )
+              : page,
         ),
       ),
     );

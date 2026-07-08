@@ -18,17 +18,13 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
     // Listen once — navigate when data load completes, regardless of rebuilds.
     // fireImmediately: true ensures navigation fires even when the provider
     // is already settled before this widget mounts (e.g. hot-restart).
-    ref.listenManual<AsyncValue<void>>(
-      initializeDataProvider,
-      (_, next) {
-        if (next is AsyncData && mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listenManual<AsyncValue<void>>(initializeDataProvider, (_, next) {
+      if (next is AsyncData && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    }, fireImmediately: true);
   }
 
   @override
@@ -36,7 +32,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
     final initState = ref.watch(initializeDataProvider);
 
     return Scaffold(
-      backgroundColor: AppTheme.cream,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -44,9 +40,9 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
             Text(
               'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    fontSize: 24,
-                    color: AppTheme.islamicGreen,
-                  ),
+                fontSize: 24,
+                color: Theme.of(context).colorScheme.primary,
+              ),
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.center,
             ),
@@ -57,9 +53,8 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
                 color: AppTheme.islamicGreen,
                 size: 48,
               ),
-              loading: () => const CircularProgressIndicator(
-                color: AppTheme.islamicGreen,
-              ),
+              loading: () =>
+                  const CircularProgressIndicator(color: AppTheme.islamicGreen),
               error: (e, _) => Column(
                 children: [
                   const Icon(Icons.error_outline, color: Colors.red, size: 48),
@@ -67,10 +62,9 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
                   Text(
                     'Failed to load data.\nPlease restart the app.',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: Colors.red),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.red),
                   ),
                 ],
               ),
@@ -78,10 +72,9 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
             const SizedBox(height: 24),
             Text(
               'Preparing your Digital Sanctuary...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.textSecondary,
-                    fontStyle: FontStyle.italic,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
             ),
           ],
         ),

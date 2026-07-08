@@ -185,9 +185,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   Widget _buildLoading() {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: const Center(
-        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
-      ),
+      body: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -197,9 +195,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         children: [
           Text(
             'القرآن الكريم',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(color: AppTheme.islamicGreen),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
             textDirection: TextDirection.rtl,
           ),
           Text(
@@ -357,9 +355,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
         );
       },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -426,6 +422,16 @@ class _MushafPageNumberOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? AppTheme.darkSurface.withValues(alpha: .92)
+        : const Color(0xFFF7EEDB).withValues(alpha: .92);
+    final borderColor = isDark
+        ? AppTheme.darkIslamicGreenBorder
+        : const Color(0xFFB98B42).withValues(alpha: .46);
+    final textColor = isDark
+        ? AppTheme.darkTextPrimary
+        : const Color(0xFF2B2113);
 
     return Positioned(
       left: 0,
@@ -436,14 +442,12 @@ class _MushafPageNumberOverlay extends StatelessWidget {
           child: DecoratedBox(
             key: const ValueKey('mushafPageNumberOverlay'),
             decoration: BoxDecoration(
-              color: const Color(0xFFF7EEDB).withValues(alpha: .92),
+              color: backgroundColor,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: const Color(0xFFB98B42).withValues(alpha: .46),
-              ),
+              border: Border.all(color: borderColor),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: .12),
+                  color: Colors.black.withValues(alpha: isDark ? .28 : .12),
                   blurRadius: 10,
                   offset: const Offset(0, 3),
                 ),
@@ -456,7 +460,7 @@ class _MushafPageNumberOverlay extends StatelessWidget {
                 key: const ValueKey('mushafPageNumberText'),
                 textDirection: TextDirection.rtl,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFF2B2113),
+                  color: textColor,
                   fontWeight: FontWeight.w700,
                   height: 1,
                 ),
@@ -531,9 +535,7 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
           onVerseFocused: widget.onVerseHit,
         );
       },
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: AppTheme.islamicGreen),
-      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -589,9 +591,7 @@ class _QuranPageContent extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 8),
             child: Text(
               '$page',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
             ),
           ),
@@ -793,7 +793,6 @@ class _BismillahHeader extends StatelessWidget {
           fontSize: _bismillahFontSize,
           fontWeight: FontWeight.w400,
           height: _bismillahLineHeight,
-          color: AppTheme.textPrimary,
         ),
         textAlign: TextAlign.center,
         textDirection: TextDirection.rtl,
@@ -819,10 +818,10 @@ class _SurahHeader extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: AppTheme.divider),
-          top: BorderSide(color: AppTheme.divider),
+          bottom: BorderSide(color: Theme.of(context).dividerColor),
+          top: BorderSide(color: Theme.of(context).dividerColor),
         ),
       ),
       child: Center(
@@ -830,7 +829,7 @@ class _SurahHeader extends ConsumerWidget {
           surahName ?? 'سورة $surahNumber',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontFamily: _kfgqpcHafsFontFamily,
-            color: AppTheme.islamicGreen,
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w600,
           ),
           textDirection: TextDirection.rtl,
@@ -859,7 +858,9 @@ class _ArabicVerse extends StatelessWidget {
             fontSize: 24,
             fontWeight: FontWeight.w400,
             height: 2.2,
-            color: isBookmarked ? AppTheme.islamicGreen : AppTheme.textPrimary,
+            color: isBookmarked
+                ? Theme.of(context).colorScheme.onPrimaryContainer
+                : Theme.of(context).textTheme.headlineLarge?.color,
           ),
           children: [
             ..._arabicTextSpans,
