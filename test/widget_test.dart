@@ -794,11 +794,15 @@ void main() {
         );
         final richText = tester.widget<RichText>(richTextFinder);
         final style = (richText.text as TextSpan).style;
-        expect(richText.textAlign, TextAlign.justify);
-        expect(style?.fontSize, greaterThan(30));
-        expect(style?.fontSize, lessThanOrEqualTo(36));
-        expect(style?.height, 2.05);
-        expect(richText.textScaler.scale(style!.fontSize!), greaterThan(36));
+        expect(richText.textAlign, TextAlign.right);
+        expect(style?.fontSize, greaterThanOrEqualTo(24));
+        expect(style?.fontSize, lessThanOrEqualTo(30));
+        expect(style?.height, 1.8);
+        expect(richText.textScaler.scale(style!.fontSize!), greaterThan(31));
+        expect(
+          richText.textScaler.scale(style.fontSize!),
+          lessThanOrEqualTo(36),
+        );
         expect(tester.getSize(richTextFinder).width, 344);
         expect(tester.takeException(), isNull);
       },
@@ -846,7 +850,7 @@ void main() {
         verseId: '1:3',
         surahNumber: 1,
         verseNumber: 3,
-        arabicText: '۞ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ۝٣',
+        arabicText: '۞ ٱلرَّحْمَـٰنِ ۖ ٱلرَّحِيمِ ۚ مَـٰلِكِ ۝٣',
       );
 
       await tester.pumpWidget(
@@ -869,9 +873,11 @@ void main() {
         find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
       );
       final text = (richText.text as TextSpan).toPlainText();
-      expect(text, 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾ ');
+      expect(text, 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ مَـٰلِكِ ﴿٣﴾ ');
       expect(text, isNot(contains('۞')));
       expect(text, isNot(contains('۝')));
+      expect(text, isNot(contains('ۖ')));
+      expect(text, isNot(contains('ۚ')));
     });
 
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (

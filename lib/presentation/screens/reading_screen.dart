@@ -20,14 +20,16 @@ const _bismillahLineHeight = 2.0;
 const _classicPageHorizontalPadding = 8.0;
 const _classicPageVerticalPadding = 12.0;
 const _classicVerseVerticalPadding = 8.0;
-const _classicArabicMinFontSize = 30.0;
-const _classicArabicMaxFontSize = 36.0;
-const _classicArabicWidthScale = 0.092;
-const _classicArabicLineHeight = 2.05;
+const _classicArabicMinFontSize = 24.0;
+const _classicArabicMaxFontSize = 30.0;
+const _classicArabicWidthScale = 0.078;
+const _classicArabicLineHeight = 1.8;
 const _classicAyahMarkerFontScale = 0.75;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
-final _classicEmbeddedMarkerPattern = RegExp(r'\s*(?:۞|۝\s*[٠-٩0-9]*)\s*');
+final _classicEmbeddedMarkerPattern = RegExp(
+  r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
+);
 final _whitespacePattern = RegExp(r'\s+');
 
 enum ReadingMode { classic, mushaf }
@@ -871,7 +873,7 @@ class _ArabicVerse extends StatelessWidget {
             final fontSize = _fontSizeForWidth(constraints.maxWidth);
             return RichText(
               textDirection: TextDirection.rtl,
-              textAlign: TextAlign.justify,
+              textAlign: TextAlign.right,
               textScaler: MediaQuery.textScalerOf(context),
               textWidthBasis: TextWidthBasis.parent,
               text: TextSpan(
