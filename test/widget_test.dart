@@ -839,10 +839,18 @@ void main() {
       final richText = tester.widget<RichText>(
         find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
       );
+      final textSpan = richText.text as TextSpan;
+      expect(textSpan.toPlainText(), 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾ ');
+
+      final markerSpan = textSpan.children!.whereType<TextSpan>().last;
+      expect(markerSpan.text, ' ﴿٣﴾ ');
+      expect(markerSpan.style?.color, AppTheme.goldAccent);
       expect(
-        (richText.text as TextSpan).toPlainText(),
-        'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾ ',
+        markerSpan.style?.fontSize,
+        greaterThanOrEqualTo(textSpan.style!.fontSize! * 0.95),
       );
+      expect(markerSpan.style?.fontWeight, FontWeight.w700);
+      expect(markerSpan.style?.height, 1.0);
     });
 
     testWidgets('removes embedded Classic marker glyphs', (tester) async {
