@@ -795,13 +795,51 @@ void main() {
         final richText = tester.widget<RichText>(richTextFinder);
         final style = (richText.text as TextSpan).style;
         expect(richText.textAlign, TextAlign.justify);
-        expect(style?.fontSize, 30);
+        expect(style?.fontSize, greaterThan(30));
+        expect(style?.fontSize, lessThanOrEqualTo(36));
         expect(style?.height, 2.05);
-        expect(richText.textScaler.scale(style!.fontSize!), 36);
+        expect(richText.textScaler.scale(style!.fontSize!), greaterThan(36));
         expect(tester.getSize(richTextFinder).width, 344);
         expect(tester.takeException(), isNull);
       },
     );
+
+    testWidgets('appends one Classic ayah marker when verse text has none', (
+      tester,
+    ) async {
+      const unmarkedVerse = Verse(
+        verseId: '1:3',
+        surahNumber: 1,
+        verseNumber: 3,
+        arabicText: 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesBySurahProvider(
+              1,
+            ).overrideWith((ref) async => [unmarkedVerse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
+      );
+      expect(
+        (richText.text as TextSpan).toPlainText(),
+        'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ۝٣ ',
+      );
+    });
 
     testWidgets('does not append a duplicate Classic ayah marker', (
       tester,

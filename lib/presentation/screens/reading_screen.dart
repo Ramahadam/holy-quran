@@ -20,8 +20,11 @@ const _bismillahLineHeight = 2.0;
 const _classicPageHorizontalPadding = 8.0;
 const _classicPageVerticalPadding = 12.0;
 const _classicVerseVerticalPadding = 8.0;
-const _classicArabicFontSize = 30.0;
+const _classicArabicMinFontSize = 30.0;
+const _classicArabicMaxFontSize = 36.0;
+const _classicArabicWidthScale = 0.092;
 const _classicArabicLineHeight = 2.05;
+const _classicAyahMarkerFontScale = 0.75;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
 
@@ -859,26 +862,50 @@ class _ArabicVerse extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         vertical: _classicVerseVerticalPadding,
       ),
-      child: RichText(
-        textDirection: TextDirection.rtl,
-        textAlign: TextAlign.justify,
-        textScaler: MediaQuery.textScalerOf(context),
-        textWidthBasis: TextWidthBasis.parent,
-        text: TextSpan(
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontFamily: _kfgqpcHafsFontFamily,
-            fontSize: _classicArabicFontSize,
-            fontWeight: FontWeight.w400,
-            height: _classicArabicLineHeight,
-            color: isBookmarked
-                ? Theme.of(context).colorScheme.onPrimaryContainer
-                : Theme.of(context).textTheme.headlineLarge?.color,
-          ),
-          children: _arabicTextSpans,
+      child: SizedBox(
+        width: double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fontSize = _fontSizeForWidth(constraints.maxWidth);
+            return RichText(
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.justify,
+              textScaler: MediaQuery.textScalerOf(context),
+              textWidthBasis: TextWidthBasis.parent,
+              text: TextSpan(
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontFamily: _kfgqpcHafsFontFamily,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w400,
+                  height: _classicArabicLineHeight,
+                  color: isBookmarked
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).textTheme.headlineLarge?.color,
+                ),
+                children: [
+                  ..._arabicTextSpans,
+                  if (!_hasEmbeddedAyahMarker)
+                    TextSpan(
+                      text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
+                      style: TextStyle(
+                        color: AppTheme.goldAccent,
+                        fontSize: fontSize * _classicAyahMarkerFontScale,
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
+
+  double _fontSizeForWidth(double width) => (width * _classicArabicWidthScale)
+      .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
+      .toDouble();
+
+  bool get _hasEmbeddedAyahMarker => verse.arabicText.contains('۝');
 
   List<TextSpan> get _arabicTextSpans {
     final leadingSpaceCount =
@@ -910,5 +937,14 @@ class _ArabicVerse extends StatelessWidget {
       return text.length;
     }
     return lastWordStart + _bismillahLastWord.length;
+  }
+
+  String _toArabicNumeral(int number) {
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number
+        .toString()
+        .split('')
+        .map((d) => arabicDigits[int.parse(d)])
+        .join();
   }
 }
