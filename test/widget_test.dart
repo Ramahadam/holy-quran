@@ -840,10 +840,12 @@ void main() {
         find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
       );
       final textSpan = richText.text as TextSpan;
-      expect(textSpan.toPlainText(), 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾ ');
+      expect(textSpan.toPlainText(), 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ٣ ');
+      expect(textSpan.toPlainText(), isNot(contains('﴿')));
+      expect(textSpan.toPlainText(), isNot(contains('﴾')));
 
       final markerSpan = textSpan.children!.whereType<TextSpan>().last;
-      expect(markerSpan.text, ' ﴿٣﴾ ');
+      expect(markerSpan.text, ' ٣ ');
       expect(markerSpan.style?.color, AppTheme.goldAccent);
       expect(
         markerSpan.style?.fontSize,
@@ -885,7 +887,7 @@ void main() {
         find.textContaining('أُو', findRichText: true),
       );
       final text = (richText.text as TextSpan).toPlainText();
-      expect(text, 'أُولَـٰٓئِكَ أَنَا أُحْىِۦ أَلِيمٌ بِمَا ﴿٣﴾ ');
+      expect(text, 'أُولَـٰٓئِكَ أَنَا أُحْىِۦ أَلِيمٌ بِمَا ٣ ');
       expect(text, isNot(contains('۞')));
       expect(text, isNot(contains('۝')));
       expect(text, isNot(contains('ۖ')));

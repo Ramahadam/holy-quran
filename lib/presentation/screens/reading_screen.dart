@@ -891,7 +891,7 @@ class _ArabicVerse extends StatelessWidget {
                 children: [
                   ..._arabicTextSpans,
                   TextSpan(
-                    text: ' ﴿${_toArabicNumeral(verse.verseNumber)}﴾ ',
+                    text: ' ${_toArabicNumeral(verse.verseNumber)} ',
                     style: TextStyle(
                       color: AppTheme.goldAccent,
                       fontSize: fontSize * _classicAyahMarkerFontScale,
