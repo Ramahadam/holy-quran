@@ -797,7 +797,7 @@ void main() {
         expect(richText.textAlign, TextAlign.right);
         expect(style?.fontSize, greaterThanOrEqualTo(24));
         expect(style?.fontSize, lessThanOrEqualTo(30));
-        expect(style?.height, 1.8);
+        expect(style?.height, 1.6);
         expect(richText.textScaler.scale(style!.fontSize!), greaterThan(31));
         expect(
           richText.textScaler.scale(style.fontSize!),
@@ -850,7 +850,7 @@ void main() {
         verseId: '1:3',
         surahNumber: 1,
         verseNumber: 3,
-        arabicText: '۞ ٱلرَّحْمَـٰنِ ۖ ٱلرَّحِيمِ ۚ مَـٰلِكِ ۝٣',
+        arabicText: '۞ أُو۟لَـٰٓئِكَ ۖ أَنَا۠ أُحْىِۦ ۚ أَلِيمٌۢ بِمَا ۝٣',
       );
 
       await tester.pumpWidget(
@@ -870,14 +870,18 @@ void main() {
       await tester.pumpAndSettle();
 
       final richText = tester.widget<RichText>(
-        find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
+        find.textContaining('أُو', findRichText: true),
       );
       final text = (richText.text as TextSpan).toPlainText();
-      expect(text, 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ مَـٰلِكِ ﴿٣﴾ ');
+      expect(text, 'أُولَـٰٓئِكَ أَنَا أُحْىِۦ أَلِيمٌ بِمَا ﴿٣﴾ ');
       expect(text, isNot(contains('۞')));
       expect(text, isNot(contains('۝')));
       expect(text, isNot(contains('ۖ')));
       expect(text, isNot(contains('ۚ')));
+      expect(text, isNot(contains('۟')));
+      expect(text, isNot(contains('۠')));
+      expect(text, isNot(contains('ۢ')));
+      expect(text, isNot(contains('أُو لَـٰٓئِكَ')));
     });
 
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (
