@@ -767,7 +767,10 @@ void main() {
             child: MaterialApp(
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
-              home: ReadingScreen(surah: _surah1),
+              home: MediaQuery(
+                data: const MediaQueryData(textScaler: TextScaler.linear(1.2)),
+                child: ReadingScreen(surah: _surah1),
+              ),
             ),
           ),
         );
@@ -777,13 +780,13 @@ void main() {
           find.byType(SingleChildScrollView),
         );
         final padding = scrollView.padding as EdgeInsets;
-        expect(padding.horizontal, 24);
+        expect(padding.horizontal, 16);
 
         final contentColumn = find.descendant(
           of: find.byType(SingleChildScrollView),
           matching: find.byType(Column),
         );
-        expect(tester.getSize(contentColumn).width, 336);
+        expect(tester.getSize(contentColumn).width, 344);
 
         final richTextFinder = find.textContaining(
           'ٱلرَّحْمَـٰنِ',
@@ -791,12 +794,46 @@ void main() {
         );
         final richText = tester.widget<RichText>(richTextFinder);
         final style = (richText.text as TextSpan).style;
+        expect(richText.textAlign, TextAlign.justify);
         expect(style?.fontSize, 30);
         expect(style?.height, 2.05);
-        expect(tester.getSize(richTextFinder).width, lessThanOrEqualTo(336));
+        expect(richText.textScaler.scale(style!.fontSize!), 36);
+        expect(tester.getSize(richTextFinder).width, 344);
         expect(tester.takeException(), isNull);
       },
     );
+
+    testWidgets('does not append a duplicate Classic ayah marker', (
+      tester,
+    ) async {
+      const markedVerse = Verse(
+        verseId: '1:3',
+        surahNumber: 1,
+        verseNumber: 3,
+        arabicText: 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ۝٣',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            versesBySurahProvider(1).overrideWith((ref) async => [markedVerse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
+      );
+      expect((richText.text as TextSpan).toPlainText(), markedVerse.arabicText);
+    });
 
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (
       tester,

@@ -17,12 +17,11 @@ const _bismillahOpeningWord = 'بِسْمِ';
 const _bismillahLastWord = 'ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
 const _bismillahLineHeight = 2.0;
-const _classicPageHorizontalPadding = 12.0;
+const _classicPageHorizontalPadding = 8.0;
 const _classicPageVerticalPadding = 12.0;
 const _classicVerseVerticalPadding = 8.0;
 const _classicArabicFontSize = 30.0;
 const _classicArabicLineHeight = 2.05;
-const _classicAyahMarkerFontSize = 22.0;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
 
@@ -862,7 +861,9 @@ class _ArabicVerse extends StatelessWidget {
       ),
       child: RichText(
         textDirection: TextDirection.rtl,
-        textAlign: TextAlign.center,
+        textAlign: TextAlign.justify,
+        textScaler: MediaQuery.textScalerOf(context),
+        textWidthBasis: TextWidthBasis.parent,
         text: TextSpan(
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             fontFamily: _kfgqpcHafsFontFamily,
@@ -873,16 +874,7 @@ class _ArabicVerse extends StatelessWidget {
                 ? Theme.of(context).colorScheme.onPrimaryContainer
                 : Theme.of(context).textTheme.headlineLarge?.color,
           ),
-          children: [
-            ..._arabicTextSpans,
-            TextSpan(
-              text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
-              style: TextStyle(
-                color: AppTheme.goldAccent,
-                fontSize: _classicAyahMarkerFontSize,
-              ),
-            ),
-          ],
+          children: _arabicTextSpans,
         ),
       ),
     );
@@ -918,14 +910,5 @@ class _ArabicVerse extends StatelessWidget {
       return text.length;
     }
     return lastWordStart + _bismillahLastWord.length;
-  }
-
-  String _toArabicNumeral(int number) {
-    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((d) => arabicDigits[int.parse(d)])
-        .join();
   }
 }
