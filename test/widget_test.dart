@@ -847,9 +847,13 @@ void main() {
       expect(markerSpan.style?.color, AppTheme.goldAccent);
       expect(
         markerSpan.style?.fontSize,
-        greaterThanOrEqualTo(textSpan.style!.fontSize! * 0.95),
+        greaterThanOrEqualTo(textSpan.style!.fontSize! * 0.85),
       );
-      expect(markerSpan.style?.fontWeight, FontWeight.w700);
+      expect(
+        markerSpan.style?.fontSize,
+        lessThanOrEqualTo(textSpan.style!.fontSize! * 0.9),
+      );
+      expect(markerSpan.style?.fontWeight, FontWeight.w500);
       expect(markerSpan.style?.height, 1.0);
     });
 

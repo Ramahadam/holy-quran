@@ -24,7 +24,7 @@ const _classicArabicMinFontSize = 24.0;
 const _classicArabicMaxFontSize = 30.0;
 const _classicArabicWidthScale = 0.078;
 const _classicArabicLineHeight = 1.6;
-const _classicAyahMarkerFontScale = 1.0;
+const _classicAyahMarkerFontScale = 0.88;
 const _classicAyahMarkerLineHeight = 1.0;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
@@ -895,7 +895,7 @@ class _ArabicVerse extends StatelessWidget {
                     style: TextStyle(
                       color: AppTheme.goldAccent,
                       fontSize: fontSize * _classicAyahMarkerFontScale,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w500,
                       height: _classicAyahMarkerLineHeight,
                     ),
                   ),
