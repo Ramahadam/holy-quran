@@ -739,6 +739,65 @@ void main() {
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
+    testWidgets(
+      'uses comfortable Classic typography and width on compact phones',
+      (tester) async {
+        const longVerse = Verse(
+          verseId: '1:3',
+          surahNumber: 1,
+          verseNumber: 3,
+          arabicText:
+              'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ مَـٰلِكِ يَوْمِ ٱلدِّينِ إِيَّاكَ نَعْبُدُ',
+        );
+
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(360, 640);
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              versesBySurahProvider(1).overrideWith((ref) async => [longVerse]),
+              bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: ReadingScreen(surah: _surah1),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final scrollView = tester.widget<SingleChildScrollView>(
+          find.byType(SingleChildScrollView),
+        );
+        final padding = scrollView.padding as EdgeInsets;
+        expect(padding.horizontal, 24);
+
+        final contentColumn = find.descendant(
+          of: find.byType(SingleChildScrollView),
+          matching: find.byType(Column),
+        );
+        expect(tester.getSize(contentColumn).width, 336);
+
+        final richTextFinder = find.textContaining(
+          'ٱلرَّحْمَـٰنِ',
+          findRichText: true,
+        );
+        final richText = tester.widget<RichText>(richTextFinder);
+        final style = (richText.text as TextSpan).style;
+        expect(style?.fontSize, 30);
+        expect(style?.height, 2.05);
+        expect(tester.getSize(richTextFinder).width, lessThanOrEqualTo(336));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (
       tester,
     ) async {

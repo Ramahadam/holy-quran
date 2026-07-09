@@ -17,6 +17,12 @@ const _bismillahOpeningWord = 'بِسْمِ';
 const _bismillahLastWord = 'ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
 const _bismillahLineHeight = 2.0;
+const _classicPageHorizontalPadding = 12.0;
+const _classicPageVerticalPadding = 12.0;
+const _classicVerseVerticalPadding = 8.0;
+const _classicArabicFontSize = 30.0;
+const _classicArabicLineHeight = 2.05;
+const _classicAyahMarkerFontSize = 22.0;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
 
@@ -710,7 +716,10 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
 
     return SingleChildScrollView(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: _classicPageHorizontalPadding,
+        vertical: _classicPageVerticalPadding,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: _buildVerseWidgets(context, bookmarks),
@@ -848,16 +857,18 @@ class _ArabicVerse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        vertical: _classicVerseVerticalPadding,
+      ),
       child: RichText(
         textDirection: TextDirection.rtl,
         textAlign: TextAlign.center,
         text: TextSpan(
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             fontFamily: _kfgqpcHafsFontFamily,
-            fontSize: 24,
+            fontSize: _classicArabicFontSize,
             fontWeight: FontWeight.w400,
-            height: 2.2,
+            height: _classicArabicLineHeight,
             color: isBookmarked
                 ? Theme.of(context).colorScheme.onPrimaryContainer
                 : Theme.of(context).textTheme.headlineLarge?.color,
@@ -866,7 +877,10 @@ class _ArabicVerse extends StatelessWidget {
             ..._arabicTextSpans,
             TextSpan(
               text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
-              style: TextStyle(color: AppTheme.goldAccent, fontSize: 20),
+              style: TextStyle(
+                color: AppTheme.goldAccent,
+                fontSize: _classicAyahMarkerFontSize,
+              ),
             ),
           ],
         ),
