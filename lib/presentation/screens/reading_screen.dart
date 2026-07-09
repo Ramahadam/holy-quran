@@ -27,6 +27,8 @@ const _classicArabicLineHeight = 2.05;
 const _classicAyahMarkerFontScale = 0.75;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
+final _classicEmbeddedMarkerPattern = RegExp(r'\s*(?:۞|۝\s*[٠-٩0-9]*)\s*');
+final _whitespacePattern = RegExp(r'\s+');
 
 enum ReadingMode { classic, mushaf }
 
@@ -884,14 +886,13 @@ class _ArabicVerse extends StatelessWidget {
                 ),
                 children: [
                   ..._arabicTextSpans,
-                  if (!_hasEmbeddedAyahMarker)
-                    TextSpan(
-                      text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
-                      style: TextStyle(
-                        color: AppTheme.goldAccent,
-                        fontSize: fontSize * _classicAyahMarkerFontScale,
-                      ),
+                  TextSpan(
+                    text: ' ﴿${_toArabicNumeral(verse.verseNumber)}﴾ ',
+                    style: TextStyle(
+                      color: AppTheme.goldAccent,
+                      fontSize: fontSize * _classicAyahMarkerFontScale,
                     ),
+                  ),
                 ],
               ),
             );
@@ -905,16 +906,14 @@ class _ArabicVerse extends StatelessWidget {
       .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
       .toDouble();
 
-  bool get _hasEmbeddedAyahMarker => verse.arabicText.contains('۝');
-
   List<TextSpan> get _arabicTextSpans {
-    final leadingSpaceCount =
-        verse.arabicText.length - verse.arabicText.trimLeft().length;
-    final leadingSpace = verse.arabicText.substring(0, leadingSpaceCount);
-    final trimmedText = verse.arabicText.substring(leadingSpaceCount);
+    final text = _displayArabicText;
+    final leadingSpaceCount = text.length - text.trimLeft().length;
+    final leadingSpace = text.substring(0, leadingSpaceCount);
+    final trimmedText = text.substring(leadingSpaceCount);
 
     if (!trimmedText.startsWith(_bismillahOpeningWord)) {
-      return [TextSpan(text: verse.arabicText)];
+      return [TextSpan(text: text)];
     }
 
     final bismillahEnd = _findBismillahEnd(trimmedText);
@@ -930,6 +929,11 @@ class _ArabicVerse extends StatelessWidget {
       TextSpan(text: trimmedText.substring(bismillahEnd)),
     ];
   }
+
+  String get _displayArabicText => verse.arabicText
+      .replaceAll(_classicEmbeddedMarkerPattern, ' ')
+      .replaceAll(_whitespacePattern, ' ')
+      .trim();
 
   int _findBismillahEnd(String text) {
     final lastWordStart = text.indexOf(_bismillahLastWord);

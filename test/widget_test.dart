@@ -837,18 +837,16 @@ void main() {
       );
       expect(
         (richText.text as TextSpan).toPlainText(),
-        'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ۝٣ ',
+        'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾ ',
       );
     });
 
-    testWidgets('does not append a duplicate Classic ayah marker', (
-      tester,
-    ) async {
+    testWidgets('removes embedded Classic marker glyphs', (tester) async {
       const markedVerse = Verse(
         verseId: '1:3',
         surahNumber: 1,
         verseNumber: 3,
-        arabicText: 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ۝٣',
+        arabicText: '۞ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ۝٣',
       );
 
       await tester.pumpWidget(
@@ -870,7 +868,10 @@ void main() {
       final richText = tester.widget<RichText>(
         find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
       );
-      expect((richText.text as TextSpan).toPlainText(), markedVerse.arabicText);
+      final text = (richText.text as TextSpan).toPlainText();
+      expect(text, 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ ﴿٣﴾ ');
+      expect(text, isNot(contains('۞')));
+      expect(text, isNot(contains('۝')));
     });
 
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (
