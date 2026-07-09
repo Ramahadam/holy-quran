@@ -794,7 +794,7 @@ void main() {
         );
         final richText = tester.widget<RichText>(richTextFinder);
         final style = (richText.text as TextSpan).style;
-        expect(richText.textAlign, TextAlign.right);
+        expect(richText.textAlign, TextAlign.justify);
         expect(style?.fontSize, greaterThanOrEqualTo(24));
         expect(style?.fontSize, lessThanOrEqualTo(30));
         expect(style?.height, 1.6);

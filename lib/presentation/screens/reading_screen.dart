@@ -875,7 +875,7 @@ class _ArabicVerse extends StatelessWidget {
             final fontSize = _fontSizeForWidth(constraints.maxWidth);
             return RichText(
               textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
+              textAlign: TextAlign.justify,
               textScaler: MediaQuery.textScalerOf(context),
               textWidthBasis: TextWidthBasis.parent,
               text: TextSpan(
