@@ -808,6 +808,58 @@ void main() {
       },
     );
 
+    testWidgets('flows same-page Classic ayahs in one justified paragraph', (
+      tester,
+    ) async {
+      const firstVerse = Verse(
+        verseId: '2:1',
+        surahNumber: 2,
+        verseNumber: 1,
+        arabicText: 'الٓمٓ',
+        page: 2,
+      );
+      const secondVerse = Verse(
+        verseId: '2:2',
+        surahNumber: 2,
+        verseNumber: 2,
+        arabicText: 'ذَٰلِكَ ٱلْكِتَـٰبُ',
+        page: 2,
+      );
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 2),
+            versesBySurahProvider(
+              2,
+            ).overrideWith((ref) async => [firstVerse, secondVerse]),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('الٓم', findRichText: true),
+      );
+      final textSpan = richText.text as TextSpan;
+
+      expect(richText.textAlign, TextAlign.justify);
+      expect(textSpan.toPlainText(), 'الٓمٓ ١ ذَٰلِكَ ٱلْكِتَـٰبُ ٢ ');
+    });
+
     testWidgets('appends one Classic ayah marker when verse text has none', (
       tester,
     ) async {

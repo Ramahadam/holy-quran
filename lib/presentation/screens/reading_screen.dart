@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +43,71 @@ void _openVerseDetail(BuildContext context, Verse verse) {
       builder: (context) => VerseDetailScreen(verse: verse),
     ),
   );
+}
+
+double _classicFontSizeForWidth(double width) =>
+    (width * _classicArabicWidthScale)
+        .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
+        .toDouble();
+
+Object _classicParagraphGroupFor(Verse verse) =>
+    verse.page > 0 ? 'page:${verse.page}' : 'verse:${verse.verseId}';
+
+List<TextSpan> _classicArabicTextSpans(
+  Verse verse, {
+  GestureRecognizer? recognizer,
+  TextStyle? style,
+}) {
+  final text = _classicDisplayArabicText(verse);
+  final leadingSpaceCount = text.length - text.trimLeft().length;
+  final leadingSpace = text.substring(0, leadingSpaceCount);
+  final trimmedText = text.substring(leadingSpaceCount);
+
+  if (!trimmedText.startsWith(_bismillahOpeningWord)) {
+    return [TextSpan(text: text, recognizer: recognizer, style: style)];
+  }
+
+  final bismillahEnd = _findBismillahEnd(trimmedText);
+  return [
+    if (leadingSpace.isNotEmpty)
+      TextSpan(text: leadingSpace, recognizer: recognizer, style: style),
+    TextSpan(
+      text: trimmedText.substring(0, bismillahEnd),
+      recognizer: recognizer,
+      style: (style ?? const TextStyle()).copyWith(
+        fontSize: _bismillahFontSize,
+        height: _bismillahLineHeight,
+      ),
+    ),
+    TextSpan(
+      text: trimmedText.substring(bismillahEnd),
+      recognizer: recognizer,
+      style: style,
+    ),
+  ];
+}
+
+String _classicDisplayArabicText(Verse verse) => verse.arabicText
+    .replaceAll(_classicInlineAnnotationPattern, '')
+    .replaceAll(_classicEmbeddedMarkerPattern, ' ')
+    .replaceAll(_whitespacePattern, ' ')
+    .trim();
+
+int _findBismillahEnd(String text) {
+  final lastWordStart = text.indexOf(_bismillahLastWord);
+  if (lastWordStart == -1) {
+    return text.length;
+  }
+  return lastWordStart + _bismillahLastWord.length;
+}
+
+String _toArabicNumeral(int number) {
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return number
+      .toString()
+      .split('')
+      .map((d) => arabicDigits[int.parse(d)])
+      .join();
 }
 
 class ReadingScreen extends ConsumerStatefulWidget {
@@ -759,10 +825,35 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
 
   List<Widget> _buildVerseWidgets(BuildContext context, Set<String> bookmarks) {
     final widgets = <Widget>[];
+    var paragraphVerses = <Verse>[];
+    Object? currentParagraphGroup;
     int? lastSurah;
+
+    void flushParagraph() {
+      if (paragraphVerses.isEmpty) return;
+
+      final initialVerseId = widget.initialVerseId;
+      final paragraphKey =
+          initialVerseId != null &&
+              paragraphVerses.any((verse) => verse.verseId == initialVerseId)
+          ? GlobalObjectKey('classicVerse-$initialVerseId')
+          : null;
+
+      widgets.add(
+        _ClassicVerseParagraph(
+          key: paragraphKey,
+          verses: List<Verse>.unmodifiable(paragraphVerses),
+          bookmarks: bookmarks,
+          onVerseFocused: widget.onVerseFocused,
+        ),
+      );
+      paragraphVerses = <Verse>[];
+      currentParagraphGroup = null;
+    }
 
     for (final verse in widget.verses) {
       if (verse.surahNumber != lastSurah) {
+        flushParagraph();
         if (lastSurah != null) {
           widgets.add(const SizedBox(height: 16));
         }
@@ -773,20 +864,16 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
         lastSurah = verse.surahNumber;
       }
 
-      final isBookmarked = bookmarks.contains(verse.verseId);
-      widgets.add(
-        GestureDetector(
-          key: GlobalObjectKey('classicVerse-${verse.verseId}'),
-          behavior: HitTestBehavior.opaque,
-          onLongPress: () {
-            widget.onVerseFocused?.call(verse.verseId);
-            _openVerseDetail(context, verse);
-          },
-          child: _ArabicVerse(verse: verse, isBookmarked: isBookmarked),
-        ),
-      );
+      final paragraphGroup = _classicParagraphGroupFor(verse);
+      if (currentParagraphGroup != null &&
+          currentParagraphGroup != paragraphGroup) {
+        flushParagraph();
+      }
+      currentParagraphGroup = paragraphGroup;
+      paragraphVerses.add(verse);
     }
 
+    flushParagraph();
     return widgets;
   }
 
@@ -856,6 +943,152 @@ class _SurahHeader extends ConsumerWidget {
   }
 }
 
+class _ClassicVerseParagraph extends StatefulWidget {
+  final List<Verse> verses;
+  final Set<String> bookmarks;
+  final ValueChanged<String>? onVerseFocused;
+
+  const _ClassicVerseParagraph({
+    super.key,
+    required this.verses,
+    required this.bookmarks,
+    this.onVerseFocused,
+  });
+
+  @override
+  State<_ClassicVerseParagraph> createState() => _ClassicVerseParagraphState();
+}
+
+class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
+  final Map<String, LongPressGestureRecognizer> _recognizers = {};
+
+  @override
+  void didUpdateWidget(covariant _ClassicVerseParagraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.verses != widget.verses ||
+        oldWidget.onVerseFocused != widget.onVerseFocused) {
+      _disposeRecognizers();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  void _disposeRecognizers() {
+    for (final recognizer in _recognizers.values) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final paragraph = Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: _classicVerseVerticalPadding,
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
+            return RichText(
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.justify,
+              textScaler: MediaQuery.textScalerOf(context),
+              textWidthBasis: TextWidthBasis.parent,
+              text: TextSpan(
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontFamily: _kfgqpcHafsFontFamily,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w400,
+                  height: _classicArabicLineHeight,
+                  color: _baseTextColor(context),
+                ),
+                children: _buildVerseSpans(context, fontSize),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    if (widget.verses.length != 1) {
+      return paragraph;
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () => _focusVerse(widget.verses.single),
+      child: paragraph,
+    );
+  }
+
+  Color? _baseTextColor(BuildContext context) {
+    if (widget.verses.length == 1 &&
+        widget.bookmarks.contains(widget.verses.single.verseId)) {
+      return Theme.of(context).colorScheme.onPrimaryContainer;
+    }
+    return Theme.of(context).textTheme.headlineLarge?.color;
+  }
+
+  List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {
+    final bookmarkedColor = Theme.of(context).colorScheme.onPrimaryContainer;
+    final baseStyleIsBookmarked =
+        widget.verses.length == 1 &&
+        widget.bookmarks.contains(widget.verses.single.verseId);
+    final spans = <InlineSpan>[];
+
+    for (final verse in widget.verses) {
+      final recognizer = widget.verses.length == 1
+          ? null
+          : _verseRecognizer(verse);
+      final verseStyle =
+          widget.bookmarks.contains(verse.verseId) && !baseStyleIsBookmarked
+          ? TextStyle(color: bookmarkedColor)
+          : null;
+
+      spans.addAll(
+        _classicArabicTextSpans(
+          verse,
+          recognizer: recognizer,
+          style: verseStyle,
+        ),
+      );
+      spans.add(
+        TextSpan(
+          text: ' ${_toArabicNumeral(verse.verseNumber)} ',
+          recognizer: recognizer,
+          style: TextStyle(
+            color: AppTheme.goldAccent,
+            fontSize: fontSize * _classicAyahMarkerFontScale,
+            fontWeight: FontWeight.w500,
+            height: _classicAyahMarkerLineHeight,
+          ),
+        ),
+      );
+    }
+
+    return spans;
+  }
+
+  LongPressGestureRecognizer _verseRecognizer(Verse verse) {
+    return _recognizers.putIfAbsent(
+      verse.verseId,
+      () =>
+          LongPressGestureRecognizer()..onLongPress = () => _focusVerse(verse),
+    );
+  }
+
+  void _focusVerse(Verse verse) {
+    widget.onVerseFocused?.call(verse.verseId);
+    _openVerseDetail(context, verse);
+  }
+}
+
 class _ArabicVerse extends StatelessWidget {
   final Verse verse;
   final bool isBookmarked;
@@ -872,7 +1105,7 @@ class _ArabicVerse extends StatelessWidget {
         width: double.infinity,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final fontSize = _fontSizeForWidth(constraints.maxWidth);
+            final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
             return RichText(
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.justify,
@@ -889,7 +1122,7 @@ class _ArabicVerse extends StatelessWidget {
                       : Theme.of(context).textTheme.headlineLarge?.color,
                 ),
                 children: [
-                  ..._arabicTextSpans,
+                  ..._classicArabicTextSpans(verse),
                   TextSpan(
                     text: ' ${_toArabicNumeral(verse.verseNumber)} ',
                     style: TextStyle(
@@ -906,56 +1139,5 @@ class _ArabicVerse extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  double _fontSizeForWidth(double width) => (width * _classicArabicWidthScale)
-      .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
-      .toDouble();
-
-  List<TextSpan> get _arabicTextSpans {
-    final text = _displayArabicText;
-    final leadingSpaceCount = text.length - text.trimLeft().length;
-    final leadingSpace = text.substring(0, leadingSpaceCount);
-    final trimmedText = text.substring(leadingSpaceCount);
-
-    if (!trimmedText.startsWith(_bismillahOpeningWord)) {
-      return [TextSpan(text: text)];
-    }
-
-    final bismillahEnd = _findBismillahEnd(trimmedText);
-    return [
-      if (leadingSpace.isNotEmpty) TextSpan(text: leadingSpace),
-      TextSpan(
-        text: trimmedText.substring(0, bismillahEnd),
-        style: const TextStyle(
-          fontSize: _bismillahFontSize,
-          height: _bismillahLineHeight,
-        ),
-      ),
-      TextSpan(text: trimmedText.substring(bismillahEnd)),
-    ];
-  }
-
-  String get _displayArabicText => verse.arabicText
-      .replaceAll(_classicInlineAnnotationPattern, '')
-      .replaceAll(_classicEmbeddedMarkerPattern, ' ')
-      .replaceAll(_whitespacePattern, ' ')
-      .trim();
-
-  int _findBismillahEnd(String text) {
-    final lastWordStart = text.indexOf(_bismillahLastWord);
-    if (lastWordStart == -1) {
-      return text.length;
-    }
-    return lastWordStart + _bismillahLastWord.length;
-  }
-
-  String _toArabicNumeral(int number) {
-    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((d) => arabicDigits[int.parse(d)])
-        .join();
   }
 }
