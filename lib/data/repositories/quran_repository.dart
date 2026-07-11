@@ -6,6 +6,8 @@ abstract class QuranRepository {
 
   Future<List<Verse>> getVersesBySurah(int surahNumber);
 
+  Future<List<Verse>> getAllVerses();
+
   Future<List<Verse>> getVersesByPage(int page);
 
   Future<Verse?> getVerseById(String verseId);

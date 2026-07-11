@@ -116,6 +116,21 @@ class QuranRepositoryImpl implements QuranRepository {
   }
 
   @override
+  Future<List<Verse>> getAllVerses() async {
+    final isar = await IsarService.getInstance();
+    final entities = await isar.verseEntitys.where().findAll();
+
+    entities.sort((a, b) {
+      final surahComparison = a.surahNumber.compareTo(b.surahNumber);
+      return surahComparison != 0
+          ? surahComparison
+          : a.verseNumber.compareTo(b.verseNumber);
+    });
+
+    return entities.map((entity) => entity.toDomain()).toList();
+  }
+
+  @override
   Future<List<Verse>> getVersesByPage(int page) async {
     if (page < 1 || page > 604) {
       throw ArgumentError('Page must be between 1 and 604, got $page');

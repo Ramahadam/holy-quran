@@ -302,7 +302,7 @@ void main() {
             versesByPageProvider(
               1,
             ).overrideWith((ref) async => const [_verse1]),
-            versesBySurahProvider(
+            classicVersesProvider(
               1,
             ).overrideWith((ref) async => const [_verse1]),
             bookmarksBySurahProvider(

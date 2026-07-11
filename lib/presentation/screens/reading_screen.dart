@@ -24,7 +24,7 @@ const _classicVerseVerticalPadding = 4.0;
 const _classicArabicMinFontSize = 24.0;
 const _classicArabicMaxFontSize = 30.0;
 const _classicArabicWidthScale = 0.078;
-const _classicArabicLineHeight = 1.6;
+const _classicArabicLineHeight = 1.45;
 const _classicAyahMarkerFontScale = 0.88;
 const _classicAyahMarkerLineHeight = 1.0;
 const _totalPages = 604;
@@ -50,8 +50,7 @@ double _classicFontSizeForWidth(double width) =>
         .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
         .toDouble();
 
-Object _classicParagraphGroupFor(Verse verse) =>
-    verse.page > 0 ? 'page:${verse.page}' : 'verse:${verse.verseId}';
+Object _classicParagraphGroupFor(Verse verse) => verse.surahNumber;
 
 List<TextSpan> _classicArabicTextSpans(
   Verse verse, {
@@ -409,7 +408,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
   Widget _buildClassicScroll() {
     final versesAsync = ref.watch(
-      versesBySurahProvider(widget.surah.surahNumber),
+      classicVersesProvider(widget.surah.surahNumber),
     );
 
     return versesAsync.when(
@@ -422,17 +421,24 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           _currentPageFirstVerseId ??= verses.first.verseId;
         });
 
+        final initialClassicVerseId =
+            widget.initialVerseId ?? '${widget.surah.surahNumber}:1';
+
         return _ClassicSurahContent(
           surah: widget.surah,
           verses: verses,
-          initialVerseId: widget.initialVerseId,
-          shouldScrollToInitialVerse:
-              widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
+          initialVerseId: initialClassicVerseId,
+          shouldScrollToInitialVerse: !_didScrollToInitialClassicVerse,
           onInitialVerseScrolled: () {
             _didScrollToInitialClassicVerse = true;
           },
           onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
-          onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
+          onVerseVisible: (verse) {
+            _currentPageFirstVerseId = verse.verseId;
+            if (verse.page != _currentPage) {
+              setState(() => _currentPage = verse.page);
+            }
+          },
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -726,7 +732,7 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
   final bool shouldScrollToInitialVerse;
   final VoidCallback onInitialVerseScrolled;
   final ValueChanged<String>? onVerseFocused;
-  final ValueChanged<String>? onVerseVisible;
+  final ValueChanged<Verse>? onVerseVisible;
 
   const _ClassicSurahContent({
     required this.surah,
@@ -745,6 +751,7 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
 
 class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
   late final ScrollController _scrollController;
+  final GlobalKey _initialVerseKey = GlobalKey();
   String? _lastReportedVisibleVerseId;
 
   @override
@@ -772,11 +779,8 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     final bookmarks = bookmarksAsync.valueOrNull ?? {};
 
     if (widget.shouldScrollToInitialVerse && widget.initialVerseId != null) {
-      final initialVerseKey = GlobalObjectKey(
-        'classicVerse-${widget.initialVerseId}',
-      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final context = initialVerseKey.currentContext;
+        final context = _initialVerseKey.currentContext;
         if (context != null) {
           Scrollable.ensureVisible(
             context,
@@ -815,11 +819,11 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
       0,
       widget.verses.length - 1,
     );
-    final visibleVerseId = widget.verses[index].verseId;
+    final visibleVerse = widget.verses[index];
 
-    if (visibleVerseId != _lastReportedVisibleVerseId) {
-      _lastReportedVisibleVerseId = visibleVerseId;
-      widget.onVerseVisible?.call(visibleVerseId);
+    if (visibleVerse.verseId != _lastReportedVisibleVerseId) {
+      _lastReportedVisibleVerseId = visibleVerse.verseId;
+      widget.onVerseVisible?.call(visibleVerse);
     }
   }
 
@@ -836,7 +840,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
       final paragraphKey =
           initialVerseId != null &&
               paragraphVerses.any((verse) => verse.verseId == initialVerseId)
-          ? GlobalObjectKey('classicVerse-$initialVerseId')
+          ? _initialVerseKey
           : null;
 
       widgets.add(
@@ -862,6 +866,11 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
           widgets.add(const _BismillahHeader());
         }
         lastSurah = verse.surahNumber;
+      }
+
+      if (verse.verseId == widget.initialVerseId &&
+          paragraphVerses.isNotEmpty) {
+        flushParagraph();
       }
 
       final paragraphGroup = _classicParagraphGroupFor(verse);
@@ -1060,7 +1069,9 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
       );
       spans.add(
         TextSpan(
-          text: ' ${_toArabicNumeral(verse.verseNumber)} ',
+          // A non-breaking space keeps the ayah marker attached to the final
+          // word instead of allowing it to become orphaned on the next line.
+          text: '\u00a0${_toArabicNumeral(verse.verseNumber)} ',
           recognizer: recognizer,
           style: TextStyle(
             color: AppTheme.goldAccent,
