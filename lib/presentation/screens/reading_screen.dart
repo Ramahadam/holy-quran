@@ -24,7 +24,7 @@ const _classicVerseVerticalPadding = 4.0;
 const _classicArabicMinFontSize = 24.0;
 const _classicArabicMaxFontSize = 30.0;
 const _classicArabicWidthScale = 0.078;
-const _classicArabicLineHeight = 1.45;
+const _classicArabicLineHeight = 1.6;
 const _classicAyahMarkerFontScale = 0.88;
 const _classicAyahMarkerLineHeight = 1.0;
 const _totalPages = 604;
@@ -50,7 +50,8 @@ double _classicFontSizeForWidth(double width) =>
         .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
         .toDouble();
 
-Object _classicParagraphGroupFor(Verse verse) => verse.surahNumber;
+Object _classicParagraphGroupFor(Verse verse) =>
+    '${verse.surahNumber}:${(verse.verseNumber - 1) ~/ 24}';
 
 List<TextSpan> _classicArabicTextSpans(
   Verse verse, {
@@ -74,6 +75,7 @@ List<TextSpan> _classicArabicTextSpans(
       text: trimmedText.substring(0, bismillahEnd),
       recognizer: recognizer,
       style: (style ?? const TextStyle()).copyWith(
+        fontFamily: _kfgqpcHafsFontFamily,
         fontSize: _bismillahFontSize,
         height: _bismillahLineHeight,
       ),
@@ -269,62 +271,48 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final targetMode = _readingMode == ReadingMode.classic
+        ? ReadingMode.mushaf
+        : ReadingMode.classic;
+    final targetLabel = targetMode == ReadingMode.mushaf ? 'Mushaf' : 'Classic';
+    final targetIcon = targetMode == ReadingMode.mushaf
+        ? Icons.image_outlined
+        : Icons.menu_book;
+
     return AppBar(
-      title: Column(
-        children: [
-          Text(
-            'القرآن الكريم',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            textDirection: TextDirection.rtl,
-          ),
-          Text(
-            'Page $_currentPage',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
+      toolbarHeight: 56,
+      title: Text(
+        'Page $_currentPage',
+        style: Theme.of(context).textTheme.titleMedium,
       ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: SegmentedButton<ReadingMode>(
-            showSelectedIcon: false,
-            selected: {_readingMode},
-            segments: const [
-              ButtonSegment(
-                value: ReadingMode.classic,
-                icon: Icon(Icons.menu_book),
-                label: Text('Classic'),
-              ),
-              ButtonSegment(
-                value: ReadingMode.mushaf,
-                icon: Icon(Icons.image_outlined),
-                label: Text('Mushaf'),
-              ),
-            ],
-            onSelectionChanged: (selection) {
-              final mode = selection.single;
-              setState(() {
-                _readingMode = mode;
-                _showMushafControls = false;
-                if (mode == ReadingMode.mushaf) {
-                  _currentPageFirstVerseId = null;
-                  _showMushafPageNumberOverlay = true;
-                } else {
-                  _currentPageFirstVerseId = widget.initialVerseId;
-                  _hideMushafPageNumberOverlay();
-                }
-              });
-              if (mode == ReadingMode.mushaf) {
-                _scheduleMushafPageNumberOverlayHide();
-              }
-            },
-          ),
+      centerTitle: true,
+      actions: [
+        TextButton.icon(
+          onPressed: () => _setReadingMode(targetMode),
+          icon: Icon(targetIcon),
+          label: Text(targetLabel),
         ),
-      ),
+        const SizedBox(width: 8),
+      ],
     );
+  }
+
+  void _setReadingMode(ReadingMode mode) {
+    setState(() {
+      _readingMode = mode;
+      _showMushafControls = false;
+      if (mode == ReadingMode.mushaf) {
+        _currentPageFirstVerseId = null;
+        _showMushafPageNumberOverlay = true;
+      } else {
+        _currentPageFirstVerseId = widget.initialVerseId;
+        _didScrollToInitialClassicVerse = false;
+        _hideMushafPageNumberOverlay();
+      }
+    });
+    if (mode == ReadingMode.mushaf) {
+      _scheduleMushafPageNumberOverlayHide();
+    }
   }
 
   void _setImmersiveMode(bool immersive) {
@@ -428,7 +416,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           surah: widget.surah,
           verses: verses,
           initialVerseId: initialClassicVerseId,
-          shouldScrollToInitialVerse: !_didScrollToInitialClassicVerse,
+          shouldScrollToInitialVerse:
+              widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
           onInitialVerseScrolled: () {
             _didScrollToInitialClassicVerse = true;
           },
@@ -751,17 +740,32 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
 
 class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
   late final ScrollController _scrollController;
+  late List<Verse> _verses;
   final GlobalKey _initialVerseKey = GlobalKey();
+  final Set<String> _additionalBookmarks = {};
   String? _lastReportedVisibleVerseId;
+  bool _isLoadingAdjacentSurah = false;
 
   @override
   void initState() {
     super.initState();
+    _verses = List<Verse>.of(widget.verses);
     _scrollController = ScrollController();
     _scrollController.addListener(_updateVisibleVerse);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateVisibleVerse();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant _ClassicSurahContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.surah.surahNumber != widget.surah.surahNumber ||
+        oldWidget.verses != widget.verses) {
+      _verses = List<Verse>.of(widget.verses);
+      _additionalBookmarks.clear();
+      _lastReportedVisibleVerseId = null;
+    }
   }
 
   @override
@@ -776,7 +780,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     final bookmarksAsync = ref.watch(
       bookmarksBySurahProvider(widget.surah.surahNumber),
     );
-    final bookmarks = bookmarksAsync.valueOrNull ?? {};
+    final bookmarks = {...?bookmarksAsync.valueOrNull, ..._additionalBookmarks};
 
     if (widget.shouldScrollToInitialVerse && widget.initialVerseId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -792,34 +796,97 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
       });
     }
 
-    return SingleChildScrollView(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(
-        horizontal: _classicPageHorizontalPadding,
-        vertical: _classicPageVerticalPadding,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: _buildVerseWidgets(context, bookmarks),
+    final contentWidgets = _buildVerseWidgets(context, bookmarks);
+    final scrollable = widget.shouldScrollToInitialVerse
+        ? SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: _classicPageHorizontalPadding,
+              vertical: _classicPageVerticalPadding,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: contentWidgets,
+            ),
+          )
+        : ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: _classicPageHorizontalPadding,
+              vertical: _classicPageVerticalPadding,
+            ),
+            itemCount: contentWidgets.length,
+            itemBuilder: (context, index) => contentWidgets[index],
+          );
+
+    return RefreshIndicator(
+      onRefresh: _loadPreviousSurah,
+      child: NotificationListener<OverscrollNotification>(
+        onNotification: (notification) {
+          if (notification.overscroll > 0) {
+            unawaited(_loadNextSurah());
+          }
+          return false;
+        },
+        child: scrollable,
       ),
     );
+  }
+
+  Future<void> _loadNextSurah() async {
+    if (_isLoadingAdjacentSurah || _verses.isEmpty) return;
+    final nextSurahNumber = _verses.last.surahNumber + 1;
+    if (nextSurahNumber > 114) return;
+    await _loadAdjacentSurah(nextSurahNumber, prepend: false);
+  }
+
+  Future<void> _loadPreviousSurah() async {
+    if (_isLoadingAdjacentSurah || _verses.isEmpty) return;
+    final previousSurahNumber = _verses.first.surahNumber - 1;
+    if (previousSurahNumber < 1) return;
+    await _loadAdjacentSurah(previousSurahNumber, prepend: true);
+  }
+
+  Future<void> _loadAdjacentSurah(
+    int surahNumber, {
+    required bool prepend,
+  }) async {
+    _isLoadingAdjacentSurah = true;
+    try {
+      final results = await Future.wait([
+        ref.read(versesBySurahProvider(surahNumber).future),
+        ref.read(bookmarksBySurahProvider(surahNumber).future),
+      ]);
+      if (!mounted) return;
+      final verses = results[0] as List<Verse>;
+      final bookmarks = results[1] as Set<String>;
+      if (verses.isEmpty) return;
+      setState(() {
+        _verses = prepend ? [...verses, ..._verses] : [..._verses, ...verses];
+        _additionalBookmarks.addAll(bookmarks);
+      });
+    } finally {
+      _isLoadingAdjacentSurah = false;
+    }
   }
 
   void _updateVisibleVerse() {
     if (!_scrollController.hasClients) return;
 
     final maxScrollExtent = _scrollController.position.maxScrollExtent;
-    if (widget.verses.isEmpty || maxScrollExtent <= 0) return;
+    if (_verses.isEmpty || maxScrollExtent <= 0) return;
 
     final progress = (_scrollController.offset / maxScrollExtent).clamp(
       0.0,
       1.0,
     );
-    final index = (progress * (widget.verses.length - 1)).round().clamp(
+    final index = (progress * (_verses.length - 1)).round().clamp(
       0,
-      widget.verses.length - 1,
+      _verses.length - 1,
     );
-    final visibleVerse = widget.verses[index];
+    final visibleVerse = _verses[index];
 
     if (visibleVerse.verseId != _lastReportedVisibleVerseId) {
       _lastReportedVisibleVerseId = visibleVerse.verseId;
@@ -855,7 +922,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
       currentParagraphGroup = null;
     }
 
-    for (final verse in widget.verses) {
+    for (final verse in _verses) {
       if (verse.surahNumber != lastSurah) {
         flushParagraph();
         if (lastSurah != null) {
@@ -1011,7 +1078,6 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
               textWidthBasis: TextWidthBasis.parent,
               text: TextSpan(
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontFamily: _kfgqpcHafsFontFamily,
                   fontSize: fontSize,
                   fontWeight: FontWeight.w400,
                   height: _classicArabicLineHeight,
@@ -1074,6 +1140,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
           text: '\u00a0${_toArabicNumeral(verse.verseNumber)} ',
           recognizer: recognizer,
           style: TextStyle(
+            fontFamily: _kfgqpcHafsFontFamily,
             color: AppTheme.goldAccent,
             fontSize: fontSize * _classicAyahMarkerFontScale,
             fontWeight: FontWeight.w500,

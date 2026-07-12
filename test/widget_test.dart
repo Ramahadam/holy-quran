@@ -776,28 +776,26 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final scrollView = tester.widget<SingleChildScrollView>(
-          find.byType(SingleChildScrollView),
-        );
+        final scrollView = tester.widget<ListView>(find.byType(ListView));
         final padding = scrollView.padding as EdgeInsets;
         expect(padding.horizontal, 16);
-
-        final contentColumn = find.descendant(
-          of: find.byType(SingleChildScrollView),
-          matching: find.byType(Column),
-        );
-        expect(tester.getSize(contentColumn).width, 344);
 
         final richTextFinder = find.textContaining(
           'ٱلرَّحْمَـٰنِ',
           findRichText: true,
         );
         final richText = tester.widget<RichText>(richTextFinder);
-        final style = (richText.text as TextSpan).style;
+        final textSpan = richText.text as TextSpan;
+        final style = textSpan.style;
+        final markerSpan = textSpan.children!.whereType<TextSpan>().firstWhere(
+          (span) => span.text?.contains('٣') ?? false,
+        );
         expect(richText.textAlign, TextAlign.justify);
+        expect(style?.fontFamily, isNot('KFGQPCHafsUthmanicScript'));
+        expect(markerSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
         expect(style?.fontSize, greaterThanOrEqualTo(24));
         expect(style?.fontSize, lessThanOrEqualTo(30));
-        expect(style?.height, 1.45);
+        expect(style?.height, 1.6);
         expect(richText.textScaler.scale(style!.fontSize!), greaterThan(31));
         expect(
           richText.textScaler.scale(style.fontSize!),
@@ -935,10 +933,10 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            classicVersesProvider(
-              1,
-            ).overrideWith((ref) async => [_verse1, surah2Verse]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            versesBySurahProvider(2).overrideWith((ref) async => [surah2Verse]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
             surahListProvider.overrideWith((ref) async => [_surah1, surah2]),
           ],
           child: MaterialApp(
@@ -950,65 +948,57 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
       expect(find.text('الفاتحة'), findsOneWidget);
       expect(find.text('البقرة'), findsOneWidget);
       expect(find.textContaining('الٓمٓ', findRichText: true), findsOneWidget);
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
     });
 
-    testWidgets(
-      'opens Classic at the selected surah in the continuous scroll',
-      (tester) async {
-        const surah2 = Surah(
+    testWidgets('opens Classic at the beginning of the selected surah', (
+      tester,
+    ) async {
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 1,
+      );
+      final surah2Verses = List.generate(
+        48,
+        (index) => Verse(
+          verseId: '2:${index + 1}',
           surahNumber: 2,
-          nameArabic: 'البقرة',
-          nameEnglish: 'The Cow',
-          numberOfVerses: 1,
-        );
-        final longFirstSurah = List.generate(
-          100,
-          (index) => Verse(
-            verseId: '1:${index + 1}',
-            surahNumber: 1,
-            verseNumber: index + 1,
-            arabicText: 'آية طويلة للاختبار ${index + 1}',
-            page: 1,
-          ),
-        );
-        const surah2Verse = Verse(
-          verseId: '2:1',
-          surahNumber: 2,
-          verseNumber: 1,
-          arabicText: 'الٓمٓ',
-          page: 2,
-        );
+          verseNumber: index + 1,
+          arabicText: index == 0 ? 'الٓمٓ' : 'آية طويلة للاختبار',
+          page: 2 + (index ~/ 6),
+        ),
+      );
 
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              startPageForSurahProvider(2).overrideWith((ref) async => 2),
-              classicVersesProvider(
-                2,
-              ).overrideWith((ref) async => [...longFirstSurah, surah2Verse]),
-              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
-              surahListProvider.overrideWith((ref) async => [_surah1, surah2]),
-            ],
-            child: MaterialApp(
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              home: ReadingScreen(surah: surah2),
-            ),
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 2),
+            classicVersesProvider(2).overrideWith((ref) async => surah2Verses),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [_surah1, surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah2),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        final scrollView = tester.widget<SingleChildScrollView>(
-          find.byType(SingleChildScrollView),
-        );
-        expect(scrollView.controller!.offset, greaterThan(0));
-        expect(find.text('Page 2'), findsOneWidget);
-      },
-    );
+      final scrollView = tester.widget<ListView>(find.byType(ListView));
+      expect(scrollView.controller!.offset, 0);
+      expect(find.textContaining('الٓمٓ', findRichText: true), findsOneWidget);
+      expect(find.text('Page 2'), findsOneWidget);
+    });
 
     testWidgets('removes embedded Classic marker glyphs', (tester) async {
       const markedVerse = Verse(
@@ -1073,7 +1063,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
       expect(find.byType(PageView), findsNothing);
 
       await tester.tap(find.text('Mushaf'));
@@ -1081,6 +1071,31 @@ void main() {
       await tester.pump();
 
       expect(find.byType(PageView), findsOneWidget);
+    });
+
+    testWidgets('uses a compact app bar mode switch in Classic', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      expect(appBar.preferredSize.height, lessThanOrEqualTo(56));
+      expect(find.byType(SegmentedButton<ReadingMode>), findsNothing);
+      expect(find.text('Mushaf'), findsOneWidget);
     });
 
     testWidgets('switches between Classic and Mushaf modes', (tester) async {
@@ -1374,7 +1389,9 @@ void main() {
       expect(positionRepo.savedPosition?.verseId, isNot('1:1'));
     });
 
-    testWidgets('uses KFGQPC font for Arabic Quran text', (tester) async {
+    testWidgets('uses native Arabic text with KFGQPC Bismillah styling', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -1394,8 +1411,10 @@ void main() {
       final richText = tester.widget<RichText>(
         find.textContaining('بِسْمِ', findRichText: true),
       );
+      final textSpan = richText.text as TextSpan;
+      expect(textSpan.style?.fontFamily, isNot('KFGQPCHafsUthmanicScript'));
       expect(
-        (richText.text as TextSpan).style?.fontFamily,
+        textSpan.children?.first.style?.fontFamily,
         'KFGQPCHafsUthmanicScript',
       );
     });
