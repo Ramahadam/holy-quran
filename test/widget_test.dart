@@ -886,6 +886,31 @@ void main() {
       );
     });
 
+    testWidgets('flows Classic ayahs continuously across ayah 24', (
+      tester,
+    ) async {
+      final verses = _surahVerses(25);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => verses),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final continuousParagraph = find.byWidgetPredicate((widget) {
+        if (widget is! RichText) return false;
+        final text = widget.text.toPlainText();
+        return text.contains('آية 24') && text.contains('آية 25');
+      });
+      expect(continuousParagraph, findsOneWidget);
+    });
+
     testWidgets('appends one Classic ayah marker when verse text has none', (
       tester,
     ) async {

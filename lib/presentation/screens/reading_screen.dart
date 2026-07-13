@@ -50,8 +50,7 @@ double _classicFontSizeForWidth(double width) =>
         .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
         .toDouble();
 
-Object _classicParagraphGroupFor(Verse verse) =>
-    '${verse.surahNumber}:${(verse.verseNumber - 1) ~/ 24}';
+Object _classicParagraphGroupFor(Verse verse) => verse.surahNumber;
 
 List<TextSpan> _classicArabicTextSpans(
   Verse verse, {
