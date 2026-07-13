@@ -1114,6 +1114,9 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
 
   List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {
     final bookmarkedColor = Theme.of(context).colorScheme.onPrimaryContainer;
+    final markerColor = Theme.of(context).brightness == Brightness.light
+        ? AppTheme.classicAyahMarker
+        : AppTheme.goldAccent;
     final baseStyleIsBookmarked =
         widget.verses.length == 1 &&
         widget.bookmarks.contains(widget.verses.single.verseId);
@@ -1143,7 +1146,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
           recognizer: recognizer,
           style: TextStyle(
             fontFamily: _kfgqpcHafsFontFamily,
-            color: AppTheme.goldAccent,
+            color: markerColor,
             fontSize: fontSize * _classicAyahMarkerFontScale,
             fontWeight: FontWeight.w500,
             height: _classicAyahMarkerLineHeight,
@@ -1186,6 +1189,9 @@ class _ArabicVerse extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
+            final markerColor = Theme.of(context).brightness == Brightness.light
+                ? AppTheme.classicAyahMarker
+                : AppTheme.goldAccent;
             return RichText(
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.justify,
@@ -1206,7 +1212,7 @@ class _ArabicVerse extends StatelessWidget {
                   TextSpan(
                     text: ' ${_toArabicNumeral(verse.verseNumber)} ',
                     style: TextStyle(
-                      color: AppTheme.goldAccent,
+                      color: markerColor,
                       fontSize: fontSize * _classicAyahMarkerFontScale,
                       fontWeight: FontWeight.w500,
                       height: _classicAyahMarkerLineHeight,
