@@ -950,7 +950,7 @@ void main() {
       final markerSpan = textSpan.children!.whereType<TextSpan>().last;
       expect(markerSpan.text, '\u00a0٣ ');
       expect(markerSpan.style?.color, AppTheme.classicAyahMarker);
-      expect(markerSpan.style?.fontWeight, FontWeight.w600);
+      expect(markerSpan.style?.fontWeight, FontWeight.w500);
       expect(
         markerSpan.style?.fontSize,
         greaterThanOrEqualTo(textSpan.style!.fontSize! * 0.85),
