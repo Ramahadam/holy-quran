@@ -26,8 +26,9 @@ class QuranRepositoryImpl implements QuranRepository {
       await isar.surahEntitys.clear();
     });
 
-    final checksumLines =
-        (await rootBundle.loadString('assets/quran/checksums.txt')).split('\n');
+    final checksumLines = (await rootBundle.loadString(
+      'assets/quran/checksums.txt',
+    )).split('\n');
 
     await _loadSurahs(checksumLines);
     await _loadVerses(checksumLines);

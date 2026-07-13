@@ -164,6 +164,16 @@ final versesBySurahProvider = FutureProvider.family<List<Verse>, int>((
   return repo.getVersesBySurah(surahNumber);
 });
 
+final classicVersesProvider = FutureProvider.family<List<Verse>, int>((
+  ref,
+  initialSurahNumber,
+) async {
+  await ref.watch(initializeDataProvider.future);
+  return ref
+      .watch(quranRepositoryProvider)
+      .getVersesBySurah(initialSurahNumber);
+});
+
 final versesByPageProvider = FutureProvider.family<List<Verse>, int>((
   ref,
   page,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,8 +18,22 @@ const _bismillahOpeningWord = 'بِسْمِ';
 const _bismillahLastWord = 'ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
 const _bismillahLineHeight = 2.0;
+const _classicPageHorizontalPadding = 8.0;
+const _classicPageVerticalPadding = 12.0;
+const _classicVerseVerticalPadding = 4.0;
+const _classicArabicMinFontSize = 24.0;
+const _classicArabicMaxFontSize = 30.0;
+const _classicArabicWidthScale = 0.078;
+const _classicArabicLineHeight = 1.6;
+const _classicAyahMarkerFontScale = 0.88;
+const _classicAyahMarkerLineHeight = 1.0;
 const _totalPages = 604;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
+final _classicEmbeddedMarkerPattern = RegExp(
+  r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
+);
+final _classicInlineAnnotationPattern = RegExp(r'[ۣ۪ۭ۟۠ۡۢۤۧۨ۫۬]');
+final _whitespacePattern = RegExp(r'\s+');
 
 enum ReadingMode { classic, mushaf }
 
@@ -28,6 +43,71 @@ void _openVerseDetail(BuildContext context, Verse verse) {
       builder: (context) => VerseDetailScreen(verse: verse),
     ),
   );
+}
+
+double _classicFontSizeForWidth(double width) =>
+    (width * _classicArabicWidthScale)
+        .clamp(_classicArabicMinFontSize, _classicArabicMaxFontSize)
+        .toDouble();
+
+Object _classicParagraphGroupFor(Verse verse) => verse.surahNumber;
+
+List<TextSpan> _classicArabicTextSpans(
+  Verse verse, {
+  GestureRecognizer? recognizer,
+  TextStyle? style,
+}) {
+  final text = _classicDisplayArabicText(verse);
+  final leadingSpaceCount = text.length - text.trimLeft().length;
+  final leadingSpace = text.substring(0, leadingSpaceCount);
+  final trimmedText = text.substring(leadingSpaceCount);
+
+  if (!trimmedText.startsWith(_bismillahOpeningWord)) {
+    return [TextSpan(text: text, recognizer: recognizer, style: style)];
+  }
+
+  final bismillahEnd = _findBismillahEnd(trimmedText);
+  return [
+    if (leadingSpace.isNotEmpty)
+      TextSpan(text: leadingSpace, recognizer: recognizer, style: style),
+    TextSpan(
+      text: trimmedText.substring(0, bismillahEnd),
+      recognizer: recognizer,
+      style: (style ?? const TextStyle()).copyWith(
+        fontFamily: _kfgqpcHafsFontFamily,
+        fontSize: _bismillahFontSize,
+        height: _bismillahLineHeight,
+      ),
+    ),
+    TextSpan(
+      text: trimmedText.substring(bismillahEnd),
+      recognizer: recognizer,
+      style: style,
+    ),
+  ];
+}
+
+String _classicDisplayArabicText(Verse verse) => verse.arabicText
+    .replaceAll(_classicInlineAnnotationPattern, '')
+    .replaceAll(_classicEmbeddedMarkerPattern, ' ')
+    .replaceAll(_whitespacePattern, ' ')
+    .trim();
+
+int _findBismillahEnd(String text) {
+  final lastWordStart = text.indexOf(_bismillahLastWord);
+  if (lastWordStart == -1) {
+    return text.length;
+  }
+  return lastWordStart + _bismillahLastWord.length;
+}
+
+String _toArabicNumeral(int number) {
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return number
+      .toString()
+      .split('')
+      .map((d) => arabicDigits[int.parse(d)])
+      .join();
 }
 
 class ReadingScreen extends ConsumerStatefulWidget {
@@ -190,62 +270,48 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final targetMode = _readingMode == ReadingMode.classic
+        ? ReadingMode.mushaf
+        : ReadingMode.classic;
+    final targetLabel = targetMode == ReadingMode.mushaf ? 'Mushaf' : 'Classic';
+    final targetIcon = targetMode == ReadingMode.mushaf
+        ? Icons.image_outlined
+        : Icons.menu_book;
+
     return AppBar(
-      title: Column(
-        children: [
-          Text(
-            'القرآن الكريم',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            textDirection: TextDirection.rtl,
-          ),
-          Text(
-            'Page $_currentPage',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
+      toolbarHeight: 56,
+      title: Text(
+        'Page $_currentPage',
+        style: Theme.of(context).textTheme.titleMedium,
       ),
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: SegmentedButton<ReadingMode>(
-            showSelectedIcon: false,
-            selected: {_readingMode},
-            segments: const [
-              ButtonSegment(
-                value: ReadingMode.classic,
-                icon: Icon(Icons.menu_book),
-                label: Text('Classic'),
-              ),
-              ButtonSegment(
-                value: ReadingMode.mushaf,
-                icon: Icon(Icons.image_outlined),
-                label: Text('Mushaf'),
-              ),
-            ],
-            onSelectionChanged: (selection) {
-              final mode = selection.single;
-              setState(() {
-                _readingMode = mode;
-                _showMushafControls = false;
-                if (mode == ReadingMode.mushaf) {
-                  _currentPageFirstVerseId = null;
-                  _showMushafPageNumberOverlay = true;
-                } else {
-                  _currentPageFirstVerseId = widget.initialVerseId;
-                  _hideMushafPageNumberOverlay();
-                }
-              });
-              if (mode == ReadingMode.mushaf) {
-                _scheduleMushafPageNumberOverlayHide();
-              }
-            },
-          ),
+      centerTitle: true,
+      actions: [
+        TextButton.icon(
+          onPressed: () => _setReadingMode(targetMode),
+          icon: Icon(targetIcon),
+          label: Text(targetLabel),
         ),
-      ),
+        const SizedBox(width: 8),
+      ],
     );
+  }
+
+  void _setReadingMode(ReadingMode mode) {
+    setState(() {
+      _readingMode = mode;
+      _showMushafControls = false;
+      if (mode == ReadingMode.mushaf) {
+        _currentPageFirstVerseId = null;
+        _showMushafPageNumberOverlay = true;
+      } else {
+        _currentPageFirstVerseId = widget.initialVerseId;
+        _didScrollToInitialClassicVerse = false;
+        _hideMushafPageNumberOverlay();
+      }
+    });
+    if (mode == ReadingMode.mushaf) {
+      _scheduleMushafPageNumberOverlayHide();
+    }
   }
 
   void _setImmersiveMode(bool immersive) {
@@ -329,7 +395,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
   Widget _buildClassicScroll() {
     final versesAsync = ref.watch(
-      versesBySurahProvider(widget.surah.surahNumber),
+      classicVersesProvider(widget.surah.surahNumber),
     );
 
     return versesAsync.when(
@@ -342,17 +408,26 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           _currentPageFirstVerseId ??= verses.first.verseId;
         });
 
+        final initialClassicVerseId =
+            widget.initialVerseId ?? '${widget.surah.surahNumber}:1';
+
         return _ClassicSurahContent(
           surah: widget.surah,
           verses: verses,
-          initialVerseId: widget.initialVerseId,
+          initialVerseId: initialClassicVerseId,
+          useEagerScroll: widget.initialVerseId != null,
           shouldScrollToInitialVerse:
               widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
           onInitialVerseScrolled: () {
             _didScrollToInitialClassicVerse = true;
           },
           onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
-          onVerseVisible: (verseId) => _currentPageFirstVerseId = verseId,
+          onVerseVisible: (verse) {
+            _currentPageFirstVerseId = verse.verseId;
+            if (verse.page != _currentPage) {
+              setState(() => _currentPage = verse.page);
+            }
+          },
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -643,15 +718,17 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
   final Surah surah;
   final List<Verse> verses;
   final String? initialVerseId;
+  final bool useEagerScroll;
   final bool shouldScrollToInitialVerse;
   final VoidCallback onInitialVerseScrolled;
   final ValueChanged<String>? onVerseFocused;
-  final ValueChanged<String>? onVerseVisible;
+  final ValueChanged<Verse>? onVerseVisible;
 
   const _ClassicSurahContent({
     required this.surah,
     required this.verses,
     required this.initialVerseId,
+    required this.useEagerScroll,
     required this.shouldScrollToInitialVerse,
     required this.onInitialVerseScrolled,
     this.onVerseFocused,
@@ -665,16 +742,32 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
 
 class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
   late final ScrollController _scrollController;
+  late List<Verse> _verses;
+  final GlobalKey _initialVerseKey = GlobalKey();
+  final Set<String> _additionalBookmarks = {};
   String? _lastReportedVisibleVerseId;
+  bool _isLoadingAdjacentSurah = false;
 
   @override
   void initState() {
     super.initState();
+    _verses = List<Verse>.of(widget.verses);
     _scrollController = ScrollController();
     _scrollController.addListener(_updateVisibleVerse);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateVisibleVerse();
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant _ClassicSurahContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.surah.surahNumber != widget.surah.surahNumber ||
+        oldWidget.verses != widget.verses) {
+      _verses = List<Verse>.of(widget.verses);
+      _additionalBookmarks.clear();
+      _lastReportedVisibleVerseId = null;
+    }
   }
 
   @override
@@ -689,14 +782,11 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     final bookmarksAsync = ref.watch(
       bookmarksBySurahProvider(widget.surah.surahNumber),
     );
-    final bookmarks = bookmarksAsync.valueOrNull ?? {};
+    final bookmarks = {...?bookmarksAsync.valueOrNull, ..._additionalBookmarks};
 
     if (widget.shouldScrollToInitialVerse && widget.initialVerseId != null) {
-      final initialVerseKey = GlobalObjectKey(
-        'classicVerse-${widget.initialVerseId}',
-      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final context = initialVerseKey.currentContext;
+        final context = _initialVerseKey.currentContext;
         if (context != null) {
           Scrollable.ensureVisible(
             context,
@@ -708,44 +798,135 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
       });
     }
 
-    return SingleChildScrollView(
-      controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: _buildVerseWidgets(context, bookmarks),
+    final contentWidgets = _buildVerseWidgets(context, bookmarks);
+    final scrollable = widget.useEagerScroll
+        ? SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: _classicPageHorizontalPadding,
+              vertical: _classicPageVerticalPadding,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: contentWidgets,
+            ),
+          )
+        : ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(
+              horizontal: _classicPageHorizontalPadding,
+              vertical: _classicPageVerticalPadding,
+            ),
+            itemCount: contentWidgets.length,
+            itemBuilder: (context, index) => contentWidgets[index],
+          );
+
+    return RefreshIndicator(
+      onRefresh: _loadPreviousSurah,
+      child: NotificationListener<OverscrollNotification>(
+        onNotification: (notification) {
+          if (notification.overscroll > 0) {
+            unawaited(_loadNextSurah());
+          }
+          return false;
+        },
+        child: scrollable,
       ),
     );
+  }
+
+  Future<void> _loadNextSurah() async {
+    if (_isLoadingAdjacentSurah || _verses.isEmpty) return;
+    final nextSurahNumber = _verses.last.surahNumber + 1;
+    if (nextSurahNumber > 114) return;
+    await _loadAdjacentSurah(nextSurahNumber, prepend: false);
+  }
+
+  Future<void> _loadPreviousSurah() async {
+    if (_isLoadingAdjacentSurah || _verses.isEmpty) return;
+    final previousSurahNumber = _verses.first.surahNumber - 1;
+    if (previousSurahNumber < 1) return;
+    await _loadAdjacentSurah(previousSurahNumber, prepend: true);
+  }
+
+  Future<void> _loadAdjacentSurah(
+    int surahNumber, {
+    required bool prepend,
+  }) async {
+    _isLoadingAdjacentSurah = true;
+    try {
+      final results = await Future.wait([
+        ref.read(versesBySurahProvider(surahNumber).future),
+        ref.read(bookmarksBySurahProvider(surahNumber).future),
+      ]);
+      if (!mounted) return;
+      final verses = results[0] as List<Verse>;
+      final bookmarks = results[1] as Set<String>;
+      if (verses.isEmpty) return;
+      setState(() {
+        _verses = prepend ? [...verses, ..._verses] : [..._verses, ...verses];
+        _additionalBookmarks.addAll(bookmarks);
+      });
+    } finally {
+      _isLoadingAdjacentSurah = false;
+    }
   }
 
   void _updateVisibleVerse() {
     if (!_scrollController.hasClients) return;
 
     final maxScrollExtent = _scrollController.position.maxScrollExtent;
-    if (widget.verses.isEmpty || maxScrollExtent <= 0) return;
+    if (_verses.isEmpty || maxScrollExtent <= 0) return;
 
     final progress = (_scrollController.offset / maxScrollExtent).clamp(
       0.0,
       1.0,
     );
-    final index = (progress * (widget.verses.length - 1)).round().clamp(
+    final index = (progress * (_verses.length - 1)).round().clamp(
       0,
-      widget.verses.length - 1,
+      _verses.length - 1,
     );
-    final visibleVerseId = widget.verses[index].verseId;
+    final visibleVerse = _verses[index];
 
-    if (visibleVerseId != _lastReportedVisibleVerseId) {
-      _lastReportedVisibleVerseId = visibleVerseId;
-      widget.onVerseVisible?.call(visibleVerseId);
+    if (visibleVerse.verseId != _lastReportedVisibleVerseId) {
+      _lastReportedVisibleVerseId = visibleVerse.verseId;
+      widget.onVerseVisible?.call(visibleVerse);
     }
   }
 
   List<Widget> _buildVerseWidgets(BuildContext context, Set<String> bookmarks) {
     final widgets = <Widget>[];
+    var paragraphVerses = <Verse>[];
+    Object? currentParagraphGroup;
     int? lastSurah;
 
-    for (final verse in widget.verses) {
+    void flushParagraph() {
+      if (paragraphVerses.isEmpty) return;
+
+      final initialVerseId = widget.initialVerseId;
+      final paragraphKey =
+          initialVerseId != null &&
+              paragraphVerses.any((verse) => verse.verseId == initialVerseId)
+          ? _initialVerseKey
+          : null;
+
+      widgets.add(
+        _ClassicVerseParagraph(
+          key: paragraphKey,
+          verses: List<Verse>.unmodifiable(paragraphVerses),
+          bookmarks: bookmarks,
+          onVerseFocused: widget.onVerseFocused,
+        ),
+      );
+      paragraphVerses = <Verse>[];
+      currentParagraphGroup = null;
+    }
+
+    for (final verse in _verses) {
       if (verse.surahNumber != lastSurah) {
+        flushParagraph();
         if (lastSurah != null) {
           widgets.add(const SizedBox(height: 16));
         }
@@ -756,20 +937,21 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
         lastSurah = verse.surahNumber;
       }
 
-      final isBookmarked = bookmarks.contains(verse.verseId);
-      widgets.add(
-        GestureDetector(
-          key: GlobalObjectKey('classicVerse-${verse.verseId}'),
-          behavior: HitTestBehavior.opaque,
-          onLongPress: () {
-            widget.onVerseFocused?.call(verse.verseId);
-            _openVerseDetail(context, verse);
-          },
-          child: _ArabicVerse(verse: verse, isBookmarked: isBookmarked),
-        ),
-      );
+      if (verse.verseId == widget.initialVerseId &&
+          paragraphVerses.isNotEmpty) {
+        flushParagraph();
+      }
+
+      final paragraphGroup = _classicParagraphGroupFor(verse);
+      if (currentParagraphGroup != null &&
+          currentParagraphGroup != paragraphGroup) {
+        flushParagraph();
+      }
+      currentParagraphGroup = paragraphGroup;
+      paragraphVerses.add(verse);
     }
 
+    flushParagraph();
     return widgets;
   }
 
@@ -839,6 +1021,157 @@ class _SurahHeader extends ConsumerWidget {
   }
 }
 
+class _ClassicVerseParagraph extends StatefulWidget {
+  final List<Verse> verses;
+  final Set<String> bookmarks;
+  final ValueChanged<String>? onVerseFocused;
+
+  const _ClassicVerseParagraph({
+    super.key,
+    required this.verses,
+    required this.bookmarks,
+    this.onVerseFocused,
+  });
+
+  @override
+  State<_ClassicVerseParagraph> createState() => _ClassicVerseParagraphState();
+}
+
+class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
+  final Map<String, LongPressGestureRecognizer> _recognizers = {};
+
+  @override
+  void didUpdateWidget(covariant _ClassicVerseParagraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.verses != widget.verses ||
+        oldWidget.onVerseFocused != widget.onVerseFocused) {
+      _disposeRecognizers();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeRecognizers();
+    super.dispose();
+  }
+
+  void _disposeRecognizers() {
+    for (final recognizer in _recognizers.values) {
+      recognizer.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final paragraph = Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: _classicVerseVerticalPadding,
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
+            return RichText(
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.justify,
+              textScaler: MediaQuery.textScalerOf(context),
+              textWidthBasis: TextWidthBasis.parent,
+              text: TextSpan(
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w400,
+                  height: _classicArabicLineHeight,
+                  color: _baseTextColor(context),
+                ),
+                children: _buildVerseSpans(context, fontSize),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    if (widget.verses.length != 1) {
+      return paragraph;
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: () => _focusVerse(widget.verses.single),
+      child: paragraph,
+    );
+  }
+
+  Color? _baseTextColor(BuildContext context) {
+    if (widget.verses.length == 1 &&
+        widget.bookmarks.contains(widget.verses.single.verseId)) {
+      return Theme.of(context).colorScheme.onPrimaryContainer;
+    }
+    return Theme.of(context).textTheme.headlineLarge?.color;
+  }
+
+  List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {
+    final bookmarkedColor = Theme.of(context).colorScheme.onPrimaryContainer;
+    final markerColor = Theme.of(context).brightness == Brightness.light
+        ? AppTheme.classicAyahMarker
+        : AppTheme.goldAccent;
+    final baseStyleIsBookmarked =
+        widget.verses.length == 1 &&
+        widget.bookmarks.contains(widget.verses.single.verseId);
+    final spans = <InlineSpan>[];
+
+    for (final verse in widget.verses) {
+      final recognizer = widget.verses.length == 1
+          ? null
+          : _verseRecognizer(verse);
+      final verseStyle =
+          widget.bookmarks.contains(verse.verseId) && !baseStyleIsBookmarked
+          ? TextStyle(color: bookmarkedColor)
+          : null;
+
+      spans.addAll(
+        _classicArabicTextSpans(
+          verse,
+          recognizer: recognizer,
+          style: verseStyle,
+        ),
+      );
+      spans.add(
+        TextSpan(
+          // A non-breaking space keeps the ayah marker attached to the final
+          // word instead of allowing it to become orphaned on the next line.
+          text: '\u00a0${_toArabicNumeral(verse.verseNumber)} ',
+          recognizer: recognizer,
+          style: TextStyle(
+            fontFamily: _kfgqpcHafsFontFamily,
+            color: markerColor,
+            fontSize: fontSize * _classicAyahMarkerFontScale,
+            fontWeight: FontWeight.w500,
+            height: _classicAyahMarkerLineHeight,
+          ),
+        ),
+      );
+    }
+
+    return spans;
+  }
+
+  LongPressGestureRecognizer _verseRecognizer(Verse verse) {
+    return _recognizers.putIfAbsent(
+      verse.verseId,
+      () =>
+          LongPressGestureRecognizer()..onLongPress = () => _focusVerse(verse),
+    );
+  }
+
+  void _focusVerse(Verse verse) {
+    widget.onVerseFocused?.call(verse.verseId);
+    _openVerseDetail(context, verse);
+  }
+}
+
 class _ArabicVerse extends StatelessWidget {
   final Verse verse;
   final bool isBookmarked;
@@ -848,70 +1181,49 @@ class _ArabicVerse extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: RichText(
-        textDirection: TextDirection.rtl,
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            fontFamily: _kfgqpcHafsFontFamily,
-            fontSize: 24,
-            fontWeight: FontWeight.w400,
-            height: 2.2,
-            color: isBookmarked
-                ? Theme.of(context).colorScheme.onPrimaryContainer
-                : Theme.of(context).textTheme.headlineLarge?.color,
-          ),
-          children: [
-            ..._arabicTextSpans,
-            TextSpan(
-              text: ' ۝${_toArabicNumeral(verse.verseNumber)} ',
-              style: TextStyle(color: AppTheme.goldAccent, fontSize: 20),
-            ),
-          ],
+      padding: const EdgeInsets.symmetric(
+        vertical: _classicVerseVerticalPadding,
+      ),
+      child: SizedBox(
+        width: double.infinity,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
+            final markerColor = Theme.of(context).brightness == Brightness.light
+                ? AppTheme.classicAyahMarker
+                : AppTheme.goldAccent;
+            return RichText(
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.justify,
+              textScaler: MediaQuery.textScalerOf(context),
+              textWidthBasis: TextWidthBasis.parent,
+              text: TextSpan(
+                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontFamily: _kfgqpcHafsFontFamily,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w400,
+                  height: _classicArabicLineHeight,
+                  color: isBookmarked
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).textTheme.headlineLarge?.color,
+                ),
+                children: [
+                  ..._classicArabicTextSpans(verse),
+                  TextSpan(
+                    text: ' ${_toArabicNumeral(verse.verseNumber)} ',
+                    style: TextStyle(
+                      color: markerColor,
+                      fontSize: fontSize * _classicAyahMarkerFontScale,
+                      fontWeight: FontWeight.w500,
+                      height: _classicAyahMarkerLineHeight,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
-  }
-
-  List<TextSpan> get _arabicTextSpans {
-    final leadingSpaceCount =
-        verse.arabicText.length - verse.arabicText.trimLeft().length;
-    final leadingSpace = verse.arabicText.substring(0, leadingSpaceCount);
-    final trimmedText = verse.arabicText.substring(leadingSpaceCount);
-
-    if (!trimmedText.startsWith(_bismillahOpeningWord)) {
-      return [TextSpan(text: verse.arabicText)];
-    }
-
-    final bismillahEnd = _findBismillahEnd(trimmedText);
-    return [
-      if (leadingSpace.isNotEmpty) TextSpan(text: leadingSpace),
-      TextSpan(
-        text: trimmedText.substring(0, bismillahEnd),
-        style: const TextStyle(
-          fontSize: _bismillahFontSize,
-          height: _bismillahLineHeight,
-        ),
-      ),
-      TextSpan(text: trimmedText.substring(bismillahEnd)),
-    ];
-  }
-
-  int _findBismillahEnd(String text) {
-    final lastWordStart = text.indexOf(_bismillahLastWord);
-    if (lastWordStart == -1) {
-      return text.length;
-    }
-    return lastWordStart + _bismillahLastWord.length;
-  }
-
-  String _toArabicNumeral(int number) {
-    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((d) => arabicDigits[int.parse(d)])
-        .join();
   }
 }

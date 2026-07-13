@@ -554,7 +554,7 @@ void main() {
             lastReadPositionProvider.overrideWith((ref) async => position),
             recentBookmarksProvider.overrideWith((ref) async => const []),
             pageForVerseProvider('1:1').overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -707,7 +707,7 @@ void main() {
         ProviderScope(
           overrides: [
             pageForVerseProvider('1:1').overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -720,12 +720,37 @@ void main() {
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
+    testWidgets('keeps a deep Classic bookmark rendered after rebuilds', (
+      tester,
+    ) async {
+      final verses = _surahVerses(60);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            pageForVerseProvider('1:40').overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => verses),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:40'}),
+          ],
+          child: const MaterialApp(
+            home: ReadingScreen(surah: _surah1, initialVerseId: '1:40'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final bookmarkedVerse = find.textContaining('آية 40', findRichText: true);
+      expect(bookmarkedVerse, findsOneWidget);
+      expect(tester.getTopLeft(bookmarkedVerse).dy, lessThan(200));
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+    });
+
     testWidgets('shows verse list when data is available', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
           child: MaterialApp(
@@ -739,6 +764,331 @@ void main() {
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
+    testWidgets(
+      'uses comfortable Classic typography and width on compact phones',
+      (tester) async {
+        const longVerse = Verse(
+          verseId: '1:3',
+          surahNumber: 1,
+          verseNumber: 3,
+          arabicText:
+              'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ مَـٰلِكِ يَوْمِ ٱلدِّينِ إِيَّاكَ نَعْبُدُ',
+        );
+
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(360, 640);
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              classicVersesProvider(1).overrideWith((ref) async => [longVerse]),
+              bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: MediaQuery(
+                data: const MediaQueryData(textScaler: TextScaler.linear(1.2)),
+                child: ReadingScreen(surah: _surah1),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final scrollView = tester.widget<ListView>(find.byType(ListView));
+        final padding = scrollView.padding as EdgeInsets;
+        expect(padding.horizontal, 16);
+
+        final richTextFinder = find.textContaining(
+          'ٱلرَّحْمَـٰنِ',
+          findRichText: true,
+        );
+        final richText = tester.widget<RichText>(richTextFinder);
+        final textSpan = richText.text as TextSpan;
+        final style = textSpan.style;
+        final markerSpan = textSpan.children!.whereType<TextSpan>().firstWhere(
+          (span) => span.text?.contains('٣') ?? false,
+        );
+        expect(richText.textAlign, TextAlign.justify);
+        expect(style?.fontFamily, isNot('KFGQPCHafsUthmanicScript'));
+        expect(markerSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
+        expect(style?.fontSize, greaterThanOrEqualTo(24));
+        expect(style?.fontSize, lessThanOrEqualTo(30));
+        expect(style?.height, 1.6);
+        expect(richText.textScaler.scale(style!.fontSize!), greaterThan(31));
+        expect(
+          richText.textScaler.scale(style.fontSize!),
+          lessThanOrEqualTo(36),
+        );
+        expect(tester.getSize(richTextFinder).width, 344);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('flows cross-page Classic ayahs in one justified paragraph', (
+      tester,
+    ) async {
+      const firstVerse = Verse(
+        verseId: '2:1',
+        surahNumber: 2,
+        verseNumber: 1,
+        arabicText: 'الٓمٓ',
+        page: 3,
+      );
+      const secondVerse = Verse(
+        verseId: '2:2',
+        surahNumber: 2,
+        verseNumber: 2,
+        arabicText: 'ذَٰلِكَ ٱلْكِتَـٰبُ',
+        page: 2,
+      );
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 2),
+            classicVersesProvider(
+              2,
+            ).overrideWith((ref) async => [firstVerse, secondVerse]),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('الٓم', findRichText: true),
+      );
+      final textSpan = richText.text as TextSpan;
+
+      expect(richText.textAlign, TextAlign.justify);
+      expect(
+        textSpan.toPlainText(),
+        'الٓمٓ\u00a0١ ذَٰلِكَ ٱلْكِتَـٰبُ\u00a0٢ ',
+      );
+    });
+
+    testWidgets('flows Classic ayahs continuously across ayah 24', (
+      tester,
+    ) async {
+      final verses = _surahVerses(25);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => verses),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: _surah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final continuousParagraph = find.byWidgetPredicate((widget) {
+        if (widget is! RichText) return false;
+        final text = widget.text.toPlainText();
+        return text.contains('آية 24') && text.contains('آية 25');
+      });
+      expect(continuousParagraph, findsOneWidget);
+    });
+
+    testWidgets('appends one Classic ayah marker when verse text has none', (
+      tester,
+    ) async {
+      const unmarkedVerse = Verse(
+        verseId: '1:3',
+        surahNumber: 1,
+        verseNumber: 3,
+        arabicText: 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(
+              1,
+            ).overrideWith((ref) async => [unmarkedVerse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('ٱلرَّحْمَـٰنِ', findRichText: true),
+      );
+      final textSpan = richText.text as TextSpan;
+      expect(textSpan.toPlainText(), 'ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\u00a0٣ ');
+      expect(textSpan.toPlainText(), isNot(contains('﴿')));
+      expect(textSpan.toPlainText(), isNot(contains('﴾')));
+
+      final markerSpan = textSpan.children!.whereType<TextSpan>().last;
+      expect(markerSpan.text, '\u00a0٣ ');
+      expect(markerSpan.style?.color, AppTheme.classicAyahMarker);
+      expect(markerSpan.style?.fontWeight, FontWeight.w500);
+      expect(
+        markerSpan.style?.fontSize,
+        greaterThanOrEqualTo(textSpan.style!.fontSize! * 0.85),
+      );
+      expect(
+        markerSpan.style?.fontSize,
+        lessThanOrEqualTo(textSpan.style!.fontSize! * 0.9),
+      );
+      expect(markerSpan.style?.height, 1.0);
+    });
+
+    testWidgets('continues Classic scrolling into the next surah', (
+      tester,
+    ) async {
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 1,
+      );
+      const surah2Verse = Verse(
+        verseId: '2:1',
+        surahNumber: 2,
+        verseNumber: 1,
+        arabicText: 'الٓمٓ',
+        page: 2,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            versesBySurahProvider(2).overrideWith((ref) async => [surah2Verse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [_surah1, surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      expect(find.text('الفاتحة'), findsOneWidget);
+      expect(find.text('البقرة'), findsOneWidget);
+      expect(find.textContaining('الٓمٓ', findRichText: true), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
+    });
+
+    testWidgets('opens Classic at the beginning of the selected surah', (
+      tester,
+    ) async {
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 1,
+      );
+      final surah2Verses = List.generate(
+        48,
+        (index) => Verse(
+          verseId: '2:${index + 1}',
+          surahNumber: 2,
+          verseNumber: index + 1,
+          arabicText: index == 0 ? 'الٓمٓ' : 'آية طويلة للاختبار',
+          page: 2 + (index ~/ 6),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 2),
+            classicVersesProvider(2).overrideWith((ref) async => surah2Verses),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [_surah1, surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final scrollView = tester.widget<ListView>(find.byType(ListView));
+      expect(scrollView.controller!.offset, 0);
+      expect(find.textContaining('الٓمٓ', findRichText: true), findsOneWidget);
+      expect(find.text('Page 2'), findsOneWidget);
+    });
+
+    testWidgets('removes embedded Classic marker glyphs', (tester) async {
+      const markedVerse = Verse(
+        verseId: '1:3',
+        surahNumber: 1,
+        verseNumber: 3,
+        arabicText: '۞ أُو۟لَـٰٓئِكَ ۖ أَنَا۠ أُحْىِۦ ۚ أَلِيمٌۢ بِمَا ۝٣',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [markedVerse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('أُو', findRichText: true),
+      );
+      final text = (richText.text as TextSpan).toPlainText();
+      expect(text, 'أُولَـٰٓئِكَ أَنَا أُحْىِۦ أَلِيمٌ بِمَا\u00a0٣ ');
+      expect(text, isNot(contains('۞')));
+      expect(text, isNot(contains('۝')));
+      expect(text, isNot(contains('ۖ')));
+      expect(text, isNot(contains('ۚ')));
+      expect(text, isNot(contains('۟')));
+      expect(text, isNot(contains('۠')));
+      expect(text, isNot(contains('ۢ')));
+      expect(text, isNot(contains('أُو لَـٰٓئِكَ')));
+    });
+
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (
       tester,
     ) async {
@@ -746,7 +1096,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(
+            classicVersesProvider(
               1,
             ).overrideWith((ref) async => [_verse1, _verse2]),
             versesByPageProvider(
@@ -763,7 +1113,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
       expect(find.byType(PageView), findsNothing);
 
       await tester.tap(find.text('Mushaf'));
@@ -773,12 +1123,37 @@ void main() {
       expect(find.byType(PageView), findsOneWidget);
     });
 
+    testWidgets('uses a compact app bar mode switch in Classic', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      expect(appBar.preferredSize.height, lessThanOrEqualTo(56));
+      expect(find.byType(SegmentedButton<ReadingMode>), findsNothing);
+      expect(find.text('Mushaf'), findsOneWidget);
+    });
+
     testWidgets('switches between Classic and Mushaf modes', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -817,7 +1192,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -863,7 +1238,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -905,7 +1280,7 @@ void main() {
           overrides: [
             readingPositionRepositoryProvider.overrideWithValue(positionRepo),
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(
+            classicVersesProvider(
               1,
             ).overrideWith((ref) async => [_verse1, _verse2]),
             versesByPageProvider(
@@ -953,7 +1328,7 @@ void main() {
               feedbackPromptService,
             ),
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -983,7 +1358,7 @@ void main() {
           overrides: [
             readingPositionRepositoryProvider.overrideWithValue(positionRepo),
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(
+            classicVersesProvider(
               1,
             ).overrideWith((ref) async => [_verse1, _verse2]),
             versesByPageProvider(
@@ -1000,7 +1375,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.longPress(find.textContaining('بِسْمِ', findRichText: true));
+      final verseParagraph = find.textContaining('بِسْمِ', findRichText: true);
+      final paragraph = tester.renderObject<RenderParagraph>(verseParagraph);
+      final firstVerseBox = paragraph
+          .getBoxesForSelection(
+            const TextSelection(baseOffset: 0, extentOffset: 14),
+          )
+          .first;
+      await tester.longPressAt(
+        paragraph.localToGlobal(firstVerseBox.toRect().center),
+      );
       await tester.pump();
 
       expect(find.byType(VerseDetailScreen), findsOneWidget);
@@ -1031,7 +1415,7 @@ void main() {
           overrides: [
             readingPositionRepositoryProvider.overrideWithValue(positionRepo),
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => verses),
+            classicVersesProvider(1).overrideWith((ref) async => verses),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
           child: MaterialApp(
@@ -1055,12 +1439,14 @@ void main() {
       expect(positionRepo.savedPosition?.verseId, isNot('1:1'));
     });
 
-    testWidgets('uses KFGQPC font for Arabic Quran text', (tester) async {
+    testWidgets('uses native Arabic text with KFGQPC Bismillah styling', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
@@ -1075,8 +1461,10 @@ void main() {
       final richText = tester.widget<RichText>(
         find.textContaining('بِسْمِ', findRichText: true),
       );
+      final textSpan = richText.text as TextSpan;
+      expect(textSpan.style?.fontFamily, isNot('KFGQPCHafsUthmanicScript'));
       expect(
-        (richText.text as TextSpan).style?.fontFamily,
+        textSpan.children?.first.style?.fontFamily,
         'KFGQPCHafsUthmanicScript',
       );
     });
@@ -1088,7 +1476,7 @@ void main() {
           ProviderScope(
             overrides: [
               startPageForSurahProvider(1).overrideWith((ref) async => 1),
-              versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+              classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
               bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
             ],
             child: MaterialApp(
@@ -1123,7 +1511,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [verse]),
+            classicVersesProvider(1).overrideWith((ref) async => [verse]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
           child: MaterialApp(
@@ -1168,7 +1556,7 @@ void main() {
           ProviderScope(
             overrides: [
               startPageForSurahProvider(2).overrideWith((ref) async => 2),
-              versesBySurahProvider(2).overrideWith((ref) async => [verse]),
+              classicVersesProvider(2).overrideWith((ref) async => [verse]),
               bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
               surahListProvider.overrideWith((ref) async => [surah2]),
             ],
@@ -1211,7 +1599,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(2).overrideWith((ref) async => 4),
-            versesBySurahProvider(2).overrideWith((ref) async => [verse]),
+            classicVersesProvider(2).overrideWith((ref) async => [verse]),
             bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
             surahListProvider.overrideWith((ref) async => [surah2]),
           ],
@@ -1244,7 +1632,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(9).overrideWith((ref) async => 187),
-            versesBySurahProvider(9).overrideWith((ref) async => [verse]),
+            classicVersesProvider(9).overrideWith((ref) async => [verse]),
             bookmarksBySurahProvider(9).overrideWith((ref) async => {}),
             surahListProvider.overrideWith((ref) async => [surah9]),
           ],
@@ -1264,7 +1652,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(
+            classicVersesProvider(
               1,
             ).overrideWith((ref) => Future.error('db error')),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
@@ -1285,7 +1673,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
           ],
           child: MaterialApp(
@@ -1315,7 +1703,7 @@ void main() {
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            versesBySurahProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
             versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
