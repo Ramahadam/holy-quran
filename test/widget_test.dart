@@ -720,6 +720,31 @@ void main() {
       expect(find.textContaining('بِسْمِ', findRichText: true), findsOneWidget);
     });
 
+    testWidgets('keeps a deep Classic bookmark rendered after rebuilds', (
+      tester,
+    ) async {
+      final verses = _surahVerses(60);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            pageForVerseProvider('1:40').overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => verses),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:40'}),
+          ],
+          child: const MaterialApp(
+            home: ReadingScreen(surah: _surah1, initialVerseId: '1:40'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final bookmarkedVerse = find.textContaining('آية 40', findRichText: true);
+      expect(bookmarkedVerse, findsOneWidget);
+      expect(tester.getTopLeft(bookmarkedVerse).dy, lessThan(200));
+      expect(find.byType(SingleChildScrollView), findsOneWidget);
+    });
+
     testWidgets('shows verse list when data is available', (tester) async {
       await tester.pumpWidget(
         ProviderScope(

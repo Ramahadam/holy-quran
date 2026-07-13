@@ -416,6 +416,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           surah: widget.surah,
           verses: verses,
           initialVerseId: initialClassicVerseId,
+          useEagerScroll: widget.initialVerseId != null,
           shouldScrollToInitialVerse:
               widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
           onInitialVerseScrolled: () {
@@ -718,6 +719,7 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
   final Surah surah;
   final List<Verse> verses;
   final String? initialVerseId;
+  final bool useEagerScroll;
   final bool shouldScrollToInitialVerse;
   final VoidCallback onInitialVerseScrolled;
   final ValueChanged<String>? onVerseFocused;
@@ -727,6 +729,7 @@ class _ClassicSurahContent extends ConsumerStatefulWidget {
     required this.surah,
     required this.verses,
     required this.initialVerseId,
+    required this.useEagerScroll,
     required this.shouldScrollToInitialVerse,
     required this.onInitialVerseScrolled,
     this.onVerseFocused,
@@ -797,7 +800,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     }
 
     final contentWidgets = _buildVerseWidgets(context, bookmarks);
-    final scrollable = widget.shouldScrollToInitialVerse
+    final scrollable = widget.useEagerScroll
         ? SingleChildScrollView(
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
