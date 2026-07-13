@@ -1148,7 +1148,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
             fontFamily: _kfgqpcHafsFontFamily,
             color: markerColor,
             fontSize: fontSize * _classicAyahMarkerFontScale,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             height: _classicAyahMarkerLineHeight,
           ),
         ),
@@ -1214,7 +1214,7 @@ class _ArabicVerse extends StatelessWidget {
                     style: TextStyle(
                       color: markerColor,
                       fontSize: fontSize * _classicAyahMarkerFontScale,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                       height: _classicAyahMarkerLineHeight,
                     ),
                   ),

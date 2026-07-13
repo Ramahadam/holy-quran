@@ -6,7 +6,7 @@ class AppTheme {
   static const Color mushafPage = Color(0xFFFFFBF2);
   static const Color islamicGreen = Color(0xFF2E7D32);
   static const Color goldAccent = Color(0xFFB8860B);
-  static const Color classicAyahMarker = Color(0xFF8A6508);
+  static const Color classicAyahMarker = Color(0xFF946200);
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF555555);
   static const Color divider = Color(0xFFE8DCC8);
