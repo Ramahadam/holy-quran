@@ -26,8 +26,9 @@ class QuranRepositoryImpl implements QuranRepository {
       await isar.surahEntitys.clear();
     });
 
-    final checksumLines =
-        (await rootBundle.loadString('assets/quran/checksums.txt')).split('\n');
+    final checksumLines = (await rootBundle.loadString(
+      'assets/quran/checksums.txt',
+    )).split('\n');
 
     await _loadSurahs(checksumLines);
     await _loadVerses(checksumLines);
@@ -113,21 +114,6 @@ class QuranRepositoryImpl implements QuranRepository {
         .findAll();
 
     return entities.map((e) => e.toDomain()).toList();
-  }
-
-  @override
-  Future<List<Verse>> getAllVerses() async {
-    final isar = await IsarService.getInstance();
-    final entities = await isar.verseEntitys.where().findAll();
-
-    entities.sort((a, b) {
-      final surahComparison = a.surahNumber.compareTo(b.surahNumber);
-      return surahComparison != 0
-          ? surahComparison
-          : a.verseNumber.compareTo(b.verseNumber);
-    });
-
-    return entities.map((entity) => entity.toDomain()).toList();
   }
 
   @override
