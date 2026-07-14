@@ -41,10 +41,6 @@ class MushafSampleAssets {
 }
 
 class MushafSamplePage extends StatefulWidget {
-  static const double aspectRatio = 382.68 / 547.09;
-  static const double _canonicalPageWidth = 382.68;
-  static const double _canonicalPageHeight = 547.09;
-
   final int page;
   final ValueChanged<MushafHitResult>? onHit;
   final ValueChanged<String>? onVerseTap;
@@ -116,10 +112,8 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
       ),
     );
 
-    final pageSurface = SizedBox(
+    final pageSurface = SizedBox.expand(
       key: const ValueKey('canonicalMushafPageSurface'),
-      width: MushafSamplePage._canonicalPageWidth,
-      height: MushafSamplePage._canonicalPageHeight,
       child: DecoratedBox(
         decoration: BoxDecoration(
           border: isDark ? Border.all(color: AppTheme.darkDivider) : null,
@@ -139,11 +133,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
 
     return ColoredBox(
       color: isDark ? AppTheme.darkBackground : AppTheme.mushafBackground,
-      child: SafeArea(
-        child: Center(
-          child: FittedBox(fit: BoxFit.contain, child: pageSurface),
-        ),
-      ),
+      child: SafeArea(child: pageSurface),
     );
   }
 

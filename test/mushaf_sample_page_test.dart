@@ -89,7 +89,7 @@ void main() {
       expect(mushafSurahTitleFontFamily, 'KFGQPCHafsUthmanicScript');
     });
 
-    testWidgets('fits the Quran page into a canonical physical-page surface', (
+    testWidgets('uses the full mobile viewport for the Mushaf page surface', (
       tester,
     ) async {
       tester.view.devicePixelRatio = 1;
@@ -107,12 +107,29 @@ void main() {
       final surface = tester.getRect(
         find.byKey(const ValueKey('canonicalMushafPageSurface')),
       );
-      expect(
-        surface.width / surface.height,
-        closeTo(MushafSamplePage.aspectRatio, .001),
+      expect(surface.width, closeTo(430, .1));
+      expect(surface.height, closeTo(932, .1));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keeps dense Mushaf pages comfortably readable on phones', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 932);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 3))),
       );
-      expect(surface.width, lessThanOrEqualTo(430));
-      expect(surface.height, lessThan(932));
+      await tester.pumpAndSettle();
+
+      final pageText = tester.widget<RichText>(find.byType(RichText).first);
+      final pageStyle = (pageText.text as TextSpan).style;
+      expect(pageStyle?.fontSize, greaterThanOrEqualTo(24));
       expect(tester.takeException(), isNull);
     });
 
