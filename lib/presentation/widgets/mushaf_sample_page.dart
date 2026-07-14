@@ -20,18 +20,12 @@ const _singleSlotChromeAsset =
 const double mushafPageHeaderHeight = 57;
 
 @visibleForTesting
-const double mushafPageContentTopInset = mushafPageHeaderHeight;
-
-@visibleForTesting
 const double mushafSingleSlotChromeHeight = mushafPageHeaderHeight;
 
 @visibleForTesting
 const double mushafSurahTitleFontSize = 18;
 
 const String mushafSurahTitleFontFamily = 'KFGQPCHafsUthmanicScript';
-
-@visibleForTesting
-const double mushafJuzTitleFontSize = 18;
 
 class MushafSampleAssets {
   static const Set<int> sampleCoordinatePages = {1, 2, 3, 604};
@@ -48,6 +42,8 @@ class MushafSampleAssets {
 
 class MushafSamplePage extends StatefulWidget {
   static const double aspectRatio = 382.68 / 547.09;
+  static const double _canonicalPageWidth = 382.68;
+  static const double _canonicalPageHeight = 547.09;
 
   final int page;
   final ValueChanged<MushafHitResult>? onHit;
@@ -120,34 +116,32 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
       ),
     );
 
+    final pageSurface = SizedBox(
+      key: const ValueKey('canonicalMushafPageSurface'),
+      width: MushafSamplePage._canonicalPageWidth,
+      height: MushafSamplePage._canonicalPageHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: isDark ? Border.all(color: AppTheme.darkDivider) : null,
+          boxShadow: isDark
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .28),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: ClipRect(child: page),
+      ),
+    );
+
     return ColoredBox(
       color: isDark ? AppTheme.darkBackground : AppTheme.mushafBackground,
       child: SafeArea(
-        child: SizedBox.expand(
-          child: isDark
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 12,
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppTheme.darkDivider),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: .28),
-                          blurRadius: 18,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: page,
-                    ),
-                  ),
-                )
-              : page,
+        child: Center(
+          child: FittedBox(fit: BoxFit.contain, child: pageSurface),
         ),
       ),
     );
@@ -225,13 +219,12 @@ class MushafQcfPage extends StatelessWidget {
             );
           },
         ),
-        _MushafPageHeader(pageNumber: pageNumber),
       ],
     );
   }
 
   // Tuning knobs for the empty space between the frame and the Quran text.
-  static const double _contentTopInset = mushafPageContentTopInset;
+  static const double _contentTopInset = 0;
   static const double _contentHorizontalInset = 0;
   static const double _contentBottomInset = 0;
 
@@ -333,115 +326,6 @@ String mushafJuzLabel(int juz) {
   return 'الجزء ${convertToArabicNumber(juz.toString())}';
 }
 
-class _MushafPageHeader extends StatelessWidget {
-  final int pageNumber;
-
-  const _MushafPageHeader({required this.pageNumber});
-
-  static const double _height = mushafPageHeaderHeight;
-  static const String _backgroundAsset =
-      'assets/mushaf/chrome/quran_header_surah_juzah_empty_slots_v2.png';
-
-  @override
-  Widget build(BuildContext context) {
-    final pageData = getPageData(pageNumber);
-    final first = pageData.first;
-    final surah = int.parse(first['surah'].toString());
-    final verse = int.parse(first['start'].toString());
-    final juz = getJuzNumber(surah, verse);
-    const surahStyle = TextStyle(
-      color: Color(0xFF2B2113),
-      fontFamily: mushafSurahTitleFontFamily,
-      fontSize: mushafSurahTitleFontSize,
-      fontWeight: FontWeight.w700,
-      height: 1,
-    );
-    final metaStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
-      color: const Color(0xFF2B2113),
-      fontSize: mushafJuzTitleFontSize,
-      fontWeight: FontWeight.w700,
-      height: 1,
-    );
-
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      height: _height,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.asset(
-              _backgroundAsset,
-              key: const ValueKey('mushafHeaderBackground'),
-              fit: BoxFit.fill,
-            ),
-            Transform.translate(
-              offset: const Offset(0, 1),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      key: const ValueKey('mushafHeaderSurahSlot'),
-                      padding: const EdgeInsetsDirectional.only(
-                        start: 28,
-                        end: 34,
-                      ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            getSurahNameArabic(surah),
-                            style: surahStyle,
-                            textAlign: TextAlign.center,
-                            textDirection: TextDirection.rtl,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      key: const ValueKey('mushafHeaderJuzSlot'),
-                      padding: const EdgeInsetsDirectional.only(
-                        start: 34,
-                        end: 28,
-                      ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            mushafJuzLabel(juz),
-                            style: metaStyle,
-                            textAlign: TextAlign.center,
-                            textDirection: TextDirection.rtl,
-                            maxLines: 1,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: SizedBox(
-                key: const ValueKey('mushafHeaderDivider'),
-                width: 1,
-                height: 15,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _MushafSingleSlotChrome extends StatelessWidget {
   final Widget child;
   final double horizontalPadding;
@@ -528,20 +412,6 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
     final verseSpans = <InlineSpan>[];
-    final pageStartsWithSurah = mushafPageStartsWithSurah(
-      pageNumber: widget.pageNumber,
-    );
-
-    if (widget.pageNumber == 1 || widget.pageNumber == 2) {
-      verseSpans.add(
-        WidgetSpan(
-          child: SizedBox(
-            height: screenSize.height * .175 * widget.contentScale,
-          ),
-        ),
-      );
-    }
-
     for (final r in ranges) {
       final surah = int.parse(r['surah'].toString());
       final start = int.parse(r['start'].toString());
@@ -549,13 +419,21 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
 
       for (var verse = start; verse <= end; verse += 1) {
         if (verse == start && verse == 1) {
-          final isPageOpeningSurah = pageStartsWithSurah && r == ranges.first;
-          if (widget.theme.showHeader && !isPageOpeningSurah) {
+          if (widget.theme.showHeader) {
             verseSpans.add(
               WidgetSpan(
                 child: _MushafInlineSurahHeader(
                   surahNumber: surah,
                   contentScale: widget.contentScale,
+                ),
+              ),
+            );
+          }
+          if (widget.pageNumber == 1 || widget.pageNumber == 2) {
+            verseSpans.add(
+              WidgetSpan(
+                child: SizedBox(
+                  height: screenSize.height * .175 * widget.contentScale,
                 ),
               ),
             );
@@ -774,7 +652,7 @@ class _MushafInlineSurahHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scale = contentScale.clamp(.9, 1.0);
+    final scale = contentScale.clamp(.62, 1.0);
 
     return Padding(
       key: const ValueKey('mushafInlineSurahHeader'),

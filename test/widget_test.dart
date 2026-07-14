@@ -312,9 +312,13 @@ void main() {
 
       expect(find.byType(MushafQcfPage), findsOneWidget);
       expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('الجزء الأول'), findsOneWidget);
+      expect(find.text('الجزء الأول'), findsNothing);
       expect(
-        find.byKey(const ValueKey('mushafHeaderBackground')),
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('canonicalMushafPageSurface')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
