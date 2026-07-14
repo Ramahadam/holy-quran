@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qcf_quran/qcf_quran.dart';
 import '../../data/repositories/reading_position_repository.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
@@ -15,9 +16,11 @@ import '../widgets/mushaf_sample_page.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 const _bismillahOpeningWord = 'بِسْمِ';
+const _bismillahAllahWord = 'ٱللَّهِ';
 const _bismillahLastWord = 'ٱلرَّحِيمِ';
+const _bismillahText = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
-const _bismillahLineHeight = 2.0;
+const _bismillahLineHeight = 1.7;
 const _classicPageHorizontalPadding = 8.0;
 const _classicPageVerticalPadding = 12.0;
 const _classicVerseVerticalPadding = 4.0;
@@ -87,11 +90,31 @@ List<TextSpan> _classicArabicTextSpans(
   ];
 }
 
-String _classicDisplayArabicText(Verse verse) => verse.arabicText
+String _classicDisplayArabicText(Verse verse) {
+  final text = _normalizedClassicArabicText(verse);
+  if (_hasEmbeddedBismillah(verse)) {
+    return text.substring(_findBismillahEnd(text)).trimLeft();
+  }
+  return text;
+}
+
+String _normalizedClassicArabicText(Verse verse) => verse.arabicText
     .replaceAll(_classicInlineAnnotationPattern, '')
     .replaceAll(_classicEmbeddedMarkerPattern, ' ')
     .replaceAll(_whitespacePattern, ' ')
     .trim();
+
+bool _hasEmbeddedBismillah(Verse verse) {
+  if (verse.surahNumber != 1 || verse.verseNumber != 1) return false;
+  final text = _normalizedClassicArabicText(verse);
+  return text.startsWith(_bismillahOpeningWord) &&
+      text.contains(_bismillahLastWord);
+}
+
+int? _classicJuzForVerse(Verse verse) {
+  final juz = getJuzNumber(verse.surahNumber, verse.verseNumber);
+  return juz >= 1 && juz <= 30 ? juz : null;
+}
 
 int _findBismillahEnd(String text) {
   final lastWordStart = text.indexOf(_bismillahLastWord);
@@ -901,6 +924,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     var paragraphVerses = <Verse>[];
     Object? currentParagraphGroup;
     int? lastSurah;
+    int? lastJuz;
 
     void flushParagraph() {
       if (paragraphVerses.isEmpty) return;
@@ -925,15 +949,35 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     }
 
     for (final verse in _verses) {
+      final juz = _classicJuzForVerse(verse);
+      if (juz != null && juz != lastJuz) {
+        flushParagraph();
+        if (lastJuz != null) {
+          widgets.add(const SizedBox(height: 12));
+        }
+        widgets.add(_ClassicJuzDivider(juz: juz));
+        lastJuz = juz;
+      }
+
       if (verse.surahNumber != lastSurah) {
         flushParagraph();
         if (lastSurah != null) {
           widgets.add(const SizedBox(height: 16));
         }
-        widgets.add(_SurahHeader(surahNumber: verse.surahNumber));
-        if (_shouldShowBismillahBeforeVerse(verse)) {
-          widgets.add(const _BismillahHeader());
-        }
+        final hasEmbeddedBismillah = _hasEmbeddedBismillah(verse);
+        widgets.add(
+          _ClassicSurahOpening(
+            surahNumber: verse.surahNumber,
+            showBismillah:
+                hasEmbeddedBismillah || _shouldShowBismillahBeforeVerse(verse),
+            onBismillahLongPress: hasEmbeddedBismillah
+                ? () {
+                    widget.onVerseFocused?.call(verse.verseId);
+                    _openVerseDetail(context, verse);
+                  }
+                : null,
+          ),
+        );
         lastSurah = verse.surahNumber;
       }
 
@@ -962,22 +1006,152 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
 }
 
 class _BismillahHeader extends StatelessWidget {
-  const _BismillahHeader();
+  final VoidCallback? onLongPress;
+
+  const _BismillahHeader({this.onLongPress});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
-        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-          fontFamily: _kfgqpcHafsFontFamily,
-          fontSize: _bismillahFontSize,
-          fontWeight: FontWeight.w400,
-          height: _bismillahLineHeight,
+    final baseStyle = Theme.of(context).textTheme.headlineLarge?.copyWith(
+      fontFamily: _kfgqpcHafsFontFamily,
+      fontSize: _bismillahFontSize,
+      fontWeight: FontWeight.w400,
+      height: _bismillahLineHeight,
+    );
+    final bismillah = Semantics(
+      header: true,
+      label: _bismillahText,
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Text.rich(
+          key: const ValueKey('classicBismillah'),
+          TextSpan(
+            style: baseStyle,
+            children: [
+              const TextSpan(text: 'بِسْمِ '),
+              TextSpan(
+                text: _bismillahAllahWord,
+                style: const TextStyle(color: AppTheme.bismillahAllah),
+              ),
+              const TextSpan(text: ' ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'),
+            ],
+          ),
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
         ),
-        textAlign: TextAlign.center,
-        textDirection: TextDirection.rtl,
+      ),
+    );
+    if (onLongPress == null) return bismillah;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: onLongPress,
+      child: bismillah,
+    );
+  }
+}
+
+class _ClassicSurahOpening extends ConsumerWidget {
+  final int surahNumber;
+  final bool showBismillah;
+  final VoidCallback? onBismillahLongPress;
+
+  const _ClassicSurahOpening({
+    required this.surahNumber,
+    required this.showBismillah,
+    this.onBismillahLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final surahAsync = ref.watch(surahListProvider);
+    final surahName = surahAsync.whenOrNull(
+      data: (surahs) => surahs
+          .where((s) => s.surahNumber == surahNumber)
+          .firstOrNull
+          ?.nameArabic,
+    );
+    final label = 'سورة ${surahName ?? _toArabicNumeral(surahNumber)}';
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      key: const ValueKey('classicSurahOpening'),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: [
+          Semantics(
+            header: true,
+            child: ConstrainedBox(
+              key: const ValueKey('classicSurahTitle'),
+              constraints: const BoxConstraints(maxWidth: 320),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.22),
+                  border: Border.all(
+                    color: colorScheme.primary.withValues(alpha: 0.45),
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontFamily: mushafSurahTitleFontFamily,
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                    ),
+                    textAlign: TextAlign.center,
+                    textDirection: TextDirection.rtl,
+                    maxLines: 1,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (showBismillah)
+            _BismillahHeader(onLongPress: onBismillahLongPress),
+        ],
+      ),
+    );
+  }
+}
+
+class _ClassicJuzDivider extends StatelessWidget {
+  final int juz;
+
+  const _ClassicJuzDivider({required this.juz});
+
+  @override
+  Widget build(BuildContext context) {
+    final label = mushafJuzLabel(juz);
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      header: true,
+      child: Padding(
+        key: ValueKey('classicJuzDivider-$juz'),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Expanded(child: Divider(color: Theme.of(context).dividerColor)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+                textDirection: TextDirection.rtl,
+              ),
+            ),
+            Expanded(child: Divider(color: Theme.of(context).dividerColor)),
+          ],
+        ),
       ),
     );
   }
