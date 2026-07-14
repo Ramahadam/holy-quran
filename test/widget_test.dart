@@ -1001,8 +1001,8 @@ void main() {
       await tester.drag(find.byType(ListView), const Offset(0, -300));
       await tester.pumpAndSettle();
 
-      expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('البقرة'), findsOneWidget);
+      expect(find.text('سورة الفاتحة'), findsOneWidget);
+      expect(find.text('سورة البقرة'), findsOneWidget);
       expect(find.textContaining('الٓمٓ', findRichText: true), findsOneWidget);
       expect(find.byType(ListView), findsOneWidget);
     });
@@ -1493,11 +1493,11 @@ void main() {
         final children = (richText.text as TextSpan).children!;
         expect(children.first.style?.color, isNull);
         expect(children.first.style?.fontSize, 28);
-        expect(children.first.style?.height, 2.0);
+        expect(children.first.style?.height, 1.7);
       },
     );
 
-    testWidgets('styles only the Bismillah phrase when more text follows', (
+    testWidgets('highlights Allah in the separated Classic Bismillah', (
       tester,
     ) async {
       const verse = Verse(
@@ -1522,18 +1522,25 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final richText = tester.widget<RichText>(
-        find.textContaining('بِسْمِ', findRichText: true),
+      final bismillah = tester.widget<Text>(
+        find.byKey(const ValueKey('classicBismillah')),
       );
-      final children = (richText.text as TextSpan).children!;
-      final bismillahSpan = children[0] as TextSpan;
-      final remainingTextSpan = children[1] as TextSpan;
-      expect(bismillahSpan.text, _bismillah);
-      expect(bismillahSpan.style?.color, isNull);
-      expect(bismillahSpan.style?.fontSize, 28);
-      expect(bismillahSpan.style?.height, 2.0);
-      expect(remainingTextSpan.text, ' ٱلْحَمْدُ لِلَّهِ');
-      expect(remainingTextSpan.style, isNull);
+      final rootSpan = bismillah.textSpan! as TextSpan;
+      final allahSpan = rootSpan.children![1] as TextSpan;
+      expect(rootSpan.style?.fontSize, 28);
+      expect(rootSpan.style?.height, 1.7);
+      expect(allahSpan.text, 'ٱللَّهِ');
+      expect(allahSpan.style?.color, AppTheme.bismillahAllah);
+
+      final verseParagraph = tester.widget<RichText>(
+        find.textContaining('ٱلْحَمْدُ', findRichText: true),
+      );
+      expect(verseParagraph.text.toPlainText(), isNot(contains(_bismillah)));
+
+      await tester.longPress(find.byKey(const ValueKey('classicBismillah')));
+      await tester.pumpAndSettle();
+      expect(find.byType(VerseDetailScreen), findsOneWidget);
+      expect(find.text('1:1'), findsOneWidget);
     });
 
     testWidgets(
@@ -1570,14 +1577,141 @@ void main() {
         await tester.pumpAndSettle();
         final bismillah = tester.widget<Text>(find.text(_bismillah));
         final context = tester.element(find.text(_bismillah));
+        final rootSpan = bismillah.textSpan! as TextSpan;
         expect(
-          bismillah.style?.color,
+          rootSpan.style?.color,
           Theme.of(context).textTheme.headlineLarge?.color,
         );
-        expect(bismillah.style?.fontSize, 28);
-        expect(bismillah.style?.height, 2.0);
+        expect(rootSpan.style?.fontSize, 28);
+        expect(rootSpan.style?.height, 1.7);
       },
     );
+
+    testWidgets('uses a compact framed Classic Surah opening', (tester) async {
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const verse = Verse(
+        verseId: '2:1',
+        surahNumber: 2,
+        verseNumber: 1,
+        arabicText: 'الٓمٓ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 2),
+            classicVersesProvider(2).overrideWith((ref) async => [verse]),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: const ReadingScreen(surah: surah2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final title = find.byKey(const ValueKey('classicSurahTitle'));
+      expect(title, findsOneWidget);
+      expect(find.text('سورة البقرة'), findsOneWidget);
+      expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
+      expect(tester.getSize(title).height, lessThanOrEqualTo(56));
+    });
+
+    testWidgets('separates Al-Fatihah Bismillah from its verse paragraph', (
+      tester,
+    ) async {
+      const verse = Verse(
+        verseId: '1:1',
+        surahNumber: 1,
+        verseNumber: 1,
+        arabicText: '$_bismillah ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [verse]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: const ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('classicBismillah')), findsOneWidget);
+      expect(find.bySemanticsLabel(_bismillah), findsOneWidget);
+      final verseParagraph = tester.widget<RichText>(
+        find.textContaining('ٱلْحَمْدُ', findRichText: true),
+      );
+      expect(verseParagraph.text.toPlainText(), isNot(contains(_bismillah)));
+    });
+
+    testWidgets('shows Classic Juz dividers at mid-Surah boundaries', (
+      tester,
+    ) async {
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const verses = [
+        Verse(
+          verseId: '2:141',
+          surahNumber: 2,
+          verseNumber: 141,
+          arabicText: 'تِلْكَ أُمَّةٌ قَدْ خَلَتْ',
+        ),
+        Verse(
+          verseId: '2:142',
+          surahNumber: 2,
+          verseNumber: 142,
+          arabicText: 'سَيَقُولُ ٱلسُّفَهَآءُ',
+        ),
+      ];
+
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(360, 1000);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 21),
+            classicVersesProvider(2).overrideWith((ref) async => verses),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            surahListProvider.overrideWith((ref) async => [surah2]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: const ReadingScreen(surah: surah2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('الجزء الأول'), findsOneWidget);
+      expect(find.text('الجزء الثاني'), findsOneWidget);
+      expect(find.byKey(const ValueKey('classicJuzDivider-2')), findsOneWidget);
+    });
 
     testWidgets('does not show Bismillah for a continuation verse in Classic', (
       tester,

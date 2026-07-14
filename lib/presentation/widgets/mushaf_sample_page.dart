@@ -28,7 +28,6 @@ const double mushafSingleSlotChromeHeight = mushafPageHeaderHeight;
 @visibleForTesting
 const double mushafSurahTitleFontSize = 18;
 
-@visibleForTesting
 const String mushafSurahTitleFontFamily = 'KFGQPCHafsUthmanicScript';
 
 @visibleForTesting
@@ -294,7 +293,6 @@ bool _isJuz30Page(int pageNumber) {
   return pageNumber >= 582 && pageNumber <= 604;
 }
 
-@visibleForTesting
 String mushafJuzLabel(int juz) {
   const names = [
     'الأول',
