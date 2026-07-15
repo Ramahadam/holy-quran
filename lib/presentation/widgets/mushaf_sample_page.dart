@@ -219,7 +219,7 @@ class MushafQcfPage extends StatelessWidget {
   static const double _contentBottomInset = 0;
 
   double get _scale {
-    if (pageNumber == 1) return 1.16;
+    if (pageNumber == 1) return 1.06;
     if (pageNumber == 2) return 1.06;
     return 1.08;
   }

@@ -397,6 +397,46 @@ void main() {
       );
     });
 
+    testWidgets(
+      'uses one verse font size across both decorated opening pages',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(411, 914);
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(home: Scaffold(body: MushafSamplePage(page: 1))),
+        );
+        await tester.pumpAndSettle();
+        final alFatihaFontSize = tester
+            .widget<Text>(bodyTextFinder)
+            .style
+            ?.fontSize;
+
+        await tester.pumpWidget(
+          MaterialApp(home: Scaffold(body: MushafSamplePage(page: 2))),
+        );
+        await tester.pumpAndSettle();
+        final alBaqarahFontSize = tester
+            .widget<Text>(bodyTextFinder)
+            .style
+            ?.fontSize;
+
+        expect(alFatihaFontSize, isNotNull);
+        expect(alBaqarahFontSize, isNotNull);
+        expect(alFatihaFontSize, closeTo(alBaqarahFontSize!, .01));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('explains unsupported page numbers', (tester) async {
       await tester.pumpWidget(
         MaterialApp(home: Scaffold(body: MushafSamplePage(page: 605))),
