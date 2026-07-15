@@ -31,6 +31,7 @@ const _classicArabicLineHeight = 1.6;
 const _classicAyahMarkerFontScale = 0.88;
 const _classicAyahMarkerLineHeight = 1.0;
 const _totalPages = 604;
+const _mushafPageContextStripHeight = 32.0;
 const _mushafPageNumberOverlayDuration = Duration(milliseconds: 1500);
 final _classicEmbeddedMarkerPattern = RegExp(
   r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
@@ -409,6 +410,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
                 },
               ),
             ),
+          if (_readingMode == ReadingMode.mushaf)
+            _MushafPageContextStrip(pageNumber: _currentPage),
           if (showMushafPageNumber)
             _MushafPageNumberOverlay(pageNumber: _currentPage),
         ],
@@ -510,6 +513,125 @@ String _toArabicPageNumber(int number) {
       .split('')
       .map((digit) => arabicDigits[int.parse(digit)])
       .join();
+}
+
+({String surah, String juz}) _mushafPageContext(int pageNumber) {
+  final ranges = getPageData(pageNumber);
+  final first = ranges.first;
+  final last = ranges.last;
+  final firstSurah = int.parse(first['surah'].toString());
+  final lastSurah = int.parse(last['surah'].toString());
+  final firstVerse = int.parse(first['start'].toString());
+  final lastVerse = int.parse(last['end'].toString());
+  final firstSurahName = getSurahNameArabic(firstSurah);
+  final lastSurahName = getSurahNameArabic(lastSurah);
+  final surah = firstSurah == lastSurah
+      ? 'سورة $firstSurahName'
+      : 'سورة $firstSurahName – $lastSurahName';
+  final firstJuz = getJuzNumber(firstSurah, firstVerse);
+  final lastJuz = getJuzNumber(lastSurah, lastVerse);
+  final juz = firstJuz == lastJuz
+      ? mushafJuzLabel(firstJuz)
+      : '${mushafJuzLabel(firstJuz)} – '
+            '${mushafJuzLabel(lastJuz).replaceFirst('الجزء ', '')}';
+
+  return (surah: surah, juz: juz);
+}
+
+class _MushafPageContextStrip extends StatelessWidget {
+  final int pageNumber;
+
+  const _MushafPageContextStrip({required this.pageNumber});
+
+  @override
+  Widget build(BuildContext context) {
+    final pageContext = _mushafPageContext(pageNumber);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? AppTheme.darkSurface.withValues(alpha: .9)
+        : const Color(0xFFF7EEDB).withValues(alpha: .9);
+    final borderColor = isDark
+        ? AppTheme.darkIslamicGreenBorder.withValues(alpha: .72)
+        : const Color(0xFFB98B42).withValues(alpha: .42);
+    final textColor = isDark
+        ? AppTheme.darkTextPrimary
+        : const Color(0xFF2B2113);
+
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: _mushafPageContextStripHeight,
+      child: IgnorePointer(
+        child: Semantics(
+          container: true,
+          excludeSemantics: true,
+          label: '${pageContext.surah}، ${pageContext.juz}',
+          child: DecoratedBox(
+            key: const ValueKey('mushafPageContextStrip'),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              border: Border(bottom: BorderSide(color: borderColor)),
+            ),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            pageContext.juz,
+                            key: const ValueKey('mushafPageJuzText'),
+                            maxLines: 1,
+                            textDirection: TextDirection.rtl,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: textColor,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            pageContext.surah,
+                            key: const ValueKey('mushafPageSurahText'),
+                            maxLines: 1,
+                            textDirection: TextDirection.rtl,
+                            style: TextStyle(
+                              color: textColor,
+                              fontFamily: mushafSurahTitleFontFamily,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _MushafPageNumberOverlay extends StatelessWidget {

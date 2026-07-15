@@ -33,6 +33,13 @@ const _surah1 = Surah(
   numberOfVerses: 7,
 );
 
+const _surah112 = Surah(
+  surahNumber: 112,
+  nameArabic: 'الإخلاص',
+  nameEnglish: 'Sincerity',
+  numberOfVerses: 4,
+);
+
 const _verse1 = Verse(
   verseId: '1:1',
   surahNumber: 1,
@@ -47,6 +54,14 @@ const _verse2 = Verse(
   verseNumber: 2,
   arabicText: 'ٱلْحَمْدُ لِلَّهِ',
   translation: 'Praise be to Allah',
+);
+
+const _verse112 = Verse(
+  verseId: '112:1',
+  surahNumber: 112,
+  verseNumber: 1,
+  arabicText: 'قُلْ هُوَ ٱللَّهُ أَحَدٌ',
+  page: 604,
 );
 
 const _bismillah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
@@ -1237,6 +1252,232 @@ void main() {
       );
     });
 
+    testWidgets('keeps Surah and Juz context visible in immersive Mushaf', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageContextStrip')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة الفاتحة',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الأول',
+      );
+
+      await tester.pump(const Duration(milliseconds: 1501));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageNumberOverlay')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('mushafPageContextStrip')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('overlays compact context without resizing a narrow page', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(320, 568);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+      await tester.pump();
+
+      final stripRect = tester.getRect(
+        find.byKey(const ValueKey('mushafPageContextStrip')),
+      );
+      final pageRect = tester.getRect(find.byType(MushafQcfPage));
+      final pageViewRect = tester.getRect(find.byType(PageView));
+
+      expect(stripRect.width, closeTo(320, .1));
+      expect(stripRect.height, lessThanOrEqualTo(32));
+      expect(pageViewRect, const Rect.fromLTWH(0, 0, 320, 568));
+      expect(pageRect, pageViewRect);
+      expect(stripRect.top, pageViewRect.top);
+      expect(stripRect.overlaps(pageRect), isTrue);
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .maxLines,
+        1,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .maxLines,
+        1,
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('summarizes the Surah range on a multi-Surah Mushaf page', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(112).overrideWith((ref) async => 604),
+            classicVersesProvider(112).overrideWith((ref) async => [_verse112]),
+            versesByPageProvider(604).overrideWith((ref) async => [_verse112]),
+            bookmarksBySurahProvider(112).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah112),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة الإخلاص – الناس',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الثلاثون',
+      );
+    });
+
+    testWidgets('updates Juz context when paging within the same Surah', (
+      tester,
+    ) async {
+      const surah = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const page21Verse = Verse(
+        verseId: '2:141',
+        surahNumber: 2,
+        verseNumber: 141,
+        arabicText: 'تلك أمة',
+        page: 21,
+      );
+      const page22Verse = Verse(
+        verseId: '2:142',
+        surahNumber: 2,
+        verseNumber: 142,
+        arabicText: 'سيقول السفهاء',
+        page: 22,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 21),
+            classicVersesProvider(
+              2,
+            ).overrideWith((ref) async => [page21Verse, page22Verse]),
+            versesByPageProvider(21).overrideWith((ref) async => [page21Verse]),
+            versesByPageProvider(22).overrideWith((ref) async => [page22Verse]),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة البقرة',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الأول',
+      );
+
+      final pageView = tester.widget<PageView>(find.byType(PageView));
+      pageView.controller!.jumpToPage(21);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة البقرة',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الثاني',
+      );
+    });
+
     testWidgets('uses dark Mushaf page overlay in dark mode', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -1269,9 +1510,24 @@ void main() {
       final overlayText = tester.widget<Text>(
         find.byKey(const ValueKey('mushafPageNumberText')),
       );
+      final contextDecoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const ValueKey('mushafPageContextStrip')),
+                  )
+                  .decoration
+              as BoxDecoration;
+      final contextText = tester.widget<Text>(
+        find.byKey(const ValueKey('mushafPageSurahText')),
+      );
 
       expect(decoration.color, AppTheme.darkSurface.withValues(alpha: .92));
       expect(overlayText.style?.color, AppTheme.darkTextPrimary);
+      expect(
+        contextDecoration.color,
+        AppTheme.darkSurface.withValues(alpha: .9),
+      );
+      expect(contextText.style?.color, AppTheme.darkTextPrimary);
     });
 
     testWidgets('saves tapped Mushaf verse as the last-read VerseID', (
