@@ -401,6 +401,7 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
     final screenSize = MediaQuery.of(context).size;
     final isPortrait =
         MediaQuery.of(context).orientation == Orientation.portrait;
+    final isOpeningPage = widget.pageNumber == 1 || widget.pageNumber == 2;
     final verseSpans = <InlineSpan>[];
     for (final r in ranges) {
       final surah = int.parse(r['surah'].toString());
@@ -415,15 +416,6 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
                 child: _MushafInlineSurahHeader(
                   surahNumber: surah,
                   contentScale: widget.contentScale,
-                ),
-              ),
-            );
-          }
-          if (widget.pageNumber == 1 || widget.pageNumber == 2) {
-            verseSpans.add(
-              WidgetSpan(
-                child: SizedBox(
-                  height: screenSize.height * .175 * widget.contentScale,
                 ),
               ),
             );
@@ -446,41 +438,46 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
       }
     }
 
+    final pageText = Text.rich(
+      TextSpan(children: verseSpans),
+      locale: const Locale('ar'),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.rtl,
+      style: TextStyle(
+        fontFamily: pageFont,
+        package: 'qcf_quran',
+        fontSize: isPortrait
+            ? baseFontSize
+            : isOpeningPage
+            ? 20 * widget.sp
+            : baseFontSize - (17 * widget.sp),
+        color: widget.theme.verseTextColor,
+        height: isPortrait
+            ? isOpeningPage
+                  ? 2.2 * widget.h
+                  : widget.theme.verseHeight * widget.h
+            : 4 * widget.h,
+        letterSpacing: widget.theme.letterSpacing,
+        wordSpacing: widget.theme.wordSpacing,
+      ),
+    );
+
     return SingleChildScrollView(
       physics: const NeverScrollableScrollPhysics(),
       child: SizedBox(
         height: screenSize.height,
         width: screenSize.width,
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            Text.rich(
-              TextSpan(children: verseSpans),
-              locale: const Locale('ar'),
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.rtl,
-              style: TextStyle(
-                fontFamily: pageFont,
-                package: 'qcf_quran',
-                fontSize: isPortrait
-                    ? baseFontSize
-                    : (widget.pageNumber == 1 || widget.pageNumber == 2)
-                    ? 20 * widget.sp
-                    : baseFontSize - (17 * widget.sp),
-                color: widget.theme.verseTextColor,
-                height: isPortrait
-                    ? (widget.pageNumber == 1 || widget.pageNumber == 2)
-                          ? 2.2 * widget.h
-                          : widget.theme.verseHeight * widget.h
-                    : 4 * widget.h,
-                letterSpacing: widget.theme.letterSpacing,
-                wordSpacing: widget.theme.wordSpacing,
+        child: isOpeningPage
+            ? Align(
+                alignment: const Alignment(0, .25),
+                child: SizedBox(width: screenSize.width, child: pageText),
+              )
+            : ListView(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [pageText],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

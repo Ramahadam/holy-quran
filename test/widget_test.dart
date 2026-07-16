@@ -437,6 +437,51 @@ void main() {
       },
     );
 
+    testWidgets(
+      'balances decorated opening pages vertically on phone viewports',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+
+        for (final size in const [Size(360, 640), Size(411, 914)]) {
+          tester.view.physicalSize = size;
+
+          for (final page in const [1, 2]) {
+            await tester.pumpWidget(
+              MaterialApp(
+                home: Scaffold(body: MushafSamplePage(page: page)),
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            final pageRect = tester.getRect(
+              find.byKey(const ValueKey('canonicalMushafPageSurface')),
+            );
+            final bodyRect = tester.getRect(bodyTextFinder);
+            final centerOffset = bodyRect.center.dy - pageRect.center.dy;
+
+            expect(bodyRect.top, greaterThan(pageRect.top));
+            expect(bodyRect.bottom, lessThan(pageRect.bottom));
+            expect(
+              centerOffset,
+              inInclusiveRange(size.height * .04, size.height * .07),
+              reason: 'Page $page at $size should be optically centered.',
+            );
+          }
+        }
+
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('explains unsupported page numbers', (tester) async {
       await tester.pumpWidget(
         MaterialApp(home: Scaffold(body: MushafSamplePage(page: 605))),
