@@ -182,6 +182,16 @@ class MushafQcfPage extends StatelessWidget {
               contentHeight: contentHeight,
             );
             final mediaQuery = MediaQuery.of(context);
+            final isOpeningPage = pageNumber == 1 || pageNumber == 2;
+            final usesResponsiveLineHeight =
+                mediaQuery.orientation == Orientation.portrait &&
+                !isOpeningPage;
+            final textScale = usesResponsiveLineHeight
+                ? 1.0
+                : _scale * contentScale;
+            final lineHeightScale = usesResponsiveLineHeight
+                ? contentScale * _regularPortraitLineHeightScale
+                : 1.0;
 
             return Padding(
               padding: const EdgeInsets.only(
@@ -199,8 +209,8 @@ class MushafQcfPage extends StatelessWidget {
                 child: _InspiredQcfPage(
                   pageNumber: pageNumber,
                   theme: theme,
-                  sp: _scale * contentScale,
-                  h: _heightScale,
+                  sp: textScale,
+                  h: _heightScale * lineHeightScale,
                   contentScale: contentScale,
                   onTap: onTap,
                   onLongPress: onLongPress,
@@ -217,6 +227,7 @@ class MushafQcfPage extends StatelessWidget {
   static const double _contentTopInset = 0;
   static const double _contentHorizontalInset = 0;
   static const double _contentBottomInset = 0;
+  static const double _regularPortraitLineHeightScale = 1.08;
 
   double get _scale {
     if (pageNumber == 1) return 1.06;

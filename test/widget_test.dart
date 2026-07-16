@@ -482,6 +482,149 @@ void main() {
       },
     );
 
+    testWidgets(
+      'fills regular pages vertically without changing width-based font size',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+
+        Future<
+          ({
+            double fontSize,
+            int lineCount,
+            double coverage,
+            double bottomGapRatio,
+            double averageLinePitch,
+          })
+        >
+        measureAtHeight(double height) async {
+          tester.view.physicalSize = Size(411, height);
+          await tester.pumpWidget(
+            const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+          );
+          await tester.pumpAndSettle();
+
+          final bodyText = tester.widget<Text>(bodyTextFinder);
+          final bodyRect = tester.getRect(bodyTextFinder);
+          final pageRect = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+          final paragraph = tester.renderObject<RenderParagraph>(
+            find
+                .descendant(of: bodyTextFinder, matching: find.byType(RichText))
+                .first,
+          );
+          final lineTops =
+              paragraph
+                  .getBoxesForSelection(
+                    TextSelection(
+                      baseOffset: 0,
+                      extentOffset: paragraph.text.toPlainText().length,
+                    ),
+                  )
+                  .map((box) => box.top.roundToDouble())
+                  .toSet()
+                  .toList()
+                ..sort();
+
+          return (
+            fontSize: bodyText.style!.fontSize!,
+            lineCount: lineTops.length,
+            coverage: bodyRect.height / pageRect.height,
+            bottomGapRatio:
+                (pageRect.bottom - bodyRect.bottom) / pageRect.height,
+            averageLinePitch:
+                (lineTops.last - lineTops.first) / (lineTops.length - 1),
+          );
+        }
+
+        final compact = await measureAtHeight(760);
+        final tall = await measureAtHeight(1000);
+
+        expect(compact.fontSize, closeTo(tall.fontSize, .01));
+        expect(compact.fontSize, greaterThanOrEqualTo(23));
+        expect(compact.lineCount, 15);
+        expect(tall.lineCount, 15);
+        expect(compact.coverage, inInclusiveRange(.9, 1.0));
+        expect(tall.coverage, inInclusiveRange(.9, 1.0));
+        expect(compact.bottomGapRatio, inInclusiveRange(0, .06));
+        expect(tall.bottomGapRatio, inInclusiveRange(0, .06));
+        expect(tall.averageLinePitch, greaterThan(compact.averageLinePitch));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('preserves regular page typography in landscape', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(914, 411);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+      );
+      await tester.pumpAndSettle();
+
+      final bodyText = tester.widget<Text>(
+        find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        }),
+      );
+
+      expect(bodyText.style?.fontSize, greaterThanOrEqualTo(12));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keeps special regular pages inside common phone viewports', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      final bodyTextFinder = find.byWidgetPredicate((widget) {
+        if (widget is! Text) return false;
+        return widget.data == null && widget.textSpan is TextSpan;
+      });
+
+      for (final size in const [Size(360, 640), Size(411, 914)]) {
+        tester.view.physicalSize = size;
+
+        for (final page in const [187, 604]) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(body: MushafSamplePage(page: page)),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final pageRect = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+          final bodyRect = tester.getRect(bodyTextFinder);
+
+          expect(bodyRect.top, greaterThanOrEqualTo(pageRect.top));
+          expect(bodyRect.bottom, lessThanOrEqualTo(pageRect.bottom));
+          expect(tester.takeException(), isNull);
+        }
+      }
+    });
+
     testWidgets('explains unsupported page numbers', (tester) async {
       await tester.pumpWidget(
         MaterialApp(home: Scaffold(body: MushafSamplePage(page: 605))),

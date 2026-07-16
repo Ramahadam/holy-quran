@@ -129,7 +129,7 @@ void main() {
 
       final pageText = tester.widget<RichText>(find.byType(RichText).first);
       final pageStyle = (pageText.text as TextSpan).style;
-      expect(pageStyle?.fontSize, greaterThanOrEqualTo(24));
+      expect(pageStyle?.fontSize, greaterThanOrEqualTo(23));
       expect(tester.takeException(), isNull);
     });
 
