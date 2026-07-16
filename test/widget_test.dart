@@ -1555,62 +1555,118 @@ void main() {
       );
     });
 
-    testWidgets('overlays compact context without resizing a narrow page', (
+    testWidgets('reserves compact context space above dense Mushaf pages', (
       tester,
     ) async {
       tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(320, 568);
       addTearDown(() {
         tester.view.resetDevicePixelRatio();
         tester.view.resetPhysicalSize();
       });
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
-            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
-            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            home: ReadingScreen(surah: _surah1),
+      const surah = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const page4Verse = Verse(
+        verseId: '2:17',
+        surahNumber: 2,
+        verseNumber: 17,
+        arabicText: 'مثلهم كمثل الذي استوقد نارا',
+        page: 4,
+      );
+
+      for (final size in const [Size(360, 640), Size(411, 914)]) {
+        tester.view.physicalSize = size;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(2).overrideWith((ref) async => 4),
+              classicVersesProvider(
+                2,
+              ).overrideWith((ref) async => [page4Verse]),
+              versesByPageProvider(4).overrideWith((ref) async => [page4Verse]),
+              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: ReadingScreen(key: ValueKey(size), surah: surah),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Mushaf'));
-      await tester.pump();
-      await tester.pump();
+        await tester.tap(find.text('Mushaf'));
+        await tester.pumpAndSettle();
 
-      final stripRect = tester.getRect(
-        find.byKey(const ValueKey('mushafPageContextStrip')),
-      );
-      final pageRect = tester.getRect(find.byType(MushafQcfPage));
-      final pageViewRect = tester.getRect(find.byType(PageView));
+        final stripRect = tester.getRect(
+          find.byKey(const ValueKey('mushafPageContextStrip')),
+        );
+        final pageViewRect = tester.getRect(find.byType(PageView));
+        final pageRect = tester.getRect(find.byType(MushafQcfPage));
+        final bodyTextFinder = find.descendant(
+          of: find.byKey(const ValueKey(4)),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.data == null &&
+                widget.textSpan is TextSpan,
+          ),
+        );
+        final bodyRect = tester.getRect(bodyTextFinder);
 
-      expect(stripRect.width, closeTo(320, .1));
-      expect(stripRect.height, lessThanOrEqualTo(32));
-      expect(pageViewRect, const Rect.fromLTWH(0, 0, 320, 568));
-      expect(pageRect, pageViewRect);
-      expect(stripRect.top, pageViewRect.top);
-      expect(stripRect.overlaps(pageRect), isTrue);
-      expect(
-        tester
-            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
-            .maxLines,
-        1,
-      );
-      expect(
-        tester
-            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
-            .maxLines,
-        1,
-      );
-      expect(tester.takeException(), isNull);
+        expect(stripRect.width, closeTo(size.width, .1));
+        expect(stripRect.height, lessThanOrEqualTo(32));
+        expect(pageViewRect.top, closeTo(stripRect.bottom, .1));
+        expect(pageRect, pageViewRect);
+        expect(stripRect.overlaps(pageRect), isFalse);
+        expect(
+          bodyRect.top,
+          greaterThanOrEqualTo(stripRect.bottom),
+          reason: 'The context header must remain above Quran text at $size.',
+        );
+        expect(
+          bodyRect.bottom,
+          lessThanOrEqualTo(pageRect.bottom),
+          reason: 'The last Quran line must remain visible at $size.',
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+              .maxLines,
+          1,
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+              .maxLines,
+          1,
+        );
+
+        await tester.tapAt(stripRect.center);
+        await tester.pump();
+        await tester.pump();
+
+        final controlledStripRect = tester.getRect(
+          find.byKey(const ValueKey('mushafPageContextStrip')),
+        );
+        final controlledPageRect = tester.getRect(find.byType(MushafQcfPage));
+        final controlledBodyRect = tester.getRect(bodyTextFinder);
+
+        expect(find.byType(AppBar), findsOneWidget);
+        expect(controlledPageRect.top, closeTo(controlledStripRect.bottom, .1));
+        expect(
+          controlledBodyRect.bottom,
+          lessThanOrEqualTo(controlledPageRect.bottom),
+          reason:
+              'Showing controls must keep the last Quran line visible at '
+              '$size.',
+        );
+        expect(tester.takeException(), isNull);
+      }
     });
 
     testWidgets('summarizes the Surah range on a multi-Surah Mushaf page', (

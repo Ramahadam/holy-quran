@@ -378,45 +378,47 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         ? _buildClassicScroll()
         : _buildMushafPageView();
 
-    return Scaffold(
-      appBar: showAppBar ? _buildAppBar() : null,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
-                setState(() {
-                  _showMushafControls = false;
-                  _hideMushafPageNumberOverlay();
-                });
-              }
-            },
-            child: reader,
-          ),
-          if (isMushafImmersive)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 56,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  setState(() {
-                    _showMushafControls = true;
-                    _showMushafPageNumberOverlay = true;
-                  });
-                  _scheduleMushafPageNumberOverlayHide();
-                },
-              ),
-            ),
-          if (_readingMode == ReadingMode.mushaf)
-            _MushafPageContextStrip(pageNumber: _currentPage),
-          if (showMushafPageNumber)
-            _MushafPageNumberOverlay(pageNumber: _currentPage),
-        ],
-      ),
+    void showImmersiveControls() {
+      setState(() {
+        _showMushafControls = true;
+        _showMushafPageNumberOverlay = true;
+      });
+      _scheduleMushafPageNumberOverlayHide();
+    }
+
+    final readerStack = Stack(
+      children: [
+        GestureDetector(
+          onTap: () {
+            if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
+              setState(() {
+                _showMushafControls = false;
+                _hideMushafPageNumberOverlay();
+              });
+            }
+          },
+          child: reader,
+        ),
+        if (showMushafPageNumber)
+          _MushafPageNumberOverlay(pageNumber: _currentPage),
+      ],
     );
+    final body = _readingMode == ReadingMode.mushaf
+        ? SafeArea(
+            child: Column(
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: isMushafImmersive ? showImmersiveControls : null,
+                  child: _MushafPageContextStrip(pageNumber: _currentPage),
+                ),
+                Expanded(child: readerStack),
+              ],
+            ),
+          )
+        : readerStack;
+
+    return Scaffold(appBar: showAppBar ? _buildAppBar() : null, body: body);
   }
 
   Widget _buildClassicScroll() {
@@ -557,10 +559,8 @@ class _MushafPageContextStrip extends StatelessWidget {
         ? AppTheme.darkTextPrimary
         : const Color(0xFF2B2113);
 
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
+    return SizedBox(
+      width: double.infinity,
       height: _mushafPageContextStripHeight,
       child: IgnorePointer(
         child: Semantics(
