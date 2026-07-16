@@ -696,6 +696,7 @@ class _MushafPageFrame extends StatelessWidget {
     return DecoratedBox(
       decoration: const BoxDecoration(color: AppTheme.mushafPage),
       child: CustomPaint(
+        key: const ValueKey('mushafOrnamentalFrame'),
         painter: _MushafFramePainter(),
         child: const SizedBox.expand(),
       ),
@@ -704,17 +705,116 @@ class _MushafPageFrame extends StatelessWidget {
 }
 
 class _MushafFramePainter extends CustomPainter {
+  static const Color _outerColor = Color(0xFF9A8354);
+  static const Color _innerColor = Color(0xFFD7C89C);
+  static const Color _motifColor = Color(0xFFB8A67A);
+
   @override
   void paint(Canvas canvas, Size size) {
-    final separatorPaint = Paint()
-      ..color = const Color(0xFFB8A67A)
-      ..strokeWidth = .8;
-    canvas.drawLine(Offset.zero, Offset(0, size.height), separatorPaint);
-    canvas.drawLine(
-      Offset(size.width, 0),
-      Offset(size.width, size.height),
-      separatorPaint,
+    final scale = (size.width / 411).clamp(.85, 1.15);
+    final outerInset = (size.width * .012).clamp(4.0, 6.0);
+    final innerInset = outerInset + (3.5 * scale);
+    final outerRect = Rect.fromLTWH(
+      outerInset,
+      outerInset,
+      size.width - (outerInset * 2),
+      size.height - (outerInset * 2),
     );
+    final innerRect = Rect.fromLTWH(
+      innerInset,
+      innerInset,
+      size.width - (innerInset * 2),
+      size.height - (innerInset * 2),
+    );
+
+    canvas.drawRect(
+      outerRect,
+      Paint()
+        ..color = _outerColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = .8 * scale,
+    );
+    canvas.drawRect(
+      innerRect,
+      Paint()
+        ..color = _innerColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = .65 * scale,
+    );
+
+    final bandCenter = (outerInset + innerInset) / 2;
+    final motifRadius = (innerInset - outerInset) * .42;
+    final motifPaint = Paint()
+      ..color = _motifColor
+      ..style = PaintingStyle.fill;
+    final motifStroke = Paint()
+      ..color = _outerColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = .55 * scale;
+
+    for (final center in [
+      Offset(innerInset, innerInset),
+      Offset(size.width - innerInset, innerInset),
+      Offset(innerInset, size.height - innerInset),
+      Offset(size.width - innerInset, size.height - innerInset),
+    ]) {
+      _drawDiamond(
+        canvas,
+        center: center,
+        radius: motifRadius * 1.45,
+        fill: motifPaint,
+        stroke: motifStroke,
+      );
+      canvas.drawCircle(center, motifRadius * .28, motifStroke);
+    }
+
+    for (final fraction in const [.25, .5, .75]) {
+      _drawDiamond(
+        canvas,
+        center: Offset(size.width * fraction, bandCenter),
+        radius: motifRadius,
+        fill: motifPaint,
+        stroke: motifStroke,
+      );
+      _drawDiamond(
+        canvas,
+        center: Offset(size.width * fraction, size.height - bandCenter),
+        radius: motifRadius,
+        fill: motifPaint,
+        stroke: motifStroke,
+      );
+      _drawDiamond(
+        canvas,
+        center: Offset(bandCenter, size.height * fraction),
+        radius: motifRadius,
+        fill: motifPaint,
+        stroke: motifStroke,
+      );
+      _drawDiamond(
+        canvas,
+        center: Offset(size.width - bandCenter, size.height * fraction),
+        radius: motifRadius,
+        fill: motifPaint,
+        stroke: motifStroke,
+      );
+    }
+  }
+
+  void _drawDiamond(
+    Canvas canvas, {
+    required Offset center,
+    required double radius,
+    required Paint fill,
+    required Paint stroke,
+  }) {
+    final path = Path()
+      ..moveTo(center.dx, center.dy - radius)
+      ..lineTo(center.dx + radius, center.dy)
+      ..lineTo(center.dx, center.dy + radius)
+      ..lineTo(center.dx - radius, center.dy)
+      ..close();
+    canvas.drawPath(path, fill);
+    canvas.drawPath(path, stroke);
   }
 
   @override

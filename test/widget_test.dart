@@ -625,6 +625,69 @@ void main() {
       }
     });
 
+    testWidgets(
+      'paints a responsive Mushaf frame without changing QCF geometry',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        for (final size in const [Size(360, 640), Size(430, 932)]) {
+          tester.view.physicalSize = size;
+          await tester.pumpWidget(
+            const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+          );
+          await tester.pumpAndSettle();
+
+          final frameRect = tester.getRect(
+            find.byKey(const ValueKey('mushafOrnamentalFrame')),
+          );
+          final pageRect = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+
+          expect(frameRect, pageRect);
+        }
+
+        tester.view.physicalSize = const Size(411, 914);
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+        );
+        await tester.pumpAndSettle();
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+        final bodyText = tester.widget<Text>(bodyTextFinder);
+        final bodyRect = tester.getRect(bodyTextFinder);
+        final pageRect = tester.getRect(
+          find.byKey(const ValueKey('canonicalMushafPageSurface')),
+        );
+        final paragraph = tester.renderObject<RenderParagraph>(
+          find
+              .descendant(of: bodyTextFinder, matching: find.byType(RichText))
+              .first,
+        );
+        final lineTops = paragraph
+            .getBoxesForSelection(
+              TextSelection(
+                baseOffset: 0,
+                extentOffset: paragraph.text.toPlainText().length,
+              ),
+            )
+            .map((box) => box.top.round())
+            .toSet();
+
+        expect(bodyRect.width, closeTo(pageRect.width, .1));
+        expect(bodyText.style?.fontSize, closeTo(23.1, .01));
+        expect(lineTops, hasLength(15));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('explains unsupported page numbers', (tester) async {
       await tester.pumpWidget(
         MaterialApp(home: Scaffold(body: MushafSamplePage(page: 605))),
