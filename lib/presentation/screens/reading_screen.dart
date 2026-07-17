@@ -335,6 +335,37 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     });
     if (mode == ReadingMode.mushaf) {
       _scheduleMushafPageNumberOverlayHide();
+      _prefetchMushafPages(_currentPage);
+    }
+  }
+
+  void _toggleMushafControls() {
+    if (_readingMode != ReadingMode.mushaf) return;
+
+    final showControls = !_showMushafControls;
+    setState(() {
+      _showMushafControls = showControls;
+      _showMushafPageNumberOverlay = showControls;
+    });
+    if (showControls) {
+      _scheduleMushafPageNumberOverlayHide();
+    } else {
+      _hideMushafPageNumberOverlay();
+    }
+  }
+
+  void _prefetchMushafPages(int page) {
+    for (final adjacentPage in mushafAdjacentPagesFor(page)) {
+      unawaited(
+        ref
+            .read(versesByPageProvider(adjacentPage).future)
+            .then<void>((_) {})
+            .catchError((Object error) {
+              debugPrint(
+                'Failed to prefetch Mushaf page $adjacentPage: $error',
+              );
+            }),
+      );
     }
   }
 
@@ -388,17 +419,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
 
     final readerStack = Stack(
       children: [
-        GestureDetector(
-          onTap: () {
-            if (_readingMode == ReadingMode.mushaf && _showMushafControls) {
-              setState(() {
-                _showMushafControls = false;
-                _hideMushafPageNumberOverlay();
-              });
-            }
-          },
-          child: reader,
-        ),
+        reader,
         if (showMushafPageNumber)
           _MushafPageNumberOverlay(pageNumber: _currentPage),
       ],
@@ -488,6 +509,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         });
         if (_readingMode == ReadingMode.mushaf) {
           _scheduleMushafPageNumberOverlayHide();
+          _prefetchMushafPages(pageNum);
         }
       },
       itemBuilder: (context, index) {
@@ -502,11 +524,18 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           onVerseHit: pageNum == _currentPage
               ? (verseId) => _currentPageFirstVerseId = verseId
               : null,
+          onPageTap: pageNum == _currentPage ? _toggleMushafControls : null,
         );
       },
     );
   }
 }
+
+@visibleForTesting
+List<int> mushafAdjacentPagesFor(int page) => [
+  if (page > 1) page - 1,
+  if (page < _totalPages) page + 1,
+];
 
 String _toArabicPageNumber(int number) {
   const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -698,6 +727,7 @@ class _QuranPage extends ConsumerStatefulWidget {
   final ReadingMode readingMode;
   final ValueChanged<String>? onFirstVerseResolved;
   final ValueChanged<String>? onVerseHit;
+  final VoidCallback? onPageTap;
 
   const _QuranPage({
     super.key,
@@ -705,6 +735,7 @@ class _QuranPage extends ConsumerStatefulWidget {
     required this.readingMode,
     this.onFirstVerseResolved,
     this.onVerseHit,
+    this.onPageTap,
   });
 
   @override
@@ -734,9 +765,18 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
         final surahNumbers = verses.map((v) => v.surahNumber).toSet();
 
         if (widget.readingMode == ReadingMode.mushaf) {
+          final allBookmarks = <String>{};
+          for (final surahNumber in surahNumbers) {
+            final bookmarks = ref.watch(bookmarksBySurahProvider(surahNumber));
+            final verseIds = bookmarks.valueOrNull;
+            if (verseIds != null) allBookmarks.addAll(verseIds);
+          }
+
           return MushafSamplePage(
             page: widget.page,
-            onVerseTap: (verseId) {
+            onPageTap: widget.onPageTap,
+            bookmarkedVerseIds: allBookmarks,
+            onVerseLongPress: (verseId) {
               widget.onVerseHit?.call(verseId);
               final verse = verses
                   .where((verse) => verse.verseId == verseId)

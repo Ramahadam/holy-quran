@@ -89,7 +89,7 @@ void main() {
       expect(mushafSurahTitleFontFamily, 'KFGQPCHafsUthmanicScript');
     });
 
-    testWidgets('uses the full mobile viewport for the Mushaf page surface', (
+    testWidgets('contain-scales the canonical Mushaf page in the viewport', (
       tester,
     ) async {
       tester.view.devicePixelRatio = 1;
@@ -107,8 +107,19 @@ void main() {
       final surface = tester.getRect(
         find.byKey(const ValueKey('canonicalMushafPageSurface')),
       );
+      final expectedScale = 430 / canonicalMushafPageSize.width;
       expect(surface.width, closeTo(430, .1));
-      expect(surface.height, closeTo(932, .1));
+      expect(
+        surface.height,
+        closeTo(canonicalMushafPageSize.height * expectedScale, .1),
+      );
+      expect(
+        surface.width / surface.height,
+        closeTo(
+          canonicalMushafPageSize.width / canonicalMushafPageSize.height,
+          .001,
+        ),
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -127,9 +138,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final pageText = tester.widget<RichText>(find.byType(RichText).first);
-      final pageStyle = (pageText.text as TextSpan).style;
-      expect(pageStyle?.fontSize, greaterThanOrEqualTo(23));
+      final pageText = tester.widget<Text>(
+        find.byKey(const ValueKey('mushafPageText-3')),
+      );
+      final surface = tester.getRect(
+        find.byKey(const ValueKey('canonicalMushafPageSurface')),
+      );
+      final displayedFontSize =
+          pageText.style!.fontSize! *
+          (surface.width / canonicalMushafPageSize.width);
+      expect(displayedFontSize, greaterThanOrEqualTo(23));
       expect(tester.takeException(), isNull);
     });
 
@@ -225,6 +243,14 @@ void main() {
       expect(find.text(getSurahNameArabic(112)), findsOneWidget);
       expect(find.text(getSurahNameArabic(113)), findsOneWidget);
       expect(find.text(getSurahNameArabic(114)), findsOneWidget);
+      final titleTops = [112, 113, 114]
+          .map(
+            (surah) =>
+                tester.getTopLeft(find.text(getSurahNameArabic(surah))).dy,
+          )
+          .toList();
+      expect(titleTops[0], lessThan(titleTops[1]));
+      expect(titleTops[1], lessThan(titleTops[2]));
       expect(tester.takeException(), isNull);
     });
 

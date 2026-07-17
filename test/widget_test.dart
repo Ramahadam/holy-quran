@@ -381,7 +381,7 @@ void main() {
 
       expect(bodyTextFinder, findsOneWidget);
       final bodyText = tester.widget<Text>(bodyTextFinder);
-      expect(bodyText.style?.fontSize, lessThan(22));
+      expect(bodyText.textScaler, TextScaler.noScaling);
 
       final paragraphFinder = find.descendant(
         of: bodyTextFinder,
@@ -471,9 +471,11 @@ void main() {
             expect(bodyRect.top, greaterThan(pageRect.top));
             expect(bodyRect.bottom, lessThan(pageRect.bottom));
             expect(
-              centerOffset,
-              inInclusiveRange(size.height * .04, size.height * .07),
-              reason: 'Page $page at $size should be optically centered.',
+              centerOffset.abs(),
+              lessThanOrEqualTo(pageRect.height * .08),
+              reason:
+                  'Page $page at $size should remain centered in its fixed '
+                  'composition.',
             );
           }
         }
@@ -527,7 +529,9 @@ void main() {
                   .getBoxesForSelection(
                     TextSelection(
                       baseOffset: 0,
-                      extentOffset: paragraph.text.toPlainText().length,
+                      extentOffset: paragraph.text
+                          .toPlainText(includeSemanticsLabels: false)
+                          .length,
                     ),
                   )
                   .map((box) => box.top.roundToDouble())
@@ -550,14 +554,12 @@ void main() {
         final tall = await measureAtHeight(1000);
 
         expect(compact.fontSize, closeTo(tall.fontSize, .01));
-        expect(compact.fontSize, greaterThanOrEqualTo(23));
+        expect(compact.fontSize, greaterThanOrEqualTo(20));
         expect(compact.lineCount, 15);
         expect(tall.lineCount, 15);
-        expect(compact.coverage, inInclusiveRange(.9, 1.0));
-        expect(tall.coverage, inInclusiveRange(.9, 1.0));
-        expect(compact.bottomGapRatio, inInclusiveRange(0, .06));
-        expect(tall.bottomGapRatio, inInclusiveRange(0, .06));
-        expect(tall.averageLinePitch, greaterThan(compact.averageLinePitch));
+        expect(compact.coverage, closeTo(tall.coverage, .001));
+        expect(compact.bottomGapRatio, closeTo(tall.bottomGapRatio, .001));
+        expect(tall.averageLinePitch, closeTo(compact.averageLinePitch, .001));
         expect(tester.takeException(), isNull);
       },
     );
@@ -633,10 +635,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const ValueKey('mushafOrnamentalFrame')),
-        findsNothing,
-      );
+      expect(find.byKey(const ValueKey('mushafOrnamentalFrame')), findsNothing);
       expect(
         find.descendant(
           of: find.byType(MushafQcfPage),
@@ -1621,11 +1620,22 @@ void main() {
         expect(stripRect.width, closeTo(size.width, .1));
         expect(stripRect.height, lessThanOrEqualTo(32));
         expect(pageViewRect.top, closeTo(stripRect.bottom, .1));
-        expect(pageRect, pageViewRect);
+        expect(
+          pageRect.width / pageRect.height,
+          closeTo(
+            canonicalMushafPageSize.width / canonicalMushafPageSize.height,
+            .001,
+          ),
+        );
+        expect(pageRect.left, greaterThanOrEqualTo(pageViewRect.left));
+        expect(pageRect.right, lessThanOrEqualTo(pageViewRect.right));
+        expect(pageRect.top, greaterThanOrEqualTo(pageViewRect.top));
+        expect(pageRect.bottom, lessThanOrEqualTo(pageViewRect.bottom));
+        expect(pageRect.center.dy, closeTo(pageViewRect.center.dy, .1));
         expect(stripRect.overlaps(pageRect), isFalse);
         expect(
           bodyRect.top,
-          greaterThanOrEqualTo(stripRect.bottom),
+          greaterThanOrEqualTo(pageRect.top),
           reason: 'The context header must remain above Quran text at $size.',
         );
         expect(
@@ -1655,9 +1665,17 @@ void main() {
         );
         final controlledPageRect = tester.getRect(find.byType(MushafQcfPage));
         final controlledBodyRect = tester.getRect(bodyTextFinder);
+        final controlledPageViewRect = tester.getRect(find.byType(PageView));
 
         expect(find.byType(AppBar), findsOneWidget);
-        expect(controlledPageRect.top, closeTo(controlledStripRect.bottom, .1));
+        expect(
+          controlledPageRect.center.dy,
+          closeTo(controlledPageViewRect.center.dy, .1),
+        );
+        expect(
+          controlledPageRect.top,
+          greaterThanOrEqualTo(controlledStripRect.bottom),
+        );
         expect(
           controlledBodyRect.bottom,
           lessThanOrEqualTo(controlledPageRect.bottom),
@@ -1836,7 +1854,7 @@ void main() {
       expect(contextText.style?.color, AppTheme.darkTextPrimary);
     });
 
-    testWidgets('saves tapped Mushaf verse as the last-read VerseID', (
+    testWidgets('saves long-pressed Mushaf verse as the last-read VerseID', (
       tester,
     ) async {
       final positionRepo = _FakeReadingPositionRepository();
@@ -1868,8 +1886,9 @@ void main() {
       await tester.pump();
 
       final qcfPage = tester.widget<MushafQcfPage>(find.byType(MushafQcfPage));
-      expect(qcfPage.onTap, isNotNull);
-      qcfPage.onTap!.call(1, 2);
+      expect(qcfPage.onTap, isNull);
+      expect(qcfPage.onLongPress, isNotNull);
+      qcfPage.onLongPress!.call(1, 2);
       await tester.pumpAndSettle();
 
       expect(find.byType(VerseDetailScreen), findsOneWidget);

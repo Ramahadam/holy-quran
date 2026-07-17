@@ -90,15 +90,17 @@ void main() {
   });
 
   group('MushafSamplePage hit testing', () {
-    testWidgets('exposes QCF verse taps as stable VerseIDs', (tester) async {
-      String? tappedVerseId;
+    testWidgets('exposes QCF verse long presses as stable VerseIDs', (
+      tester,
+    ) async {
+      String? pressedVerseId;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: MushafSamplePage(
               page: 1,
-              onVerseTap: (verseId) => tappedVerseId = verseId,
+              onVerseLongPress: (verseId) => pressedVerseId = verseId,
             ),
           ),
         ),
@@ -106,9 +108,10 @@ void main() {
       await tester.pump();
 
       final qcfPage = tester.widget<MushafQcfPage>(find.byType(MushafQcfPage));
-      qcfPage.onTap?.call(1, 1);
+      expect(qcfPage.onTap, isNull);
+      qcfPage.onLongPress?.call(1, 1);
 
-      expect(tappedVerseId, '1:1');
+      expect(pressedVerseId, '1:1');
     });
   });
 }

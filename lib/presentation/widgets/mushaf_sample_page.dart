@@ -13,8 +13,17 @@ const _referenceBasmalaHeightScale = 1.06;
 const _juz30BasmalaTextScale = 1.0;
 const _juz30BasmalaLineHeight = 1.72;
 const _allahHighlightColor = Color(0xFFB34437);
+const _bookmarkMarkerColor = Color(0x33B98B42);
 const _singleSlotChromeAsset =
     'assets/mushaf/chrome/quran_single_slot_centered.png';
+final Map<String, String> _normalVerseTextById = {
+  for (final row in quranText)
+    '${row['surah_number']}:${row['verse_number']}':
+        row['text_normal']?.toString() ?? '',
+};
+
+@visibleForTesting
+const Size canonicalMushafPageSize = Size(382.68, 547.09);
 
 @visibleForTesting
 const double mushafPageHeaderHeight = 57;
@@ -43,13 +52,17 @@ class MushafSampleAssets {
 class MushafSamplePage extends StatefulWidget {
   final int page;
   final ValueChanged<MushafHitResult>? onHit;
-  final ValueChanged<String>? onVerseTap;
+  final VoidCallback? onPageTap;
+  final ValueChanged<String>? onVerseLongPress;
+  final Set<String> bookmarkedVerseIds;
 
   const MushafSamplePage({
     super.key,
     required this.page,
     this.onHit,
-    this.onVerseTap,
+    this.onPageTap,
+    this.onVerseLongPress,
+    this.bookmarkedVerseIds = const {},
   });
 
   @override
@@ -96,44 +109,72 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final page = GestureDetector(
+    Widget page = GestureDetector(
       key: _pageKey,
       behavior: HitTestBehavior.opaque,
-      onTapUp: _handleTapUp,
+      excludeFromSemantics: true,
+      onTap: widget.onPageTap,
+      onTapUp: widget.onHit == null ? null : _handleTapUp,
       child: MushafQcfPage(
         pageNumber: widget.page,
         theme: _qcfTheme,
-        onTap: (surahNumber, verseNumber) {
-          widget.onVerseTap?.call('$surahNumber:$verseNumber');
-        },
+        bookmarkedVerseIds: widget.bookmarkedVerseIds,
         onLongPress: (surahNumber, verseNumber) {
-          widget.onVerseTap?.call('$surahNumber:$verseNumber');
+          widget.onVerseLongPress?.call('$surahNumber:$verseNumber');
         },
       ),
     );
-
-    final pageSurface = SizedBox.expand(
-      key: const ValueKey('canonicalMushafPageSurface'),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: isDark ? Border.all(color: AppTheme.darkDivider) : null,
-          boxShadow: isDark
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .28),
-                    blurRadius: 18,
-                    offset: const Offset(0, 8),
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRect(child: page),
-      ),
-    );
+    if (widget.onPageTap != null) {
+      page = Semantics(
+        identifier: 'mushaf-page-controls',
+        label: 'إظهار أو إخفاء أدوات القراءة',
+        container: true,
+        explicitChildNodes: true,
+        onTap: widget.onPageTap,
+        child: page,
+      );
+    }
 
     return ColoredBox(
       color: isDark ? AppTheme.darkBackground : AppTheme.mushafBackground,
-      child: SafeArea(child: pageSurface),
+      child: SafeArea(
+        child: SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: SizedBox(
+              key: const ValueKey('canonicalMushafPageSurface'),
+              width: canonicalMushafPageSize.width,
+              height: canonicalMushafPageSize.height,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  border: isDark
+                      ? Border.all(color: AppTheme.darkDivider)
+                      : null,
+                  boxShadow: isDark
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: .28),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    size: canonicalMushafPageSize,
+                    padding: EdgeInsets.zero,
+                    viewPadding: EdgeInsets.zero,
+                    viewInsets: EdgeInsets.zero,
+                    textScaler: TextScaler.noScaling,
+                  ),
+                  child: ClipRect(child: page),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -156,6 +197,7 @@ class MushafQcfPage extends StatelessWidget {
   final QcfThemeData theme;
   final void Function(int surahNumber, int verseNumber)? onTap;
   final void Function(int surahNumber, int verseNumber)? onLongPress;
+  final Set<String> bookmarkedVerseIds;
 
   const MushafQcfPage({
     super.key,
@@ -163,6 +205,7 @@ class MushafQcfPage extends StatelessWidget {
     required this.theme,
     this.onTap,
     this.onLongPress,
+    this.bookmarkedVerseIds = const {},
   });
 
   @override
@@ -183,15 +226,10 @@ class MushafQcfPage extends StatelessWidget {
             );
             final mediaQuery = MediaQuery.of(context);
             final isOpeningPage = pageNumber == 1 || pageNumber == 2;
-            final usesResponsiveLineHeight =
-                mediaQuery.orientation == Orientation.portrait &&
-                !isOpeningPage;
-            final textScale = usesResponsiveLineHeight
+            final textScale = isOpeningPage ? _scale : _regularPageTextScale;
+            final lineHeightScale = isOpeningPage
                 ? 1.0
-                : _scale * contentScale;
-            final lineHeightScale = usesResponsiveLineHeight
-                ? contentScale * _regularPortraitLineHeightScale
-                : 1.0;
+                : contentScale * _regularPortraitLineHeightScale;
 
             return Padding(
               padding: const EdgeInsets.only(
@@ -205,6 +243,8 @@ class MushafQcfPage extends StatelessWidget {
                   size: Size(contentWidth, contentHeight),
                   padding: EdgeInsets.zero,
                   viewPadding: EdgeInsets.zero,
+                  viewInsets: EdgeInsets.zero,
+                  textScaler: TextScaler.noScaling,
                 ),
                 child: _InspiredQcfPage(
                   pageNumber: pageNumber,
@@ -214,6 +254,7 @@ class MushafQcfPage extends StatelessWidget {
                   contentScale: contentScale,
                   onTap: onTap,
                   onLongPress: onLongPress,
+                  bookmarkedVerseIds: bookmarkedVerseIds,
                 ),
               ),
             );
@@ -227,6 +268,7 @@ class MushafQcfPage extends StatelessWidget {
   static const double _contentTopInset = 0;
   static const double _contentHorizontalInset = 0;
   static const double _contentBottomInset = 0;
+  static const double _regularPageTextScale = .94;
   static const double _regularPortraitLineHeightScale = 1.08;
 
   double get _scale {
@@ -363,6 +405,7 @@ class _InspiredQcfPage extends StatefulWidget {
   final double contentScale;
   final void Function(int surahNumber, int verseNumber)? onTap;
   final void Function(int surahNumber, int verseNumber)? onLongPress;
+  final Set<String> bookmarkedVerseIds;
 
   const _InspiredQcfPage({
     required this.pageNumber,
@@ -372,6 +415,7 @@ class _InspiredQcfPage extends StatefulWidget {
     required this.contentScale,
     this.onTap,
     this.onLongPress,
+    this.bookmarkedVerseIds = const {},
   });
 
   @override
@@ -451,6 +495,8 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
 
     final pageText = Text.rich(
       TextSpan(children: verseSpans),
+      key: ValueKey('mushafPageText-${widget.pageNumber}'),
+      textScaler: TextScaler.noScaling,
       locale: const Locale('ar'),
       textAlign: TextAlign.center,
       textDirection: TextDirection.rtl,
@@ -473,22 +519,14 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
       ),
     );
 
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      child: SizedBox(
-        height: screenSize.height,
-        width: screenSize.width,
-        child: isOpeningPage
-            ? Align(
-                alignment: const Alignment(0, .25),
-                child: SizedBox(width: screenSize.width, child: pageText),
-              )
-            : ListView(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [pageText],
-              ),
+    return SizedBox(
+      height: screenSize.height,
+      width: screenSize.width,
+      child: Align(
+        alignment: isOpeningPage
+            ? const Alignment(0, .25)
+            : Alignment.topCenter,
+        child: SizedBox(width: screenSize.width, child: pageText),
       ),
     );
   }
@@ -505,29 +543,49 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         ? '${verseText.substring(0, 1)}\u200A${verseText.substring(1)}'
         : verseText;
     final allahGlyphIndexes = _allahGlyphIndexes(surah, verse, displayText);
+    final verseId = '$surah:$verse';
+    final isBookmarked = widget.bookmarkedVerseIds.contains(verseId);
+    final semanticsLabel = _verseSemanticsLabel(
+      surah: surah,
+      verse: verse,
+      isBookmarked: isBookmarked,
+    );
     final spans = <InlineSpan>[];
 
-    for (var i = 0; i < displayText.length; i += 1) {
-      final char = displayText[i];
+    var runStart = 0;
+    var isFirstRun = true;
+    while (runStart < displayText.length) {
+      final isAllahRun = allahGlyphIndexes.contains(runStart);
+      var runEnd = runStart + 1;
+      while (runEnd < displayText.length &&
+          allahGlyphIndexes.contains(runEnd) == isAllahRun) {
+        runEnd += 1;
+      }
       spans.add(
         TextSpan(
-          text: char,
+          text: displayText.substring(runStart, runEnd),
           recognizer: recognizer,
-          style: allahGlyphIndexes.contains(i)
+          semanticsIdentifier: isFirstRun ? 'mushaf-verse-$surah-$verse' : null,
+          semanticsLabel: isFirstRun ? semanticsLabel : '',
+          style: isAllahRun
               ? const TextStyle(color: _allahHighlightColor)
               : null,
         ),
       );
+      isFirstRun = false;
+      runStart = runEnd;
     }
 
     spans.add(
       TextSpan(
         text: getVerseNumberQCF(surah, verse),
         recognizer: recognizer,
+        semanticsLabel: '',
         style: TextStyle(
           fontFamily: pageFont,
           package: 'qcf_quran',
           color: widget.theme.verseNumberColor,
+          backgroundColor: isBookmarked ? _bookmarkMarkerColor : null,
           height: widget.theme.verseNumberHeight * widget.h,
         ),
       ),
@@ -574,15 +632,6 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
   }
 
   GestureRecognizer? _verseRecognizer(int surah, int verse) {
-    if (widget.onTap != null) {
-      final key = 'tap:$surah:$verse';
-      return _recognizers.putIfAbsent(
-        key,
-        () =>
-            TapGestureRecognizer()
-              ..onTap = () => widget.onTap?.call(surah, verse),
-      );
-    }
     if (widget.onLongPress != null) {
       final key = 'long:$surah:$verse';
       return _recognizers.putIfAbsent(
@@ -590,6 +639,15 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         () =>
             LongPressGestureRecognizer()
               ..onLongPress = () => widget.onLongPress?.call(surah, verse),
+      );
+    }
+    if (widget.onTap != null) {
+      final key = 'tap:$surah:$verse';
+      return _recognizers.putIfAbsent(
+        key,
+        () =>
+            TapGestureRecognizer()
+              ..onTap = () => widget.onTap?.call(surah, verse),
       );
     }
     return null;
@@ -625,12 +683,19 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
   }
 
   String? _normalVerseText(int surah, int verse) {
-    for (final row in quranText) {
-      if (row['surah_number'] == surah && row['verse_number'] == verse) {
-        return row['text_normal']?.toString();
-      }
-    }
-    return null;
+    return _normalVerseTextById['$surah:$verse'];
+  }
+
+  String _verseSemanticsLabel({
+    required int surah,
+    required int verse,
+    required bool isBookmarked,
+  }) {
+    final normalText = _normalVerseText(surah, verse) ?? '';
+    final bookmarkLabel = isBookmarked ? '، محفوظة' : '';
+    return 'سورة ${getSurahNameArabic(surah)}، '
+        'الآية ${convertToArabicNumber(verse.toString())}، '
+        '$normalText$bookmarkLabel';
   }
 
   bool _isAllahWord(String word) {
