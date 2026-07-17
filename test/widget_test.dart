@@ -33,6 +33,13 @@ const _surah1 = Surah(
   numberOfVerses: 7,
 );
 
+const _surah112 = Surah(
+  surahNumber: 112,
+  nameArabic: 'الإخلاص',
+  nameEnglish: 'Sincerity',
+  numberOfVerses: 4,
+);
+
 const _verse1 = Verse(
   verseId: '1:1',
   surahNumber: 1,
@@ -47,6 +54,14 @@ const _verse2 = Verse(
   verseNumber: 2,
   arabicText: 'ٱلْحَمْدُ لِلَّهِ',
   translation: 'Praise be to Allah',
+);
+
+const _verse112 = Verse(
+  verseId: '112:1',
+  surahNumber: 112,
+  verseNumber: 1,
+  arabicText: 'قُلْ هُوَ ٱللَّهُ أَحَدٌ',
+  page: 604,
 );
 
 const _bismillah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
@@ -312,9 +327,13 @@ void main() {
 
       expect(find.byType(MushafQcfPage), findsOneWidget);
       expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('الجزء الأول'), findsOneWidget);
+      expect(find.text('الجزء الأول'), findsNothing);
       expect(
-        find.byKey(const ValueKey('mushafHeaderBackground')),
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('canonicalMushafPageSurface')),
         findsOneWidget,
       );
       expect(tester.takeException(), isNull);
@@ -362,7 +381,7 @@ void main() {
 
       expect(bodyTextFinder, findsOneWidget);
       final bodyText = tester.widget<Text>(bodyTextFinder);
-      expect(bodyText.style?.fontSize, lessThan(22));
+      expect(bodyText.textScaler, TextScaler.noScaling);
 
       final paragraphFinder = find.descendant(
         of: bodyTextFinder,
@@ -376,6 +395,255 @@ void main() {
         paragraph.getMaxIntrinsicHeight(paragraph.size.width),
         lessThanOrEqualTo(tester.getSize(bodyTextFinder).height),
       );
+    });
+
+    testWidgets(
+      'uses one verse font size across both decorated opening pages',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(411, 914);
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(home: Scaffold(body: MushafSamplePage(page: 1))),
+        );
+        await tester.pumpAndSettle();
+        final alFatihaFontSize = tester
+            .widget<Text>(bodyTextFinder)
+            .style
+            ?.fontSize;
+
+        await tester.pumpWidget(
+          MaterialApp(home: Scaffold(body: MushafSamplePage(page: 2))),
+        );
+        await tester.pumpAndSettle();
+        final alBaqarahFontSize = tester
+            .widget<Text>(bodyTextFinder)
+            .style
+            ?.fontSize;
+
+        expect(alFatihaFontSize, isNotNull);
+        expect(alBaqarahFontSize, isNotNull);
+        expect(alFatihaFontSize, closeTo(alBaqarahFontSize!, .01));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'balances decorated opening pages vertically on phone viewports',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+
+        for (final size in const [Size(360, 640), Size(411, 914)]) {
+          tester.view.physicalSize = size;
+
+          for (final page in const [1, 2]) {
+            await tester.pumpWidget(
+              MaterialApp(
+                home: Scaffold(body: MushafSamplePage(page: page)),
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            final pageRect = tester.getRect(
+              find.byKey(const ValueKey('canonicalMushafPageSurface')),
+            );
+            final bodyRect = tester.getRect(bodyTextFinder);
+            final centerOffset = bodyRect.center.dy - pageRect.center.dy;
+
+            expect(bodyRect.top, greaterThan(pageRect.top));
+            expect(bodyRect.bottom, lessThan(pageRect.bottom));
+            expect(
+              centerOffset.abs(),
+              lessThanOrEqualTo(pageRect.height * .08),
+              reason:
+                  'Page $page at $size should remain centered in its fixed '
+                  'composition.',
+            );
+          }
+        }
+
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'fills regular pages vertically without changing width-based font size',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        final bodyTextFinder = find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        });
+
+        Future<
+          ({
+            double fontSize,
+            int lineCount,
+            double coverage,
+            double bottomGapRatio,
+            double averageLinePitch,
+          })
+        >
+        measureAtHeight(double height) async {
+          tester.view.physicalSize = Size(411, height);
+          await tester.pumpWidget(
+            const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+          );
+          await tester.pumpAndSettle();
+
+          final bodyText = tester.widget<Text>(bodyTextFinder);
+          final bodyRect = tester.getRect(bodyTextFinder);
+          final pageRect = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+          final paragraph = tester.renderObject<RenderParagraph>(
+            find
+                .descendant(of: bodyTextFinder, matching: find.byType(RichText))
+                .first,
+          );
+          final lineTops =
+              paragraph
+                  .getBoxesForSelection(
+                    TextSelection(
+                      baseOffset: 0,
+                      extentOffset: paragraph.text
+                          .toPlainText(includeSemanticsLabels: false)
+                          .length,
+                    ),
+                  )
+                  .map((box) => box.top.roundToDouble())
+                  .toSet()
+                  .toList()
+                ..sort();
+
+          return (
+            fontSize: bodyText.style!.fontSize!,
+            lineCount: lineTops.length,
+            coverage: bodyRect.height / pageRect.height,
+            bottomGapRatio:
+                (pageRect.bottom - bodyRect.bottom) / pageRect.height,
+            averageLinePitch:
+                (lineTops.last - lineTops.first) / (lineTops.length - 1),
+          );
+        }
+
+        final compact = await measureAtHeight(760);
+        final tall = await measureAtHeight(1000);
+
+        expect(compact.fontSize, closeTo(tall.fontSize, .01));
+        expect(compact.fontSize, greaterThanOrEqualTo(20));
+        expect(compact.lineCount, 15);
+        expect(tall.lineCount, 15);
+        expect(compact.coverage, closeTo(tall.coverage, .001));
+        expect(compact.bottomGapRatio, closeTo(tall.bottomGapRatio, .001));
+        expect(tall.averageLinePitch, closeTo(compact.averageLinePitch, .001));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('preserves regular page typography in landscape', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(914, 411);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+      );
+      await tester.pumpAndSettle();
+
+      final bodyText = tester.widget<Text>(
+        find.byWidgetPredicate((widget) {
+          if (widget is! Text) return false;
+          return widget.data == null && widget.textSpan is TextSpan;
+        }),
+      );
+
+      expect(bodyText.style?.fontSize, greaterThanOrEqualTo(12));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keeps special regular pages inside common phone viewports', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      final bodyTextFinder = find.byWidgetPredicate((widget) {
+        if (widget is! Text) return false;
+        return widget.data == null && widget.textSpan is TextSpan;
+      });
+
+      for (final size in const [Size(360, 640), Size(411, 914)]) {
+        tester.view.physicalSize = size;
+
+        for (final page in const [187, 604]) {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(body: MushafSamplePage(page: page)),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final pageRect = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+          final bodyRect = tester.getRect(bodyTextFinder);
+
+          expect(bodyRect.top, greaterThanOrEqualTo(pageRect.top));
+          expect(bodyRect.bottom, lessThanOrEqualTo(pageRect.bottom));
+          expect(tester.takeException(), isNull);
+        }
+      }
+    });
+
+    testWidgets('uses a plain Mushaf page without an ornamental frame', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 4))),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('mushafOrnamentalFrame')), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(MushafQcfPage),
+          matching: find.byType(CustomPaint),
+        ),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('explains unsupported page numbers', (tester) async {
@@ -1233,6 +1501,307 @@ void main() {
       );
     });
 
+    testWidgets('keeps Surah and Juz context visible in immersive Mushaf', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageContextStrip')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة الفاتحة',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الأول',
+      );
+
+      await tester.pump(const Duration(milliseconds: 1501));
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('mushafPageNumberOverlay')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('mushafPageContextStrip')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('reserves compact context space above dense Mushaf pages', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      const surah = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const page4Verse = Verse(
+        verseId: '2:17',
+        surahNumber: 2,
+        verseNumber: 17,
+        arabicText: 'مثلهم كمثل الذي استوقد نارا',
+        page: 4,
+      );
+
+      for (final size in const [Size(360, 640), Size(411, 914)]) {
+        tester.view.physicalSize = size;
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(2).overrideWith((ref) async => 4),
+              classicVersesProvider(
+                2,
+              ).overrideWith((ref) async => [page4Verse]),
+              versesByPageProvider(4).overrideWith((ref) async => [page4Verse]),
+              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: ReadingScreen(key: ValueKey(size), surah: surah),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Mushaf'));
+        await tester.pumpAndSettle();
+
+        final stripRect = tester.getRect(
+          find.byKey(const ValueKey('mushafPageContextStrip')),
+        );
+        final pageViewRect = tester.getRect(find.byType(PageView));
+        final pageRect = tester.getRect(find.byType(MushafQcfPage));
+        final bodyTextFinder = find.descendant(
+          of: find.byKey(const ValueKey(4)),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Text &&
+                widget.data == null &&
+                widget.textSpan is TextSpan,
+          ),
+        );
+        final bodyRect = tester.getRect(bodyTextFinder);
+
+        expect(stripRect.width, closeTo(size.width, .1));
+        expect(stripRect.height, lessThanOrEqualTo(32));
+        expect(pageViewRect.top, closeTo(stripRect.bottom, .1));
+        expect(
+          pageRect.width / pageRect.height,
+          closeTo(
+            canonicalMushafPageSize.width / canonicalMushafPageSize.height,
+            .001,
+          ),
+        );
+        expect(pageRect.left, greaterThanOrEqualTo(pageViewRect.left));
+        expect(pageRect.right, lessThanOrEqualTo(pageViewRect.right));
+        expect(pageRect.top, greaterThanOrEqualTo(pageViewRect.top));
+        expect(pageRect.bottom, lessThanOrEqualTo(pageViewRect.bottom));
+        expect(pageRect.center.dy, closeTo(pageViewRect.center.dy, .1));
+        expect(stripRect.overlaps(pageRect), isFalse);
+        expect(
+          bodyRect.top,
+          greaterThanOrEqualTo(pageRect.top),
+          reason: 'The context header must remain above Quran text at $size.',
+        );
+        expect(
+          bodyRect.bottom,
+          lessThanOrEqualTo(pageRect.bottom),
+          reason: 'The last Quran line must remain visible at $size.',
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+              .maxLines,
+          1,
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+              .maxLines,
+          1,
+        );
+
+        await tester.tapAt(stripRect.center);
+        await tester.pump();
+        await tester.pump();
+
+        final controlledStripRect = tester.getRect(
+          find.byKey(const ValueKey('mushafPageContextStrip')),
+        );
+        final controlledPageRect = tester.getRect(find.byType(MushafQcfPage));
+        final controlledBodyRect = tester.getRect(bodyTextFinder);
+        final controlledPageViewRect = tester.getRect(find.byType(PageView));
+
+        expect(find.byType(AppBar), findsOneWidget);
+        expect(
+          controlledPageRect.center.dy,
+          closeTo(controlledPageViewRect.center.dy, .1),
+        );
+        expect(
+          controlledPageRect.top,
+          greaterThanOrEqualTo(controlledStripRect.bottom),
+        );
+        expect(
+          controlledBodyRect.bottom,
+          lessThanOrEqualTo(controlledPageRect.bottom),
+          reason:
+              'Showing controls must keep the last Quran line visible at '
+              '$size.',
+        );
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('summarizes the Surah range on a multi-Surah Mushaf page', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(112).overrideWith((ref) async => 604),
+            classicVersesProvider(112).overrideWith((ref) async => [_verse112]),
+            versesByPageProvider(604).overrideWith((ref) async => [_verse112]),
+            bookmarksBySurahProvider(112).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: _surah112),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة الإخلاص – الناس',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الثلاثون',
+      );
+    });
+
+    testWidgets('updates Juz context when paging within the same Surah', (
+      tester,
+    ) async {
+      const surah = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 286,
+      );
+      const page21Verse = Verse(
+        verseId: '2:141',
+        surahNumber: 2,
+        verseNumber: 141,
+        arabicText: 'تلك أمة',
+        page: 21,
+      );
+      const page22Verse = Verse(
+        verseId: '2:142',
+        surahNumber: 2,
+        verseNumber: 142,
+        arabicText: 'سيقول السفهاء',
+        page: 22,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(2).overrideWith((ref) async => 21),
+            classicVersesProvider(
+              2,
+            ).overrideWith((ref) async => [page21Verse, page22Verse]),
+            versesByPageProvider(21).overrideWith((ref) async => [page21Verse]),
+            versesByPageProvider(22).overrideWith((ref) async => [page22Verse]),
+            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: ReadingScreen(surah: surah),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Mushaf'));
+      await tester.pump();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة البقرة',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الأول',
+      );
+
+      final pageView = tester.widget<PageView>(find.byType(PageView));
+      pageView.controller!.jumpToPage(21);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageSurahText')))
+            .data,
+        'سورة البقرة',
+      );
+      expect(
+        tester
+            .widget<Text>(find.byKey(const ValueKey('mushafPageJuzText')))
+            .data,
+        'الجزء الثاني',
+      );
+    });
+
     testWidgets('uses dark Mushaf page overlay in dark mode', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -1265,12 +1834,27 @@ void main() {
       final overlayText = tester.widget<Text>(
         find.byKey(const ValueKey('mushafPageNumberText')),
       );
+      final contextDecoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const ValueKey('mushafPageContextStrip')),
+                  )
+                  .decoration
+              as BoxDecoration;
+      final contextText = tester.widget<Text>(
+        find.byKey(const ValueKey('mushafPageSurahText')),
+      );
 
       expect(decoration.color, AppTheme.darkSurface.withValues(alpha: .92));
       expect(overlayText.style?.color, AppTheme.darkTextPrimary);
+      expect(
+        contextDecoration.color,
+        AppTheme.darkSurface.withValues(alpha: .9),
+      );
+      expect(contextText.style?.color, AppTheme.darkTextPrimary);
     });
 
-    testWidgets('saves tapped Mushaf verse as the last-read VerseID', (
+    testWidgets('saves long-pressed Mushaf verse as the last-read VerseID', (
       tester,
     ) async {
       final positionRepo = _FakeReadingPositionRepository();
@@ -1302,8 +1886,9 @@ void main() {
       await tester.pump();
 
       final qcfPage = tester.widget<MushafQcfPage>(find.byType(MushafQcfPage));
-      expect(qcfPage.onTap, isNotNull);
-      qcfPage.onTap!.call(1, 2);
+      expect(qcfPage.onTap, isNull);
+      expect(qcfPage.onLongPress, isNotNull);
+      qcfPage.onLongPress!.call(1, 2);
       await tester.pumpAndSettle();
 
       expect(find.byType(VerseDetailScreen), findsOneWidget);

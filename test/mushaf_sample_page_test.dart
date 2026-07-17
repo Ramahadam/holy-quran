@@ -83,16 +83,75 @@ void main() {
   });
 
   group('MushafQcfPage chrome', () {
-    test('keeps page header compact and reserves matching top space', () {
-      expect(mushafPageHeaderHeight, 57);
-      expect(mushafPageContentTopInset, mushafPageHeaderHeight);
+    test('keeps inline Surah chrome compact', () {
       expect(mushafSingleSlotChromeHeight, mushafPageHeaderHeight);
       expect(mushafSurahTitleFontSize, 18);
       expect(mushafSurahTitleFontFamily, 'KFGQPCHafsUthmanicScript');
-      expect(mushafJuzTitleFontSize, 18);
     });
 
-    testWidgets('renders decorated header metadata without footer chrome', (
+    testWidgets('contain-scales the canonical Mushaf page in the viewport', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 932);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 3))),
+      );
+      await tester.pumpAndSettle();
+
+      final surface = tester.getRect(
+        find.byKey(const ValueKey('canonicalMushafPageSurface')),
+      );
+      final expectedScale = 430 / canonicalMushafPageSize.width;
+      expect(surface.width, closeTo(430, .1));
+      expect(
+        surface.height,
+        closeTo(canonicalMushafPageSize.height * expectedScale, .1),
+      );
+      expect(
+        surface.width / surface.height,
+        closeTo(
+          canonicalMushafPageSize.width / canonicalMushafPageSize.height,
+          .001,
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keeps dense Mushaf pages comfortably readable on phones', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 932);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
+      await tester.pumpWidget(
+        const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 3))),
+      );
+      await tester.pumpAndSettle();
+
+      final pageText = tester.widget<Text>(
+        find.byKey(const ValueKey('mushafPageText-3')),
+      );
+      final surface = tester.getRect(
+        find.byKey(const ValueKey('canonicalMushafPageSurface')),
+      );
+      final displayedFontSize =
+          pageText.style!.fontSize! *
+          (surface.width / canonicalMushafPageSize.width);
+      expect(displayedFontSize, greaterThanOrEqualTo(23));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('keeps continuation pages free of replacement page chrome', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -112,69 +171,20 @@ void main() {
         ),
       );
 
-      expect(find.text(getSurahNameArabic(2)), findsOneWidget);
-      expect(find.text('الجزء الأول'), findsOneWidget);
       expect(
-        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontSize,
-        mushafSurahTitleFontSize,
-      );
-      expect(
-        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontFamily,
-        mushafSurahTitleFontFamily,
-      );
-      expect(
-        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.color,
-        tester.widget<Text>(find.text('الجزء الأول')).style?.color,
-      );
-      expect(
-        tester.widget<Text>(find.text(getSurahNameArabic(2))).style?.fontWeight,
-        tester.widget<Text>(find.text('الجزء الأول')).style?.fontWeight,
-      );
-      expect(
-        tester.widget<Text>(find.text('الجزء الأول')).style?.fontSize,
-        mushafJuzTitleFontSize,
-      );
-      expect(
-        tester.widget<Text>(find.text('الجزء الأول')).style?.fontWeight,
-        FontWeight.w700,
-      );
-      expect(
-        find.byKey(const ValueKey('mushafFooterSingleSlotChrome')),
+        find.byKey(const ValueKey('mushafHeaderBackground')),
         findsNothing,
       );
       expect(
-        find.byKey(const ValueKey('mushafHeaderBackground')),
-        findsOneWidget,
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
+        findsNothing,
       );
-      expect(
-        tester
-            .getRect(find.byKey(const ValueKey('mushafHeaderBackground')))
-            .height,
-        mushafPageHeaderHeight,
-      );
-
-      final dividerCenter = tester.getCenter(
-        find.byKey(const ValueKey('mushafHeaderDivider')),
-      );
-      final surahSlotCenter = tester.getCenter(
-        find.byKey(const ValueKey('mushafHeaderSurahSlot')),
-      );
-      final juzSlotCenter = tester.getCenter(
-        find.byKey(const ValueKey('mushafHeaderJuzSlot')),
-      );
-      final pageRect = tester.getRect(find.byType(MushafQcfPage));
-      expect(dividerCenter.dx, closeTo(pageRect.center.dx, 1));
-      expect(
-        surahSlotCenter.dx,
-        closeTo(pageRect.left + pageRect.width * .25, 1),
-      );
-      expect(
-        juzSlotCenter.dx,
-        closeTo(pageRect.left + pageRect.width * .75, 1),
-      );
+      expect(find.text(getSurahNameArabic(2)), findsNothing);
+      expect(find.text('الجزء الأول'), findsNothing);
+      expect(tester.takeException(), isNull);
     });
 
-    testWidgets('uses the decorated header on pages that start a surah', (
+    testWidgets('renders the printed cartouche when a page starts a Surah', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -194,13 +204,54 @@ void main() {
         ),
       );
 
-      expect(find.text(getSurahNameArabic(1)), findsOneWidget);
-      expect(find.text('الجزء الأول'), findsOneWidget);
       expect(
-        find.byKey(const ValueKey('mushafHeaderBackground')),
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
         findsOneWidget,
       );
+      expect(find.text(getSurahNameArabic(1)), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('mushafHeaderBackground')),
+        findsNothing,
+      );
       expect(find.byType(HeaderWidget), findsNothing);
+    });
+
+    testWidgets('renders every printed Surah cartouche on page 604', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: SizedBox(
+            width: 360,
+            height: 760,
+            child: MushafQcfPage(
+              pageNumber: 604,
+              theme: QcfThemeData(
+                pageBackgroundColor: Colors.transparent,
+                verseTextColor: Colors.black,
+                verseNumberColor: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        find.byKey(const ValueKey('mushafInlineSurahHeader')),
+        findsNWidgets(3),
+      );
+      expect(find.text(getSurahNameArabic(112)), findsOneWidget);
+      expect(find.text(getSurahNameArabic(113)), findsOneWidget);
+      expect(find.text(getSurahNameArabic(114)), findsOneWidget);
+      final titleTops = [112, 113, 114]
+          .map(
+            (surah) =>
+                tester.getTopLeft(find.text(getSurahNameArabic(surah))).dy,
+          )
+          .toList();
+      expect(titleTops[0], lessThan(titleTops[1]));
+      expect(titleTops[1], lessThan(titleTops[2]));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('uses single-slot decoration for middle surah openings', (
