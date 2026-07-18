@@ -8,6 +8,7 @@ import '../../data/notifications/prayer_reminder_settings.dart';
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/surah.dart';
 import '../providers/quran_providers.dart';
+import '../widgets/juz_tile.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
@@ -20,6 +21,8 @@ enum _HomeMenuAction {
 }
 
 enum _FeedbackPromptAction { notNow, giveFeedback }
+
+enum _QuranIndexSection { surahs, juz }
 
 typedef _OpenReading =
     Future<void> Function(Surah surah, {String? initialVerseId});
@@ -34,6 +37,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _heartbeatPromptScheduled = false;
   Timer? _heartbeatPromptRefreshTimer;
+  _QuranIndexSection _indexSection = _QuranIndexSection.surahs;
 
   @override
   void dispose() {
@@ -166,23 +170,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   surahsByNumber: surahsByNumber,
                   onOpenReading: _openReadingScreen,
                 ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: SegmentedButton<_QuranIndexSection>(
+                  segments: const [
+                    ButtonSegment(
+                      value: _QuranIndexSection.surahs,
+                      label: Text('Surahs'),
+                    ),
+                    ButtonSegment(
+                      value: _QuranIndexSection.juz,
+                      label: Text('Juz'),
+                    ),
+                  ],
+                  selected: {_indexSection},
+                  showSelectedIcon: false,
+                  onSelectionChanged: (selection) {
+                    setState(() => _indexSection = selection.first);
+                  },
+                ),
+              ),
               Expanded(
-                child: surahs.isEmpty
-                    ? const Center(child: Text('No surahs found.'))
-                    : ListView.separated(
-                        itemCount: surahs.length,
-                        separatorBuilder: (context, index) => Divider(
-                          height: 1,
-                          color: Theme.of(context).dividerColor,
-                        ),
-                        itemBuilder: (context, index) {
-                          final surah = surahs[index];
-                          return SurahTile(
-                            surah: surah,
-                            onTap: () => unawaited(_openReadingScreen(surah)),
-                          );
-                        },
-                      ),
+                child: _indexSection == _QuranIndexSection.surahs
+                    ? _buildSurahList(surahs)
+                    : _buildJuzList(surahsByNumber),
               ),
             ],
           );
@@ -202,6 +213,64 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildSurahList(List<Surah> surahs) {
+    if (surahs.isEmpty) {
+      return const Center(child: Text('No surahs found.'));
+    }
+    return ListView.separated(
+      itemCount: surahs.length,
+      separatorBuilder: (context, index) =>
+          Divider(height: 1, color: Theme.of(context).dividerColor),
+      itemBuilder: (context, index) {
+        final surah = surahs[index];
+        return SurahTile(
+          surah: surah,
+          onTap: () => unawaited(_openReadingScreen(surah)),
+        );
+      },
+    );
+  }
+
+  Widget _buildJuzList(Map<int, Surah> surahsByNumber) {
+    return ref
+        .watch(juzListProvider)
+        .when(
+          data: (entries) => ListView.separated(
+            itemCount: entries.length,
+            separatorBuilder: (context, index) =>
+                Divider(height: 1, color: Theme.of(context).dividerColor),
+            itemBuilder: (context, index) {
+              final entry = entries[index];
+              final startSurah = surahsByNumber[entry.juz.startSurahNumber]!;
+              return JuzTile(
+                juz: entry.juz,
+                startSurah: startSurah,
+                page: entry.page,
+                onTap: () => unawaited(
+                  _openReadingScreen(
+                    startSurah,
+                    initialVerseId: entry.juz.startVerseId,
+                  ),
+                ),
+              );
+            },
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                'Failed to load Juz.\nPlease restart the app.',
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+              ),
+            ),
+          ),
+        );
   }
 
   void _maybeScheduleHeartbeatPrompt(AsyncValue<bool> promptAsync) {

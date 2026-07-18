@@ -17,6 +17,7 @@ import '../../data/repositories/quran_repository_impl.dart';
 import '../../data/repositories/reading_position_repository.dart';
 import '../../data/repositories/reading_position_repository_impl.dart';
 import '../../domain/models/bookmark.dart';
+import '../../domain/models/juz.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
@@ -153,6 +154,19 @@ final surahListProvider = FutureProvider<List<Surah>>((ref) async {
   await ref.watch(initializeDataProvider.future);
   final repo = ref.watch(quranRepositoryProvider);
   return repo.getAllSurahs();
+});
+
+typedef JuzListEntry = ({Juz juz, int page});
+
+final juzListProvider = FutureProvider<List<JuzListEntry>>((ref) async {
+  await ref.watch(initializeDataProvider.future);
+  final repo = ref.watch(quranRepositoryProvider);
+  return Future.wait(
+    canonicalJuzs.map((juz) async {
+      final page = await repo.getPageForVerse(juz.startVerseId);
+      return (juz: juz, page: page);
+    }),
+  );
 });
 
 final versesBySurahProvider = FutureProvider.family<List<Verse>, int>((
