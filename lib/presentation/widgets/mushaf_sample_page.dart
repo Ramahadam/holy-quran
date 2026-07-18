@@ -25,6 +25,8 @@ final Map<String, String> _normalVerseTextById = {
 @visibleForTesting
 const Size canonicalMushafPageSize = Size(382.68, 547.09);
 
+const double _minimumMushafHeightCoverage = .85;
+
 @visibleForTesting
 const double mushafPageHeaderHeight = 57;
 
@@ -139,39 +141,67 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
       color: isDark ? AppTheme.darkBackground : AppTheme.mushafBackground,
       child: SafeArea(
         child: SizedBox.expand(
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              key: const ValueKey('canonicalMushafPageSurface'),
-              width: canonicalMushafPageSize.width,
-              height: canonicalMushafPageSize.height,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  border: isDark
-                      ? Border.all(color: AppTheme.darkDivider)
-                      : null,
-                  boxShadow: isDark
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: .28),
-                            blurRadius: 18,
-                            offset: const Offset(0, 8),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    size: canonicalMushafPageSize,
-                    padding: EdgeInsets.zero,
-                    viewPadding: EdgeInsets.zero,
-                    viewInsets: EdgeInsets.zero,
-                    textScaler: TextScaler.noScaling,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final widthScale =
+                  constraints.maxWidth / canonicalMushafPageSize.width;
+              final canonicalHeightAtViewportWidth =
+                  canonicalMushafPageSize.height * widthScale;
+              final shouldExpandTallPortrait =
+                  constraints.maxHeight > constraints.maxWidth &&
+                  canonicalHeightAtViewportWidth / constraints.maxHeight <
+                      _minimumMushafHeightCoverage;
+              final viewportHeightInPageUnits =
+                  constraints.maxHeight / widthScale;
+
+              // Preserve the canonical horizontal metrics that keep QCF lines
+              // stable. Only severe portrait letterboxing gains logical height;
+              // the existing line-height scaling then uses that space without
+              // cropping or geometrically stretching Quran glyphs.
+              final pageSize = Size(
+                canonicalMushafPageSize.width,
+                shouldExpandTallPortrait &&
+                        viewportHeightInPageUnits >
+                            canonicalMushafPageSize.height
+                    ? viewportHeightInPageUnits
+                    : canonicalMushafPageSize.height,
+              );
+
+              return FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  key: const ValueKey('canonicalMushafPageSurface'),
+                  width: pageSize.width,
+                  height: pageSize.height,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: isDark
+                          ? Border.all(color: AppTheme.darkDivider)
+                          : null,
+                      boxShadow: isDark
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: .28),
+                                blurRadius: 18,
+                                offset: const Offset(0, 8),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(
+                        size: pageSize,
+                        padding: EdgeInsets.zero,
+                        viewPadding: EdgeInsets.zero,
+                        viewInsets: EdgeInsets.zero,
+                        textScaler: TextScaler.noScaling,
+                      ),
+                      child: ClipRect(child: page),
+                    ),
                   ),
-                  child: ClipRect(child: page),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ),

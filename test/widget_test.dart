@@ -502,6 +502,7 @@ void main() {
           ({
             double fontSize,
             int lineCount,
+            double pageHeight,
             double coverage,
             double bottomGapRatio,
             double averageLinePitch,
@@ -542,6 +543,7 @@ void main() {
           return (
             fontSize: bodyText.style!.fontSize!,
             lineCount: lineTops.length,
+            pageHeight: pageRect.height,
             coverage: bodyRect.height / pageRect.height,
             bottomGapRatio:
                 (pageRect.bottom - bodyRect.bottom) / pageRect.height,
@@ -557,9 +559,13 @@ void main() {
         expect(compact.fontSize, greaterThanOrEqualTo(20));
         expect(compact.lineCount, 15);
         expect(tall.lineCount, 15);
-        expect(compact.coverage, closeTo(tall.coverage, .001));
-        expect(compact.bottomGapRatio, closeTo(tall.bottomGapRatio, .001));
-        expect(tall.averageLinePitch, closeTo(compact.averageLinePitch, .001));
+        expect(compact.pageHeight, closeTo(760, .1));
+        expect(tall.pageHeight, closeTo(1000, .1));
+        expect(compact.coverage, greaterThanOrEqualTo(.85));
+        expect(tall.coverage, greaterThanOrEqualTo(.85));
+        expect(compact.bottomGapRatio, lessThan(.1));
+        expect(tall.bottomGapRatio, lessThan(.1));
+        expect(tall.averageLinePitch, greaterThan(compact.averageLinePitch));
         expect(tester.takeException(), isNull);
       },
     );
@@ -1620,12 +1626,10 @@ void main() {
         expect(stripRect.width, closeTo(size.width, .1));
         expect(stripRect.height, lessThanOrEqualTo(32));
         expect(pageViewRect.top, closeTo(stripRect.bottom, .1));
+        expect(pageRect.width, closeTo(pageViewRect.width, .1));
         expect(
-          pageRect.width / pageRect.height,
-          closeTo(
-            canonicalMushafPageSize.width / canonicalMushafPageSize.height,
-            .001,
-          ),
+          pageRect.height / pageViewRect.height,
+          greaterThanOrEqualTo(.85),
         );
         expect(pageRect.left, greaterThanOrEqualTo(pageViewRect.left));
         expect(pageRect.right, lessThanOrEqualTo(pageViewRect.right));
@@ -1674,7 +1678,7 @@ void main() {
         );
         expect(
           controlledPageRect.top,
-          greaterThanOrEqualTo(controlledStripRect.bottom),
+          greaterThanOrEqualTo(controlledStripRect.bottom - .1),
         );
         expect(
           controlledBodyRect.bottom,

@@ -89,7 +89,38 @@ void main() {
       expect(mushafSurahTitleFontFamily, 'KFGQPCHafsUthmanicScript');
     });
 
-    testWidgets('contain-scales the canonical Mushaf page in the viewport', (
+    testWidgets(
+      'keeps canonical horizontal metrics while using a tall viewport',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(430, 932);
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
+
+        await tester.pumpWidget(
+          const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 3))),
+        );
+        await tester.pumpAndSettle();
+
+        final surface = tester.getRect(
+          find.byKey(const ValueKey('canonicalMushafPageSurface')),
+        );
+        final expectedScale = 430 / canonicalMushafPageSize.width;
+        final logicalPageSize = MediaQuery.sizeOf(
+          tester.element(find.byType(MushafQcfPage)),
+        );
+
+        expect(surface.width, closeTo(430, .1));
+        expect(surface.height, closeTo(932, .1));
+        expect(logicalPageSize.width, canonicalMushafPageSize.width);
+        expect(logicalPageSize.height, closeTo(932 / expectedScale, .1));
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('uses most of a tall portrait page view for the Mushaf', (
       tester,
     ) async {
       tester.view.devicePixelRatio = 1;
@@ -104,23 +135,14 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final surface = tester.getRect(
-        find.byKey(const ValueKey('canonicalMushafPageSurface')),
-      );
-      final expectedScale = 430 / canonicalMushafPageSize.width;
-      expect(surface.width, closeTo(430, .1));
-      expect(
-        surface.height,
-        closeTo(canonicalMushafPageSize.height * expectedScale, .1),
-      );
-      expect(
-        surface.width / surface.height,
-        closeTo(
-          canonicalMushafPageSize.width / canonicalMushafPageSize.height,
-          .001,
-        ),
-      );
-      expect(tester.takeException(), isNull);
+      final availableHeight = tester
+          .getRect(find.byType(MushafSamplePage))
+          .height;
+      final surfaceHeight = tester
+          .getRect(find.byKey(const ValueKey('canonicalMushafPageSurface')))
+          .height;
+
+      expect(surfaceHeight / availableHeight, greaterThanOrEqualTo(.85));
     });
 
     testWidgets('keeps dense Mushaf pages comfortably readable on phones', (

@@ -30,60 +30,79 @@ void main() {
   });
 
   group('canonical Mushaf composition', () {
-    testWidgets('keeps one page aspect ratio on phones and landscape', (
-      tester,
-    ) async {
-      tester.view.devicePixelRatio = 1;
-      addTearDown(() {
-        tester.view.resetDevicePixelRatio();
-        tester.view.resetPhysicalSize();
-      });
+    testWidgets(
+      'expands severe phone letterboxing and keeps the canonical fallback',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        addTearDown(() {
+          tester.view.resetDevicePixelRatio();
+          tester.view.resetPhysicalSize();
+        });
 
-      for (final size in const [
-        Size(320, 568),
-        Size(360, 800),
-        Size(430, 932),
-        Size(800, 1280),
-        Size(800, 360),
-      ]) {
-        tester.view.physicalSize = size;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: MushafSamplePage(key: ValueKey(size), page: 3),
+        for (final size in const [
+          Size(320, 568),
+          Size(360, 800),
+          Size(430, 932),
+        ]) {
+          tester.view.physicalSize = size;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: MushafSamplePage(key: ValueKey(size), page: 3),
+              ),
             ),
-          ),
-        );
-        await tester.pumpAndSettle();
+          );
+          await tester.pumpAndSettle();
 
-        final surface = tester.getRect(
-          find.byKey(const ValueKey('canonicalMushafPageSurface')),
-        );
-        expect(
-          surface.width / surface.height,
-          closeTo(_canonicalPageAspectRatio, .001),
-          reason: 'Mushaf composition changed at $size.',
-        );
-        expect(surface.width, lessThanOrEqualTo(size.width));
-        expect(surface.height, lessThanOrEqualTo(size.height));
+          final surface = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+          expect(surface.width, closeTo(size.width, .01));
+          expect(surface.height, closeTo(size.height, .01));
+        }
 
-        final expectedScale = math.min(
-          size.width / canonicalMushafPageSize.width,
-          size.height / canonicalMushafPageSize.height,
-        );
-        final expectedSize = canonicalMushafPageSize * expectedScale;
-        expect(
-          surface.width,
-          closeTo(expectedSize.width, .01),
-          reason: 'Mushaf composition was not contain-scaled at $size.',
-        );
-        expect(
-          surface.height,
-          closeTo(expectedSize.height, .01),
-          reason: 'Mushaf composition was not contain-scaled at $size.',
-        );
-      }
-    });
+        for (final size in const [
+          Size(599, 800),
+          Size(800, 1280),
+          Size(800, 360),
+        ]) {
+          tester.view.physicalSize = size;
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: MushafSamplePage(key: ValueKey(size), page: 3),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          final surface = tester.getRect(
+            find.byKey(const ValueKey('canonicalMushafPageSurface')),
+          );
+          expect(
+            surface.width / surface.height,
+            closeTo(_canonicalPageAspectRatio, .001),
+            reason: 'Mushaf fallback changed at $size.',
+          );
+
+          final expectedScale = math.min(
+            size.width / canonicalMushafPageSize.width,
+            size.height / canonicalMushafPageSize.height,
+          );
+          final expectedSize = canonicalMushafPageSize * expectedScale;
+          expect(
+            surface.width,
+            closeTo(expectedSize.width, .01),
+            reason: 'Mushaf fallback was not contain-scaled at $size.',
+          );
+          expect(
+            surface.height,
+            closeTo(expectedSize.height, .01),
+            reason: 'Mushaf fallback was not contain-scaled at $size.',
+          );
+        }
+      },
+    );
 
     testWidgets('ignores system font scaling on representative pages', (
       tester,
