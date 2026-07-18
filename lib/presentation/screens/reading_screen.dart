@@ -468,10 +468,15 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           shouldScrollToInitialVerse:
               widget.initialVerseId != null && !_didScrollToInitialClassicVerse,
           onInitialVerseScrolled: () {
-            _didScrollToInitialClassicVerse = true;
+            if (!mounted) return;
+            setState(() => _didScrollToInitialClassicVerse = true);
           },
           onVerseFocused: (verseId) => _currentPageFirstVerseId = verseId,
           onVerseVisible: (verse) {
+            if (widget.initialVerseId != null &&
+                !_didScrollToInitialClassicVerse) {
+              return;
+            }
             _currentPageFirstVerseId = verse.verseId;
             if (verse.page != _currentPage) {
               setState(() => _currentPage = verse.page);
@@ -970,10 +975,13 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     final bookmarks = {...?bookmarksAsync.valueOrNull, ..._additionalBookmarks};
 
     if (widget.shouldScrollToInitialVerse && widget.initialVerseId != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         final context = _initialVerseKey.currentContext;
-        if (context != null) {
-          Scrollable.ensureVisible(
+        final startsAtInitialVerse =
+            _verses.isNotEmpty &&
+            _verses.first.verseId == widget.initialVerseId;
+        if (!startsAtInitialVerse && context != null) {
+          await Scrollable.ensureVisible(
             context,
             alignment: 0.1,
             duration: Duration.zero,
@@ -1092,15 +1100,17 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
       if (paragraphVerses.isEmpty) return;
 
       final initialVerseId = widget.initialVerseId;
-      final paragraphKey =
+      final containsInitialVerse =
+          widget.useEagerScroll &&
           initialVerseId != null &&
-              paragraphVerses.any((verse) => verse.verseId == initialVerseId)
-          ? _initialVerseKey
-          : null;
+          paragraphVerses.any((verse) => verse.verseId == initialVerseId);
+
+      if (containsInitialVerse) {
+        widgets.add(SizedBox(key: _initialVerseKey, height: 1));
+      }
 
       widgets.add(
         _ClassicVerseParagraph(
-          key: paragraphKey,
           verses: List<Verse>.unmodifiable(paragraphVerses),
           bookmarks: bookmarks,
           onVerseFocused: widget.onVerseFocused,
@@ -1363,7 +1373,6 @@ class _ClassicVerseParagraph extends StatefulWidget {
   final ValueChanged<String>? onVerseFocused;
 
   const _ClassicVerseParagraph({
-    super.key,
     required this.verses,
     required this.bookmarks,
     this.onVerseFocused,

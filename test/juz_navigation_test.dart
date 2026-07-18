@@ -9,6 +9,7 @@ import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/juz_tile.dart';
+import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 
 const _alFatihah = Surah(
   surahNumber: 1,
@@ -83,6 +84,16 @@ void main() {
     );
     expect(readingScreen.surah, _alBaqarah);
     expect(readingScreen.initialVerseId, '2:142');
+    expect(find.text('Page 22'), findsOneWidget);
+
+    final initialVerse = find.textContaining(
+      'نص الآية 142',
+      findRichText: true,
+    );
+    expect(initialVerse, findsOneWidget);
+    expect(tester.getTopLeft(initialVerse).dy, inInclusiveRange(56, 300));
+
+    await _expectMushafPage(tester, 22);
   });
 
   testWidgets('keeps the Juz 11 navigation boundary at 9:93', (tester) async {
@@ -99,6 +110,8 @@ void main() {
     );
     expect(readingScreen.surah, _atTawbah);
     expect(readingScreen.initialVerseId, '9:93');
+
+    await _expectMushafPage(tester, 201);
   });
 }
 
@@ -120,7 +133,7 @@ Widget _buildTestApp() {
       pageForVerseProvider(
         '2:142',
       ).overrideWith((ref) async => _juz2Start.page),
-      classicVersesProvider(2).overrideWith((ref) async => const [_juz2Start]),
+      classicVersesProvider(2).overrideWith((ref) async => _alBaqarahVerses()),
       versesByPageProvider(22).overrideWith((ref) async => const [_juz2Start]),
       bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
       pageForVerseProvider(
@@ -137,5 +150,33 @@ Widget _buildTestApp() {
       darkTheme: AppTheme.dark,
       home: const HomeScreen(),
     ),
+  );
+}
+
+List<Verse> _alBaqarahVerses() {
+  return List.generate(286, (index) {
+    final verseNumber = index + 1;
+    final page = verseNumber <= 142
+        ? 2 + ((verseNumber - 1) * 20 ~/ 141)
+        : 22 + ((verseNumber - 142) * 27 ~/ 144);
+    return Verse(
+      verseId: '2:$verseNumber',
+      surahNumber: 2,
+      verseNumber: verseNumber,
+      arabicText: 'نص الآية $verseNumber للاختبار',
+      page: page,
+    );
+  });
+}
+
+Future<void> _expectMushafPage(WidgetTester tester, int page) async {
+  await tester.tap(find.text('Mushaf'));
+  await tester.pumpAndSettle();
+
+  expect(
+    find.byWidgetPredicate(
+      (widget) => widget is MushafSamplePage && widget.page == page,
+    ),
+    findsOneWidget,
   );
 }
