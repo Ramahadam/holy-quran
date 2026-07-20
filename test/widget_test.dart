@@ -749,15 +749,8 @@ void main() {
 
       await tester.tap(find.byTooltip('Menu'));
       await tester.pumpAndSettle();
-      final darkModeItem = find.ancestor(
-        of: find.text('Dark mode'),
-        matching: find.byWidgetPredicate(
-          (widget) =>
-              widget.runtimeType.toString().startsWith('CheckedPopupMenuItem'),
-        ),
-      );
-      expect(darkModeItem, findsOneWidget);
-      await tester.tap(darkModeItem);
+      expect(find.text('Dark mode'), findsOneWidget);
+      await tester.tap(find.text('Dark mode'));
       await tester.pumpAndSettle();
 
       expect(
@@ -791,6 +784,66 @@ void main() {
       expect(find.text('Continue Reading'), findsOneWidget);
       expect(find.textContaining('The Opening'), findsWidgets);
       expect(find.textContaining('Verse 3'), findsOneWidget);
+    });
+
+    testWidgets('styles reading shortcuts as modern inset cards', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final position = ReadingPosition(
+        verseId: '1:3',
+        lastReadAt: DateTime(2026, 5, 24),
+      );
+      final bookmark = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime(2026, 5, 24),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => position),
+            recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final colors = AppTheme.light.colorScheme;
+      for (final key in const [
+        ValueKey('continueReadingCard'),
+        ValueKey('bookmarksCard'),
+      ]) {
+        final cardFinder = find.byKey(key);
+        expect(cardFinder, findsOneWidget);
+
+        final card = tester.widget<Material>(cardFinder);
+        expect(card.color, colors.surfaceContainerLow);
+        expect(card.shape, isA<RoundedRectangleBorder>());
+
+        final shape = card.shape! as RoundedRectangleBorder;
+        expect(shape.borderRadius, BorderRadius.circular(16));
+        expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
+        expect(tester.getTopLeft(cardFinder).dx, 16);
+        expect(tester.getBottomRight(cardFinder).dx, 784);
+      }
+
+      final continueReadingData = tester
+          .getSemantics(find.byKey(const ValueKey('continueReadingCard')))
+          .getSemanticsData();
+      expect(continueReadingData.hasAction(SemanticsAction.tap), isTrue);
+
+      expect(
+        tester.getSize(find.widgetWithIcon(IconButton, Icons.bookmark_rounded)),
+        const Size.square(48),
+      );
+      semantics.dispose();
     });
 
     testWidgets('does not show Last Read banner when no position saved', (
@@ -879,6 +932,93 @@ void main() {
       await tester.pump();
 
       expect(repo.removedVerseIds, ['1:1']);
+    });
+
+    testWidgets('shows a compact, coordinated home action menu', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final menuButtonFinder = find.byKey(const ValueKey('homeMenuButton'));
+      expect(menuButtonFinder, findsOneWidget);
+
+      final menuButton = tester.widget<PopupMenuButton>(menuButtonFinder);
+      expect(menuButton.color, AppTheme.light.colorScheme.surfaceContainerHigh);
+      expect(menuButton.shape, isA<RoundedRectangleBorder>());
+      final menuShape = menuButton.shape! as RoundedRectangleBorder;
+      expect(menuShape.borderRadius, BorderRadius.circular(16));
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+
+      for (final action in const [
+        'darkMode',
+        'reminders',
+        'feedback',
+        'exportBackup',
+        'importBackup',
+      ]) {
+        final row = find.byKey(ValueKey('homeMenu-$action'));
+        expect(row, findsOneWidget);
+        expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
+        expect(
+          find.descendant(of: row, matching: find.byType(ListTile)),
+          findsNothing,
+        );
+      }
+
+      final darkModeData = tester
+          .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
+          .getSemanticsData();
+      expect(darkModeData.hasFlag(SemanticsFlag.hasCheckedState), isTrue);
+      expect(darkModeData.hasFlag(SemanticsFlag.isChecked), isFalse);
+    });
+
+    testWidgets('home action menu grows for large text', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byKey(const ValueKey('homeMenu-reminders'))).height,
+        greaterThan(48),
+      );
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('opens reading reminders dialog and schedules a reminder', (

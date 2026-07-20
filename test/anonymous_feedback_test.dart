@@ -129,7 +129,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byTooltip('Menu'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Send feedback'));
       await tester.pumpAndSettle();

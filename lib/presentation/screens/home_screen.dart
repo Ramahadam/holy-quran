@@ -53,6 +53,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
     final themeMode = ref.watch(themeModeProvider);
     final darkModeEnabled = themeMode == ThemeMode.dark;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
@@ -72,8 +74,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         actions: [
           PopupMenuButton<_HomeMenuAction>(
+            key: const ValueKey('homeMenuButton'),
             tooltip: 'Menu',
-            icon: const Icon(Icons.more_vert),
+            position: PopupMenuPosition.under,
+            offset: const Offset(0, 4),
+            color: colors.surfaceContainerHigh,
+            surfaceTintColor: Colors.transparent,
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: colors.outlineVariant.withValues(alpha: 0.7),
+              ),
+            ),
+            constraints: const BoxConstraints(minWidth: 252, maxWidth: 280),
             onSelected: (action) {
               switch (action) {
                 case _HomeMenuAction.toggleDarkMode:
@@ -91,49 +105,83 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               }
             },
             itemBuilder: (context) => [
-              CheckedPopupMenuItem(
+              PopupMenuItem(
                 value: _HomeMenuAction.toggleDarkMode,
-                checked: darkModeEnabled,
-                child: ListTile(
-                  leading: Icon(
-                    darkModeEnabled
-                        ? Icons.dark_mode
-                        : Icons.dark_mode_outlined,
-                  ),
-                  title: const Text('Dark mode'),
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: const ValueKey('homeMenu-darkMode'),
+                  icon: darkModeEnabled
+                      ? Icons.dark_mode_rounded
+                      : Icons.dark_mode_outlined,
+                  label: 'Dark mode',
+                  checked: darkModeEnabled,
                 ),
               ),
-              const PopupMenuDivider(),
+              const PopupMenuDivider(height: 9),
               const PopupMenuItem(
                 value: _HomeMenuAction.reminders,
-                child: ListTile(
-                  leading: Icon(Icons.notifications_active_outlined),
-                  title: Text('Reading reminders'),
+                height: 48,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: ValueKey('homeMenu-reminders'),
+                  icon: Icons.notifications_active_outlined,
+                  label: 'Reading reminders',
                 ),
               ),
               const PopupMenuItem(
                 value: _HomeMenuAction.feedback,
-                child: ListTile(
-                  leading: Icon(Icons.feedback_outlined),
-                  title: Text('Send feedback'),
+                height: 48,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: ValueKey('homeMenu-feedback'),
+                  icon: Icons.feedback_outlined,
+                  label: 'Send feedback',
                 ),
               ),
-              const PopupMenuDivider(),
+              const PopupMenuDivider(height: 9),
               const PopupMenuItem(
                 value: _HomeMenuAction.exportBackup,
-                child: ListTile(
-                  leading: Icon(Icons.upload_file),
-                  title: Text('Export backup'),
+                height: 48,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: ValueKey('homeMenu-exportBackup'),
+                  icon: Icons.upload_file_rounded,
+                  label: 'Export backup',
                 ),
               ),
               const PopupMenuItem(
                 value: _HomeMenuAction.importBackup,
-                child: ListTile(
-                  leading: Icon(Icons.download),
-                  title: Text('Import backup'),
+                height: 48,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: ValueKey('homeMenu-importBackup'),
+                  icon: Icons.download_rounded,
+                  label: 'Import backup',
                 ),
               ),
             ],
+            child: SizedBox.square(
+              dimension: 48,
+              child: Center(
+                child: Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.more_horiz_rounded,
+                    color: colors.onSurfaceVariant,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -899,6 +947,56 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
   }
 }
 
+class _HomeMenuItem extends StatelessWidget {
+  final Key rowKey;
+  final IconData icon;
+  final String label;
+  final bool? checked;
+
+  const _HomeMenuItem({
+    required this.rowKey,
+    required this.icon,
+    required this.label,
+    this.checked,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Semantics(
+      key: rowKey,
+      checked: checked,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            children: [
+              Icon(icon, color: colors.primary, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (checked == true) ...[
+                const SizedBox(width: 12),
+                Icon(Icons.check_rounded, color: colors.primary, size: 18),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _LastReadBanner extends ConsumerWidget {
   final Surah surah;
   final String verseId;
@@ -913,48 +1011,84 @@ class _LastReadBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final verseNum = verseId.split(':').elementAtOrNull(1) ?? '';
-    return InkWell(
-      onTap: () => unawaited(onOpenReading(surah, initialVerseId: verseId)),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          border: Border(
-            bottom: BorderSide(color: Theme.of(context).colorScheme.primary),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.menu_book,
-              color: Theme.of(context).colorScheme.primary,
-              size: 18,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final readingLabel =
+        '${surah.nameEnglish}${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}';
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
+    );
+    void openReading() =>
+        unawaited(onOpenReading(surah, initialVerseId: verseId));
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Semantics(
+        button: true,
+        label: 'Continue reading, $readingLabel',
+        onTap: openReading,
+        excludeSemantics: true,
+        child: Material(
+          key: const ValueKey('continueReadingCard'),
+          color: colors.surfaceContainerLow,
+          shape: cardShape,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            customBorder: cardShape,
+            onTap: openReading,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
                 children: [
-                  Text(
-                    'Continue Reading',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: colors.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.menu_book_rounded,
+                      color: colors.onPrimaryContainer,
+                      size: 21,
                     ),
                   ),
-                  Text(
-                    '${surah.nameEnglish}${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Continue Reading',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colors.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          readingLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colors.onSurface,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: colors.onSurfaceVariant,
+                    size: 20,
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: Theme.of(context).colorScheme.primary,
-              size: 18,
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -974,34 +1108,63 @@ class _BookmarksSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(color: Theme.of(context).dividerColor),
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(16),
+      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Material(
+        key: const ValueKey('bookmarksCard'),
+        color: colors.surfaceContainerLow,
+        shape: cardShape,
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.bookmark_border_rounded,
+                    color: colors.primary,
+                    size: 19,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Bookmarks',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              height: 1,
+              color: colors.outlineVariant.withValues(alpha: 0.7),
+            ),
+            for (var index = 0; index < bookmarks.length; index++) ...[
+              if (index > 0)
+                Divider(
+                  height: 1,
+                  indent: 64,
+                  endIndent: 14,
+                  color: colors.outlineVariant.withValues(alpha: 0.55),
+                ),
+              _BookmarkRow(
+                bookmark: bookmarks[index],
+                surah: _surahForBookmark(bookmarks[index]),
+                onOpenReading: onOpenReading,
+              ),
+            ],
+          ],
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(
-              'Bookmarks',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-          ...bookmarks.map(
-            (bookmark) => _BookmarkRow(
-              bookmark: bookmark,
-              surah: _surahForBookmark(bookmark),
-              onOpenReading: onOpenReading,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1029,6 +1192,8 @@ class _BookmarkRow extends ConsumerWidget {
     final verseNum = bookmark.verseId.split(':').elementAtOrNull(1) ?? '';
     final title =
         surah?.nameEnglish ?? 'Surah ${bookmark.verseId.split(':').first}';
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return InkWell(
       onTap: surah == null
@@ -1037,30 +1202,38 @@ class _BookmarkRow extends ConsumerWidget {
               onOpenReading(surah!, initialVerseId: bookmark.verseId),
             ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
         child: Row(
           children: [
             IconButton(
               tooltip: 'Remove bookmark',
-              icon: Icon(
-                Icons.bookmark,
-                color: Theme.of(context).colorScheme.primary,
+              style: IconButton.styleFrom(
+                foregroundColor: colors.onPrimaryContainer,
+                backgroundColor: colors.primaryContainer,
+                minimumSize: const Size.square(48),
+                maximumSize: const Size.square(48),
+                padding: EdgeInsets.zero,
               ),
+              icon: const Icon(Icons.bookmark_rounded, size: 20),
               onPressed: () => _removeBookmark(context, ref),
             ),
+            const SizedBox(width: 10),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  '$title${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}',
-                  style: Theme.of(context).textTheme.bodyMedium,
+              child: Text(
+                '$title${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
+            const SizedBox(width: 8),
             Icon(
-              Icons.chevron_right,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              size: 18,
+              Icons.chevron_right_rounded,
+              color: colors.onSurfaceVariant,
+              size: 20,
             ),
           ],
         ),
