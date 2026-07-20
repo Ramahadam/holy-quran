@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:ui' show CheckedState;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -984,8 +986,7 @@ void main() {
       final darkModeData = tester
           .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
           .getSemanticsData();
-      expect(darkModeData.hasFlag(SemanticsFlag.hasCheckedState), isTrue);
-      expect(darkModeData.hasFlag(SemanticsFlag.isChecked), isFalse);
+      expect(darkModeData.flagsCollection.isChecked, CheckedState.isFalse);
     });
 
     testWidgets('home action menu grows for large text', (tester) async {
@@ -1019,6 +1020,76 @@ void main() {
         greaterThan(48),
       );
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('uses coordinated modern dialogs for backup actions', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Export backup'));
+      await tester.pumpAndSettle();
+
+      final colors = AppTheme.light.colorScheme;
+      final exportDialogFinder = find.byKey(
+        const ValueKey('homeDialog-exportBackup'),
+      );
+      expect(exportDialogFinder, findsOneWidget);
+      final exportDialog = tester.widget<AlertDialog>(exportDialogFinder);
+      expect(exportDialog.backgroundColor, colors.surfaceContainerHigh);
+      expect(exportDialog.surfaceTintColor, Colors.transparent);
+      expect(exportDialog.shape, isA<RoundedRectangleBorder>());
+      final exportShape = exportDialog.shape! as RoundedRectangleBorder;
+      expect(exportShape.borderRadius, BorderRadius.circular(24));
+      expect(
+        exportShape.side.color,
+        colors.outlineVariant.withValues(alpha: 0.7),
+      );
+      expect(
+        find.byKey(const ValueKey('homeDialogHeader-exportBackup')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('backupProtectionNotice')),
+        findsOneWidget,
+      );
+      expect(find.byType(TextField), findsNWidgets(2));
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Import backup'));
+      await tester.pumpAndSettle();
+
+      final importDialogFinder = find.byKey(
+        const ValueKey('homeDialog-importBackup'),
+      );
+      expect(importDialogFinder, findsOneWidget);
+      final importDialog = tester.widget<AlertDialog>(importDialogFinder);
+      expect(importDialog.backgroundColor, colors.surfaceContainerHigh);
+      expect(importDialog.shape, exportDialog.shape);
+      expect(
+        find.byKey(const ValueKey('homeDialogHeader-importBackup')),
+        findsOneWidget,
+      );
+      expect(find.byType(TextField), findsOneWidget);
     });
 
     testWidgets('opens reading reminders dialog and schedules a reminder', (

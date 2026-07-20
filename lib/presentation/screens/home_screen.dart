@@ -497,6 +497,172 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+class _HomeDialog extends StatelessWidget {
+  final Key dialogKey;
+  final Key headerKey;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget content;
+  final List<Widget> actions;
+
+  const _HomeDialog({
+    required this.dialogKey,
+    required this.headerKey,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.content,
+    required this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return AlertDialog(
+      key: dialogKey,
+      backgroundColor: colors.surfaceContainerHigh,
+      surfaceTintColor: Colors.transparent,
+      elevation: 8,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      title: Row(
+        key: headerKey,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: colors.primaryContainer,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(icon, color: colors.onPrimaryContainer, size: 21),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      content: content,
+      actionsPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      actions: actions,
+    );
+  }
+}
+
+class _HomeDialogNotice extends StatelessWidget {
+  final Key noticeKey;
+  final IconData icon;
+  final String text;
+
+  const _HomeDialogNotice({
+    required this.noticeKey,
+    required this.icon,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.6)),
+    );
+
+    return Material(
+      key: noticeKey,
+      color: colors.surfaceContainerLow,
+      shape: shape,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: colors.primary, size: 19),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                text,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+InputDecoration _homeDialogInputDecoration(
+  BuildContext context, {
+  required String labelText,
+  String? hintText,
+  IconData? prefixIcon,
+  bool alignLabelWithHint = false,
+}) {
+  final colors = Theme.of(context).colorScheme;
+  final borderRadius = BorderRadius.circular(14);
+
+  return InputDecoration(
+    labelText: labelText,
+    hintText: hintText,
+    alignLabelWithHint: alignLabelWithHint,
+    prefixIcon: prefixIcon == null ? null : Icon(prefixIcon, size: 20),
+    filled: true,
+    fillColor: colors.surfaceContainerLow,
+    border: OutlineInputBorder(borderRadius: borderRadius),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(
+        color: colors.outlineVariant.withValues(alpha: 0.7),
+      ),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(color: colors.primary, width: 1.5),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(color: colors.error),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderRadius: borderRadius,
+      borderSide: BorderSide(color: colors.error, width: 1.5),
+    ),
+  );
+}
+
 class _BackupPassphraseDialog extends StatefulWidget {
   final bool confirm;
 
@@ -530,11 +696,26 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
   @override
   Widget build(BuildContext context) {
     final confirm = widget.confirm;
-    return AlertDialog(
-      title: Text(confirm ? 'Export backup' : 'Import backup'),
+    final colors = Theme.of(context).colorScheme;
+
+    return _HomeDialog(
+      dialogKey: ValueKey(
+        confirm ? 'homeDialog-exportBackup' : 'homeDialog-importBackup',
+      ),
+      headerKey: ValueKey(
+        confirm
+            ? 'homeDialogHeader-exportBackup'
+            : 'homeDialogHeader-importBackup',
+      ),
+      icon: confirm ? Icons.upload_file_rounded : Icons.download_rounded,
+      title: confirm ? 'Export backup' : 'Import backup',
+      subtitle: confirm
+          ? 'Create an encrypted copy of your reading progress.'
+          : 'Restore your bookmarks and last reading position.',
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: _passphraseController,
@@ -546,27 +727,44 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               onSubmitted: (_) {
                 if (!confirm) _submit();
               },
-              decoration: const InputDecoration(labelText: 'Passphrase'),
+              decoration: _homeDialogInputDecoration(
+                context,
+                labelText: 'Passphrase',
+                prefixIcon: Icons.lock_outline_rounded,
+              ),
             ),
             if (confirm) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextField(
                 controller: _confirmController,
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _submit(),
-                decoration: const InputDecoration(
+                decoration: _homeDialogInputDecoration(
+                  context,
                   labelText: 'Confirm passphrase',
+                  prefixIcon: Icons.lock_outline_rounded,
                 ),
               ),
             ],
+            const SizedBox(height: 12),
+            _HomeDialogNotice(
+              noticeKey: const ValueKey('backupProtectionNotice'),
+              icon: Icons.shield_outlined,
+              text: confirm
+                  ? 'This passphrase encrypts your backup. Keep it somewhere safe.'
+                  : 'Use the same passphrase that was used to create the backup.',
+            ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
-              Text(
-                _errorText!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.red),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  _errorText!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: colors.error),
+                ),
               ),
             ],
           ],
@@ -574,12 +772,18 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
           onPressed: () => _navigator.pop(),
           child: const Text('Cancel'),
         ),
-        FilledButton(
+        FilledButton.icon(
+          style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
           onPressed: _submit,
-          child: Text(confirm ? 'Export' : 'Import'),
+          icon: Icon(
+            confirm ? Icons.upload_rounded : Icons.download_rounded,
+            size: 18,
+          ),
+          label: Text(confirm ? 'Export' : 'Import'),
         ),
       ],
     );
@@ -849,8 +1053,14 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Send feedback'),
+    final colors = Theme.of(context).colorScheme;
+
+    return _HomeDialog(
+      dialogKey: const ValueKey('homeDialog-feedback'),
+      headerKey: const ValueKey('homeDialogHeader-feedback'),
+      icon: Icons.feedback_outlined,
+      title: 'Send feedback',
+      subtitle: 'Help us improve the Quran reading experience.',
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -863,24 +1073,29 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
               maxLines: 6,
               maxLength: AnonymousFeedbackService.maxLength,
               textInputAction: TextInputAction.newline,
-              decoration: const InputDecoration(
+              decoration: _homeDialogInputDecoration(
+                context,
                 labelText: 'Feedback',
                 hintText: 'Share what would make the app better.',
                 alignLabelWithHint: true,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Sent anonymously. Do not include private information.',
-              style: Theme.of(context).textTheme.bodySmall,
+            const SizedBox(height: 12),
+            const _HomeDialogNotice(
+              noticeKey: ValueKey('feedbackPrivacyNotice'),
+              icon: Icons.privacy_tip_outlined,
+              text: 'Sent anonymously. Do not include private information.',
             ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
-              Text(
-                _errorText!,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.red),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  _errorText!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: colors.error),
+                ),
               ),
             ],
           ],
@@ -888,20 +1103,28 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
           onPressed: _submitting
               ? null
               : () => Navigator.of(context).pop(false),
           child: const Text('Cancel'),
         ),
-        FilledButton(
-          onPressed: _submitting ? null : _submit,
-          child: _submitting
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Send'),
-        ),
+        if (_submitting)
+          FilledButton(
+            style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
+            onPressed: null,
+            child: const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          )
+        else
+          FilledButton.icon(
+            style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
+            onPressed: _submit,
+            icon: const Icon(Icons.send_rounded, size: 18),
+            label: const Text('Send'),
+          ),
       ],
     );
   }
