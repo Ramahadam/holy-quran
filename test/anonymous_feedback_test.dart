@@ -227,6 +227,10 @@ void main() {
         find.text('How is your Quran reading experience?'),
         findsOneWidget,
       );
+      expect(
+        find.byKey(const ValueKey('homeDialog-feedbackPrompt')),
+        findsOneWidget,
+      );
 
       await tester.tap(find.text('Give feedback'));
       await tester.pumpAndSettle();

@@ -1092,6 +1092,282 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
+    testWidgets('uses the modern home dialog treatment for reminders', (
+      tester,
+    ) async {
+      final store = _FakePrayerReminderSettingsStore(
+        PrayerReminderSettings.defaults,
+      );
+      final service = PrayerReminderService(
+        settingsStore: store,
+        scheduler: _FakePrayerReminderScheduler(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderServiceProvider.overrideWithValue(service),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pumpAndSettle();
+
+      final colors = AppTheme.light.colorScheme;
+      final dialogFinder = find.byKey(const ValueKey('homeDialog-reminders'));
+      expect(dialogFinder, findsOneWidget);
+      final dialog = tester.widget<AlertDialog>(dialogFinder);
+      expect(dialog.backgroundColor, colors.surfaceContainerHigh);
+      expect(dialog.surfaceTintColor, Colors.transparent);
+      expect(dialog.shape, isA<RoundedRectangleBorder>());
+      final shape = dialog.shape! as RoundedRectangleBorder;
+      expect(shape.borderRadius, BorderRadius.circular(24));
+      expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
+      expect(
+        find.byKey(const ValueKey('homeDialogHeader-reminders')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('reminderEnableCard')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('reminderPrayerTimeCard')),
+        findsOneWidget,
+      );
+      expect(
+        tester.getSize(find.widgetWithText(TextButton, 'Cancel')).height,
+        greaterThanOrEqualTo(44),
+      );
+      expect(
+        tester.getSize(find.byKey(const ValueKey('reminderSaveAction'))).height,
+        greaterThanOrEqualTo(44),
+      );
+    });
+
+    testWidgets('reminder dialog remains usable at 2x text scale', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(360, 640);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+      final service = PrayerReminderService(
+        settingsStore: _FakePrayerReminderSettingsStore(
+          PrayerReminderSettings.defaults,
+        ),
+        scheduler: _FakePrayerReminderScheduler(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderServiceProvider.overrideWithValue(service),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: const TextScaler.linear(2)),
+              child: child!,
+            ),
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('homeDialog-reminders')),
+        findsOneWidget,
+      );
+      await tester.ensureVisible(find.text('Snooze'));
+      await tester.pumpAndSettle();
+      expect(find.text('Save'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('uses the modern reminder shell while settings load', (
+      tester,
+    ) async {
+      final pendingSettings = Completer<PrayerReminderSettings>();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderSettingsProvider.overrideWith(
+              (ref) => pendingSettings.future,
+            ),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(
+        find.byKey(const ValueKey('homeDialog-remindersLoading')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('homeDialogHeader-remindersLoading')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel('Loading reminder settings'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('uses the coordinated green theme for the reminder picker', (
+      tester,
+    ) async {
+      final service = PrayerReminderService(
+        settingsStore: _FakePrayerReminderSettingsStore(
+          PrayerReminderSettings.defaults.copyWith(enabled: true),
+        ),
+        scheduler: _FakePrayerReminderScheduler(),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderServiceProvider.overrideWithValue(service),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('reminderPrayerTimeCard')));
+      await tester.pumpAndSettle();
+
+      final picker = find.byType(TimePickerDialog);
+      expect(picker, findsOneWidget);
+      final pickerTheme = Theme.of(tester.element(picker)).timePickerTheme;
+      final colors = AppTheme.light.colorScheme;
+      const selected = <WidgetState>{WidgetState.selected};
+      const unselected = <WidgetState>{};
+
+      expect(pickerTheme.backgroundColor, colors.surfaceContainerHigh);
+      expect(pickerTheme.dialBackgroundColor, colors.surfaceContainerLow);
+      expect(pickerTheme.dialHandColor, colors.primary);
+      expect(
+        WidgetStateProperty.resolveAs<Color>(
+          pickerTheme.dialTextColor!,
+          selected,
+        ),
+        colors.onPrimary,
+      );
+      expect(
+        WidgetStateProperty.resolveAs<Color>(
+          pickerTheme.hourMinuteColor!,
+          selected,
+        ),
+        colors.primaryContainer,
+      );
+      expect(
+        WidgetStateProperty.resolveAs<Color>(
+          pickerTheme.hourMinuteColor!,
+          unselected,
+        ),
+        colors.surfaceContainerLow,
+      );
+      expect(
+        WidgetStateProperty.resolveAs<Color>(
+          pickerTheme.dayPeriodColor!,
+          selected,
+        ),
+        colors.primaryContainer,
+      );
+    });
+
+    testWidgets('uses the modern reminder shell when settings fail to load', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderSettingsProvider.overrideWith(
+              (ref) => Future.error(Exception('settings unavailable')),
+            ),
+            surahListProvider.overrideWith((ref) async => [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reading reminders'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('homeDialog-remindersError')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('homeDialogHeader-remindersError')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Reminder settings could not be loaded.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const ValueKey('reminderRetryAction')), findsOneWidget);
+    });
+
     testWidgets('opens reading reminders dialog and schedules a reminder', (
       tester,
     ) async {

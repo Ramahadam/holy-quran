@@ -446,18 +446,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final action = await showDialog<_FeedbackPromptAction>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('How is your Quran reading experience?'),
+      builder: (context) => _HomeDialog(
+        dialogKey: const ValueKey('homeDialog-feedbackPrompt'),
+        headerKey: const ValueKey('homeDialogHeader-feedbackPrompt'),
+        icon: Icons.favorite_border_rounded,
+        title: 'How is your Quran reading experience?',
+        subtitle: 'A quick anonymous note can help shape what comes next.',
         content: const Text(
           'If you have a moment, share what would make the app better. Your note is anonymous.',
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(72, 44)),
             onPressed: () =>
                 Navigator.of(context).pop(_FeedbackPromptAction.notNow),
             child: const Text('Not now'),
           ),
           FilledButton.icon(
+            style: FilledButton.styleFrom(minimumSize: const Size(136, 44)),
             onPressed: () =>
                 Navigator.of(context).pop(_FeedbackPromptAction.giveFeedback),
             icon: const Icon(Icons.feedback_outlined),
@@ -752,8 +758,8 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               noticeKey: const ValueKey('backupProtectionNotice'),
               icon: Icons.shield_outlined,
               text: confirm
-                  ? 'This passphrase encrypts your backup. Keep it somewhere safe.'
-                  : 'Use the same passphrase that was used to create the backup.',
+                  ? 'This passphrase encrypts your bookmarks and last reading position. It cannot be recovered, so keep it safe.'
+                  : 'Importing replaces your current bookmarks and last reading position. Use the original passphrase.',
             ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
@@ -783,7 +789,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
             confirm ? Icons.upload_rounded : Icons.download_rounded,
             size: 18,
           ),
-          label: Text(confirm ? 'Export' : 'Import'),
+          label: Text(confirm ? 'Export' : 'Replace & import'),
         ),
       ],
     );
@@ -829,71 +835,207 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(prayerReminderSettingsProvider);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return settingsAsync.when(
-      loading: () => const AlertDialog(
+      loading: () => _HomeDialog(
+        dialogKey: const ValueKey('homeDialog-remindersLoading'),
+        headerKey: const ValueKey('homeDialogHeader-remindersLoading'),
+        icon: Icons.notifications_active_outlined,
+        title: 'Reading reminders',
+        subtitle: 'Loading your reminder settings.',
         content: SizedBox(
           height: 96,
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(
+            child: Semantics(
+              label: 'Loading reminder settings',
+              child: CircularProgressIndicator(),
+            ),
+          ),
         ),
+        actions: [],
       ),
-      error: (_, _) => AlertDialog(
-        title: const Text('Reading reminders'),
-        content: const Text('Reminder settings could not be loaded.'),
+      error: (_, _) => _HomeDialog(
+        dialogKey: const ValueKey('homeDialog-remindersError'),
+        headerKey: const ValueKey('homeDialogHeader-remindersError'),
+        icon: Icons.notifications_off_outlined,
+        title: 'Reading reminders',
+        subtitle: 'Your settings are unavailable right now.',
+        content: const _HomeDialogNotice(
+          noticeKey: ValueKey('reminderLoadErrorNotice'),
+          icon: Icons.error_outline_rounded,
+          text: 'Reminder settings could not be loaded.',
+        ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Close'),
+          ),
+          FilledButton.icon(
+            key: const ValueKey('reminderRetryAction'),
+            style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
+            onPressed: () => ref.invalidate(prayerReminderSettingsProvider),
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Retry'),
           ),
         ],
       ),
       data: (settings) {
         _initialize(settings);
+        final controlsEnabled = !_saving && _enabled;
+        final sectionShape = RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: colors.outlineVariant.withValues(alpha: 0.65),
+          ),
+        );
 
-        return AlertDialog(
-          title: const Text('Reading reminders'),
+        return _HomeDialog(
+          dialogKey: const ValueKey('homeDialog-reminders'),
+          headerKey: const ValueKey('homeDialogHeader-reminders'),
+          icon: Icons.notifications_active_outlined,
+          title: 'Reading reminders',
+          subtitle: 'Build a gentle reading habit around a prayer time.',
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Enable reminder'),
-                  value: _enabled,
-                  onChanged: _saving
-                      ? null
-                      : (value) => setState(() => _enabled = value),
+                Material(
+                  key: const ValueKey('reminderEnableCard'),
+                  color: colors.surfaceContainerLow,
+                  shape: sectionShape,
+                  clipBehavior: Clip.antiAlias,
+                  child: SwitchListTile(
+                    contentPadding: const EdgeInsets.fromLTRB(14, 4, 10, 4),
+                    title: Text(
+                      'Enable reminder',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colors.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      _enabled
+                          ? 'A daily reading reminder is on.'
+                          : 'Turn this on when you are ready.',
+                    ),
+                    value: _enabled,
+                    onChanged: _saving
+                        ? null
+                        : (value) => setState(() => _enabled = value),
+                  ),
                 ),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<PrayerReminderPrayer>(
                   initialValue: _prayer,
-                  decoration: const InputDecoration(labelText: 'Prayer'),
+                  isExpanded: true,
+                  borderRadius: BorderRadius.circular(14),
+                  icon: const Icon(Icons.expand_more_rounded),
+                  decoration: _homeDialogInputDecoration(
+                    context,
+                    labelText: 'Prayer',
+                    prefixIcon: Icons.mosque_outlined,
+                  ),
                   items: PrayerReminderPrayer.values
                       .map(
                         (prayer) => DropdownMenuItem(
                           value: prayer,
-                          child: Text(prayer.label),
+                          child: Text(
+                            prayer.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       )
                       .toList(),
-                  onChanged: _saving || !_enabled
+                  onChanged: !controlsEnabled
                       ? null
                       : (value) => setState(() {
                           if (value != null) _prayer = value;
                         }),
                 ),
                 const SizedBox(height: 12),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Prayer time'),
-                  subtitle: Text(_formatTimeOfDay(_prayerTimeMinutes)),
-                  trailing: const Icon(Icons.schedule),
-                  enabled: !_saving && _enabled,
-                  onTap: _saving || !_enabled ? null : _pickPrayerTime,
+                Material(
+                  key: const ValueKey('reminderPrayerTimeCard'),
+                  color: colors.surfaceContainerLow,
+                  shape: sectionShape,
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    customBorder: sectionShape,
+                    onTap: controlsEnabled ? _pickPrayerTime : null,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: controlsEnabled
+                                  ? colors.primaryContainer
+                                  : colors.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.schedule_rounded,
+                              color: controlsEnabled
+                                  ? colors.onPrimaryContainer
+                                  : colors.onSurfaceVariant.withValues(
+                                      alpha: 0.55,
+                                    ),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Prayer time',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colors.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _formatTimeOfDay(_prayerTimeMinutes),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: controlsEnabled
+                                        ? colors.onSurface
+                                        : colors.onSurface.withValues(
+                                            alpha: 0.38,
+                                          ),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: colors.onSurfaceVariant.withValues(
+                              alpha: controlsEnabled ? 1 : 0.38,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 12),
                 DropdownButtonFormField<int>(
                   initialValue: _offsetMinutes,
-                  decoration: const InputDecoration(
+                  isExpanded: true,
+                  borderRadius: BorderRadius.circular(14),
+                  icon: const Icon(Icons.expand_more_rounded),
+                  decoration: _homeDialogInputDecoration(
+                    context,
                     labelText: 'Reminder after',
+                    prefixIcon: Icons.notifications_none_rounded,
                   ),
                   items: const [0, 5, 10, 15, 20, 30, 45, 60]
                       .map(
@@ -901,11 +1043,13 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                           value: minutes,
                           child: Text(
                             minutes == 0 ? 'At prayer time' : '$minutes min',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       )
                       .toList(),
-                  onChanged: _saving || !_enabled
+                  onChanged: !controlsEnabled
                       ? null
                       : (value) => setState(() {
                           if (value != null) _offsetMinutes = value;
@@ -914,16 +1058,27 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<int>(
                   initialValue: _snoozeMinutes,
-                  decoration: const InputDecoration(labelText: 'Snooze'),
+                  isExpanded: true,
+                  borderRadius: BorderRadius.circular(14),
+                  icon: const Icon(Icons.expand_more_rounded),
+                  decoration: _homeDialogInputDecoration(
+                    context,
+                    labelText: 'Snooze',
+                    prefixIcon: Icons.snooze_rounded,
+                  ),
                   items: const [5, 10, 15, 30, 45, 60]
                       .map(
                         (minutes) => DropdownMenuItem(
                           value: minutes,
-                          child: Text('$minutes min'),
+                          child: Text(
+                            '$minutes min',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       )
                       .toList(),
-                  onChanged: _saving || !_enabled
+                  onChanged: !controlsEnabled
                       ? null
                       : (value) => setState(() {
                           if (value != null) _snoozeMinutes = value;
@@ -934,18 +1089,35 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
           ),
           actions: [
             TextButton(
+              style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
               onPressed: _saving ? null : () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
-            FilledButton(
-              onPressed: _saving ? null : _save,
-              child: _saving
-                  ? const SizedBox.square(
+            if (_saving)
+              FilledButton(
+                key: const ValueKey('reminderSaveAction'),
+                style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
+                onPressed: null,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox.square(
                       dimension: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Save'),
-            ),
+                    ),
+                    SizedBox(width: 8),
+                    Text('Saving'),
+                  ],
+                ),
+              )
+            else
+              FilledButton.icon(
+                key: const ValueKey('reminderSaveAction'),
+                style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
+                onPressed: _save,
+                icon: const Icon(Icons.check_rounded, size: 18),
+                label: const Text('Save'),
+              ),
           ],
         );
       },
@@ -970,6 +1142,67 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
     final picked = await showTimePicker(
       context: context,
       initialTime: currentTime,
+      builder: (context, child) {
+        final theme = Theme.of(context);
+        final colors = theme.colorScheme;
+        final outline = BorderSide(
+          color: colors.outlineVariant.withValues(alpha: 0.7),
+        );
+
+        return Theme(
+          data: theme.copyWith(
+            timePickerTheme: TimePickerThemeData(
+              backgroundColor: colors.surfaceContainerHigh,
+              dialBackgroundColor: colors.surfaceContainerLow,
+              dialHandColor: colors.primary,
+              dialTextColor: WidgetStateColor.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? colors.onPrimary
+                    : colors.onSurface,
+              ),
+              entryModeIconColor: colors.primary,
+              hourMinuteColor: WidgetStateColor.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? colors.primaryContainer
+                    : colors.surfaceContainerLow,
+              ),
+              hourMinuteTextColor: WidgetStateColor.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? colors.onPrimaryContainer
+                    : colors.onSurface,
+              ),
+              dayPeriodColor: WidgetStateColor.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? colors.primaryContainer
+                    : colors.surfaceContainerLow,
+              ),
+              dayPeriodTextColor: WidgetStateColor.resolveWith(
+                (states) => states.contains(WidgetState.selected)
+                    ? colors.onPrimaryContainer
+                    : colors.onSurfaceVariant,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+                side: outline,
+              ),
+              hourMinuteShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              dayPeriodShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: outline,
+              ),
+              cancelButtonStyle: TextButton.styleFrom(
+                minimumSize: const Size(64, 44),
+              ),
+              confirmButtonStyle: TextButton.styleFrom(
+                minimumSize: const Size(64, 44),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked == null || !mounted) return;
 
@@ -1113,9 +1346,16 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
           FilledButton(
             style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
             onPressed: null,
-            child: const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 8),
+                Text('Sending'),
+              ],
             ),
           )
         else
