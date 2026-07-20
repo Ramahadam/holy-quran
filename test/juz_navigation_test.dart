@@ -51,6 +51,50 @@ const _juz11Start = Verse(
 );
 
 void main() {
+  testWidgets('Juz rows match the modern Quran index card treatment', (
+    tester,
+  ) async {
+    final semanticsHandle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: JuzTile(
+            juz: canonicalJuzs[1],
+            startSurah: _alBaqarah,
+            page: 22,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    final cardFinder = find.byKey(const ValueKey('juzCard-2'));
+    final badgeFinder = find.byKey(const ValueKey('juzNumberBadge-2'));
+    final context = tester.element(cardFinder);
+    final colors = Theme.of(context).colorScheme;
+    final card = tester.widget<Material>(cardFinder);
+    final shape = card.shape! as RoundedRectangleBorder;
+    final badge = tester.widget<Container>(badgeFinder);
+    final badgeDecoration = badge.decoration! as BoxDecoration;
+    final arabicName = tester.widget<Text>(find.text('الجزء ٢'));
+
+    expect(card.color, colors.surfaceContainerLow);
+    expect(shape.borderRadius, BorderRadius.circular(16));
+    expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
+    expect(badgeDecoration.color, colors.primaryContainer);
+    expect(badgeDecoration.shape, BoxShape.rectangle);
+    expect(arabicName.style?.color, colors.onSurface);
+    expect(
+      find.bySemanticsLabel(
+        'Juz 2, الجزء ٢, starts at Al-Baqarah 2:142, page 22',
+      ),
+      findsOneWidget,
+    );
+    semanticsHandle.dispose();
+  });
+
   testWidgets('switches from Surahs to Juz and shows its local start page', (
     tester,
   ) async {

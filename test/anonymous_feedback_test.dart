@@ -129,7 +129,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byTooltip('Menu'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Send feedback'));
       await tester.pumpAndSettle();
@@ -140,6 +140,62 @@ void main() {
 
       expect(feedbackService.submittedText, 'Thank you for the app.');
       expect(find.text('Feedback sent'), findsOneWidget);
+    });
+
+    testWidgets('uses the modern home dialog treatment for feedback', (
+      tester,
+    ) async {
+      final feedbackService = _RecordingFeedbackService();
+      final promptService = _RecordingFeedbackPromptService(
+        shouldPrompt: false,
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => const [_surah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith(
+              (ref) async => const <Bookmark>[],
+            ),
+            anonymousFeedbackServiceProvider.overrideWithValue(feedbackService),
+            feedbackPromptServiceProvider.overrideWithValue(promptService),
+            feedbackPromptShouldShowProvider.overrideWith(
+              (ref) async => promptService.shouldPrompt(),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            home: const HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Send feedback'));
+      await tester.pumpAndSettle();
+
+      final colors = AppTheme.light.colorScheme;
+      final dialogFinder = find.byKey(const ValueKey('homeDialog-feedback'));
+      expect(dialogFinder, findsOneWidget);
+      final dialog = tester.widget<AlertDialog>(dialogFinder);
+      expect(dialog.backgroundColor, colors.surfaceContainerHigh);
+      expect(dialog.surfaceTintColor, Colors.transparent);
+      expect(dialog.shape, isA<RoundedRectangleBorder>());
+      final shape = dialog.shape! as RoundedRectangleBorder;
+      expect(shape.borderRadius, BorderRadius.circular(24));
+      expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
+      expect(
+        find.byKey(const ValueKey('homeDialogHeader-feedback')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('feedbackPrivacyNotice')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows heartbeat prompt and opens anonymous feedback', (
@@ -169,6 +225,10 @@ void main() {
 
       expect(
         find.text('How is your Quran reading experience?'),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('homeDialog-feedbackPrompt')),
         findsOneWidget,
       );
 
