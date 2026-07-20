@@ -183,6 +183,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       label: Text('Juz'),
                     ),
                   ],
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      final colors = Theme.of(context).colorScheme;
+                      return states.contains(WidgetState.selected)
+                          ? colors.primaryContainer
+                          : colors.surfaceContainerLow;
+                    }),
+                    foregroundColor: WidgetStateProperty.resolveWith((states) {
+                      final colors = Theme.of(context).colorScheme;
+                      return states.contains(WidgetState.selected)
+                          ? colors.onPrimaryContainer
+                          : colors.onSurfaceVariant;
+                    }),
+                    side: WidgetStatePropertyAll(
+                      BorderSide(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    textStyle: const WidgetStatePropertyAll(
+                      TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
                   selected: {_indexSection},
                   showSelectedIcon: false,
                   onSelectionChanged: (selection) {
@@ -220,9 +244,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return const Center(child: Text('No surahs found.'));
     }
     return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
       itemCount: surahs.length,
-      separatorBuilder: (context, index) =>
-          Divider(height: 1, color: Theme.of(context).dividerColor),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final surah = surahs[index];
         return SurahTile(
@@ -238,9 +262,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .watch(juzListProvider)
         .when(
           data: (entries) => ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
             itemCount: entries.length,
-            separatorBuilder: (context, index) =>
-                Divider(height: 1, color: Theme.of(context).dividerColor),
+            separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final entry = entries[index];
               final startSurah = surahsByNumber[entry.juz.startSurahNumber]!;

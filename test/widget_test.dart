@@ -2452,6 +2452,41 @@ void main() {
   });
 
   group('SurahTile', () {
+    testWidgets('uses a calm tonal card with one green accent', (tester) async {
+      final semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: SurahTile(surah: _surah1, onTap: () {}),
+          ),
+        ),
+      );
+
+      final cardFinder = find.byKey(const ValueKey('surahCard-1'));
+      final badgeFinder = find.byKey(const ValueKey('surahNumberBadge-1'));
+      final context = tester.element(cardFinder);
+      final colors = Theme.of(context).colorScheme;
+      final card = tester.widget<Material>(cardFinder);
+      final shape = card.shape! as RoundedRectangleBorder;
+      final badge = tester.widget<Container>(badgeFinder);
+      final badgeDecoration = badge.decoration! as BoxDecoration;
+      final arabicName = tester.widget<Text>(find.text('الفاتحة'));
+
+      expect(card.color, colors.surfaceContainerLow);
+      expect(shape.borderRadius, BorderRadius.circular(16));
+      expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
+      expect(badgeDecoration.color, colors.primaryContainer);
+      expect(badgeDecoration.shape, BoxShape.rectangle);
+      expect(arabicName.style?.color, colors.onSurface);
+      expect(
+        find.bySemanticsLabel('Surah 1, The Opening, الفاتحة, 7 verses'),
+        findsOneWidget,
+      );
+      semanticsHandle.dispose();
+    });
+
     testWidgets('renders Arabic name, English name and verse count', (
       tester,
     ) async {
