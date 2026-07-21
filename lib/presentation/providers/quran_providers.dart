@@ -39,8 +39,10 @@ String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
     ? publishableKey
     : supabaseAnonKey;
 
-bool get isSupabaseFeedbackConfigured =>
+bool get isSupabaseConfigured =>
     configuredSupabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
+
+bool get isSupabaseFeedbackConfigured => isSupabaseConfigured;
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 

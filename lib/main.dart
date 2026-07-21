@@ -15,7 +15,7 @@ void main() async {
         anonKey: configuredSupabaseKey,
       );
     } catch (e) {
-      debugPrint('Feedback initialization failed: $e');
+      debugPrint('Supabase initialization failed: $e');
     }
   }
 
