@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 import '../../data/backup/quran_backup_codec.dart';
 import '../../data/backup/quran_backup_file_service.dart';
 import '../../data/backup/quran_backup_service.dart';
+import '../../data/backend/cloudflare_config.dart';
 import '../../data/feedback/anonymous_feedback_service.dart';
 import '../../data/feedback/feedback_prompt_service.dart';
 import '../../data/notifications/prayer_reminder_scheduler.dart';
@@ -21,28 +22,6 @@ import '../../domain/models/juz.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
-
-const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const String projectUrl = String.fromEnvironment('PROJECT_URL');
-const String supabasePublishableKey = String.fromEnvironment(
-  'SUPABASE_PUBLISHABLE_KEY',
-);
-const String publishableKey = String.fromEnvironment('PUBLISHABLE_KEY');
-const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
-
-String get configuredSupabaseUrl =>
-    supabaseUrl.isNotEmpty ? supabaseUrl : projectUrl;
-
-String get configuredSupabaseKey => supabasePublishableKey.isNotEmpty
-    ? supabasePublishableKey
-    : publishableKey.isNotEmpty
-    ? publishableKey
-    : supabaseAnonKey;
-
-bool get isSupabaseConfigured =>
-    configuredSupabaseUrl.isNotEmpty && configuredSupabaseKey.isNotEmpty;
-
-bool get isSupabaseFeedbackConfigured => isSupabaseConfigured;
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
@@ -89,9 +68,18 @@ final quranBackupFileServiceProvider = Provider<QuranBackupFileService>((ref) {
 final anonymousFeedbackServiceProvider = Provider<AnonymousFeedbackService>((
   ref,
 ) {
-  final transport = isSupabaseFeedbackConfigured
-      ? SupabaseFeedbackTransport(client: Supabase.instance.client)
-      : const UnconfiguredFeedbackTransport();
+  final baseUri = configuredCloudflareApiBaseUri;
+  if (baseUri == null) {
+    return const AnonymousFeedbackService(
+      transport: UnconfiguredFeedbackTransport(),
+    );
+  }
+  final client = http.Client();
+  ref.onDispose(client.close);
+  final transport = CloudflareFeedbackTransport(
+    baseUri: baseUri,
+    client: client,
+  );
   return AnonymousFeedbackService(transport: transport);
 });
 

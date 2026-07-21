@@ -1,16 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 
+import '../../data/backend/cloudflare_config.dart';
 import '../../data/tafsir/quran_foundation_tafsir_repository.dart';
 import '../../data/tafsir/tafsir_repository.dart';
 import '../../data/tafsir/tafsir_transport.dart';
 import '../../domain/models/tafsir.dart';
-import 'quran_providers.dart';
 
 final tafsirRepositoryProvider = Provider<TafsirRepository>((ref) {
-  final transport = isSupabaseConfigured
-      ? SupabaseTafsirTransport(client: Supabase.instance.client)
-      : const UnconfiguredTafsirTransport();
+  final baseUri = configuredCloudflareApiBaseUri;
+  if (baseUri == null) {
+    return const QuranFoundationTafsirRepository(
+      transport: UnconfiguredTafsirTransport(),
+    );
+  }
+  final client = http.Client();
+  ref.onDispose(client.close);
+  final transport = CloudflareTafsirTransport(baseUri: baseUri, client: client);
   return QuranFoundationTafsirRepository(transport: transport);
 });
 

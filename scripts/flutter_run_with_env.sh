@@ -3,7 +3,7 @@ set -euo pipefail
 
 env_file=".env"
 if [[ ! -f "$env_file" ]]; then
-  echo "Missing $env_file. Create it with PROJECT_URL and PUBLISHABLE_KEY." >&2
+  echo "Missing $env_file. Create it with CLOUDFLARE_API_BASE_URL." >&2
   exit 1
 fi
 
@@ -12,12 +12,11 @@ set -a
 source "$env_file"
 set +a
 
-supabase_url="${SUPABASE_URL:-${PROJECT_URL:-}}"
-supabase_key="${SUPABASE_PUBLISHABLE_KEY:-${PUBLISHABLE_KEY:-}}"
+cloudflare_api_base_url="${CLOUDFLARE_API_BASE_URL:-https://holy-quran-api.mohamedadam-tech.workers.dev}"
 app_version="${APP_VERSION:-unknown}"
 
-if [[ -z "$supabase_url" || -z "$supabase_key" ]]; then
-  echo "Missing Supabase config. Set PROJECT_URL and PUBLISHABLE_KEY in .env." >&2
+if [[ -z "$cloudflare_api_base_url" ]]; then
+  echo "Missing Cloudflare config. Set CLOUDFLARE_API_BASE_URL in .env." >&2
   exit 1
 fi
 
@@ -29,8 +28,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 {
-  printf 'SUPABASE_URL=%s\n' "$supabase_url"
-  printf 'SUPABASE_PUBLISHABLE_KEY=%s\n' "$supabase_key"
+  printf 'CLOUDFLARE_API_BASE_URL=%s\n' "$cloudflare_api_base_url"
   printf 'APP_VERSION=%s\n' "$app_version"
 } > "$define_file"
 

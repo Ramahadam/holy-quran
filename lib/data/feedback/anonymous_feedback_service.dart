@@ -1,5 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 
 class FeedbackMetadata {
   final String platform;
@@ -22,18 +24,31 @@ abstract class FeedbackTransport {
   Future<void> submit(Map<String, dynamic> payload);
 }
 
-class SupabaseFeedbackTransport implements FeedbackTransport {
-  final SupabaseClient client;
-  final String tableName;
+class CloudflareFeedbackTransport implements FeedbackTransport {
+  final http.Client client;
+  final Uri endpoint;
 
-  const SupabaseFeedbackTransport({
-    required this.client,
-    this.tableName = 'anonymous_feedback',
-  });
+  CloudflareFeedbackTransport({required Uri baseUri, required this.client})
+    : endpoint = baseUri.resolve('/v1/feedback');
 
   @override
-  Future<void> submit(Map<String, dynamic> payload) {
-    return client.from(tableName).insert(payload);
+  Future<void> submit(Map<String, dynamic> payload) async {
+    try {
+      final response = await client
+          .post(
+            endpoint,
+            headers: const {'content-type': 'application/json'},
+            body: jsonEncode(payload),
+          )
+          .timeout(const Duration(seconds: 15));
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw const FeedbackSubmissionException();
+      }
+    } on FeedbackSubmissionException {
+      rethrow;
+    } catch (error) {
+      throw FeedbackSubmissionException('Feedback transport failed.', error);
+    }
   }
 }
 
@@ -43,7 +58,7 @@ class UnconfiguredFeedbackTransport implements FeedbackTransport {
   @override
   Future<void> submit(Map<String, dynamic> payload) {
     throw const FeedbackSubmissionException(
-      'Supabase feedback is not configured.',
+      'Feedback is not configured on this build.',
     );
   }
 }

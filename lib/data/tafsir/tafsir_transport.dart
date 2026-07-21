@@ -1,22 +1,35 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 
 abstract class TafsirTransport {
   Future<Map<String, dynamic>> invoke(Map<String, dynamic> body);
 }
 
-class SupabaseTafsirTransport implements TafsirTransport {
-  final SupabaseClient client;
+class CloudflareTafsirTransport implements TafsirTransport {
+  final http.Client client;
+  final Uri endpoint;
 
-  const SupabaseTafsirTransport({required this.client});
+  CloudflareTafsirTransport({required Uri baseUri, required this.client})
+    : endpoint = baseUri.resolve('/v1/tafsir');
 
   @override
   Future<Map<String, dynamic>> invoke(Map<String, dynamic> body) async {
     try {
-      final response = await client.functions.invoke(
-        'quran-tafsir',
-        body: body,
-      );
-      final data = response.data;
+      final response = await client
+          .post(
+            endpoint,
+            headers: const {'content-type': 'application/json'},
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 20));
+      final data = jsonDecode(response.body);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        final message = data is Map && data['error'] is String
+            ? data['error'] as String
+            : 'Tafsir could not be loaded.';
+        throw TafsirException(message);
+      }
       if (data is! Map) {
         throw const TafsirException(
           'The tafsir service returned invalid data.',

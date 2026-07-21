@@ -1,32 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/data/feedback/anonymous_feedback_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:http/http.dart' as http;
 
-const String _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-const String _projectUrl = String.fromEnvironment('PROJECT_URL');
-const String _supabasePublishableKey = String.fromEnvironment(
-  'SUPABASE_PUBLISHABLE_KEY',
+const String _cloudflareApiBaseUrl = String.fromEnvironment(
+  'CLOUDFLARE_API_BASE_URL',
+  defaultValue: 'https://holy-quran-api.mohamedadam-tech.workers.dev',
 );
-const String _publishableKey = String.fromEnvironment('PUBLISHABLE_KEY');
-
-String get _configuredUrl => _supabaseUrl.isNotEmpty
-    ? _supabaseUrl
-    : _projectUrl;
-
-String get _configuredKey => _supabasePublishableKey.isNotEmpty
-    ? _supabasePublishableKey
-    : _publishableKey;
+const bool _runLiveTests = bool.fromEnvironment('RUN_CLOUDFLARE_LIVE_TESTS');
 
 void main() {
-  final hasSupabaseConfig =
-      _configuredUrl.isNotEmpty && _configuredKey.isNotEmpty;
-
   test(
-    'submits anonymous feedback through the live Supabase SDK',
+    'submits anonymous feedback through the live Cloudflare Worker',
     () async {
+      final client = http.Client();
+      addTearDown(client.close);
       final service = AnonymousFeedbackService(
-        transport: SupabaseFeedbackTransport(
-          client: SupabaseClient(_configuredUrl, _configuredKey),
+        transport: CloudflareFeedbackTransport(
+          baseUri: Uri.parse(_cloudflareApiBaseUrl),
+          client: client,
         ),
       );
 
@@ -38,8 +29,8 @@ void main() {
         ),
       );
     },
-    skip: hasSupabaseConfig
+    skip: _runLiveTests
         ? false
-        : 'Provide SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY to run live.',
+        : 'Set RUN_CLOUDFLARE_LIVE_TESTS=true to run live.',
   );
 }
