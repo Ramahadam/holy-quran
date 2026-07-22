@@ -4,6 +4,7 @@ import 'package:qcf_quran/qcf_quran.dart';
 // ignore: implementation_imports
 import 'package:qcf_quran/src/data/quran_text.dart';
 
+import '../../l10n/l10n.dart';
 import '../theme/app_theme.dart';
 import 'mushaf_hit_testing.dart';
 
@@ -805,7 +806,7 @@ class _UnsupportedMushafSamplePage extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'Mushaf page must be between 1 and 604.\nCurrent page: $page',
+          context.l10n.invalidMushafPage(page),
           textAlign: TextAlign.center,
           style: Theme.of(
             context,

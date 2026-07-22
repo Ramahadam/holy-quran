@@ -87,9 +87,7 @@ void main() {
     expect(badgeDecoration.shape, BoxShape.rectangle);
     expect(arabicName.style?.color, colors.onSurface);
     expect(
-      find.bySemanticsLabel(
-        'Juz 2, الجزء ٢, starts at Al-Baqarah 2:142, page 22',
-      ),
+      find.bySemanticsLabel('Juz 2, الجزء ٢, starts at البقرة 2:142, page 22'),
       findsOneWidget,
     );
     semanticsHandle.dispose();
@@ -110,7 +108,7 @@ void main() {
 
     expect(find.byType(JuzTile), findsNWidgets(2));
     expect(find.text('Juz 2'), findsOneWidget);
-    expect(find.text('Starts at Al-Baqarah 2:142 · Page 22'), findsOneWidget);
+    expect(find.text('Starts at البقرة 2:142 · Page 22'), findsOneWidget);
     expect(find.text('الجزء ٢'), findsOneWidget);
   });
 

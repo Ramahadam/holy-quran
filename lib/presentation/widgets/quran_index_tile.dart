@@ -5,7 +5,7 @@ class QuranIndexTile extends StatelessWidget {
   final int number;
   final String title;
   final String subtitle;
-  final String arabicTitle;
+  final String? arabicTitle;
   final String semanticsLabel;
   final VoidCallback onTap;
 
@@ -15,7 +15,7 @@ class QuranIndexTile extends StatelessWidget {
     required this.number,
     required this.title,
     required this.subtitle,
-    required this.arabicTitle,
+    this.arabicTitle,
     required this.semanticsLabel,
     required this.onTap,
   });
@@ -66,6 +66,9 @@ class QuranIndexTile extends StatelessWidget {
                             color: colors.onSurface,
                             fontWeight: FontWeight.w600,
                           ),
+                          textDirection: _containsArabic(title)
+                              ? TextDirection.rtl
+                              : null,
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -79,22 +82,24 @@ class QuranIndexTile extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Flexible(
-                    flex: 2,
-                    child: Text(
-                      arabicTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: colors.onSurface,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
+                  if (arabicTitle != null) ...[
+                    const SizedBox(width: 12),
+                    Flexible(
+                      flex: 2,
+                      child: Text(
+                        arabicTitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: colors.onSurface,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.end,
+                        textDirection: TextDirection.rtl,
                       ),
-                      textAlign: TextAlign.end,
-                      textDirection: TextDirection.rtl,
                     ),
-                  ),
+                  ],
                   const SizedBox(width: 8),
                   Icon(
                     Icons.chevron_right_rounded,
@@ -110,6 +115,9 @@ class QuranIndexTile extends StatelessWidget {
     );
   }
 }
+
+bool _containsArabic(String value) =>
+    RegExp(r'[\u0600-\u06FF]').hasMatch(value);
 
 class _NumberBadge extends StatelessWidget {
   final Key badgeKey;

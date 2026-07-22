@@ -7,12 +7,15 @@ import '../../data/feedback/anonymous_feedback_service.dart';
 import '../../data/notifications/prayer_reminder_settings.dart';
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/surah.dart';
+import '../../l10n/l10n.dart';
+import '../providers/locale_provider.dart';
 import '../providers/quran_providers.dart';
 import '../widgets/juz_tile.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
 
 enum _HomeMenuAction {
+  switchLanguage,
   toggleDarkMode,
   exportBackup,
   importBackup,
@@ -47,12 +50,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final surahsAsync = ref.watch(surahListProvider);
     final lastPositionAsync = ref.watch(lastReadPositionProvider);
     final bookmarksAsync = ref.watch(recentBookmarksProvider);
     final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
     final themeMode = ref.watch(themeModeProvider);
     final darkModeEnabled = themeMode == ThemeMode.dark;
+    final locale = ref.watch(appLocaleProvider);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -69,13 +74,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               textDirection: TextDirection.rtl,
             ),
-            Text('Holy Quran', style: Theme.of(context).textTheme.bodyMedium),
+            Text(l10n.appTitle, style: Theme.of(context).textTheme.bodyMedium),
           ],
         ),
         actions: [
           PopupMenuButton<_HomeMenuAction>(
             key: const ValueKey('homeMenuButton'),
-            tooltip: 'Menu',
+            tooltip: l10n.menu,
             position: PopupMenuPosition.under,
             offset: const Offset(0, 4),
             color: colors.surfaceContainerHigh,
@@ -90,6 +95,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             constraints: const BoxConstraints(minWidth: 252, maxWidth: 280),
             onSelected: (action) {
               switch (action) {
+                case _HomeMenuAction.switchLanguage:
+                  final nextLocale = locale.languageCode == 'ar'
+                      ? const Locale('en')
+                      : const Locale('ar');
+                  unawaited(
+                    ref.read(appLocaleProvider.notifier).setLocale(nextLocale),
+                  );
                 case _HomeMenuAction.toggleDarkMode:
                   ref.read(themeModeProvider.notifier).state = darkModeEnabled
                       ? ThemeMode.system
@@ -106,6 +118,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
             itemBuilder: (context) => [
               PopupMenuItem(
+                value: _HomeMenuAction.switchLanguage,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: const ValueKey('homeMenu-language'),
+                  icon: Icons.translate_rounded,
+                  label: l10n.switchLanguage,
+                ),
+              ),
+              const PopupMenuDivider(height: 9),
+              PopupMenuItem(
                 value: _HomeMenuAction.toggleDarkMode,
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -114,50 +137,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   icon: darkModeEnabled
                       ? Icons.dark_mode_rounded
                       : Icons.dark_mode_outlined,
-                  label: 'Dark mode',
+                  label: l10n.darkMode,
                   checked: darkModeEnabled,
                 ),
               ),
               const PopupMenuDivider(height: 9),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _HomeMenuAction.reminders,
                 height: 48,
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _HomeMenuItem(
-                  rowKey: ValueKey('homeMenu-reminders'),
+                  rowKey: const ValueKey('homeMenu-reminders'),
                   icon: Icons.notifications_active_outlined,
-                  label: 'Reading reminders',
+                  label: l10n.readingReminders,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _HomeMenuAction.feedback,
                 height: 48,
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _HomeMenuItem(
-                  rowKey: ValueKey('homeMenu-feedback'),
+                  rowKey: const ValueKey('homeMenu-feedback'),
                   icon: Icons.feedback_outlined,
-                  label: 'Send feedback',
+                  label: l10n.sendFeedback,
                 ),
               ),
               const PopupMenuDivider(height: 9),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _HomeMenuAction.exportBackup,
                 height: 48,
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _HomeMenuItem(
-                  rowKey: ValueKey('homeMenu-exportBackup'),
+                  rowKey: const ValueKey('homeMenu-exportBackup'),
                   icon: Icons.upload_file_rounded,
-                  label: 'Export backup',
+                  label: l10n.exportBackup,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: _HomeMenuAction.importBackup,
                 height: 48,
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _HomeMenuItem(
-                  rowKey: ValueKey('homeMenu-importBackup'),
+                  rowKey: const ValueKey('homeMenu-importBackup'),
                   icon: Icons.download_rounded,
-                  label: 'Import backup',
+                  label: l10n.importBackup,
                 ),
               ),
             ],
@@ -221,14 +244,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                 child: SegmentedButton<_QuranIndexSection>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: _QuranIndexSection.surahs,
-                      label: Text('Surahs'),
+                      label: Text(l10n.surahs),
                     ),
                     ButtonSegment(
                       value: _QuranIndexSection.juz,
-                      label: Text('Juz'),
+                      label: Text(l10n.juz),
                     ),
                   ],
                   style: ButtonStyle(
@@ -275,7 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Failed to load surahs.\nPlease restart the app.',
+              l10n.surahLoadError,
               textAlign: TextAlign.center,
               style: Theme.of(
                 context,
@@ -289,7 +312,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildSurahList(List<Surah> surahs) {
     if (surahs.isEmpty) {
-      return const Center(child: Text('No surahs found.'));
+      return Center(child: Text(context.l10n.noSurahs));
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -334,7 +357,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                'Failed to load Juz.\nPlease restart the app.',
+                context.l10n.juzLoadError,
                 textAlign: TextAlign.center,
                 style: Theme.of(
                   context,
@@ -387,10 +410,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           .read(quranBackupFileServiceProvider)
           .exportBackup(passphrase);
       if (!context.mounted) return;
-      _showSnackBar(context, exported ? 'Backup exported' : 'Export canceled');
+      _showSnackBar(
+        context,
+        exported ? context.l10n.backupExported : context.l10n.exportCanceled,
+      );
     } catch (_) {
       if (context.mounted) {
-        _showSnackBar(context, 'Export failed');
+        _showSnackBar(context, context.l10n.exportFailed);
       }
     }
   }
@@ -409,10 +435,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.invalidate(recentBookmarksProvider);
         ref.invalidate(bookmarksBySurahProvider);
       }
-      _showSnackBar(context, imported ? 'Backup imported' : 'Import canceled');
+      _showSnackBar(
+        context,
+        imported ? context.l10n.backupImported : context.l10n.importCanceled,
+      );
     } catch (_) {
       if (context.mounted) {
-        _showSnackBar(context, 'Import failed. Check the file and passphrase.');
+        _showSnackBar(context, context.l10n.importFailed);
       }
     }
   }
@@ -450,24 +479,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         dialogKey: const ValueKey('homeDialog-feedbackPrompt'),
         headerKey: const ValueKey('homeDialogHeader-feedbackPrompt'),
         icon: Icons.favorite_border_rounded,
-        title: 'How is your Quran reading experience?',
-        subtitle: 'A quick anonymous note can help shape what comes next.',
-        content: const Text(
-          'If you have a moment, share what would make the app better. Your note is anonymous.',
-        ),
+        title: context.l10n.feedbackPromptTitle,
+        subtitle: context.l10n.feedbackPromptSubtitle,
+        content: Text(context.l10n.feedbackPromptBody),
         actions: [
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(72, 44)),
             onPressed: () =>
                 Navigator.of(context).pop(_FeedbackPromptAction.notNow),
-            child: const Text('Not now'),
+            child: Text(context.l10n.notNow),
           ),
           FilledButton.icon(
             style: FilledButton.styleFrom(minimumSize: const Size(136, 44)),
             onPressed: () =>
                 Navigator.of(context).pop(_FeedbackPromptAction.giveFeedback),
             icon: const Icon(Icons.feedback_outlined),
-            label: const Text('Give feedback'),
+            label: Text(context.l10n.giveFeedback),
           ),
         ],
       ),
@@ -702,6 +729,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
   @override
   Widget build(BuildContext context) {
     final confirm = widget.confirm;
+    final l10n = context.l10n;
     final colors = Theme.of(context).colorScheme;
 
     return _HomeDialog(
@@ -714,10 +742,8 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
             : 'homeDialogHeader-importBackup',
       ),
       icon: confirm ? Icons.upload_file_rounded : Icons.download_rounded,
-      title: confirm ? 'Export backup' : 'Import backup',
-      subtitle: confirm
-          ? 'Create an encrypted copy of your reading progress.'
-          : 'Restore your bookmarks and last reading position.',
+      title: confirm ? l10n.exportBackup : l10n.importBackup,
+      subtitle: confirm ? l10n.exportBackupSubtitle : l10n.importBackupSubtitle,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -735,7 +761,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               },
               decoration: _homeDialogInputDecoration(
                 context,
-                labelText: 'Passphrase',
+                labelText: l10n.passphrase,
                 prefixIcon: Icons.lock_outline_rounded,
               ),
             ),
@@ -748,7 +774,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
                 onSubmitted: (_) => _submit(),
                 decoration: _homeDialogInputDecoration(
                   context,
-                  labelText: 'Confirm passphrase',
+                  labelText: l10n.confirmPassphrase,
                   prefixIcon: Icons.lock_outline_rounded,
                 ),
               ),
@@ -758,8 +784,8 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               noticeKey: const ValueKey('backupProtectionNotice'),
               icon: Icons.shield_outlined,
               text: confirm
-                  ? 'This passphrase encrypts your bookmarks and last reading position. It cannot be recovered, so keep it safe.'
-                  : 'Importing replaces your current bookmarks and last reading position. Use the original passphrase.',
+                  ? l10n.backupProtectionExport
+                  : l10n.backupProtectionImport,
             ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
@@ -780,7 +806,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
         TextButton(
           style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
           onPressed: () => _navigator.pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton.icon(
           style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
@@ -789,7 +815,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
             confirm ? Icons.upload_rounded : Icons.download_rounded,
             size: 18,
           ),
-          label: Text(confirm ? 'Export' : 'Replace & import'),
+          label: Text(confirm ? l10n.export : l10n.replaceAndImport),
         ),
       ],
     );
@@ -800,13 +826,13 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
     final passphrase = _passphraseController.text;
     if (passphrase.trim().isEmpty) {
       setState(() {
-        _errorText = 'Passphrase is required';
+        _errorText = context.l10n.passphraseRequired;
       });
       return;
     }
     if (widget.confirm && passphrase != _confirmController.text) {
       setState(() {
-        _errorText = 'Passphrases do not match';
+        _errorText = context.l10n.passphrasesMismatch;
       });
       return;
     }
@@ -835,6 +861,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(prayerReminderSettingsProvider);
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -843,13 +870,13 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
         dialogKey: const ValueKey('homeDialog-remindersLoading'),
         headerKey: const ValueKey('homeDialogHeader-remindersLoading'),
         icon: Icons.notifications_active_outlined,
-        title: 'Reading reminders',
-        subtitle: 'Loading your reminder settings.',
+        title: l10n.readingReminders,
+        subtitle: l10n.loadingReminderSettings,
         content: SizedBox(
           height: 96,
           child: Center(
             child: Semantics(
-              label: 'Loading reminder settings',
+              label: l10n.loadingReminderSettingsLabel,
               child: CircularProgressIndicator(),
             ),
           ),
@@ -860,25 +887,25 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
         dialogKey: const ValueKey('homeDialog-remindersError'),
         headerKey: const ValueKey('homeDialogHeader-remindersError'),
         icon: Icons.notifications_off_outlined,
-        title: 'Reading reminders',
-        subtitle: 'Your settings are unavailable right now.',
-        content: const _HomeDialogNotice(
-          noticeKey: ValueKey('reminderLoadErrorNotice'),
+        title: l10n.readingReminders,
+        subtitle: l10n.reminderSettingsUnavailable,
+        content: _HomeDialogNotice(
+          noticeKey: const ValueKey('reminderLoadErrorNotice'),
           icon: Icons.error_outline_rounded,
-          text: 'Reminder settings could not be loaded.',
+          text: l10n.reminderSettingsLoadFailed,
         ),
         actions: [
           TextButton(
             style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
           FilledButton.icon(
             key: const ValueKey('reminderRetryAction'),
             style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
             onPressed: () => ref.invalidate(prayerReminderSettingsProvider),
             icon: const Icon(Icons.refresh_rounded, size: 18),
-            label: const Text('Retry'),
+            label: Text(l10n.retry),
           ),
         ],
       ),
@@ -896,8 +923,8 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
           dialogKey: const ValueKey('homeDialog-reminders'),
           headerKey: const ValueKey('homeDialogHeader-reminders'),
           icon: Icons.notifications_active_outlined,
-          title: 'Reading reminders',
-          subtitle: 'Build a gentle reading habit around a prayer time.',
+          title: l10n.readingReminders,
+          subtitle: l10n.reminderSubtitle,
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -911,7 +938,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   child: SwitchListTile(
                     contentPadding: const EdgeInsets.fromLTRB(14, 4, 10, 4),
                     title: Text(
-                      'Enable reminder',
+                      l10n.enableReminder,
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: colors.onSurface,
                         fontWeight: FontWeight.w600,
@@ -919,8 +946,8 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                     ),
                     subtitle: Text(
                       _enabled
-                          ? 'A daily reading reminder is on.'
-                          : 'Turn this on when you are ready.',
+                          ? l10n.reminderEnabledBody
+                          : l10n.reminderDisabledBody,
                     ),
                     value: _enabled,
                     onChanged: _saving
@@ -936,7 +963,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   icon: const Icon(Icons.expand_more_rounded),
                   decoration: _homeDialogInputDecoration(
                     context,
-                    labelText: 'Prayer',
+                    labelText: l10n.prayer,
                     prefixIcon: Icons.mosque_outlined,
                   ),
                   items: PrayerReminderPrayer.values
@@ -944,7 +971,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                         (prayer) => DropdownMenuItem(
                           value: prayer,
                           child: Text(
-                            prayer.label,
+                            _localizedPrayerLabel(context, prayer),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -995,7 +1022,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Prayer time',
+                                  l10n.prayerTime,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colors.onSurfaceVariant,
                                   ),
@@ -1034,7 +1061,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   icon: const Icon(Icons.expand_more_rounded),
                   decoration: _homeDialogInputDecoration(
                     context,
-                    labelText: 'Reminder after',
+                    labelText: l10n.reminderAfter,
                     prefixIcon: Icons.notifications_none_rounded,
                   ),
                   items: const [0, 5, 10, 15, 20, 30, 45, 60]
@@ -1042,7 +1069,9 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                         (minutes) => DropdownMenuItem(
                           value: minutes,
                           child: Text(
-                            minutes == 0 ? 'At prayer time' : '$minutes min',
+                            minutes == 0
+                                ? l10n.atPrayerTime
+                                : l10n.minutesShort(minutes),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1063,7 +1092,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   icon: const Icon(Icons.expand_more_rounded),
                   decoration: _homeDialogInputDecoration(
                     context,
-                    labelText: 'Snooze',
+                    labelText: l10n.snooze,
                     prefixIcon: Icons.snooze_rounded,
                   ),
                   items: const [5, 10, 15, 30, 45, 60]
@@ -1071,7 +1100,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                         (minutes) => DropdownMenuItem(
                           value: minutes,
                           child: Text(
-                            '$minutes min',
+                            l10n.minutesShort(minutes),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1091,22 +1120,22 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
             TextButton(
               style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
               onPressed: _saving ? null : () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             if (_saving)
               FilledButton(
                 key: const ValueKey('reminderSaveAction'),
                 style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
                 onPressed: null,
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox.square(
+                    const SizedBox.square(
                       dimension: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    SizedBox(width: 8),
-                    Text('Saving'),
+                    const SizedBox(width: 8),
+                    Text(l10n.saving),
                   ],
                 ),
               )
@@ -1116,7 +1145,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                 style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
                 onPressed: _save,
                 icon: const Icon(Icons.check_rounded, size: 18),
-                label: const Text('Save'),
+                label: Text(l10n.save),
               ),
           ],
         );
@@ -1231,9 +1260,9 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Reminder could not be scheduled. Please try again.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(context.l10n.reminderScheduleFailed),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1248,9 +1277,9 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
         content: Text(
           saved
               ? _enabled
-                    ? 'Reading reminder scheduled'
-                    : 'Reading reminder disabled'
-              : 'Reminder permission was not granted',
+                    ? context.l10n.reminderScheduled
+                    : context.l10n.reminderDisabled
+              : context.l10n.reminderPermissionDenied,
         ),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -1261,6 +1290,19 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
   String _formatTimeOfDay(int minutesOfDay) {
     final time = TimeOfDay(hour: minutesOfDay ~/ 60, minute: minutesOfDay % 60);
     return time.format(context);
+  }
+
+  String _localizedPrayerLabel(
+    BuildContext context,
+    PrayerReminderPrayer prayer,
+  ) {
+    return switch (prayer) {
+      PrayerReminderPrayer.fajr => context.l10n.fajr,
+      PrayerReminderPrayer.dhuhr => context.l10n.dhuhr,
+      PrayerReminderPrayer.asr => context.l10n.asr,
+      PrayerReminderPrayer.maghrib => context.l10n.maghrib,
+      PrayerReminderPrayer.isha => context.l10n.isha,
+    };
   }
 }
 
@@ -1286,14 +1328,15 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colors = Theme.of(context).colorScheme;
 
     return _HomeDialog(
       dialogKey: const ValueKey('homeDialog-feedback'),
       headerKey: const ValueKey('homeDialogHeader-feedback'),
       icon: Icons.feedback_outlined,
-      title: 'Send feedback',
-      subtitle: 'Help us improve the Quran reading experience.',
+      title: l10n.sendFeedback,
+      subtitle: l10n.feedbackSubtitle,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1308,16 +1351,16 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
               textInputAction: TextInputAction.newline,
               decoration: _homeDialogInputDecoration(
                 context,
-                labelText: 'Feedback',
-                hintText: 'Share what would make the app better.',
+                labelText: l10n.feedback,
+                hintText: l10n.feedbackHint,
                 alignLabelWithHint: true,
               ),
             ),
             const SizedBox(height: 12),
-            const _HomeDialogNotice(
-              noticeKey: ValueKey('feedbackPrivacyNotice'),
+            _HomeDialogNotice(
+              noticeKey: const ValueKey('feedbackPrivacyNotice'),
               icon: Icons.privacy_tip_outlined,
-              text: 'Sent anonymously. Do not include private information.',
+              text: l10n.feedbackPrivacy,
             ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
@@ -1340,21 +1383,21 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
           onPressed: _submitting
               ? null
               : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         if (_submitting)
           FilledButton(
             style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
             onPressed: null,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox.square(
+                const SizedBox.square(
                   dimension: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                SizedBox(width: 8),
-                Text('Sending'),
+                const SizedBox(width: 8),
+                Text(l10n.sending),
               ],
             ),
           )
@@ -1363,7 +1406,7 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
             style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
             onPressed: _submit,
             icon: const Icon(Icons.send_rounded, size: 18),
-            label: const Text('Send'),
+            label: Text(l10n.send),
           ),
       ],
     );
@@ -1387,23 +1430,25 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
       if (!mounted) return;
       Navigator.of(context).pop(true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Feedback sent'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(context.l10n.feedbackSent),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );
     } on FeedbackValidationException catch (e) {
       if (!mounted) return;
       setState(() {
-        _errorText = e.message;
+        _errorText = e.message == 'Feedback is too long.'
+            ? context.l10n.feedbackTooLong
+            : context.l10n.feedbackRequired;
         _submitting = false;
       });
     } catch (e) {
       if (!mounted) return;
       debugPrint('Failed to submit anonymous feedback: $e');
       setState(() {
-        _errorText = 'Feedback could not be sent. Please try again later.';
+        _errorText = context.l10n.feedbackSendFailed;
         _submitting = false;
       });
     }
@@ -1476,8 +1521,9 @@ class _LastReadBanner extends ConsumerWidget {
     final verseNum = verseId.split(':').elementAtOrNull(1) ?? '';
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final readingLabel =
-        '${surah.nameEnglish}${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}';
+    final readingLabel = verseNum.isEmpty
+        ? surah.nameArabic
+        : '${surah.nameArabic} · ${context.l10n.verseNumber(verseNum)}';
     final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
       side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
@@ -1489,7 +1535,7 @@ class _LastReadBanner extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Semantics(
         button: true,
-        label: 'Continue reading, $readingLabel',
+        label: context.l10n.continueReadingSemantics(readingLabel),
         onTap: openReading,
         excludeSemantics: true,
         child: Material(
@@ -1523,7 +1569,7 @@ class _LastReadBanner extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Continue Reading',
+                          context.l10n.continueReading,
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colors.primary,
                             fontWeight: FontWeight.w600,
@@ -1599,7 +1645,7 @@ class _BookmarksSection extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Bookmarks',
+                    context.l10n.bookmarks,
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: colors.onSurface,
                       fontWeight: FontWeight.w600,
@@ -1654,7 +1700,8 @@ class _BookmarkRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final verseNum = bookmark.verseId.split(':').elementAtOrNull(1) ?? '';
     final title =
-        surah?.nameEnglish ?? 'Surah ${bookmark.verseId.split(':').first}';
+        surah?.nameArabic ??
+        context.l10n.surahNumber(bookmark.verseId.split(':').first);
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
@@ -1669,7 +1716,7 @@ class _BookmarkRow extends ConsumerWidget {
         child: Row(
           children: [
             IconButton(
-              tooltip: 'Remove bookmark',
+              tooltip: context.l10n.removeBookmark,
               style: IconButton.styleFrom(
                 foregroundColor: colors.onPrimaryContainer,
                 backgroundColor: colors.primaryContainer,
@@ -1683,7 +1730,9 @@ class _BookmarkRow extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                '$title${verseNum.isNotEmpty ? ' · Verse $verseNum' : ''}',
+                verseNum.isEmpty
+                    ? title
+                    : '$title · ${context.l10n.verseNumber(verseNum)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -1714,9 +1763,9 @@ class _BookmarkRow extends ConsumerWidget {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bookmark removed'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(context.l10n.bookmarkRemoved),
+          duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
       );

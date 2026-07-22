@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/tafsir.dart';
 import '../../domain/models/verse.dart';
+import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import '../providers/tafsir_providers.dart';
 
@@ -25,7 +26,7 @@ class VerseDetailScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Ayah Study'),
+            Text(context.l10n.ayahStudy),
             Text(
               '${verse.surahNumber}:${verse.verseNumber}',
               style: Theme.of(context).textTheme.labelMedium,
@@ -34,7 +35,9 @@ class VerseDetailScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            tooltip: isBookmarked ? 'Remove bookmark' : 'Bookmark verse',
+            tooltip: isBookmarked
+                ? context.l10n.removeBookmark
+                : context.l10n.bookmarkVerse,
             icon: Icon(
               isBookmarked ? Icons.bookmark : Icons.bookmark_border,
               color: Theme.of(context).colorScheme.primary,
@@ -110,7 +113,11 @@ class VerseDetailScreen extends ConsumerWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(isBookmarked ? 'Bookmark removed' : 'Bookmarked'),
+          content: Text(
+            isBookmarked
+                ? context.l10n.bookmarkRemoved
+                : context.l10n.bookmarked,
+          ),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -138,10 +145,13 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Tafsir', style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          context.l10n.tafsir,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         const SizedBox(height: 6),
         Text(
-          'Commentary from Quran Foundation',
+          context.l10n.tafsirProvider,
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 16),
@@ -159,7 +169,7 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
           ),
           data: (availableSources) {
             if (availableSources.isEmpty) {
-              return const Text('No tafsir sources are available.');
+              return Text(context.l10n.noTafsirSources);
             }
             final selectedSource = _selectSource(availableSources);
             return Column(
@@ -169,9 +179,9 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
                   key: const ValueKey('tafsirSourcePicker'),
                   initialValue: selectedSource.id,
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Tafsir source',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.tafsirSource,
+                    border: const OutlineInputBorder(),
                   ),
                   items: availableSources
                       .map(
@@ -249,7 +259,7 @@ class _TafsirPassageView extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            _attribution(value.source.name, value.source.authorName),
+            _attribution(context, value.source.name, value.source.authorName),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -278,8 +288,8 @@ class _TafsirError extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off_outlined),
             const SizedBox(width: 12),
-            const Expanded(child: Text('Tafsir is unavailable')),
-            TextButton(onPressed: onRetry, child: const Text('Retry')),
+            Expanded(child: Text(context.l10n.tafsirUnavailable)),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
           ],
         ),
       ),
@@ -292,8 +302,10 @@ String _capitalized(String value) {
   return '${value[0].toUpperCase()}${value.substring(1)}';
 }
 
-String _attribution(String name, String authorName) {
-  return authorName.isEmpty ? 'Source: $name' : 'Source: $name — $authorName';
+String _attribution(BuildContext context, String name, String authorName) {
+  return authorName.isEmpty
+      ? context.l10n.sourceName(name)
+      : context.l10n.sourceNameAuthor(name, authorName);
 }
 
 class _VerseBadge extends StatelessWidget {

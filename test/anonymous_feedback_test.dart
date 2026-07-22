@@ -384,7 +384,7 @@ void main() {
 
       expect(find.text('How is your Quran reading experience?'), findsNothing);
 
-      await tester.tap(find.text('Al-Fatihah'));
+      await tester.tap(find.text('الفاتحة'));
       await tester.pumpAndSettle();
 
       expect(find.byType(ReadingScreen), findsOneWidget);
