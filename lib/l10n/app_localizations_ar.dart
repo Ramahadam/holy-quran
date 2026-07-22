@@ -37,10 +37,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendFeedback => 'إرسال ملاحظات';
 
   @override
-  String get exportBackup => 'تصدير نسخة احتياطية';
+  String get saveBackupToDevice => 'حفظ النسخة على الجهاز';
 
   @override
-  String get importBackup => 'استيراد نسخة احتياطية';
+  String get shareBackup => 'مشاركة النسخة الاحتياطية';
+
+  @override
+  String get restoreBackup => 'استعادة نسخة احتياطية';
 
   @override
   String get surahs => 'السور';
@@ -58,22 +61,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get juzLoadError => 'تعذر تحميل الأجزاء.\nيرجى إعادة تشغيل التطبيق.';
 
   @override
-  String get backupExported => 'تم تصدير النسخة الاحتياطية';
+  String get backupSaved => 'تم حفظ النسخة الاحتياطية';
 
   @override
-  String get exportCanceled => 'تم إلغاء التصدير';
+  String get saveCanceled => 'تم إلغاء الحفظ';
 
   @override
-  String get exportFailed => 'فشل التصدير';
+  String get saveUnavailable => 'الحفظ على هذا الجهاز غير متاح';
 
   @override
-  String get backupImported => 'تم استيراد النسخة الاحتياطية';
+  String get saveBackupFailed => 'تعذر حفظ النسخة الاحتياطية';
 
   @override
-  String get importCanceled => 'تم إلغاء الاستيراد';
+  String get backupShared => 'تمت مشاركة النسخة الاحتياطية';
 
   @override
-  String get importFailed => 'فشل الاستيراد. تحقق من الملف وعبارة المرور.';
+  String get shareCanceled => 'تم إلغاء المشاركة';
+
+  @override
+  String get shareUnavailable => 'المشاركة غير متاحة على هذا الجهاز';
+
+  @override
+  String get shareBackupFailed => 'تعذرت مشاركة النسخة الاحتياطية';
+
+  @override
+  String get backupRestored => 'تمت استعادة النسخة الاحتياطية';
+
+  @override
+  String get restoreCanceled => 'تم إلغاء الاستعادة';
+
+  @override
+  String get restoreUnavailable => 'الاستعادة غير متاحة على هذا الجهاز';
+
+  @override
+  String get restoreFailed => 'فشلت الاستعادة. تحقق من الملف وعبارة المرور.';
 
   @override
   String get feedbackPromptTitle => 'كيف كانت تجربتك في قراءة القرآن؟';
@@ -93,10 +114,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get giveFeedback => 'إرسال ملاحظة';
 
   @override
-  String get exportBackupSubtitle => 'أنشئ نسخة مشفرة من تقدمك في القراءة.';
+  String get saveBackupSubtitle =>
+      'احفظ نسخة مشفرة من علاماتك وآخر موضع قراءة.';
 
   @override
-  String get importBackupSubtitle => 'استعد علاماتك وآخر موضع قراءة.';
+  String get shareBackupSubtitle =>
+      'شارك نسخة مشفرة من علاماتك وآخر موضع قراءة.';
+
+  @override
+  String get restoreBackupSubtitle => 'استعد علاماتك وآخر موضع قراءة.';
 
   @override
   String get passphrase => 'عبارة المرور';
@@ -105,24 +131,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmPassphrase => 'تأكيد عبارة المرور';
 
   @override
-  String get backupProtectionExport =>
+  String get backupProtectionCreate =>
       'تشفّر عبارة المرور علاماتك وآخر موضع قراءة، ولا يمكن استعادتها إن فُقدت، فاحفظها بأمان.';
 
   @override
-  String get backupProtectionImport =>
-      'سيستبدل الاستيراد علاماتك وآخر موضع قراءة الحاليين. استخدم عبارة المرور الأصلية.';
+  String get backupProtectionRestore =>
+      'ستستبدل الاستعادة علاماتك وآخر موضع قراءة الحاليين. استخدم عبارة المرور الأصلية.';
 
   @override
   String get cancel => 'إلغاء';
 
   @override
-  String get export => 'تصدير';
+  String get share => 'مشاركة';
 
   @override
-  String get replaceAndImport => 'استبدال واستيراد';
+  String get restore => 'استعادة';
+
+  @override
+  String get replaceAndRestore => 'استبدال واستعادة';
+
+  @override
+  String get backupFileSubject => 'نسخة احتياطية للقرآن الكريم';
+
+  @override
+  String get shareBackupTitle => 'مشاركة نسخة القرآن الكريم الاحتياطية';
 
   @override
   String get passphraseRequired => 'عبارة المرور مطلوبة';
+
+  @override
+  String get passphraseTooShort => 'استخدم 8 أحرف على الأقل';
 
   @override
   String get passphrasesMismatch => 'عبارتا المرور غير متطابقتين';

@@ -152,17 +152,23 @@ abstract class AppLocalizations {
   /// **'Send feedback'**
   String get sendFeedback;
 
-  /// No description provided for @exportBackup.
+  /// No description provided for @saveBackupToDevice.
   ///
   /// In en, this message translates to:
-  /// **'Export backup'**
-  String get exportBackup;
+  /// **'Save backup to device'**
+  String get saveBackupToDevice;
 
-  /// No description provided for @importBackup.
+  /// No description provided for @shareBackup.
   ///
   /// In en, this message translates to:
-  /// **'Import backup'**
-  String get importBackup;
+  /// **'Share backup'**
+  String get shareBackup;
+
+  /// No description provided for @restoreBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup'**
+  String get restoreBackup;
 
   /// No description provided for @surahs.
   ///
@@ -194,41 +200,77 @@ abstract class AppLocalizations {
   /// **'Failed to load Juz.\nPlease restart the app.'**
   String get juzLoadError;
 
-  /// No description provided for @backupExported.
+  /// No description provided for @backupSaved.
   ///
   /// In en, this message translates to:
-  /// **'Backup exported'**
-  String get backupExported;
+  /// **'Backup saved'**
+  String get backupSaved;
 
-  /// No description provided for @exportCanceled.
+  /// No description provided for @saveCanceled.
   ///
   /// In en, this message translates to:
-  /// **'Export canceled'**
-  String get exportCanceled;
+  /// **'Save canceled'**
+  String get saveCanceled;
 
-  /// No description provided for @exportFailed.
+  /// No description provided for @saveUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Export failed'**
-  String get exportFailed;
+  /// **'Saving to this device is unavailable'**
+  String get saveUnavailable;
 
-  /// No description provided for @backupImported.
+  /// No description provided for @saveBackupFailed.
   ///
   /// In en, this message translates to:
-  /// **'Backup imported'**
-  String get backupImported;
+  /// **'Backup could not be saved'**
+  String get saveBackupFailed;
 
-  /// No description provided for @importCanceled.
+  /// No description provided for @backupShared.
   ///
   /// In en, this message translates to:
-  /// **'Import canceled'**
-  String get importCanceled;
+  /// **'Backup shared'**
+  String get backupShared;
 
-  /// No description provided for @importFailed.
+  /// No description provided for @shareCanceled.
   ///
   /// In en, this message translates to:
-  /// **'Import failed. Check the file and passphrase.'**
-  String get importFailed;
+  /// **'Share canceled'**
+  String get shareCanceled;
+
+  /// No description provided for @shareUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing is unavailable on this device'**
+  String get shareUnavailable;
+
+  /// No description provided for @shareBackupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup could not be shared'**
+  String get shareBackupFailed;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored'**
+  String get backupRestored;
+
+  /// No description provided for @restoreCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore canceled'**
+  String get restoreCanceled;
+
+  /// No description provided for @restoreUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring is unavailable on this device'**
+  String get restoreUnavailable;
+
+  /// No description provided for @restoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed. Check the file and passphrase.'**
+  String get restoreFailed;
 
   /// No description provided for @feedbackPromptTitle.
   ///
@@ -260,17 +302,23 @@ abstract class AppLocalizations {
   /// **'Give feedback'**
   String get giveFeedback;
 
-  /// No description provided for @exportBackupSubtitle.
+  /// No description provided for @saveBackupSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Create an encrypted copy of your reading progress.'**
-  String get exportBackupSubtitle;
+  /// **'Save an encrypted copy of your bookmarks and last reading position.'**
+  String get saveBackupSubtitle;
 
-  /// No description provided for @importBackupSubtitle.
+  /// No description provided for @shareBackupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share an encrypted copy of your bookmarks and last reading position.'**
+  String get shareBackupSubtitle;
+
+  /// No description provided for @restoreBackupSubtitle.
   ///
   /// In en, this message translates to:
   /// **'Restore your bookmarks and last reading position.'**
-  String get importBackupSubtitle;
+  String get restoreBackupSubtitle;
 
   /// No description provided for @passphrase.
   ///
@@ -284,17 +332,17 @@ abstract class AppLocalizations {
   /// **'Confirm passphrase'**
   String get confirmPassphrase;
 
-  /// No description provided for @backupProtectionExport.
+  /// No description provided for @backupProtectionCreate.
   ///
   /// In en, this message translates to:
   /// **'This passphrase encrypts your bookmarks and last reading position. It cannot be recovered, so keep it safe.'**
-  String get backupProtectionExport;
+  String get backupProtectionCreate;
 
-  /// No description provided for @backupProtectionImport.
+  /// No description provided for @backupProtectionRestore.
   ///
   /// In en, this message translates to:
-  /// **'Importing replaces your current bookmarks and last reading position. Use the original passphrase.'**
-  String get backupProtectionImport;
+  /// **'Restoring replaces your current bookmarks and last reading position. Use the original passphrase.'**
+  String get backupProtectionRestore;
 
   /// No description provided for @cancel.
   ///
@@ -302,23 +350,47 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
-  /// No description provided for @export.
+  /// No description provided for @share.
   ///
   /// In en, this message translates to:
-  /// **'Export'**
-  String get export;
+  /// **'Share'**
+  String get share;
 
-  /// No description provided for @replaceAndImport.
+  /// No description provided for @restore.
   ///
   /// In en, this message translates to:
-  /// **'Replace & import'**
-  String get replaceAndImport;
+  /// **'Restore'**
+  String get restore;
+
+  /// No description provided for @replaceAndRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace & restore'**
+  String get replaceAndRestore;
+
+  /// No description provided for @backupFileSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Holy Quran backup'**
+  String get backupFileSubject;
+
+  /// No description provided for @shareBackupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Holy Quran backup'**
+  String get shareBackupTitle;
 
   /// No description provided for @passphraseRequired.
   ///
   /// In en, this message translates to:
   /// **'Passphrase is required'**
   String get passphraseRequired;
+
+  /// No description provided for @passphraseTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 8 characters'**
+  String get passphraseTooShort;
 
   /// No description provided for @passphrasesMismatch.
   ///

@@ -1,48 +1,48 @@
 import 'dart:typed_data';
 
-import 'package:file_selector/file_selector.dart';
-import 'package:share_plus/share_plus.dart';
-
+import 'quran_backup_file_operations.dart';
 import 'quran_backup_service.dart';
-
-const _backupFileName = 'holy-quran-backup.quran';
-const _backupTypeGroup = XTypeGroup(
-  label: 'Holy Quran backup',
-  extensions: ['quran'],
-);
 
 class QuranBackupFileService {
   final QuranBackupService backupService;
+  final BackupFileOperations fileOperations;
 
-  const QuranBackupFileService({required this.backupService});
+  const QuranBackupFileService({
+    required this.backupService,
+    required this.fileOperations,
+  });
 
-  Future<bool> exportBackup(String passphrase) async {
-    final bytes = await backupService.exportBackup(passphrase);
-    final result = await SharePlus.instance.share(
-      ShareParams(
-        files: [
-          XFile.fromData(
-            Uint8List.fromList(bytes),
-            mimeType: 'application/octet-stream',
-            name: _backupFileName,
-          ),
-        ],
-        fileNameOverrides: const [_backupFileName],
-        subject: 'Holy Quran backup',
-        title: 'Export Holy Quran backup',
-      ),
+  Future<BackupFileOperationResult> saveBackup(
+    String passphrase, {
+    required String confirmButtonText,
+  }) async {
+    return fileOperations.save(
+      bytes: Uint8List.fromList(await backupService.exportBackup(passphrase)),
+      confirmButtonText: confirmButtonText,
     );
-    return result.status != ShareResultStatus.dismissed;
   }
 
-  Future<bool> importBackup(String passphrase) async {
-    final file = await openFile(
-      acceptedTypeGroups: const [_backupTypeGroup],
-      confirmButtonText: 'Import',
+  Future<BackupFileOperationResult> shareBackup(
+    String passphrase, {
+    required String subject,
+    required String title,
+  }) async {
+    return fileOperations.share(
+      bytes: Uint8List.fromList(await backupService.exportBackup(passphrase)),
+      subject: subject,
+      title: title,
     );
-    if (file == null) return false;
+  }
 
-    await backupService.importBackup(await file.readAsBytes(), passphrase);
-    return true;
+  Future<BackupFileOperationResult> restoreBackup(
+    String passphrase, {
+    required String confirmButtonText,
+  }) async {
+    final bytes = await fileOperations.pick(
+      confirmButtonText: confirmButtonText,
+    );
+    if (bytes == null) return BackupFileOperationResult.canceled;
+    await backupService.importBackup(bytes, passphrase);
+    return BackupFileOperationResult.completed;
   }
 }

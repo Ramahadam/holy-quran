@@ -37,10 +37,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendFeedback => 'Send feedback';
 
   @override
-  String get exportBackup => 'Export backup';
+  String get saveBackupToDevice => 'Save backup to device';
 
   @override
-  String get importBackup => 'Import backup';
+  String get shareBackup => 'Share backup';
+
+  @override
+  String get restoreBackup => 'Restore backup';
 
   @override
   String get surahs => 'Surahs';
@@ -59,22 +62,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get juzLoadError => 'Failed to load Juz.\nPlease restart the app.';
 
   @override
-  String get backupExported => 'Backup exported';
+  String get backupSaved => 'Backup saved';
 
   @override
-  String get exportCanceled => 'Export canceled';
+  String get saveCanceled => 'Save canceled';
 
   @override
-  String get exportFailed => 'Export failed';
+  String get saveUnavailable => 'Saving to this device is unavailable';
 
   @override
-  String get backupImported => 'Backup imported';
+  String get saveBackupFailed => 'Backup could not be saved';
 
   @override
-  String get importCanceled => 'Import canceled';
+  String get backupShared => 'Backup shared';
 
   @override
-  String get importFailed => 'Import failed. Check the file and passphrase.';
+  String get shareCanceled => 'Share canceled';
+
+  @override
+  String get shareUnavailable => 'Sharing is unavailable on this device';
+
+  @override
+  String get shareBackupFailed => 'Backup could not be shared';
+
+  @override
+  String get backupRestored => 'Backup restored';
+
+  @override
+  String get restoreCanceled => 'Restore canceled';
+
+  @override
+  String get restoreUnavailable => 'Restoring is unavailable on this device';
+
+  @override
+  String get restoreFailed => 'Restore failed. Check the file and passphrase.';
 
   @override
   String get feedbackPromptTitle => 'How is your Quran reading experience?';
@@ -94,11 +115,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get giveFeedback => 'Give feedback';
 
   @override
-  String get exportBackupSubtitle =>
-      'Create an encrypted copy of your reading progress.';
+  String get saveBackupSubtitle =>
+      'Save an encrypted copy of your bookmarks and last reading position.';
 
   @override
-  String get importBackupSubtitle =>
+  String get shareBackupSubtitle =>
+      'Share an encrypted copy of your bookmarks and last reading position.';
+
+  @override
+  String get restoreBackupSubtitle =>
       'Restore your bookmarks and last reading position.';
 
   @override
@@ -108,24 +133,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmPassphrase => 'Confirm passphrase';
 
   @override
-  String get backupProtectionExport =>
+  String get backupProtectionCreate =>
       'This passphrase encrypts your bookmarks and last reading position. It cannot be recovered, so keep it safe.';
 
   @override
-  String get backupProtectionImport =>
-      'Importing replaces your current bookmarks and last reading position. Use the original passphrase.';
+  String get backupProtectionRestore =>
+      'Restoring replaces your current bookmarks and last reading position. Use the original passphrase.';
 
   @override
   String get cancel => 'Cancel';
 
   @override
-  String get export => 'Export';
+  String get share => 'Share';
 
   @override
-  String get replaceAndImport => 'Replace & import';
+  String get restore => 'Restore';
+
+  @override
+  String get replaceAndRestore => 'Replace & restore';
+
+  @override
+  String get backupFileSubject => 'Holy Quran backup';
+
+  @override
+  String get shareBackupTitle => 'Share Holy Quran backup';
 
   @override
   String get passphraseRequired => 'Passphrase is required';
+
+  @override
+  String get passphraseTooShort => 'Use at least 8 characters';
 
   @override
   String get passphrasesMismatch => 'Passphrases do not match';

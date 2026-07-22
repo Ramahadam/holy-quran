@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/backup/quran_backup_file_operations.dart';
+import '../../data/backup/quran_backup_service.dart';
 import '../../data/feedback/anonymous_feedback_service.dart';
 import '../../data/notifications/prayer_reminder_settings.dart';
 import '../../domain/models/bookmark.dart';
@@ -17,8 +19,9 @@ import 'reading_screen.dart';
 enum _HomeMenuAction {
   switchLanguage,
   toggleDarkMode,
-  exportBackup,
-  importBackup,
+  saveBackup,
+  shareBackup,
+  restoreBackup,
   feedback,
   reminders,
 }
@@ -26,6 +29,8 @@ enum _HomeMenuAction {
 enum _FeedbackPromptAction { notNow, giveFeedback }
 
 enum _QuranIndexSection { surahs, juz }
+
+enum _BackupPassphrasePurpose { save, share, restore }
 
 typedef _OpenReading =
     Future<void> Function(Surah surah, {String? initialVerseId});
@@ -106,10 +111,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ref.read(themeModeProvider.notifier).state = darkModeEnabled
                       ? ThemeMode.system
                       : ThemeMode.dark;
-                case _HomeMenuAction.exportBackup:
-                  _exportBackup(context);
-                case _HomeMenuAction.importBackup:
-                  _importBackup(context);
+                case _HomeMenuAction.saveBackup:
+                  _saveBackup(context);
+                case _HomeMenuAction.shareBackup:
+                  _shareBackup(context);
+                case _HomeMenuAction.restoreBackup:
+                  _restoreBackup(context);
                 case _HomeMenuAction.feedback:
                   _showFeedbackDialog(context);
                 case _HomeMenuAction.reminders:
@@ -164,23 +171,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const PopupMenuDivider(height: 9),
               PopupMenuItem(
-                value: _HomeMenuAction.exportBackup,
+                value: _HomeMenuAction.saveBackup,
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-exportBackup'),
-                  icon: Icons.upload_file_rounded,
-                  label: l10n.exportBackup,
+                  rowKey: const ValueKey('homeMenu-saveBackup'),
+                  icon: Icons.save_alt_rounded,
+                  label: l10n.saveBackupToDevice,
                 ),
               ),
               PopupMenuItem(
-                value: _HomeMenuAction.importBackup,
+                value: _HomeMenuAction.shareBackup,
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-importBackup'),
+                  rowKey: const ValueKey('homeMenu-shareBackup'),
+                  icon: Icons.share_outlined,
+                  label: l10n.shareBackup,
+                ),
+              ),
+              PopupMenuItem(
+                value: _HomeMenuAction.restoreBackup,
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: _HomeMenuItem(
+                  rowKey: const ValueKey('homeMenu-restoreBackup'),
                   icon: Icons.download_rounded,
-                  label: l10n.importBackup,
+                  label: l10n.restoreBackup,
                 ),
               ),
             ],
@@ -401,58 +418,97 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  Future<void> _exportBackup(BuildContext context) async {
-    final passphrase = await _promptPassphrase(context, confirm: true);
-    if (passphrase == null) return;
+  Future<void> _saveBackup(BuildContext context) async {
+    final passphrase = await _promptPassphrase(
+      context,
+      purpose: _BackupPassphrasePurpose.save,
+    );
+    if (passphrase == null || !context.mounted) return;
+    final l10n = context.l10n;
 
     try {
-      final exported = await ref
+      final result = await ref
           .read(quranBackupFileServiceProvider)
-          .exportBackup(passphrase);
+          .saveBackup(passphrase, confirmButtonText: l10n.save);
       if (!context.mounted) return;
-      _showSnackBar(
-        context,
-        exported ? context.l10n.backupExported : context.l10n.exportCanceled,
-      );
+      _showSnackBar(context, switch (result) {
+        BackupFileOperationResult.completed => l10n.backupSaved,
+        BackupFileOperationResult.canceled => l10n.saveCanceled,
+        BackupFileOperationResult.unavailable => l10n.saveUnavailable,
+      });
     } catch (_) {
       if (context.mounted) {
-        _showSnackBar(context, context.l10n.exportFailed);
+        _showSnackBar(context, l10n.saveBackupFailed);
       }
     }
   }
 
-  Future<void> _importBackup(BuildContext context) async {
-    final passphrase = await _promptPassphrase(context);
-    if (passphrase == null) return;
+  Future<void> _shareBackup(BuildContext context) async {
+    final passphrase = await _promptPassphrase(
+      context,
+      purpose: _BackupPassphrasePurpose.share,
+    );
+    if (passphrase == null || !context.mounted) return;
+    final l10n = context.l10n;
 
     try {
-      final imported = await ref
+      final result = await ref
           .read(quranBackupFileServiceProvider)
-          .importBackup(passphrase);
+          .shareBackup(
+            passphrase,
+            subject: l10n.backupFileSubject,
+            title: l10n.shareBackupTitle,
+          );
       if (!context.mounted) return;
-      if (imported) {
+      _showSnackBar(context, switch (result) {
+        BackupFileOperationResult.completed => l10n.backupShared,
+        BackupFileOperationResult.canceled => l10n.shareCanceled,
+        BackupFileOperationResult.unavailable => l10n.shareUnavailable,
+      });
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, l10n.shareBackupFailed);
+      }
+    }
+  }
+
+  Future<void> _restoreBackup(BuildContext context) async {
+    final passphrase = await _promptPassphrase(
+      context,
+      purpose: _BackupPassphrasePurpose.restore,
+    );
+    if (passphrase == null || !context.mounted) return;
+    final l10n = context.l10n;
+
+    try {
+      final result = await ref
+          .read(quranBackupFileServiceProvider)
+          .restoreBackup(passphrase, confirmButtonText: l10n.restore);
+      if (!context.mounted) return;
+      if (result == BackupFileOperationResult.completed) {
         ref.invalidate(lastReadPositionProvider);
         ref.invalidate(recentBookmarksProvider);
         ref.invalidate(bookmarksBySurahProvider);
       }
-      _showSnackBar(
-        context,
-        imported ? context.l10n.backupImported : context.l10n.importCanceled,
-      );
+      _showSnackBar(context, switch (result) {
+        BackupFileOperationResult.completed => l10n.backupRestored,
+        BackupFileOperationResult.canceled => l10n.restoreCanceled,
+        BackupFileOperationResult.unavailable => l10n.restoreUnavailable,
+      });
     } catch (_) {
       if (context.mounted) {
-        _showSnackBar(context, context.l10n.importFailed);
+        _showSnackBar(context, l10n.restoreFailed);
       }
     }
   }
 
   Future<String?> _promptPassphrase(
     BuildContext context, {
-    bool confirm = false,
+    required _BackupPassphrasePurpose purpose,
   }) {
     return showDialog<String>(
       context: context,
-      builder: (context) => _BackupPassphraseDialog(confirm: confirm),
+      builder: (context) => _BackupPassphraseDialog(purpose: purpose),
     );
   }
 
@@ -697,9 +753,9 @@ InputDecoration _homeDialogInputDecoration(
 }
 
 class _BackupPassphraseDialog extends StatefulWidget {
-  final bool confirm;
+  final _BackupPassphrasePurpose purpose;
 
-  const _BackupPassphraseDialog({required this.confirm});
+  const _BackupPassphraseDialog({required this.purpose});
 
   @override
   State<_BackupPassphraseDialog> createState() =>
@@ -728,22 +784,40 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final confirm = widget.confirm;
+    final purpose = widget.purpose;
+    final confirm = purpose != _BackupPassphrasePurpose.restore;
     final l10n = context.l10n;
     final colors = Theme.of(context).colorScheme;
+    final (keyName, icon, title, subtitle, actionLabel) = switch (purpose) {
+      _BackupPassphrasePurpose.save => (
+        'saveBackup',
+        Icons.save_alt_rounded,
+        l10n.saveBackupToDevice,
+        l10n.saveBackupSubtitle,
+        l10n.save,
+      ),
+      _BackupPassphrasePurpose.share => (
+        'shareBackup',
+        Icons.share_outlined,
+        l10n.shareBackup,
+        l10n.shareBackupSubtitle,
+        l10n.share,
+      ),
+      _BackupPassphrasePurpose.restore => (
+        'restoreBackup',
+        Icons.download_rounded,
+        l10n.restoreBackup,
+        l10n.restoreBackupSubtitle,
+        l10n.replaceAndRestore,
+      ),
+    };
 
     return _HomeDialog(
-      dialogKey: ValueKey(
-        confirm ? 'homeDialog-exportBackup' : 'homeDialog-importBackup',
-      ),
-      headerKey: ValueKey(
-        confirm
-            ? 'homeDialogHeader-exportBackup'
-            : 'homeDialogHeader-importBackup',
-      ),
-      icon: confirm ? Icons.upload_file_rounded : Icons.download_rounded,
-      title: confirm ? l10n.exportBackup : l10n.importBackup,
-      subtitle: confirm ? l10n.exportBackupSubtitle : l10n.importBackupSubtitle,
+      dialogKey: ValueKey('homeDialog-$keyName'),
+      headerKey: ValueKey('homeDialogHeader-$keyName'),
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -784,8 +858,8 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               noticeKey: const ValueKey('backupProtectionNotice'),
               icon: Icons.shield_outlined,
               text: confirm
-                  ? l10n.backupProtectionExport
-                  : l10n.backupProtectionImport,
+                  ? l10n.backupProtectionCreate
+                  : l10n.backupProtectionRestore,
             ),
             if (_errorText != null) ...[
               const SizedBox(height: 12),
@@ -811,11 +885,8 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
         FilledButton.icon(
           style: FilledButton.styleFrom(minimumSize: const Size(96, 44)),
           onPressed: _submit,
-          icon: Icon(
-            confirm ? Icons.upload_rounded : Icons.download_rounded,
-            size: 18,
-          ),
-          label: Text(confirm ? l10n.export : l10n.replaceAndImport),
+          icon: Icon(icon, size: 18),
+          label: Text(actionLabel),
         ),
       ],
     );
@@ -830,7 +901,15 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
       });
       return;
     }
-    if (widget.confirm && passphrase != _confirmController.text) {
+    if (widget.purpose != _BackupPassphrasePurpose.restore &&
+        passphrase.trim().length < minimumBackupPassphraseLength) {
+      setState(() {
+        _errorText = context.l10n.passphraseTooShort;
+      });
+      return;
+    }
+    if (widget.purpose != _BackupPassphrasePurpose.restore &&
+        passphrase != _confirmController.text) {
       setState(() {
         _errorText = context.l10n.passphrasesMismatch;
       });

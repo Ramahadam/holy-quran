@@ -968,8 +968,9 @@ void main() {
         'darkMode',
         'reminders',
         'feedback',
-        'exportBackup',
-        'importBackup',
+        'saveBackup',
+        'shareBackup',
+        'restoreBackup',
       ]) {
         final row = find.byKey(ValueKey('homeMenu-$action'));
         expect(row, findsOneWidget);
@@ -1040,30 +1041,49 @@ void main() {
 
       await tester.tap(find.byTooltip('Menu'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Export backup'));
+      await tester.tap(find.text('Save backup to device'));
       await tester.pumpAndSettle();
 
       final colors = AppTheme.light.colorScheme;
-      final exportDialogFinder = find.byKey(
-        const ValueKey('homeDialog-exportBackup'),
+      final saveDialogFinder = find.byKey(
+        const ValueKey('homeDialog-saveBackup'),
       );
-      expect(exportDialogFinder, findsOneWidget);
-      final exportDialog = tester.widget<AlertDialog>(exportDialogFinder);
-      expect(exportDialog.backgroundColor, colors.surfaceContainerHigh);
-      expect(exportDialog.surfaceTintColor, Colors.transparent);
-      expect(exportDialog.shape, isA<RoundedRectangleBorder>());
-      final exportShape = exportDialog.shape! as RoundedRectangleBorder;
-      expect(exportShape.borderRadius, BorderRadius.circular(24));
+      expect(saveDialogFinder, findsOneWidget);
+      final saveDialog = tester.widget<AlertDialog>(saveDialogFinder);
+      expect(saveDialog.backgroundColor, colors.surfaceContainerHigh);
+      expect(saveDialog.surfaceTintColor, Colors.transparent);
+      expect(saveDialog.shape, isA<RoundedRectangleBorder>());
+      final saveShape = saveDialog.shape! as RoundedRectangleBorder;
+      expect(saveShape.borderRadius, BorderRadius.circular(24));
       expect(
-        exportShape.side.color,
+        saveShape.side.color,
         colors.outlineVariant.withValues(alpha: 0.7),
       );
       expect(
-        find.byKey(const ValueKey('homeDialogHeader-exportBackup')),
+        find.byKey(const ValueKey('homeDialogHeader-saveBackup')),
         findsOneWidget,
       );
       expect(
         find.byKey(const ValueKey('backupProtectionNotice')),
+        findsOneWidget,
+      );
+      expect(find.byType(TextField), findsNWidgets(2));
+      await tester.enterText(find.byType(TextField).first, 'short');
+      await tester.enterText(find.byType(TextField).last, 'short');
+      await tester.tap(find.text('Save'));
+      await tester.pump();
+      expect(find.text('Use at least 8 characters'), findsOneWidget);
+      expect(saveDialogFinder, findsOneWidget);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Share backup'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const ValueKey('homeDialog-shareBackup')),
         findsOneWidget,
       );
       expect(find.byType(TextField), findsNWidgets(2));
@@ -1072,18 +1092,18 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byTooltip('Menu'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Import backup'));
+      await tester.tap(find.text('Restore backup'));
       await tester.pumpAndSettle();
 
-      final importDialogFinder = find.byKey(
-        const ValueKey('homeDialog-importBackup'),
+      final restoreDialogFinder = find.byKey(
+        const ValueKey('homeDialog-restoreBackup'),
       );
-      expect(importDialogFinder, findsOneWidget);
-      final importDialog = tester.widget<AlertDialog>(importDialogFinder);
-      expect(importDialog.backgroundColor, colors.surfaceContainerHigh);
-      expect(importDialog.shape, exportDialog.shape);
+      expect(restoreDialogFinder, findsOneWidget);
+      final restoreDialog = tester.widget<AlertDialog>(restoreDialogFinder);
+      expect(restoreDialog.backgroundColor, colors.surfaceContainerHigh);
+      expect(restoreDialog.shape, saveDialog.shape);
       expect(
-        find.byKey(const ValueKey('homeDialogHeader-importBackup')),
+        find.byKey(const ValueKey('homeDialogHeader-restoreBackup')),
         findsOneWidget,
       );
       expect(find.byType(TextField), findsOneWidget);
