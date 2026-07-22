@@ -504,37 +504,40 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   }
 
   Widget _buildMushafPageView() {
-    return PageView.builder(
-      controller: _pageController,
-      reverse: true,
-      itemCount: _totalPages,
-      onPageChanged: (index) {
-        final pageNum = index + 1;
-        setState(() {
-          _currentPage = pageNum;
-          _currentPageFirstVerseId = null;
-          _showMushafPageNumberOverlay = _readingMode == ReadingMode.mushaf;
-        });
-        if (_readingMode == ReadingMode.mushaf) {
-          _scheduleMushafPageNumberOverlayHide();
-          _prefetchMushafPages(pageNum);
-        }
-      },
-      itemBuilder: (context, index) {
-        final pageNum = index + 1;
-        return _QuranPage(
-          key: ValueKey(pageNum),
-          page: pageNum,
-          readingMode: _readingMode,
-          onFirstVerseResolved: pageNum == _currentPage
-              ? (verseId) => _currentPageFirstVerseId ??= verseId
-              : null,
-          onVerseHit: pageNum == _currentPage
-              ? (verseId) => _currentPageFirstVerseId = verseId
-              : null,
-          onPageTap: pageNum == _currentPage ? _toggleMushafControls : null,
-        );
-      },
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView.builder(
+        controller: _pageController,
+        reverse: true,
+        itemCount: _totalPages,
+        onPageChanged: (index) {
+          final pageNum = index + 1;
+          setState(() {
+            _currentPage = pageNum;
+            _currentPageFirstVerseId = null;
+            _showMushafPageNumberOverlay = _readingMode == ReadingMode.mushaf;
+          });
+          if (_readingMode == ReadingMode.mushaf) {
+            _scheduleMushafPageNumberOverlayHide();
+            _prefetchMushafPages(pageNum);
+          }
+        },
+        itemBuilder: (context, index) {
+          final pageNum = index + 1;
+          return _QuranPage(
+            key: ValueKey(pageNum),
+            page: pageNum,
+            readingMode: _readingMode,
+            onFirstVerseResolved: pageNum == _currentPage
+                ? (verseId) => _currentPageFirstVerseId ??= verseId
+                : null,
+            onVerseHit: pageNum == _currentPage
+                ? (verseId) => _currentPageFirstVerseId = verseId
+                : null,
+            onPageTap: pageNum == _currentPage ? _toggleMushafControls : null,
+          );
+        },
+      ),
     );
   }
 }

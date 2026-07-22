@@ -37,6 +37,22 @@ const _verse1 = Verse(
 );
 
 void main() {
+  testWidgets('Mushaf pages progress toward the left in RTL app mode', (
+    tester,
+  ) async {
+    await _pumpReading(tester, textDirection: TextDirection.rtl);
+    await _enterMushaf(tester);
+
+    final scrollable = tester.widget<Scrollable>(
+      find.descendant(
+        of: find.byType(PageView),
+        matching: find.byType(Scrollable),
+      ),
+    );
+
+    expect(scrollable.axisDirection, AxisDirection.left);
+  });
+
   testWidgets('single tap on the Mushaf page toggles immersive controls', (
     tester,
   ) async {
@@ -230,6 +246,7 @@ Future<void> _pumpReading(
   _MemoryBookmarkRepository? bookmarkRepository,
   _MemoryReadingPositionRepository? positionRepository,
   List<Override> extraOverrides = const [],
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
   final bookmarks = bookmarkRepository ?? _MemoryBookmarkRepository();
   await tester.pumpWidget(
@@ -247,7 +264,12 @@ Future<void> _pumpReading(
         ).overrideWith((ref) => bookmarks.idsForSurah(1)),
         ...extraOverrides,
       ],
-      child: const MaterialApp(home: ReadingScreen(surah: _alFatihah)),
+      child: MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: const ReadingScreen(surah: _alFatihah),
+        ),
+      ),
     ),
   );
   await tester.pumpAndSettle();
