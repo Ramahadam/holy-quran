@@ -13,6 +13,9 @@
 migrate_working_dir/
 .env
 config/supabase.local.json
+config/cloudflare.local.json
+node_modules/
+.wrangler/
 # IntelliJ related
 *.iml
 *.ipr

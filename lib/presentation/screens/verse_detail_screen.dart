@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/models/tafsir.dart';
 import '../../domain/models/verse.dart';
 import '../providers/quran_providers.dart';
+import '../providers/tafsir_providers.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 
@@ -20,7 +22,16 @@ class VerseDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text('${verse.surahNumber}:${verse.verseNumber}'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Ayah Study'),
+            Text(
+              '${verse.surahNumber}:${verse.verseNumber}',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             tooltip: isBookmarked ? 'Remove bookmark' : 'Bookmark verse',
@@ -68,6 +79,10 @@ class VerseDetailScreen extends ConsumerWidget {
                       ).textTheme.titleMedium?.copyWith(height: 1.7),
                     ),
                   ],
+                  const SizedBox(height: 32),
+                  Divider(color: Theme.of(context).dividerColor),
+                  const SizedBox(height: 24),
+                  _TafsirSection(verseKey: verse.verseId),
                 ],
               ),
             ),
@@ -102,6 +117,183 @@ class VerseDetailScreen extends ConsumerWidget {
       );
     }
   }
+}
+
+class _TafsirSection extends ConsumerStatefulWidget {
+  final String verseKey;
+
+  const _TafsirSection({required this.verseKey});
+
+  @override
+  ConsumerState<_TafsirSection> createState() => _TafsirSectionState();
+}
+
+class _TafsirSectionState extends ConsumerState<_TafsirSection> {
+  static const int _preferredEnglishSourceId = 169;
+  int? _selectedSourceId;
+
+  @override
+  Widget build(BuildContext context) {
+    final sources = ref.watch(tafsirSourcesProvider);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Tafsir', style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 6),
+        Text(
+          'Commentary from Quran Foundation',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 16),
+        sources.when(
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator(
+                key: ValueKey('tafsirSourcesLoading'),
+              ),
+            ),
+          ),
+          error: (_, _) => _TafsirError(
+            onRetry: () => ref.invalidate(tafsirSourcesProvider),
+          ),
+          data: (availableSources) {
+            if (availableSources.isEmpty) {
+              return const Text('No tafsir sources are available.');
+            }
+            final selectedSource = _selectSource(availableSources);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DropdownButtonFormField<int>(
+                  key: const ValueKey('tafsirSourcePicker'),
+                  initialValue: selectedSource.id,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Tafsir source',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: availableSources
+                      .map(
+                        (source) => DropdownMenuItem(
+                          value: source.id,
+                          child: Text(
+                            '${source.name} · ${_capitalized(source.languageName)}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: (sourceId) {
+                    if (sourceId == null || sourceId == _selectedSourceId) {
+                      return;
+                    }
+                    setState(() => _selectedSourceId = sourceId);
+                  },
+                ),
+                const SizedBox(height: 20),
+                _TafsirPassageView(
+                  request: TafsirRequest(
+                    verseKey: widget.verseKey,
+                    source: selectedSource,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  TafsirSource _selectSource(List<TafsirSource> sources) {
+    final selectedId = _selectedSourceId ?? _preferredEnglishSourceId;
+    for (final source in sources) {
+      if (source.id == selectedId) return source;
+    }
+    return sources.first;
+  }
+}
+
+class _TafsirPassageView extends ConsumerWidget {
+  final TafsirRequest request;
+
+  const _TafsirPassageView({required this.request});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final passage = ref.watch(tafsirPassageProvider(request));
+    return passage.when(
+      loading: () => const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(
+            key: ValueKey('tafsirPassageLoading'),
+          ),
+        ),
+      ),
+      error: (_, _) => _TafsirError(
+        onRetry: () => ref.invalidate(tafsirPassageProvider(request)),
+      ),
+      data: (value) => Column(
+        crossAxisAlignment: value.source.isArabic
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          Text(
+            value.text,
+            textDirection: value.source.isArabic
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.7),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _attribution(value.source.name, value.source.authorName),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TafsirError extends StatelessWidget {
+  final VoidCallback onRetry;
+
+  const _TafsirError({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Icon(Icons.cloud_off_outlined),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Tafsir is unavailable')),
+            TextButton(onPressed: onRetry, child: const Text('Retry')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _capitalized(String value) {
+  if (value.isEmpty) return value;
+  return '${value[0].toUpperCase()}${value.substring(1)}';
+}
+
+String _attribution(String name, String authorName) {
+  return authorName.isEmpty ? 'Source: $name' : 'Source: $name — $authorName';
 }
 
 class _VerseBadge extends StatelessWidget {

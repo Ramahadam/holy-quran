@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "holy-quran-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-21",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "secrets": {
+    "required": ["QF_CLIENT_ID", "QF_CLIENT_SECRET"]
+  },
+  "d1_databases": [
+    {
+      "binding": "FEEDBACK_DB",
+      "database_name": "holy-quran-feedback",
+      "database_id": "14334942-d455-44e6-8494-be48e031b7b1",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
