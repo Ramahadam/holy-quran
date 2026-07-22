@@ -71,17 +71,6 @@ class VerseDetailScreen extends ConsumerWidget {
                     textAlign: TextAlign.right,
                     textDirection: TextDirection.rtl,
                   ),
-                  if (verse.translation != null) ...[
-                    const SizedBox(height: 28),
-                    Divider(color: Theme.of(context).dividerColor),
-                    const SizedBox(height: 20),
-                    Text(
-                      verse.translation!,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.copyWith(height: 1.7),
-                    ),
-                  ],
                   const SizedBox(height: 32),
                   Divider(color: Theme.of(context).dividerColor),
                   const SizedBox(height: 24),
@@ -173,12 +162,12 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
             final appLanguageCode = Localizations.localeOf(
               context,
             ).languageCode;
-            final orderedSources = orderTafsirSourcesForLanguage(
+            final localizedSources = tafsirSourcesForLanguage(
               availableSources,
               appLanguageCode,
             );
             final selectedSource = selectTafsirSource(
-              orderedSources,
+              localizedSources,
               appLanguageCode,
               selectedSourceId: _selectedSourceId,
             );
@@ -193,12 +182,13 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
                     labelText: context.l10n.tafsirSource,
                     border: const OutlineInputBorder(),
                   ),
-                  items: orderedSources
+                  items: localizedSources
                       .map(
                         (source) => DropdownMenuItem(
                           value: source.id,
                           child: Text(
-                            '${source.name} · ${_localizedLanguageName(context, source.languageName)}',
+                            '${tafsirSourceNameForLanguage(source, appLanguageCode)} '
+                            '· ${_localizedLanguageName(context, source.languageName)}',
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -261,7 +251,17 @@ class _TafsirPassageView extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            _attribution(context, value.source.name, value.source.authorName),
+            _attribution(
+              context,
+              tafsirSourceNameForLanguage(
+                value.source,
+                Localizations.localeOf(context).languageCode,
+              ),
+              tafsirAuthorNameForLanguage(
+                value.source,
+                Localizations.localeOf(context).languageCode,
+              ),
+            ),
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

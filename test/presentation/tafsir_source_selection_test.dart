@@ -21,14 +21,25 @@ void main() {
     expect(selectTafsirSource(sourcesWithoutMuyassar, 'ar').id, 15);
   });
 
-  test('orders matching-language sources first and keeps stable order', () {
+  test('shows only sources matching the app language', () {
     expect(
-      orderTafsirSourcesForLanguage(_sources, 'ar').map((source) => source.id),
-      [16, 15, 169, 168],
+      tafsirSourcesForLanguage(_sources, 'ar').map((source) => source.id),
+      [16, 15],
     );
     expect(
-      orderTafsirSourcesForLanguage(_sources, 'en').map((source) => source.id),
-      [169, 168, 16, 15],
+      tafsirSourcesForLanguage(_sources, 'en').map((source) => source.id),
+      [169, 168],
+    );
+  });
+
+  test('localizes known Arabic source names and authors', () {
+    expect(tafsirSourceNameForLanguage(_sources[1], 'ar'), 'التفسير الميسر');
+    expect(tafsirAuthorNameForLanguage(_sources[1], 'ar'), 'نخبة من العلماء');
+    expect(tafsirSourceNameForLanguage(_sources[2], 'ar'), 'تفسير الطبري');
+    expect(tafsirAuthorNameForLanguage(_sources[2], 'ar'), 'الإمام الطبري');
+    expect(
+      tafsirSourceNameForLanguage(_sources.first, 'en'),
+      'Ibn Kathir (Abridged)',
     );
   });
 }

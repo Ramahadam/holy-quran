@@ -37,6 +37,22 @@ const _arabic = TafsirSource(
   slug: 'ar-tafsir-muyassar',
 );
 
+const _arabicTabari = TafsirSource(
+  id: 15,
+  name: 'Tafsir al-Tabari',
+  authorName: 'Imam at-Tabari',
+  languageName: 'arabic',
+  slug: 'ar-tafsir-al-tabari',
+);
+
+const _englishAlternative = TafsirSource(
+  id: 168,
+  name: "Ma'arif al-Qur'an",
+  authorName: 'Mufti Muhammad Shafi',
+  languageName: 'english',
+  slug: 'en-tafsir-maarif-ul-quran',
+);
+
 void main() {
   testWidgets('shows attributed tafsir and switches source', (tester) async {
     await tester.pumpWidget(
@@ -52,6 +68,7 @@ void main() {
 
     expect(find.text('Ayah Study'), findsOneWidget);
     expect(find.text('Tafsir'), findsOneWidget);
+    expect(find.text(_verse.translation!), findsNothing);
     expect(find.text('English explanation'), findsOneWidget);
     expect(
       find.text('Source: Tafsir Ibn Kathir — Hafiz Ibn Kathir'),
@@ -60,11 +77,15 @@ void main() {
 
     await tester.tap(find.byType(DropdownButtonFormField<int>));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Tafsir Muyassar · Arabic').last);
+    expect(find.textContaining('Tafsir Muyassar'), findsNothing);
+    await tester.tap(find.text("Ma'arif al-Qur'an · English").last);
     await tester.pumpAndSettle();
 
-    expect(find.text('شرح عربي'), findsOneWidget);
-    expect(find.text('Source: Tafsir Muyassar — الميسر'), findsOneWidget);
+    expect(find.text('Alternative English explanation'), findsOneWidget);
+    expect(
+      find.text("Source: Ma'arif al-Qur'an — Mufti Muhammad Shafi"),
+      findsOneWidget,
+    );
   });
 
   testWidgets('uses the app language for the default tafsir source', (
@@ -84,8 +105,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text(_verse.translation!), findsNothing);
     expect(find.text('شرح عربي'), findsOneWidget);
-    expect(find.text('Tafsir Muyassar · العربية'), findsOneWidget);
+    expect(find.text('التفسير الميسر · العربية'), findsOneWidget);
+
+    await tester.tap(find.byType(DropdownButtonFormField<int>));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Tafsir Ibn Kathir'), findsNothing);
+    await tester.tap(find.text('تفسير الطبري · العربية').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('شرح الطبري'), findsOneWidget);
+    expect(find.text('المصدر: تفسير الطبري — الإمام الطبري'), findsOneWidget);
 
     final container = ProviderScope.containerOf(
       tester.element(find.byType(VerseDetailScreen)),
@@ -116,7 +147,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(_verse.arabicText), findsOneWidget);
-    expect(find.text(_verse.translation!), findsOneWidget);
+    expect(find.text(_verse.translation!), findsNothing);
     expect(find.text('Tafsir is unavailable'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
   });
@@ -146,17 +177,25 @@ class _MemoryAppLocaleStore implements AppLocaleStore {
 
 class _FakeTafsirRepository implements TafsirRepository {
   @override
-  Future<List<TafsirSource>> getSources() async => [_arabic, _english];
+  Future<List<TafsirSource>> getSources() async => [
+    _arabic,
+    _english,
+    _arabicTabari,
+    _englishAlternative,
+  ];
 
   @override
   Future<TafsirPassage> getTafsir({
     required String verseKey,
     required TafsirSource source,
   }) async {
-    return TafsirPassage(
-      source: source,
-      text: source.isArabic ? 'شرح عربي' : 'English explanation',
-    );
+    final text = switch (source.id) {
+      15 => 'شرح الطبري',
+      16 => 'شرح عربي',
+      168 => 'Alternative English explanation',
+      _ => 'English explanation',
+    };
+    return TafsirPassage(source: source, text: text);
   }
 }
 
