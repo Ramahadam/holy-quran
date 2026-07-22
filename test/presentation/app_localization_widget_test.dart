@@ -4,11 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/data/localization/app_locale_store.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/l10n/app_localizations.dart';
+import 'package:holy_quran_app/l10n/app_localizations_ar.dart';
 import 'package:holy_quran_app/presentation/providers/locale_provider.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 
 void main() {
+  test('uses natural Arabic wording for saved Ayahs and backups', () {
+    final l10n = AppLocalizationsAr();
+
+    expect(l10n.bookmarks, 'الآيات المحفوظة');
+    expect(l10n.bookmarkVerse, 'حفظ الآية');
+    expect(l10n.removeBookmark, 'إزالة من المحفوظات');
+    expect(l10n.saveBackupToDevice, 'حفظ نسخة احتياطية على الجهاز');
+  });
+
   testWidgets('Arabic is default and English selection persists', (
     tester,
   ) async {
