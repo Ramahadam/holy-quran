@@ -1,6 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/data/backup/quran_backup_codec.dart';
+import 'package:holy_quran_app/data/backup/quran_backup_file_operations.dart';
+import 'package:holy_quran_app/data/backup/quran_backup_file_service.dart';
 import 'package:holy_quran_app/data/backup/quran_backup_service.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
 import 'package:holy_quran_app/data/repositories/reading_position_repository.dart';
@@ -80,6 +84,46 @@ void main() {
       expect(decoded.bookmarks.single.verseId, '1:1');
       expect(decoded.lastRead?.verseId, '1:7');
     });
+
+    test('requires at least 8 characters for a new backup passphrase', () {
+      final service = QuranBackupService(
+        bookmarkRepository: _FakeBookmarkRepository([]),
+        readingPositionRepository: _FakeReadingPositionRepository(null),
+        codec: _testCodec(),
+      );
+
+      expect(
+        () => service.exportBackup('1234567'),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
+    test(
+      'can restore a legacy backup protected by a short passphrase',
+      () async {
+        final codec = _testCodec();
+        final bytes = await codec.encode(
+          QuranBackupData(
+            bookmarks: [
+              Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 30)),
+            ],
+            lastRead: null,
+            exportedAt: DateTime.utc(2026, 5, 30),
+          ),
+          'old',
+        );
+        final bookmarkRepo = _FakeBookmarkRepository([]);
+        final service = QuranBackupService(
+          bookmarkRepository: bookmarkRepo,
+          readingPositionRepository: _FakeReadingPositionRepository(null),
+          codec: codec,
+        );
+
+        await service.importBackup(bytes, 'old');
+
+        expect(bookmarkRepo.bookmarks.single.verseId, '1:1');
+      },
+    );
 
     test('round trips exported state into a fresh repository', () async {
       final sourceBookmarks = [
@@ -173,7 +217,182 @@ void main() {
       expect(positionRepo.savedPosition, isNull);
       expect(positionRepo.cleared, isTrue);
     });
+
+    test('rolls back existing state when applying a restore fails', () async {
+      final originalBookmark = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime.utc(2026, 5, 29),
+      );
+      final originalPosition = ReadingPosition(
+        verseId: '1:7',
+        lastReadAt: DateTime.utc(2026, 5, 29),
+      );
+      final bookmarkRepo = _FakeBookmarkRepository([originalBookmark]);
+      final positionRepo = _FakeReadingPositionRepository(
+        originalPosition,
+        saveFailuresRemaining: 1,
+      );
+      final codec = _testCodec();
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: positionRepo,
+        codec: codec,
+      );
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: [
+            Bookmark(verseId: '2:255', timestamp: DateTime.utc(2026, 5, 30)),
+          ],
+          lastRead: ReadingPosition(
+            verseId: '2:255',
+            lastReadAt: DateTime.utc(2026, 5, 30),
+          ),
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        service.importBackup(bytes, 'passphrase'),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(bookmarkRepo.bookmarks.single.verseId, originalBookmark.verseId);
+      expect(positionRepo.savedPosition?.verseId, originalPosition.verseId);
+    });
   });
+
+  group('QuranBackupFileService', () {
+    test(
+      'saves an encrypted backup through the selected file operation',
+      () async {
+        final operations = _FakeBackupFileOperations();
+        final service = _fileService(operations: operations);
+
+        final result = await service.saveBackup(
+          'passphrase',
+          confirmButtonText: 'Save',
+        );
+
+        expect(result, BackupFileOperationResult.completed);
+        expect(operations.savedBytes, isNotEmpty);
+        expect(operations.saveConfirmButtonText, 'Save');
+        expect(
+          String.fromCharCodes(operations.savedBytes!),
+          isNot(contains('private note')),
+        );
+      },
+    );
+
+    test('preserves an unavailable share result', () async {
+      final operations = _FakeBackupFileOperations(
+        shareResult: BackupFileOperationResult.unavailable,
+      );
+      final service = _fileService(operations: operations);
+
+      final result = await service.shareBackup(
+        'passphrase',
+        subject: 'Backup',
+        title: 'Share backup',
+      );
+
+      expect(result, BackupFileOperationResult.unavailable);
+      expect(operations.shareSubject, 'Backup');
+      expect(operations.shareTitle, 'Share backup');
+    });
+
+    test('preserves a canceled device save result', () async {
+      final operations = _FakeBackupFileOperations(
+        saveResult: BackupFileOperationResult.canceled,
+      );
+
+      final result = await _fileService(
+        operations: operations,
+      ).saveBackup('passphrase', confirmButtonText: 'Save');
+
+      expect(result, BackupFileOperationResult.canceled);
+    });
+
+    test('does not restore anything when file selection is canceled', () async {
+      final bookmarkRepo = _FakeBookmarkRepository([]);
+      final operations = _FakeBackupFileOperations(pickedBytes: null);
+      final service = _fileService(
+        operations: operations,
+        bookmarkRepository: bookmarkRepo,
+      );
+
+      final result = await service.restoreBackup(
+        'passphrase',
+        confirmButtonText: 'Restore',
+      );
+
+      expect(result, BackupFileOperationResult.canceled);
+      expect(bookmarkRepo.replaced, isFalse);
+    });
+  });
+}
+
+QuranBackupFileService _fileService({
+  required _FakeBackupFileOperations operations,
+  _FakeBookmarkRepository? bookmarkRepository,
+}) {
+  return QuranBackupFileService(
+    backupService: QuranBackupService(
+      bookmarkRepository:
+          bookmarkRepository ??
+          _FakeBookmarkRepository([
+            Bookmark(
+              verseId: '2:255',
+              timestamp: DateTime.utc(2026, 5, 30),
+              note: 'private note',
+            ),
+          ]),
+      readingPositionRepository: _FakeReadingPositionRepository(null),
+      codec: _testCodec(),
+    ),
+    fileOperations: operations,
+  );
+}
+
+class _FakeBackupFileOperations implements BackupFileOperations {
+  final BackupFileOperationResult saveResult;
+  final BackupFileOperationResult shareResult;
+  final Uint8List? pickedBytes;
+  Uint8List? savedBytes;
+  String? saveConfirmButtonText;
+  String? shareSubject;
+  String? shareTitle;
+
+  _FakeBackupFileOperations({
+    this.saveResult = BackupFileOperationResult.completed,
+    this.shareResult = BackupFileOperationResult.completed,
+    this.pickedBytes,
+  });
+
+  @override
+  Future<Uint8List?> pick({required String confirmButtonText}) async =>
+      pickedBytes;
+
+  @override
+  Future<BackupFileOperationResult> save({
+    required Uint8List bytes,
+    required String confirmButtonText,
+  }) async {
+    savedBytes = bytes;
+    saveConfirmButtonText = confirmButtonText;
+    return saveResult;
+  }
+
+  @override
+  Future<BackupFileOperationResult> share({
+    required Uint8List bytes,
+    required String subject,
+    required String title,
+  }) async {
+    shareSubject = subject;
+    shareTitle = title;
+    return shareResult;
+  }
 }
 
 class _FakeBookmarkRepository implements BookmarkRepository {
@@ -228,8 +447,12 @@ class _FakeBookmarkRepository implements BookmarkRepository {
 class _FakeReadingPositionRepository implements ReadingPositionRepository {
   ReadingPosition? savedPosition;
   bool cleared = false;
+  int saveFailuresRemaining;
 
-  _FakeReadingPositionRepository(this.savedPosition);
+  _FakeReadingPositionRepository(
+    this.savedPosition, {
+    this.saveFailuresRemaining = 0,
+  });
 
   @override
   Future<void> clearPosition() async {
@@ -242,6 +465,10 @@ class _FakeReadingPositionRepository implements ReadingPositionRepository {
 
   @override
   Future<void> savePosition(ReadingPosition position) async {
+    if (saveFailuresRemaining > 0) {
+      saveFailuresRemaining--;
+      throw StateError('Simulated save failure');
+    }
     savedPosition = position;
     cleared = false;
   }

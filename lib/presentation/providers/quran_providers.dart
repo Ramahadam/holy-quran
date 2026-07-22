@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../../data/backup/quran_backup_codec.dart';
+import '../../data/backup/quran_backup_file_operations_factory.dart';
 import '../../data/backup/quran_backup_file_service.dart';
 import '../../data/backup/quran_backup_service.dart';
 import '../../data/backend/cloudflare_config.dart';
@@ -63,6 +64,7 @@ final quranBackupServiceProvider = Provider<QuranBackupService>((ref) {
 final quranBackupFileServiceProvider = Provider<QuranBackupFileService>((ref) {
   return QuranBackupFileService(
     backupService: ref.watch(quranBackupServiceProvider),
+    fileOperations: createBackupFileOperations(),
   );
 });
 
