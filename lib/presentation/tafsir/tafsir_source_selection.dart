@@ -32,19 +32,55 @@ TafsirSource selectTafsirSource(
   return sources.first;
 }
 
-List<TafsirSource> orderTafsirSourcesForLanguage(
+List<TafsirSource> tafsirSourcesForLanguage(
   List<TafsirSource> sources,
   String appLanguageCode,
 ) {
   final desiredLanguage = _tafsirLanguageFor(appLanguageCode);
-  return [
-    ...sources.where(
-      (source) => source.languageName.toLowerCase() == desiredLanguage,
-    ),
-    ...sources.where(
-      (source) => source.languageName.toLowerCase() != desiredLanguage,
-    ),
-  ];
+  final matchingSources = sources
+      .where((source) => source.languageName.toLowerCase() == desiredLanguage)
+      .toList(growable: false);
+  return matchingSources.isEmpty ? sources : matchingSources;
+}
+
+String tafsirSourceNameForLanguage(
+  TafsirSource source,
+  String appLanguageCode,
+) {
+  if (appLanguageCode.toLowerCase() != 'ar') return source.name;
+
+  return switch (source.id) {
+    926 => 'تفسير الجلالين',
+    925 => 'التحرير والتنوير',
+    94 => 'تفسير البغوي',
+    15 => 'تفسير الطبري',
+    93 => 'التفسير الوسيط',
+    90 => 'تفسير القرطبي',
+    14 => 'تفسير ابن كثير',
+    16 => 'التفسير الميسر',
+    91 => 'تفسير السعدي',
+    _ => source.name,
+  };
+}
+
+String tafsirAuthorNameForLanguage(
+  TafsirSource source,
+  String appLanguageCode,
+) {
+  if (appLanguageCode.toLowerCase() != 'ar') return source.authorName;
+
+  return switch (source.id) {
+    926 => 'جلال الدين المحلي وجلال الدين السيوطي',
+    925 => 'محمد الطاهر بن عاشور',
+    94 => 'الإمام البغوي',
+    15 => 'الإمام الطبري',
+    93 => 'محمد سيد طنطاوي',
+    90 => 'الإمام القرطبي',
+    14 => 'الحافظ ابن كثير',
+    16 => 'نخبة من العلماء',
+    91 => 'عبد الرحمن السعدي',
+    _ => source.authorName,
+  };
 }
 
 String _tafsirLanguageFor(String appLanguageCode) {

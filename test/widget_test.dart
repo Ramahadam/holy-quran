@@ -2482,7 +2482,7 @@ void main() {
 
       expect(find.byType(VerseDetailScreen), findsOneWidget);
       expect(find.text('1:1'), findsOneWidget);
-      expect(find.text('In the name of Allah'), findsOneWidget);
+      expect(find.text('In the name of Allah'), findsNothing);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -3080,7 +3080,9 @@ void main() {
   });
 
   group('VerseDetailScreen', () {
-    testWidgets('renders large Quran text and translation', (tester) async {
+    testWidgets('renders large Quran text without duplicate translation', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -3097,7 +3099,7 @@ void main() {
 
       final arabicText = tester.widget<Text>(find.text(_verse1.arabicText));
       expect(arabicText.style?.fontSize, 36);
-      expect(find.text('In the name of Allah'), findsOneWidget);
+      expect(find.text('In the name of Allah'), findsNothing);
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
     });
 
