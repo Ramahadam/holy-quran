@@ -19,6 +19,7 @@ import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
+import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
@@ -2985,15 +2986,13 @@ void main() {
       expect(badgeDecoration.shape, BoxShape.rectangle);
       expect(arabicName.style?.color, colors.onSurface);
       expect(
-        find.bySemanticsLabel('Surah 1, الفاتحة, 7 verses'),
+        find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'),
         findsOneWidget,
       );
       semanticsHandle.dispose();
     });
 
-    testWidgets('renders Arabic name and localized verse count', (
-      tester,
-    ) async {
+    testWidgets('adds the English meaning in English mode', (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -3003,11 +3002,29 @@ void main() {
         ),
       );
       expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('The Opening'), findsNothing);
-      expect(find.text('7 verses'), findsOneWidget);
+      expect(find.text('The Opening · 7 verses'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       await tester.tap(find.byType(SurahTile));
       expect(tapped, isTrue);
+    });
+
+    testWidgets('keeps the Surah index Arabic-only in Arabic mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SurahTile(surah: _surah1, onTap: () {}),
+          ),
+        ),
+      );
+
+      expect(find.text('الفاتحة'), findsOneWidget);
+      expect(find.textContaining('The Opening'), findsNothing);
+      expect(find.text('7 آيات'), findsOneWidget);
     });
   });
 
