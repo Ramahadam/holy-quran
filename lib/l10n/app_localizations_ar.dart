@@ -343,6 +343,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tafsirUnavailable => 'التفسير غير متاح';
 
   @override
+  String get languageArabic => 'العربية';
+
+  @override
+  String get languageEnglish => 'الإنجليزية';
+
+  @override
+  String get languageBengali => 'البنغالية';
+
+  @override
+  String get languageRussian => 'الروسية';
+
+  @override
+  String get languageSwahili => 'السواحيلية';
+
+  @override
+  String get languageUrdu => 'الأردية';
+
+  @override
+  String get languageKurdish => 'الكردية';
+
+  @override
   String sourceName(String name) {
     return 'المصدر: $name';
   }

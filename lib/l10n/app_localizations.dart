@@ -685,6 +685,48 @@ abstract class AppLocalizations {
   /// **'Tafsir is unavailable'**
   String get tafsirUnavailable;
 
+  /// No description provided for @languageArabic.
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get languageArabic;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageBengali.
+  ///
+  /// In en, this message translates to:
+  /// **'Bengali'**
+  String get languageBengali;
+
+  /// No description provided for @languageRussian.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get languageRussian;
+
+  /// No description provided for @languageSwahili.
+  ///
+  /// In en, this message translates to:
+  /// **'Swahili'**
+  String get languageSwahili;
+
+  /// No description provided for @languageUrdu.
+  ///
+  /// In en, this message translates to:
+  /// **'Urdu'**
+  String get languageUrdu;
+
+  /// No description provided for @languageKurdish.
+  ///
+  /// In en, this message translates to:
+  /// **'Kurdish'**
+  String get languageKurdish;
+
   /// No description provided for @sourceName.
   ///
   /// In en, this message translates to:

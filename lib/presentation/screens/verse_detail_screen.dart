@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/models/tafsir.dart';
 import '../../domain/models/verse.dart';
 import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import '../providers/tafsir_providers.dart';
+import '../tafsir/tafsir_source_selection.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 
@@ -136,7 +136,6 @@ class _TafsirSection extends ConsumerStatefulWidget {
 }
 
 class _TafsirSectionState extends ConsumerState<_TafsirSection> {
-  static const int _preferredEnglishSourceId = 169;
   int? _selectedSourceId;
 
   @override
@@ -171,24 +170,35 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
             if (availableSources.isEmpty) {
               return Text(context.l10n.noTafsirSources);
             }
-            final selectedSource = _selectSource(availableSources);
+            final appLanguageCode = Localizations.localeOf(
+              context,
+            ).languageCode;
+            final orderedSources = orderTafsirSourcesForLanguage(
+              availableSources,
+              appLanguageCode,
+            );
+            final selectedSource = selectTafsirSource(
+              orderedSources,
+              appLanguageCode,
+              selectedSourceId: _selectedSourceId,
+            );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DropdownButtonFormField<int>(
-                  key: const ValueKey('tafsirSourcePicker'),
+                  key: ValueKey('tafsirSourcePicker-${selectedSource.id}'),
                   initialValue: selectedSource.id,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: context.l10n.tafsirSource,
                     border: const OutlineInputBorder(),
                   ),
-                  items: availableSources
+                  items: orderedSources
                       .map(
                         (source) => DropdownMenuItem(
                           value: source.id,
                           child: Text(
-                            '${source.name} · ${_capitalized(source.languageName)}',
+                            '${source.name} · ${_localizedLanguageName(context, source.languageName)}',
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -214,14 +224,6 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
         ),
       ],
     );
-  }
-
-  TafsirSource _selectSource(List<TafsirSource> sources) {
-    final selectedId = _selectedSourceId ?? _preferredEnglishSourceId;
-    for (final source in sources) {
-      if (source.id == selectedId) return source;
-    }
-    return sources.first;
   }
 }
 
@@ -297,9 +299,17 @@ class _TafsirError extends StatelessWidget {
   }
 }
 
-String _capitalized(String value) {
-  if (value.isEmpty) return value;
-  return '${value[0].toUpperCase()}${value.substring(1)}';
+String _localizedLanguageName(BuildContext context, String value) {
+  return switch (value.toLowerCase()) {
+    'arabic' => context.l10n.languageArabic,
+    'english' => context.l10n.languageEnglish,
+    'bengali' => context.l10n.languageBengali,
+    'russian' => context.l10n.languageRussian,
+    'swahili' => context.l10n.languageSwahili,
+    'urdu' => context.l10n.languageUrdu,
+    'kurdish' => context.l10n.languageKurdish,
+    _ => value,
+  };
 }
 
 String _attribution(BuildContext context, String name, String authorName) {
