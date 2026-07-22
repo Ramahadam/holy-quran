@@ -37,7 +37,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sendFeedback => 'إرسال ملاحظات';
 
   @override
-  String get saveBackupToDevice => 'حفظ النسخة على الجهاز';
+  String get saveBackupToDevice => 'حفظ نسخة احتياطية على الجهاز';
 
   @override
   String get shareBackup => 'مشاركة النسخة الاحتياطية';
@@ -115,14 +115,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get saveBackupSubtitle =>
-      'احفظ نسخة مشفرة من علاماتك وآخر موضع قراءة.';
+      'احفظ نسخة مشفّرة من آياتك المحفوظة وآخر موضع قراءة.';
 
   @override
   String get shareBackupSubtitle =>
-      'شارك نسخة مشفرة من علاماتك وآخر موضع قراءة.';
+      'شارك نسخة مشفّرة من آياتك المحفوظة وآخر موضع قراءة.';
 
   @override
-  String get restoreBackupSubtitle => 'استعد علاماتك وآخر موضع قراءة.';
+  String get restoreBackupSubtitle => 'استعد آياتك المحفوظة وآخر موضع قراءة.';
 
   @override
   String get passphrase => 'عبارة المرور';
@@ -132,11 +132,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get backupProtectionCreate =>
-      'تشفّر عبارة المرور علاماتك وآخر موضع قراءة، ولا يمكن استعادتها إن فُقدت، فاحفظها بأمان.';
+      'تُشفّر آياتك المحفوظة وآخر موضع قراءة باستخدام عبارة المرور. لا يمكن استعادة النسخة إن فُقدت العبارة، فاحفظها بأمان.';
 
   @override
   String get backupProtectionRestore =>
-      'ستستبدل الاستعادة علاماتك وآخر موضع قراءة الحاليين. استخدم عبارة المرور الأصلية.';
+      'ستُستبدل آياتك المحفوظة وآخر موضع قراءة حاليًا ببيانات النسخة الاحتياطية. استخدم عبارة المرور الأصلية.';
 
   @override
   String get cancel => 'إلغاء';
@@ -278,7 +278,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get bookmarks => 'العلامات المرجعية';
+  String get bookmarks => 'الآيات المحفوظة';
 
   @override
   String surahNumber(String number) {
@@ -286,13 +286,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get removeBookmark => 'إزالة العلامة';
+  String get removeBookmark => 'إزالة من المحفوظات';
 
   @override
-  String get bookmarkRemoved => 'تمت إزالة العلامة';
+  String get bookmarkRemoved => 'أزيلت الآية من المحفوظات';
 
   @override
-  String get bookmarked => 'تمت إضافة العلامة';
+  String get bookmarked => 'تم حفظ الآية';
 
   @override
   String verseCount(int count) {
@@ -363,7 +363,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ayahStudy => 'دراسة الآية';
 
   @override
-  String get bookmarkVerse => 'إضافة علامة للآية';
+  String get bookmarkVerse => 'حفظ الآية';
 
   @override
   String get tafsir => 'التفسير';
