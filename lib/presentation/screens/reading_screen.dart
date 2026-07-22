@@ -9,6 +9,7 @@ import '../../data/repositories/reading_position_repository.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
+import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
 import 'verse_detail_screen.dart';
@@ -297,7 +298,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     final targetMode = _readingMode == ReadingMode.classic
         ? ReadingMode.mushaf
         : ReadingMode.classic;
-    final targetLabel = targetMode == ReadingMode.mushaf ? 'Mushaf' : 'Classic';
+    final targetLabel = targetMode == ReadingMode.mushaf
+        ? context.l10n.mushaf
+        : context.l10n.classic;
     final targetIcon = targetMode == ReadingMode.mushaf
         ? Icons.image_outlined
         : Icons.menu_book;
@@ -305,7 +308,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     return AppBar(
       toolbarHeight: 56,
       title: Text(
-        'Page $_currentPage',
+        context.l10n.pageNumber(_currentPage),
         style: Theme.of(context).textTheme.titleMedium,
       ),
       centerTitle: true,
@@ -450,7 +453,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     return versesAsync.when(
       data: (verses) {
         if (verses.isEmpty) {
-          return const Center(child: Text('No verses in this surah.'));
+          return Center(child: Text(context.l10n.noVersesInSurah));
         }
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -489,7 +492,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Failed to load verses.\nPlease restart the app.',
+            context.l10n.verseLoadError,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,
@@ -757,7 +760,7 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
     return versesAsync.when(
       data: (verses) {
         if (verses.isEmpty) {
-          return const Center(child: Text('No verses on this page.'));
+          return Center(child: Text(context.l10n.noVersesOnPage));
         }
 
         if (!_didResolve && widget.onFirstVerseResolved != null) {
@@ -805,7 +808,7 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'Failed to load verses.\nPlease restart the app.',
+            context.l10n.verseLoadError,
             textAlign: TextAlign.center,
             style: Theme.of(
               context,

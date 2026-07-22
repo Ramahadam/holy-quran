@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/models/surah.dart';
+import '../../l10n/l10n.dart';
 import 'quran_index_tile.dart';
 
 class SurahTile extends StatelessWidget {
@@ -11,16 +12,17 @@ class SurahTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return QuranIndexTile(
       keyPrefix: 'surah',
       number: surah.surahNumber,
-      title: surah.nameEnglish,
-      subtitle: '${surah.numberOfVerses} verses',
-      arabicTitle: surah.nameArabic,
-      semanticsLabel:
-          'Surah ${surah.surahNumber}, ${surah.nameEnglish}, '
-          '${surah.nameArabic}, '
-          '${surah.numberOfVerses} verses',
+      title: surah.nameArabic,
+      subtitle: l10n.verseCount(surah.numberOfVerses),
+      semanticsLabel: l10n.surahSemantics(
+        surah.surahNumber,
+        surah.nameArabic,
+        surah.numberOfVerses,
+      ),
       onTap: onTap,
     );
   }

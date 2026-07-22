@@ -22,6 +22,7 @@ import '../../domain/models/juz.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
+import 'locale_provider.dart';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
@@ -111,8 +112,10 @@ final prayerReminderSchedulerProvider = Provider<PrayerReminderScheduler>((
   ref,
 ) {
   final settingsStore = ref.watch(prayerReminderSettingsStoreProvider);
+  final locale = ref.watch(appLocaleProvider);
   late final LocalPrayerReminderScheduler scheduler;
   scheduler = LocalPrayerReminderScheduler(
+    localeProvider: () => locale,
     onSnoozeRequested: () async {
       final settings = await settingsStore.load();
       if (!settings.enabled) return;

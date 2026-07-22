@@ -3,6 +3,7 @@ import 'package:qcf_quran/qcf_quran.dart';
 
 import '../../domain/models/juz.dart';
 import '../../domain/models/surah.dart';
+import '../../l10n/l10n.dart';
 import 'quran_index_tile.dart';
 
 class JuzTile extends StatelessWidget {
@@ -21,18 +22,23 @@ class JuzTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final startLabel =
-        '${startSurah.nameEnglish} '
+        '${startSurah.nameArabic} '
         '${juz.startSurahNumber}:${juz.startVerseNumber}';
     final arabicTitle = 'الجزء ${convertToArabicNumber(juz.number.toString())}';
     return QuranIndexTile(
       keyPrefix: 'juz',
       number: juz.number,
-      title: 'Juz ${juz.number}',
-      subtitle: 'Starts at $startLabel · Page $page',
+      title: l10n.juzNumber(juz.number),
+      subtitle: l10n.juzStartsAt(startLabel, page),
       arabicTitle: arabicTitle,
-      semanticsLabel:
-          'Juz ${juz.number}, $arabicTitle, starts at $startLabel, page $page',
+      semanticsLabel: l10n.juzSemantics(
+        juz.number,
+        arabicTitle,
+        startLabel,
+        page,
+      ),
       onTap: onTap,
     );
   }

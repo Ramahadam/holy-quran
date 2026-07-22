@@ -220,10 +220,7 @@ void main() {
     testWidgets('shows database error message', (tester) async {
       await tester.pumpWidget(const ProviderScope(child: DatabaseErrorApp()));
       await tester.pump();
-      expect(
-        find.textContaining('Could not open the database'),
-        findsOneWidget,
-      );
+      expect(find.textContaining('تعذر فتح قاعدة البيانات'), findsOneWidget);
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 
@@ -683,7 +680,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(SurahTile), findsOneWidget);
-      expect(find.text('The Opening'), findsOneWidget);
+      expect(find.text('الفاتحة'), findsOneWidget);
     });
 
     testWidgets('shows empty state when surah list is empty', (tester) async {
@@ -784,7 +781,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Continue Reading'), findsOneWidget);
-      expect(find.textContaining('The Opening'), findsWidgets);
+      expect(find.textContaining('الفاتحة'), findsWidgets);
       expect(find.textContaining('Verse 3'), findsOneWidget);
     });
 
@@ -928,7 +925,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Bookmarks'), findsOneWidget);
-      expect(find.text('The Opening · Verse 1'), findsOneWidget);
+      expect(find.text('الفاتحة · Verse 1'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Remove bookmark'));
       await tester.pump();
@@ -2968,13 +2965,13 @@ void main() {
       expect(badgeDecoration.shape, BoxShape.rectangle);
       expect(arabicName.style?.color, colors.onSurface);
       expect(
-        find.bySemanticsLabel('Surah 1, The Opening, الفاتحة, 7 verses'),
+        find.bySemanticsLabel('Surah 1, الفاتحة, 7 verses'),
         findsOneWidget,
       );
       semanticsHandle.dispose();
     });
 
-    testWidgets('renders Arabic name, English name and verse count', (
+    testWidgets('renders Arabic name and localized verse count', (
       tester,
     ) async {
       bool tapped = false;
@@ -2986,7 +2983,7 @@ void main() {
         ),
       );
       expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('The Opening'), findsOneWidget);
+      expect(find.text('The Opening'), findsNothing);
       expect(find.text('7 verses'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       await tester.tap(find.byType(SurahTile));

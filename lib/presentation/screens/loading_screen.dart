@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
 import 'home_screen.dart';
@@ -60,7 +61,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
                   const Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
-                    'Failed to load data.\nPlease restart the app.',
+                    context.l10n.dataLoadError,
                     textAlign: TextAlign.center,
                     style: Theme.of(
                       context,
@@ -71,7 +72,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Preparing your Digital Sanctuary...',
+              context.l10n.preparingApp,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
