@@ -355,6 +355,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tafsirUnavailable => 'Tafsir is unavailable';
 
   @override
+  String get languageArabic => 'Arabic';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageBengali => 'Bengali';
+
+  @override
+  String get languageRussian => 'Russian';
+
+  @override
+  String get languageSwahili => 'Swahili';
+
+  @override
+  String get languageUrdu => 'Urdu';
+
+  @override
+  String get languageKurdish => 'Kurdish';
+
+  @override
   String sourceName(String name) {
     return 'Source: $name';
   }
