@@ -37,20 +37,22 @@ const _verse1 = Verse(
 );
 
 void main() {
-  testWidgets('Mushaf pages progress toward the left in RTL app mode', (
+  testWidgets('Mushaf advances from page 1 to page 2 in RTL app mode', (
     tester,
   ) async {
     await _pumpReading(tester, textDirection: TextDirection.rtl);
     await _enterMushaf(tester);
 
-    final scrollable = tester.widget<Scrollable>(
-      find.descendant(
-        of: find.byType(PageView),
-        matching: find.byType(Scrollable),
-      ),
-    );
+    await _expectForwardMushafDragAdvances(tester);
+  });
 
-    expect(scrollable.axisDirection, AxisDirection.left);
+  testWidgets('Mushaf uses the same forward drag in LTR app mode', (
+    tester,
+  ) async {
+    await _pumpReading(tester);
+    await _enterMushaf(tester);
+
+    await _expectForwardMushafDragAdvances(tester);
   });
 
   testWidgets('single tap on the Mushaf page toggles immersive controls', (
@@ -279,6 +281,15 @@ Future<void> _enterMushaf(WidgetTester tester) async {
   await tester.tap(find.text('Mushaf'));
   await tester.pump();
   await tester.pump();
+}
+
+Future<void> _expectForwardMushafDragAdvances(WidgetTester tester) async {
+  final controller = tester.widget<PageView>(find.byType(PageView)).controller!;
+  await tester.drag(find.byType(PageView), const Offset(500, 0));
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
+
+  expect(controller.page, 1);
 }
 
 class _MemoryBookmarkRepository implements BookmarkRepository {
