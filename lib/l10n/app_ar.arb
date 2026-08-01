@@ -94,7 +94,7 @@
   "surahSemantics": "السورة {number}، {arabicName}، عدد الآيات {count}",
   "juzNumber": "الجزء {number}",
   "juzStartsAt": "يبدأ عند {startLabel} · الصفحة {page}",
-  "juzSemantics": "الجزء {number}، {arabicTitle}، يبدأ عند {startLabel}، الصفحة {page}",
+  "juzSemantics": "الجزء {number}، يبدأ عند {startLabel}، الصفحة {page}",
   "pageNumber": "الصفحة {page}",
   "mushaf": "المصحف",
   "classic": "النمط التقليدي",

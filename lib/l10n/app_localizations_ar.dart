@@ -325,13 +325,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String juzSemantics(
-    int number,
-    String arabicTitle,
-    String startLabel,
-    int page,
-  ) {
-    return 'الجزء $number، $arabicTitle، يبدأ عند $startLabel، الصفحة $page';
+  String juzSemantics(int number, String startLabel, int page) {
+    return 'الجزء $number، يبدأ عند $startLabel، الصفحة $page';
   }
 
   @override

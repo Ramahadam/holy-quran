@@ -665,13 +665,8 @@ abstract class AppLocalizations {
   /// No description provided for @juzSemantics.
   ///
   /// In en, this message translates to:
-  /// **'Juz {number}, {arabicTitle}, starts at {startLabel}, page {page}'**
-  String juzSemantics(
-    int number,
-    String arabicTitle,
-    String startLabel,
-    int page,
-  );
+  /// **'Juz {number}, starts at {startLabel}, page {page}'**
+  String juzSemantics(int number, String startLabel, int page);
 
   /// No description provided for @pageNumber.
   ///
