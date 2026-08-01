@@ -374,6 +374,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ayahStudy => 'Ayah Study';
 
   @override
+  String get previousAyah => 'Previous Ayah';
+
+  @override
+  String get nextAyah => 'Next Ayah';
+
+  @override
+  String get ayahNavigationUnavailable => 'Unable to load this Ayah.';
+
+  @override
   String get bookmarkVerse => 'Bookmark verse';
 
   @override

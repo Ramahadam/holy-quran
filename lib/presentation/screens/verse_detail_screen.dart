@@ -8,21 +8,58 @@ import '../providers/tafsir_providers.dart';
 import '../tafsir/tafsir_source_selection.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
+final _embeddedAyahMarkerPattern = RegExp(
+  r'\s*(?:[\u06DD\u06DE\u06E9]\s*[٠-٩0-9]*|[﴾﴿])\s*',
+);
+final _ayahWhitespacePattern = RegExp(r'\s+');
 
-class VerseDetailScreen extends ConsumerWidget {
+class VerseDetailScreen extends ConsumerStatefulWidget {
   final Verse verse;
 
   const VerseDetailScreen({super.key, required this.verse});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final bookmarks = ref.watch(bookmarksBySurahProvider(verse.surahNumber));
+  ConsumerState<VerseDetailScreen> createState() => _VerseDetailScreenState();
+}
+
+class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
+  final ScrollController _scrollController = ScrollController();
+  late Verse _verse;
+  bool _isChangingVerse = false;
+
+  bool get _canGoPrevious => _verse.surahNumber > 1 || _verse.verseNumber > 1;
+
+  bool get _canGoNext => _verse.surahNumber < 114 || _verse.verseNumber < 6;
+
+  @override
+  void initState() {
+    super.initState();
+    _verse = widget.verse;
+  }
+
+  @override
+  void didUpdateWidget(covariant VerseDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.verse != widget.verse) {
+      _verse = widget.verse;
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bookmarks = ref.watch(bookmarksBySurahProvider(_verse.surahNumber));
     final isBookmarked =
-        bookmarks.valueOrNull?.contains(verse.verseId) ?? false;
+        bookmarks.valueOrNull?.contains(_verse.verseId) ?? false;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final ayahText = isArabic
-        ? verse.arabicText
-        : verse.translation ?? verse.arabicText;
+        ? _cleanArabicAyahText(_verse.arabicText)
+        : _verse.translation ?? _verse.arabicText;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -32,7 +69,7 @@ class VerseDetailScreen extends ConsumerWidget {
           children: [
             Text(context.l10n.ayahStudy),
             Text(
-              '${verse.surahNumber}:${verse.verseNumber}',
+              '${_verse.surahNumber}:${_verse.verseNumber}',
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ],
@@ -46,12 +83,13 @@ class VerseDetailScreen extends ConsumerWidget {
               isBookmarked ? Icons.bookmark : Icons.bookmark_border,
               color: Theme.of(context).colorScheme.primary,
             ),
-            onPressed: () => _toggleBookmark(context, ref, isBookmarked),
+            onPressed: () => _toggleBookmark(context, isBookmarked),
           ),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
           child: Center(
             child: ConstrainedBox(
@@ -81,7 +119,7 @@ class VerseDetailScreen extends ConsumerWidget {
                           children: [
                             Align(
                               alignment: AlignmentDirectional.centerStart,
-                              child: _VerseBadge(number: verse.verseNumber),
+                              child: _VerseBadge(number: _verse.verseNumber),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -110,7 +148,16 @@ class VerseDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  _TafsirSection(verseKey: verse.verseId),
+                  _TafsirSection(verseKey: _verse.verseId),
+                  const SizedBox(height: 16),
+                  _AyahNavigation(
+                    onPrevious: _canGoPrevious && !_isChangingVerse
+                        ? _goToPreviousAyah
+                        : null,
+                    onNext: _canGoNext && !_isChangingVerse
+                        ? _goToNextAyah
+                        : null,
+                  ),
                 ],
               ),
             ),
@@ -120,11 +167,8 @@ class VerseDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _toggleBookmark(
-    BuildContext context,
-    WidgetRef ref,
-    bool isBookmarked,
-  ) async {
+  Future<void> _toggleBookmark(BuildContext context, bool isBookmarked) async {
+    final verse = _verse;
     final repo = ref.read(bookmarkRepositoryProvider);
     if (isBookmarked) {
       await repo.removeBookmark(verse.verseId);
@@ -148,6 +192,101 @@ class VerseDetailScreen extends ConsumerWidget {
         ),
       );
     }
+  }
+
+  Future<void> _goToPreviousAyah() async {
+    if (!_canGoPrevious || _isChangingVerse) return;
+    final currentVerse = _verse;
+    await _loadAdjacentAyah(() async {
+      final repository = ref.read(quranRepositoryProvider);
+      if (currentVerse.verseNumber > 1) {
+        return repository.getVerseById(
+          '${currentVerse.surahNumber}:${currentVerse.verseNumber - 1}',
+        );
+      }
+      final previousSurah = await repository.getVersesBySurah(
+        currentVerse.surahNumber - 1,
+      );
+      return previousSurah.isEmpty ? null : previousSurah.last;
+    });
+  }
+
+  Future<void> _goToNextAyah() async {
+    if (!_canGoNext || _isChangingVerse) return;
+    final currentVerse = _verse;
+    await _loadAdjacentAyah(() async {
+      final repository = ref.read(quranRepositoryProvider);
+      final nextInSurah = await repository.getVerseById(
+        '${currentVerse.surahNumber}:${currentVerse.verseNumber + 1}',
+      );
+      if (nextInSurah != null) return nextInSurah;
+      return repository.getVerseById('${currentVerse.surahNumber + 1}:1');
+    });
+  }
+
+  Future<void> _loadAdjacentAyah(Future<Verse?> Function() load) async {
+    setState(() => _isChangingVerse = true);
+    try {
+      final adjacentVerse = await load();
+      if (!mounted) return;
+      if (adjacentVerse == null) {
+        _showNavigationError();
+        return;
+      }
+      setState(() => _verse = adjacentVerse);
+      if (_scrollController.hasClients) {
+        await _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    } catch (_) {
+      if (mounted) _showNavigationError();
+    } finally {
+      if (mounted) setState(() => _isChangingVerse = false);
+    }
+  }
+
+  void _showNavigationError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.ayahNavigationUnavailable),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+class _AyahNavigation extends StatelessWidget {
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+
+  const _AyahNavigation({required this.onPrevious, required this.onNext});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            key: const ValueKey('previousAyahButton'),
+            onPressed: onPrevious,
+            icon: const Icon(Icons.arrow_back_rounded),
+            label: Text(context.l10n.previousAyah),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: FilledButton.icon(
+            key: const ValueKey('nextAyahButton'),
+            onPressed: onNext,
+            icon: const Icon(Icons.arrow_forward_rounded),
+            label: Text(context.l10n.nextAyah),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -268,6 +407,13 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
                       key: ValueKey('tafsirSourcePicker-${selectedSource.id}'),
                       initialValue: selectedSource.id,
                       isExpanded: true,
+                      borderRadius: BorderRadius.circular(16),
+                      dropdownColor: colorScheme.surfaceContainer,
+                      menuMaxHeight: 320,
+                      icon: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: colorScheme.primary,
+                      ),
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: colorScheme.surfaceContainerHighest,
@@ -281,17 +427,58 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: colorScheme.primary,
+                            width: 1.5,
+                          ),
+                        ),
                       ),
-                      items: localizedSources
+                      selectedItemBuilder: (context) => localizedSources
                           .map(
-                            (source) => DropdownMenuItem(
-                              value: source.id,
+                            (source) => Align(
+                              alignment: AlignmentDirectional.centerStart,
                               child: Text(
                                 tafsirSourceNameForLanguage(
                                   source,
                                   appLanguageCode,
                                 ),
+                                style: Theme.of(context).textTheme.bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(growable: false),
+                      items: localizedSources
+                          .map(
+                            (source) => DropdownMenuItem(
+                              value: source.id,
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Row(
+                                key: ValueKey(
+                                  'tafsirSourceOption-${source.id}',
+                                ),
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      tafsirSourceNameForLanguage(
+                                        source,
+                                        appLanguageCode,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (source.id == selectedSource.id) ...[
+                                    const SizedBox(width: 12),
+                                    Icon(
+                                      Icons.check_circle_rounded,
+                                      size: 20,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           )
@@ -444,6 +631,11 @@ String _attribution(BuildContext context, String name, String authorName) {
       : context.l10n.sourceNameAuthor(name, authorName);
 }
 
+String _cleanArabicAyahText(String text) => text
+    .replaceAll(_embeddedAyahMarkerPattern, ' ')
+    .replaceAll(_ayahWhitespacePattern, ' ')
+    .trim();
+
 class _VerseBadge extends StatelessWidget {
   final int number;
 
@@ -459,7 +651,8 @@ class _VerseBadge extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Text(
-          '$number',
+          context.l10n.verseNumber('$number'),
+          key: const ValueKey('ayahNumberMarker'),
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
             color: Theme.of(context).colorScheme.onPrimaryContainer,
             fontWeight: FontWeight.w600,

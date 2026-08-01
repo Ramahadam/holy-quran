@@ -363,6 +363,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ayahStudy => 'دراسة الآية';
 
   @override
+  String get previousAyah => 'الآية السابقة';
+
+  @override
+  String get nextAyah => 'الآية التالية';
+
+  @override
+  String get ayahNavigationUnavailable => 'تعذر تحميل هذه الآية.';
+
+  @override
   String get bookmarkVerse => 'إضافة علامة للآية';
 
   @override

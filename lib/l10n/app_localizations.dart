@@ -721,6 +721,24 @@ abstract class AppLocalizations {
   /// **'Ayah Study'**
   String get ayahStudy;
 
+  /// No description provided for @previousAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Ayah'**
+  String get previousAyah;
+
+  /// No description provided for @nextAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Ayah'**
+  String get nextAyah;
+
+  /// No description provided for @ayahNavigationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load this Ayah.'**
+  String get ayahNavigationUnavailable;
+
   /// No description provided for @bookmarkVerse.
   ///
   /// In en, this message translates to:
