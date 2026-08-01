@@ -724,66 +724,84 @@ void main() {
     testWidgets('uses explicit light and dark modes from the home menu', (
       tester,
     ) async {
-      tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            surahListProvider.overrideWith((ref) async => [_surah1]),
-            lastReadPositionProvider.overrideWith((ref) async => null),
-            recentBookmarksProvider.overrideWith((ref) async => const []),
-          ],
-          child: Consumer(
-            builder: (context, ref, _) => MaterialApp(
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: ref.watch(themeModeProvider),
-              home: HomeScreen(),
+      for (final platformBrightness in Brightness.values) {
+        tester.platformDispatcher.platformBrightnessTestValue =
+            platformBrightness;
+
+        await tester.pumpWidget(
+          ProviderScope(
+            key: ValueKey(platformBrightness),
+            overrides: [
+              surahListProvider.overrideWith((ref) async => [_surah1]),
+              lastReadPositionProvider.overrideWith((ref) async => null),
+              recentBookmarksProvider.overrideWith((ref) async => const []),
+            ],
+            child: Consumer(
+              builder: (context, ref, _) => MaterialApp(
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: ref.watch(themeModeProvider),
+                home: HomeScreen(),
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(
-        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-        ThemeMode.light,
-      );
-      expect(
-        Theme.of(tester.element(find.byType(HomeScreen))).brightness,
-        Brightness.light,
-      );
+        expect(
+          tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+          ThemeMode.light,
+        );
+        expect(
+          Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+          Brightness.light,
+        );
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      expect(find.text('Dark mode'), findsOneWidget);
-      await tester.tap(find.text('Dark mode'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Menu'));
+        await tester.pumpAndSettle();
+        expect(find.text('Dark mode'), findsOneWidget);
+        await tester.tap(find.text('Dark mode'));
+        await tester.pumpAndSettle();
 
-      expect(
-        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-        ThemeMode.dark,
-      );
+        expect(
+          tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+          ThemeMode.dark,
+        );
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      final darkModeSemantics = tester
-          .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
-          .getSemanticsData();
-      expect(darkModeSemantics.flagsCollection.isChecked, CheckedState.isTrue);
+        await tester.tap(find.byTooltip('Menu'));
+        await tester.pumpAndSettle();
+        final darkModeSemantics = tester
+            .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
+            .getSemanticsData();
+        expect(
+          darkModeSemantics.flagsCollection.isChecked,
+          CheckedState.isTrue,
+        );
 
-      await tester.tap(find.text('Dark mode'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Dark mode'));
+        await tester.pumpAndSettle();
 
-      expect(
-        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-        ThemeMode.light,
-      );
-      expect(
-        Theme.of(tester.element(find.byType(HomeScreen))).brightness,
-        Brightness.light,
-      );
+        expect(
+          tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+          ThemeMode.light,
+        );
+        expect(
+          Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+          Brightness.light,
+        );
+
+        await tester.tap(find.byTooltip('Menu'));
+        await tester.pumpAndSettle();
+        final lightModeSemantics = tester
+            .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
+            .getSemanticsData();
+        expect(
+          lightModeSemantics.flagsCollection.isChecked,
+          CheckedState.isFalse,
+        );
+      }
     });
 
     testWidgets('shows Last Read banner when a reading position exists', (
