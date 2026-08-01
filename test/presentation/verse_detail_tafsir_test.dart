@@ -93,6 +93,42 @@ void main() {
     );
   });
 
+  testWidgets('uses structured surfaces and direction-aware alignment', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          tafsirRepositoryProvider.overrideWithValue(_FakeTafsirRepository()),
+        ],
+        child: const MaterialApp(home: VerseDetailScreen(verse: _verse)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('verseDetailAyahCard')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tafsirCard')), findsOneWidget);
+
+    final sourcePicker = tester.widget<DropdownButtonFormField<int>>(
+      find.byType(DropdownButtonFormField<int>),
+    );
+    expect(sourcePicker.decoration.filled, isTrue);
+    expect(sourcePicker.decoration.labelText, isNull);
+
+    final passage = tester.widget<Text>(
+      find.byKey(const ValueKey('tafsirPassageText')),
+    );
+    expect(passage.textAlign, TextAlign.start);
+    expect(passage.textDirection, TextDirection.ltr);
+
+    final attribution = tester.widget<Text>(
+      find.byKey(const ValueKey('tafsirAttributionText')),
+    );
+    expect(attribution.textAlign, TextAlign.start);
+    expect(attribution.textDirection, TextDirection.ltr);
+  });
+
   testWidgets('uses the app language for the default tafsir source', (
     tester,
   ) async {
@@ -115,6 +151,16 @@ void main() {
     expect(find.text('شرح عربي'), findsOneWidget);
     expect(find.text('التفسير الميسر'), findsOneWidget);
     expect(find.textContaining('Tafsir al-Tabari'), findsNothing);
+    final arabicPassage = tester.widget<Text>(
+      find.byKey(const ValueKey('tafsirPassageText')),
+    );
+    final arabicAttribution = tester.widget<Text>(
+      find.byKey(const ValueKey('tafsirAttributionText')),
+    );
+    expect(arabicPassage.textAlign, TextAlign.start);
+    expect(arabicPassage.textDirection, TextDirection.rtl);
+    expect(arabicAttribution.textAlign, TextAlign.start);
+    expect(arabicAttribution.textDirection, TextDirection.rtl);
 
     await tester.tap(find.byType(DropdownButtonFormField<int>));
     await tester.pumpAndSettle();
@@ -159,6 +205,34 @@ void main() {
     expect(find.text(_verse.translation!), findsOneWidget);
     expect(find.text('Tafsir is unavailable'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('handles a narrow Arabic layout with larger text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appLocaleStoreProvider.overrideWithValue(_MemoryAppLocaleStore()),
+          initialAppLocaleProvider.overrideWithValue(const Locale('ar')),
+          bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          tafsirRepositoryProvider.overrideWithValue(_FakeTafsirRepository()),
+        ],
+        child: const _LocalizedVerseDetailTestApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('verseDetailAyahCard')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tafsirCard')), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
 

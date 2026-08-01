@@ -28,7 +28,7 @@ class VerseDetailScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(context.l10n.ayahStudy),
             Text(
@@ -52,39 +52,63 @@ class VerseDetailScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 680),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: _VerseBadge(number: verse.verseNumber),
+                  Card(
+                    key: const ValueKey('verseDetailAyahCard'),
+                    margin: EdgeInsets.zero,
+                    elevation: 0,
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Directionality(
+                        textDirection: isArabic
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: _VerseBadge(number: verse.verseNumber),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              ayahText,
+                              style: isArabic
+                                  ? Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium?.copyWith(
+                                      fontFamily: _kfgqpcHafsFontFamily,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.9,
+                                    )
+                                  : Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge?.copyWith(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w400,
+                                      height: 1.7,
+                                    ),
+                              textAlign: TextAlign.start,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    ayahText,
-                    style: isArabic
-                        ? Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontFamily: _kfgqpcHafsFontFamily,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w400,
-                            height: 1.9,
-                          )
-                        : Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            height: 1.7,
-                          ),
-                    textAlign: isArabic ? TextAlign.right : TextAlign.left,
-                    textDirection: isArabic
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
-                  ),
-                  const SizedBox(height: 32),
-                  Divider(color: Theme.of(context).dividerColor),
                   const SizedBox(height: 24),
                   _TafsirSection(verseKey: verse.verseId),
                 ],
@@ -142,94 +166,159 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
   @override
   Widget build(BuildContext context) {
     final sources = ref.watch(tafsirSourcesProvider);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          context.l10n.tafsir,
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          context.l10n.tafsirProvider,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        const SizedBox(height: 16),
-        sources.when(
-          loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: CircularProgressIndicator(
-                key: ValueKey('tafsirSourcesLoading'),
-              ),
-            ),
-          ),
-          error: (_, _) => _TafsirError(
-            onRetry: () => ref.invalidate(tafsirSourcesProvider),
-          ),
-          data: (availableSources) {
-            if (availableSources.isEmpty) {
-              return Text(context.l10n.noTafsirSources);
-            }
-            final appLanguageCode = Localizations.localeOf(
-              context,
-            ).languageCode;
-            final localizedSources = tafsirSourcesForLanguage(
-              availableSources,
-              appLanguageCode,
-            );
-            if (localizedSources.isEmpty) {
-              return Text(context.l10n.noTafsirSources);
-            }
-            final selectedSource = selectTafsirSource(
-              localizedSources,
-              appLanguageCode,
-              selectedSourceId: _selectedSourceId,
-            );
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      key: const ValueKey('tafsirCard'),
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DropdownButtonFormField<int>(
-                  key: ValueKey('tafsirSourcePicker-${selectedSource.id}'),
-                  initialValue: selectedSource.id,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.tafsirSource,
-                    border: const OutlineInputBorder(),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  items: localizedSources
-                      .map(
-                        (source) => DropdownMenuItem(
-                          value: source.id,
-                          child: Text(
-                            tafsirSourceNameForLanguage(
-                              source,
-                              appLanguageCode,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                  onChanged: (sourceId) {
-                    if (sourceId == null || sourceId == _selectedSourceId) {
-                      return;
-                    }
-                    setState(() => _selectedSourceId = sourceId);
-                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Icon(
+                      Icons.menu_book_rounded,
+                      size: 22,
+                      color: colorScheme.onPrimaryContainer,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 20),
-                _TafsirPassageView(
-                  request: TafsirRequest(
-                    verseKey: widget.verseKey,
-                    source: selectedSource,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.tafsir,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        context.l10n.tafsirProvider,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            );
-          },
+            ),
+            const SizedBox(height: 24),
+            sources.when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: CircularProgressIndicator(
+                    key: ValueKey('tafsirSourcesLoading'),
+                  ),
+                ),
+              ),
+              error: (_, _) => _TafsirError(
+                onRetry: () => ref.invalidate(tafsirSourcesProvider),
+              ),
+              data: (availableSources) {
+                if (availableSources.isEmpty) {
+                  return Text(context.l10n.noTafsirSources);
+                }
+                final appLanguageCode = Localizations.localeOf(
+                  context,
+                ).languageCode;
+                final localizedSources = tafsirSourcesForLanguage(
+                  availableSources,
+                  appLanguageCode,
+                );
+                if (localizedSources.isEmpty) {
+                  return Text(context.l10n.noTafsirSources);
+                }
+                final selectedSource = selectTafsirSource(
+                  localizedSources,
+                  appLanguageCode,
+                  selectedSourceId: _selectedSourceId,
+                );
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      context.l10n.tafsirSource,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<int>(
+                      key: ValueKey('tafsirSourcePicker-${selectedSource.id}'),
+                      initialValue: selectedSource.id,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHighest,
+                        contentPadding: const EdgeInsetsDirectional.fromSTEB(
+                          16,
+                          14,
+                          12,
+                          14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      items: localizedSources
+                          .map(
+                            (source) => DropdownMenuItem(
+                              value: source.id,
+                              child: Text(
+                                tafsirSourceNameForLanguage(
+                                  source,
+                                  appLanguageCode,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: (sourceId) {
+                        if (sourceId == null || sourceId == _selectedSourceId) {
+                          return;
+                        }
+                        setState(() => _selectedSourceId = sourceId);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    Divider(height: 1, color: colorScheme.outlineVariant),
+                    const SizedBox(height: 24),
+                    _TafsirPassageView(
+                      request: TafsirRequest(
+                        verseKey: widget.verseKey,
+                        source: selectedSource,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -254,39 +343,70 @@ class _TafsirPassageView extends ConsumerWidget {
       error: (_, _) => _TafsirError(
         onRetry: () => ref.invalidate(tafsirPassageProvider(request)),
       ),
-      data: (value) => Column(
-        crossAxisAlignment: value.source.isArabic
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          Text(
-            value.text,
-            textDirection: value.source.isArabic
-                ? TextDirection.rtl
-                : TextDirection.ltr,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.8),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _attribution(
-              context,
-              tafsirSourceNameForLanguage(
-                value.source,
-                Localizations.localeOf(context).languageCode,
+      data: (value) {
+        final textDirection = value.source.isArabic
+            ? TextDirection.rtl
+            : TextDirection.ltr;
+        final colorScheme = Theme.of(context).colorScheme;
+        return Directionality(
+          textDirection: textDirection,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                value.text,
+                key: const ValueKey('tafsirPassageText'),
+                textAlign: TextAlign.start,
+                textDirection: textDirection,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.8),
               ),
-              tafsirAuthorNameForLanguage(
-                value.source,
-                Localizations.localeOf(context).languageCode,
+              const SizedBox(height: 24),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 18,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _attribution(
+                            context,
+                            tafsirSourceNameForLanguage(
+                              value.source,
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                            tafsirAuthorNameForLanguage(
+                              value.source,
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                          ),
+                          key: const ValueKey('tafsirAttributionText'),
+                          textAlign: TextAlign.start,
+                          textDirection: textDirection,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -334,8 +454,7 @@ class _VerseBadge extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Theme.of(context).colorScheme.primary),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
