@@ -109,7 +109,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   );
                 case _HomeMenuAction.toggleDarkMode:
                   ref.read(themeModeProvider.notifier).state = darkModeEnabled
-                      ? ThemeMode.system
+                      ? ThemeMode.light
                       : ThemeMode.dark;
                 case _HomeMenuAction.saveBackup:
                   _saveBackup(context);

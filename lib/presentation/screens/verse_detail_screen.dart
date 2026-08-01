@@ -19,6 +19,10 @@ class VerseDetailScreen extends ConsumerWidget {
     final bookmarks = ref.watch(bookmarksBySurahProvider(verse.surahNumber));
     final isBookmarked =
         bookmarks.valueOrNull?.contains(verse.verseId) ?? false;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final ayahText = isArabic
+        ? verse.arabicText
+        : verse.translation ?? verse.arabicText;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -61,15 +65,23 @@ class VerseDetailScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    verse.arabicText,
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontFamily: _kfgqpcHafsFontFamily,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w400,
-                      height: 2.1,
-                    ),
-                    textAlign: TextAlign.right,
-                    textDirection: TextDirection.rtl,
+                    ayahText,
+                    style: isArabic
+                        ? Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            fontFamily: _kfgqpcHafsFontFamily,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w400,
+                            height: 1.9,
+                          )
+                        : Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            height: 1.7,
+                          ),
+                    textAlign: isArabic ? TextAlign.right : TextAlign.left,
+                    textDirection: isArabic
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                   ),
                   const SizedBox(height: 32),
                   Divider(color: Theme.of(context).dividerColor),
@@ -166,6 +178,9 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
               availableSources,
               appLanguageCode,
             );
+            if (localizedSources.isEmpty) {
+              return Text(context.l10n.noTafsirSources);
+            }
             final selectedSource = selectTafsirSource(
               localizedSources,
               appLanguageCode,
@@ -187,8 +202,10 @@ class _TafsirSectionState extends ConsumerState<_TafsirSection> {
                         (source) => DropdownMenuItem(
                           value: source.id,
                           child: Text(
-                            '${tafsirSourceNameForLanguage(source, appLanguageCode)} '
-                            '· ${_localizedLanguageName(context, source.languageName)}',
+                            tafsirSourceNameForLanguage(
+                              source,
+                              appLanguageCode,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -247,7 +264,9 @@ class _TafsirPassageView extends ConsumerWidget {
             textDirection: value.source.isArabic
                 ? TextDirection.rtl
                 : TextDirection.ltr,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.7),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontSize: 18, height: 1.8),
           ),
           const SizedBox(height: 20),
           Text(
@@ -297,19 +316,6 @@ class _TafsirError extends StatelessWidget {
       ),
     );
   }
-}
-
-String _localizedLanguageName(BuildContext context, String value) {
-  return switch (value.toLowerCase()) {
-    'arabic' => context.l10n.languageArabic,
-    'english' => context.l10n.languageEnglish,
-    'bengali' => context.l10n.languageBengali,
-    'russian' => context.l10n.languageRussian,
-    'swahili' => context.l10n.languageSwahili,
-    'urdu' => context.l10n.languageUrdu,
-    'kurdish' => context.l10n.languageKurdish,
-    _ => value,
-  };
 }
 
 String _attribution(BuildContext context, String name, String authorName) {

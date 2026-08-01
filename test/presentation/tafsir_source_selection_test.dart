@@ -32,6 +32,14 @@ void main() {
     );
   });
 
+  test('does not expose another language when no matching source exists', () {
+    final englishSources = _sources
+        .where((source) => source.languageName == 'english')
+        .toList();
+
+    expect(tafsirSourcesForLanguage(englishSources, 'ar'), isEmpty);
+  });
+
   test('localizes known Arabic source names and authors', () {
     expect(tafsirSourceNameForLanguage(_sources[1], 'ar'), 'التفسير الميسر');
     expect(tafsirAuthorNameForLanguage(_sources[1], 'ar'), 'نخبة من العلماء');

@@ -721,7 +721,12 @@ void main() {
       expect(find.textContaining('Failed to load surahs'), findsOneWidget);
     });
 
-    testWidgets('applies dark mode from the home menu', (tester) async {
+    testWidgets('uses explicit light and dark modes from the home menu', (
+      tester,
+    ) async {
+      tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -743,7 +748,11 @@ void main() {
 
       expect(
         tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-        ThemeMode.system,
+        ThemeMode.light,
+      );
+      expect(
+        Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+        Brightness.light,
       );
 
       await tester.tap(find.byTooltip('Menu'));
@@ -755,6 +764,25 @@ void main() {
       expect(
         tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
         ThemeMode.dark,
+      );
+
+      await tester.tap(find.byTooltip('Menu'));
+      await tester.pumpAndSettle();
+      final darkModeSemantics = tester
+          .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
+          .getSemanticsData();
+      expect(darkModeSemantics.flagsCollection.isChecked, CheckedState.isTrue);
+
+      await tester.tap(find.text('Dark mode'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+        ThemeMode.light,
+      );
+      expect(
+        Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+        Brightness.light,
       );
     });
 
@@ -2482,7 +2510,8 @@ void main() {
 
       expect(find.byType(VerseDetailScreen), findsOneWidget);
       expect(find.text('1:1'), findsOneWidget);
-      expect(find.text('In the name of Allah'), findsNothing);
+      expect(find.text('In the name of Allah'), findsOneWidget);
+      expect(find.text(_verse1.arabicText), findsNothing);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -3080,7 +3109,7 @@ void main() {
   });
 
   group('VerseDetailScreen', () {
-    testWidgets('renders large Quran text without duplicate translation', (
+    testWidgets('renders only the English ayah at a balanced size', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -3097,9 +3126,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final arabicText = tester.widget<Text>(find.text(_verse1.arabicText));
-      expect(arabicText.style?.fontSize, 36);
-      expect(find.text('In the name of Allah'), findsNothing);
+      final englishText = tester.widget<Text>(
+        find.text('In the name of Allah'),
+      );
+      expect(englishText.style?.fontSize, lessThanOrEqualTo(30));
+      expect(find.text(_verse1.arabicText), findsNothing);
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
     });
 

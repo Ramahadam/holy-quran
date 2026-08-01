@@ -68,8 +68,13 @@ void main() {
 
     expect(find.text('Ayah Study'), findsOneWidget);
     expect(find.text('Tafsir'), findsOneWidget);
-    expect(find.text(_verse.translation!), findsNothing);
+    expect(find.text(_verse.arabicText), findsNothing);
+    expect(find.text(_verse.translation!), findsOneWidget);
     expect(find.text('English explanation'), findsOneWidget);
+    final ayahText = tester.widget<Text>(find.text(_verse.translation!));
+    final tafsirText = tester.widget<Text>(find.text('English explanation'));
+    expect(ayahText.style?.fontSize, lessThanOrEqualTo(30));
+    expect(tafsirText.style?.fontSize, greaterThanOrEqualTo(18));
     expect(
       find.text('Source: Tafsir Ibn Kathir — Hafiz Ibn Kathir'),
       findsOneWidget,
@@ -78,7 +83,7 @@ void main() {
     await tester.tap(find.byType(DropdownButtonFormField<int>));
     await tester.pumpAndSettle();
     expect(find.textContaining('Tafsir Muyassar'), findsNothing);
-    await tester.tap(find.text("Ma'arif al-Qur'an · English").last);
+    await tester.tap(find.text("Ma'arif al-Qur'an").last);
     await tester.pumpAndSettle();
 
     expect(find.text('Alternative English explanation'), findsOneWidget);
@@ -105,14 +110,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.text(_verse.arabicText), findsOneWidget);
     expect(find.text(_verse.translation!), findsNothing);
     expect(find.text('شرح عربي'), findsOneWidget);
-    expect(find.text('التفسير الميسر · العربية'), findsOneWidget);
+    expect(find.text('التفسير الميسر'), findsOneWidget);
+    expect(find.textContaining('Tafsir al-Tabari'), findsNothing);
 
     await tester.tap(find.byType(DropdownButtonFormField<int>));
     await tester.pumpAndSettle();
     expect(find.textContaining('Tafsir Ibn Kathir'), findsNothing);
-    await tester.tap(find.text('تفسير الطبري · العربية').last);
+    await tester.tap(find.text('تفسير الطبري').last);
     await tester.pumpAndSettle();
 
     expect(find.text('شرح الطبري'), findsOneWidget);
@@ -126,8 +133,10 @@ void main() {
         .setLocale(const Locale('en'));
     await tester.pumpAndSettle();
 
+    expect(find.text(_verse.arabicText), findsNothing);
+    expect(find.text(_verse.translation!), findsOneWidget);
     expect(find.text('English explanation'), findsOneWidget);
-    expect(find.text('Tafsir Ibn Kathir · English'), findsOneWidget);
+    expect(find.text('Tafsir Ibn Kathir'), findsOneWidget);
   });
 
   testWidgets('keeps local ayah content visible when tafsir fails', (
@@ -146,8 +155,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text(_verse.arabicText), findsOneWidget);
-    expect(find.text(_verse.translation!), findsNothing);
+    expect(find.text(_verse.arabicText), findsNothing);
+    expect(find.text(_verse.translation!), findsOneWidget);
     expect(find.text('Tafsir is unavailable'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
   });

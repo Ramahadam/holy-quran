@@ -40,7 +40,7 @@ List<TafsirSource> tafsirSourcesForLanguage(
   final matchingSources = sources
       .where((source) => source.languageName.toLowerCase() == desiredLanguage)
       .toList(growable: false);
-  return matchingSources.isEmpty ? sources : matchingSources;
+  return matchingSources;
 }
 
 String tafsirSourceNameForLanguage(
