@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/domain/models/juz.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
+import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
@@ -58,6 +59,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: AppTheme.light,
         home: Scaffold(
           body: JuzTile(
@@ -78,16 +82,50 @@ void main() {
     final shape = card.shape! as RoundedRectangleBorder;
     final badge = tester.widget<Container>(badgeFinder);
     final badgeDecoration = badge.decoration! as BoxDecoration;
-    final arabicName = tester.widget<Text>(find.text('الجزء ٢'));
+    final title = tester.widget<Text>(find.text('Juz 2'));
 
     expect(card.color, colors.surfaceContainerLow);
     expect(shape.borderRadius, BorderRadius.circular(16));
     expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
     expect(badgeDecoration.color, colors.primaryContainer);
     expect(badgeDecoration.shape, BoxShape.rectangle);
-    expect(arabicName.style?.color, colors.onSurface);
+    expect(title.style?.color, colors.onSurface);
+    expect(find.text('الجزء ٢'), findsNothing);
+    expect(find.text('Starts at Al-Baqarah 2:142 · Page 22'), findsOneWidget);
     expect(
-      find.bySemanticsLabel('Juz 2, الجزء ٢, starts at البقرة 2:142, page 22'),
+      find.bySemanticsLabel('Juz 2, starts at Al-Baqarah 2:142, page 22'),
+      findsOneWidget,
+    );
+    semanticsHandle.dispose();
+  });
+
+  testWidgets('Arabic Juz rows show one localized title and start label', (
+    tester,
+  ) async {
+    final semanticsHandle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: JuzTile(
+            juz: canonicalJuzs[1],
+            startSurah: _alBaqarah,
+            page: 22,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('الجزء 2'), findsOneWidget);
+    expect(find.text('الجزء ٢'), findsNothing);
+    expect(find.text('يبدأ عند البقرة 2:142 · الصفحة 22'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('الجزء 2، يبدأ عند البقرة 2:142، الصفحة 22'),
       findsOneWidget,
     );
     semanticsHandle.dispose();
@@ -108,8 +146,8 @@ void main() {
 
     expect(find.byType(JuzTile), findsNWidgets(2));
     expect(find.text('Juz 2'), findsOneWidget);
-    expect(find.text('Starts at البقرة 2:142 · Page 22'), findsOneWidget);
-    expect(find.text('الجزء ٢'), findsOneWidget);
+    expect(find.text('Starts at Al-Baqarah 2:142 · Page 22'), findsOneWidget);
+    expect(find.text('الجزء ٢'), findsNothing);
   });
 
   testWidgets('opens a selected Juz at its exact first verse', (tester) async {

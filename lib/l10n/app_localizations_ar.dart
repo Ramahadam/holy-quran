@@ -325,13 +325,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String juzSemantics(
-    int number,
-    String arabicTitle,
-    String startLabel,
-    int page,
-  ) {
-    return 'الجزء $number، $arabicTitle، يبدأ عند $startLabel، الصفحة $page';
+  String juzSemantics(int number, String startLabel, int page) {
+    return 'الجزء $number، يبدأ عند $startLabel، الصفحة $page';
   }
 
   @override
@@ -361,6 +356,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ayahStudy => 'دراسة الآية';
+
+  @override
+  String get previousAyah => 'الآية السابقة';
+
+  @override
+  String get nextAyah => 'الآية التالية';
+
+  @override
+  String get ayahNavigationUnavailable => 'تعذر تحميل هذه الآية.';
 
   @override
   String get bookmarkVerse => 'إضافة علامة للآية';
