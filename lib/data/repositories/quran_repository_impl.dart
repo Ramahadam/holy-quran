@@ -5,107 +5,160 @@ import 'package:isar/isar.dart';
 import '../../core/utils/checksum_validator.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
+import '../local/entities/quran_data_metadata_entity.dart';
 import '../local/entities/surah_entity.dart';
 import '../local/entities/verse_entity.dart';
 import '../local/isar_service.dart';
 import 'quran_repository.dart';
 
+const _checksumsAsset = 'assets/quran/checksums.txt';
+const _surahsAsset = 'assets/quran/surahs.json';
+const _versesAsset = 'assets/quran/verses.json';
+const _canonicalSurahCount = 114;
+const _canonicalVerseCount = 6236;
+
 class QuranRepositoryImpl implements QuranRepository {
-  QuranRepositoryImpl();
+  final AssetBundle _assetBundle;
+  final Future<Isar> Function() _getDatabase;
+
+  QuranRepositoryImpl({
+    AssetBundle? assetBundle,
+    Future<Isar> Function()? getDatabase,
+  }) : _assetBundle = assetBundle ?? rootBundle,
+       _getDatabase = getDatabase ?? IsarService.getInstance;
 
   @override
   Future<void> loadQuranData() async {
-    if (await isDataLoaded()) {
-      return;
-    }
+    final manifest = await _readManifest();
+    final isar = await _getDatabase();
+    if (await _isDataLoaded(isar, manifest.digest)) return;
 
-    final isar = await IsarService.getInstance();
+    final content = await _readAndValidateContent(manifest);
 
     await isar.writeTxn(() async {
       await isar.verseEntitys.clear();
       await isar.surahEntitys.clear();
-    });
-
-    final checksumLines = (await rootBundle.loadString(
-      'assets/quran/checksums.txt',
-    )).split('\n');
-
-    await _loadSurahs(checksumLines);
-    await _loadVerses(checksumLines);
-  }
-
-  Future<void> _loadSurahs(List<String> checksumLines) async {
-    final surahsJson = await rootBundle.loadString('assets/quran/surahs.json');
-    final expectedChecksum = checksumLines
-        .firstWhere((line) => line.contains('surahs.json'), orElse: () => '')
-        .split(' ')
-        .first;
-
-    if (expectedChecksum.isNotEmpty &&
-        !ChecksumValidator.verify(surahsJson, expectedChecksum)) {
-      throw Exception('Surahs data checksum verification failed');
-    }
-
-    final List<dynamic> surahsData = json.decode(surahsJson);
-    final surahEntities = surahsData.map((data) {
-      final surah = Surah(
-        surahNumber: data['number'] as int,
-        nameArabic: data['name'] as String,
-        nameEnglish: data['translation'] as String,
-        numberOfVerses: data['totalVerses'] as int,
+      await isar.quranDataMetadataEntitys.clear();
+      await isar.surahEntitys.putAll(content.surahs);
+      await isar.verseEntitys.putAll(content.verses);
+      await isar.quranDataMetadataEntitys.put(
+        QuranDataMetadataEntity.installed(
+          contentDigest: manifest.digest,
+          surahCount: content.surahs.length,
+          verseCount: content.verses.length,
+        ),
       );
-      return SurahEntity.fromDomain(surah);
-    }).toList();
-
-    final isar = await IsarService.getInstance();
-    await isar.writeTxn(() async {
-      await isar.surahEntitys.putAll(surahEntities);
     });
   }
 
-  Future<void> _loadVerses(List<String> checksumLines) async {
-    final versesJson = await rootBundle.loadString('assets/quran/verses.json');
-    final expectedChecksum = checksumLines
-        .firstWhere((line) => line.contains('verses.json'), orElse: () => '')
-        .split(' ')
-        .first;
-
-    if (expectedChecksum.isNotEmpty &&
-        !ChecksumValidator.verify(versesJson, expectedChecksum)) {
-      throw Exception('Verses data checksum verification failed');
+  Future<({String digest, String surahsChecksum, String versesChecksum})>
+  _readManifest() async {
+    final manifest = await _assetBundle.loadString(_checksumsAsset);
+    final checksums = <String, String>{};
+    for (final match in RegExp(
+      r'^([a-fA-F0-9]{64})\s+(.+)$',
+      multiLine: true,
+    ).allMatches(manifest)) {
+      checksums[match.group(2)!.trim()] = match.group(1)!.toLowerCase();
     }
 
-    final List<dynamic> versesData = json.decode(versesJson);
-    final verseEntities = versesData.map((data) {
-      final verse = Verse(
-        verseId: data['verseId'] as String,
-        surahNumber: data['surahNumber'] as int,
-        verseNumber: data['verseNumber'] as int,
-        arabicText: data['arabicText'] as String,
-        translation: data['translation'] as String?,
-        page: data['page'] as int,
+    final surahsChecksum = checksums[_surahsAsset];
+    final versesChecksum = checksums[_versesAsset];
+    if (surahsChecksum == null || versesChecksum == null) {
+      throw const FormatException(
+        'Quran checksum manifest is missing required assets.',
       );
-      return VerseEntity.fromDomain(verse);
-    }).toList();
+    }
 
-    final isar = await IsarService.getInstance();
+    return (
+      digest: ChecksumValidator.calculateSHA256(
+        '$surahsChecksum\n$versesChecksum',
+      ),
+      surahsChecksum: surahsChecksum,
+      versesChecksum: versesChecksum,
+    );
+  }
 
-    const batchSize = 500;
-    for (var i = 0; i < verseEntities.length; i += batchSize) {
-      final end = (i + batchSize < verseEntities.length)
-          ? i + batchSize
-          : verseEntities.length;
-      final batch = verseEntities.sublist(i, end);
+  Future<({List<SurahEntity> surahs, List<VerseEntity> verses})>
+  _readAndValidateContent(
+    ({String digest, String surahsChecksum, String versesChecksum}) manifest,
+  ) async {
+    final assets = await Future.wait([
+      _assetBundle.loadString(_surahsAsset),
+      _assetBundle.loadString(_versesAsset),
+    ]);
+    final surahsJson = assets[0];
+    final versesJson = assets[1];
 
-      await isar.writeTxn(() async {
-        await isar.verseEntitys.putAll(batch);
-      });
+    if (!ChecksumValidator.verify(surahsJson, manifest.surahsChecksum)) {
+      throw const FormatException('Surahs data checksum verification failed.');
+    }
+    if (!ChecksumValidator.verify(versesJson, manifest.versesChecksum)) {
+      throw const FormatException('Verses data checksum verification failed.');
+    }
+
+    return (surahs: _parseSurahs(surahsJson), verses: _parseVerses(versesJson));
+  }
+
+  List<SurahEntity> _parseSurahs(String input) {
+    try {
+      final decoded = jsonDecode(input);
+      if (decoded is! List) throw const FormatException();
+      final entities = decoded
+          .map((value) {
+            final data = (value as Map).cast<String, Object?>();
+            return SurahEntity.fromDomain(
+              Surah(
+                surahNumber: data['number'] as int,
+                nameArabic: data['name'] as String,
+                nameEnglish: data['translation'] as String,
+                numberOfVerses: data['totalVerses'] as int,
+              ),
+            );
+          })
+          .toList(growable: false);
+      if (entities.length != _canonicalSurahCount) {
+        throw const FormatException();
+      }
+      return entities;
+    } catch (error) {
+      if (error is FormatException && error.message.isNotEmpty) rethrow;
+      throw const FormatException('Surahs data is invalid.');
+    }
+  }
+
+  List<VerseEntity> _parseVerses(String input) {
+    try {
+      final decoded = jsonDecode(input);
+      if (decoded is! List) throw const FormatException();
+      final entities = decoded
+          .map((value) {
+            final data = (value as Map).cast<String, Object?>();
+            return VerseEntity.fromDomain(
+              Verse(
+                verseId: data['verseId'] as String,
+                surahNumber: data['surahNumber'] as int,
+                verseNumber: data['verseNumber'] as int,
+                arabicText: data['arabicText'] as String,
+                translation: data['translation'] as String?,
+                page: data['page'] as int,
+              ),
+            );
+          })
+          .toList(growable: false);
+      if (entities.length != _canonicalVerseCount) {
+        throw const FormatException();
+      }
+      return entities;
+    } catch (error) {
+      if (error is FormatException && error.message.isNotEmpty) rethrow;
+      throw const FormatException('Verses data is invalid.');
     }
   }
 
   @override
   Future<List<Verse>> getVersesBySurah(int surahNumber) async {
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
 
     final entities = await isar.verseEntitys
         .filter()
@@ -122,7 +175,7 @@ class QuranRepositoryImpl implements QuranRepository {
       throw ArgumentError('Page must be between 1 and 604, got $page');
     }
 
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
 
     final entities = await isar.verseEntitys
         .where()
@@ -140,7 +193,7 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<Verse?> getVerseById(String verseId) async {
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
 
     final entity = await isar.verseEntitys
         .filter()
@@ -152,7 +205,7 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<int> getPageForVerse(String verseId) async {
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
     final entity = await isar.verseEntitys
         .filter()
         .verseIdEqualTo(verseId)
@@ -165,7 +218,7 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<int> getStartPageForSurah(int surahNumber) async {
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
     final entity = await isar.verseEntitys
         .filter()
         .surahNumberEqualTo(surahNumber)
@@ -179,7 +232,7 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<List<Surah>> getAllSurahs() async {
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
 
     final entities = await isar.surahEntitys.where().findAll();
 
@@ -189,7 +242,7 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<Surah?> getSurahByNumber(int surahNumber) async {
-    final isar = await IsarService.getInstance();
+    final isar = await _getDatabase();
 
     final entity = await isar.surahEntitys.get(surahNumber);
 
@@ -198,12 +251,28 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<bool> isDataLoaded() async {
-    final isar = await IsarService.getInstance();
+    final manifest = await _readManifest();
+    final isar = await _getDatabase();
+    return _isDataLoaded(isar, manifest.digest);
+  }
+
+  Future<bool> _isDataLoaded(Isar isar, String expectedDigest) async {
+    final metadata = await isar.quranDataMetadataEntitys.get(
+      QuranDataMetadataEntity.singletonId,
+    );
+    if (metadata == null || metadata.contentDigest != expectedDigest) {
+      return false;
+    }
 
     final verseCount = await isar.verseEntitys.count();
     final surahCount = await isar.surahEntitys.count();
 
-    if (verseCount == 0 || surahCount != 114) return false;
+    if (verseCount != metadata.verseCount ||
+        surahCount != metadata.surahCount ||
+        verseCount != _canonicalVerseCount ||
+        surahCount != _canonicalSurahCount) {
+      return false;
+    }
 
     // Check if page data is present (migration from pre-page schema).
     final sample = await isar.verseEntitys.where().findFirst();

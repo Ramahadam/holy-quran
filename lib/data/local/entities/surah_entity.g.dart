@@ -13,9 +13,9 @@ extension GetSurahEntityCollection on Isar {
   IsarCollection<SurahEntity> get surahEntitys => this.collection();
 }
 
-final SurahEntitySchema = CollectionSchema(
+const SurahEntitySchema = CollectionSchema(
   name: r'SurahEntity',
-  id: int.parse('1957003966686490940'),
+  id: 1957003966686490940,
   properties: {
     r'nameArabic': PropertySchema(
       id: 0,
