@@ -161,6 +161,9 @@ class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   }
 
   @override
+  Future<bool> synchronizeTimezone() async => false;
+
+  @override
   Future<void> schedule(PrayerReminderSettings settings) async {
     scheduledSettings = settings;
   }
