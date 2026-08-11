@@ -42,4 +42,13 @@ void main() {
     expect(clientId, matches(RegExp(r'^[a-f0-9]{32}$')));
     expect(await store.getOrCreate(), clientId);
   });
+
+  testWidgets('dispose cancels a pending preferences timeout', (tester) async {
+    final store = CloudflareClientIdStore(
+      loadPreferences: () => Completer<SharedPreferences>().future,
+    );
+
+    unawaited(store.getOrCreate());
+    store.dispose();
+  });
 }

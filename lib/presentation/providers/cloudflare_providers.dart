@@ -5,5 +5,7 @@ import '../../data/backend/cloudflare_client_id_store.dart';
 final cloudflareClientIdStoreProvider = Provider<CloudflareClientIdStore>((
   ref,
 ) {
-  return CloudflareClientIdStore();
+  final store = CloudflareClientIdStore();
+  ref.onDispose(store.dispose);
+  return store;
 });

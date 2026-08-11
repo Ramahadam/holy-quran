@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +11,7 @@ class CloudflareClientIdStore {
   final Random _random;
   final Future<SharedPreferences> Function() _loadPreferences;
   final Duration _preferencesTimeout;
+  final Set<Timer> _pendingTimers = {};
   Future<String>? _clientId;
 
   CloudflareClientIdStore({
@@ -24,19 +26,26 @@ class CloudflareClientIdStore {
     return _clientId ??= _loadOrCreate();
   }
 
+  void dispose() {
+    for (final timer in _pendingTimers) {
+      timer.cancel();
+    }
+    _pendingTimers.clear();
+  }
+
   Future<String> _loadOrCreate() async {
     String? generatedClientId;
     try {
-      final preferences = await _loadPreferences().timeout(_preferencesTimeout);
+      final preferences = await _withTimeout(_loadPreferences());
       final existing = preferences.getString(preferenceKey);
       if (existing != null && _validClientId.hasMatch(existing)) {
         return existing;
       }
 
       generatedClientId = _generateClientId();
-      await preferences
-          .setString(preferenceKey, generatedClientId)
-          .timeout(_preferencesTimeout);
+      await _withTimeout(
+        preferences.setString(preferenceKey, generatedClientId),
+      );
       return generatedClientId;
     } catch (_) {
       return generatedClientId ?? _generateClientId();
@@ -48,5 +57,38 @@ class CloudflareClientIdStore {
       16,
       (_) => _random.nextInt(256).toRadixString(16).padLeft(2, '0'),
     ).join();
+  }
+
+  Future<T> _withTimeout<T>(Future<T> operation) {
+    final completer = Completer<T>();
+    late final Timer timer;
+    timer = Timer(_preferencesTimeout, () {
+      _pendingTimers.remove(timer);
+      if (!completer.isCompleted) {
+        completer.completeError(
+          TimeoutException('Preferences did not respond.'),
+        );
+      }
+    });
+    _pendingTimers.add(timer);
+
+    operation.then(
+      (value) {
+        timer.cancel();
+        _pendingTimers.remove(timer);
+        if (!completer.isCompleted) {
+          completer.complete(value);
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        timer.cancel();
+        _pendingTimers.remove(timer);
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
+    );
+
+    return completer.future;
   }
 }
