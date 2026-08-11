@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:holy_quran_app/data/local/entities/verse_entity.dart';
@@ -18,16 +19,28 @@ class IsarService {
   ///
   /// Prevents race conditions by ensuring only one initialization occurs
   /// even if called concurrently from multiple isolates.
-  static Future<Isar> getInstance() async {
+  static Future<Isar> getInstance() => _getInstance(_initialize);
+
+  @visibleForTesting
+  static Future<Isar> getInstanceForTesting(
+    Future<Isar> Function() initialize,
+  ) => _getInstance(initialize);
+
+  static Future<Isar> _getInstance(Future<Isar> Function() initialize) async {
     if (_isar != null) return _isar!;
 
     // Prevent concurrent initialization
     if (_initFuture != null) return _initFuture!;
 
-    _initFuture = _initialize();
-    _isar = await _initFuture!;
-    _initFuture = null;
-    return _isar!;
+    final initFuture = initialize();
+    _initFuture = initFuture;
+    try {
+      final isar = await initFuture;
+      _isar = isar;
+      return isar;
+    } finally {
+      if (identical(_initFuture, initFuture)) _initFuture = null;
+    }
   }
 
   static Future<Isar> _initialize() async {

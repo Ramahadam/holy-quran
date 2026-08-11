@@ -13,10 +13,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get databaseError =>
-      'Could not open the database.\nPlease restart the app.';
+      'Could not open the database.\nYour saved reading data is safe. Please try again.';
 
   @override
-  String get dataLoadError => 'Failed to load data.\nPlease restart the app.';
+  String get dataLoadError => 'Failed to load Quran data.\nPlease try again.';
 
   @override
   String get preparingApp => 'Preparing your Digital Sanctuary...';
