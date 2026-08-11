@@ -167,6 +167,34 @@ void main() {
       expect(await repository.isDataLoaded(), isTrue);
     },
   );
+
+  test(
+    'rolls back Quran content when the database replacement fails',
+    () async {
+      final repository = _repository(database, bundledAssets);
+      await repository.loadQuranData();
+      final installedVerse = await database.verseEntitys
+          .filter()
+          .verseIdEqualTo('1:2')
+          .findFirst();
+
+      final invalidAssets = _withDuplicateVerseId(bundledAssets);
+
+      expect(
+        _repository(database, invalidAssets).loadQuranData(),
+        throwsA(isA<IsarError>()),
+      );
+
+      final preservedVerse = await database.verseEntitys
+          .filter()
+          .verseIdEqualTo('1:2')
+          .findFirst();
+      expect(preservedVerse?.arabicText, installedVerse?.arabicText);
+      expect(await database.surahEntitys.count(), 114);
+      expect(await database.verseEntitys.count(), 6236);
+      expect(await repository.isDataLoaded(), isTrue);
+    },
+  );
 }
 
 Future<void> _initializeIsarForTests() async {
@@ -214,6 +242,29 @@ Map<String, String> _withUpdatedVerseTranslation(
       .map((verse) {
         if (verse['verseId'] != verseId) return verse;
         return <String, dynamic>{...verse, 'translation': translation};
+      })
+      .toList(growable: false);
+  final versesJson = jsonEncode(updatedVerses);
+  return {
+    ...assets,
+    'assets/quran/verses.json': versesJson,
+    'assets/quran/checksums.txt': _checksumsFor(
+      assets['assets/quran/surahs.json']!,
+      versesJson,
+    ),
+  };
+}
+
+Map<String, String> _withDuplicateVerseId(Map<String, String> assets) {
+  final verses = (jsonDecode(assets['assets/quran/verses.json']!) as List)
+      .cast<Map<String, dynamic>>();
+  final duplicateVerseId = verses.first['verseId'];
+  final updatedVerses = verses
+      .asMap()
+      .entries
+      .map((entry) {
+        if (entry.key != 1) return entry.value;
+        return <String, dynamic>{...entry.value, 'verseId': duplicateVerseId};
       })
       .toList(growable: false);
   final versesJson = jsonEncode(updatedVerses);
