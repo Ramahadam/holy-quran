@@ -23,6 +23,7 @@ import '../../domain/models/juz.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
+import 'cloudflare_providers.dart';
 import 'locale_provider.dart';
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
@@ -79,9 +80,11 @@ final anonymousFeedbackServiceProvider = Provider<AnonymousFeedbackService>((
   }
   final client = http.Client();
   ref.onDispose(client.close);
+  final clientIdStore = ref.watch(cloudflareClientIdStoreProvider);
   final transport = CloudflareFeedbackTransport(
     baseUri: baseUri,
     client: client,
+    clientId: clientIdStore.getOrCreate,
   );
   return AnonymousFeedbackService(transport: transport);
 });

@@ -6,6 +6,7 @@ import '../../data/tafsir/quran_foundation_tafsir_repository.dart';
 import '../../data/tafsir/tafsir_repository.dart';
 import '../../data/tafsir/tafsir_transport.dart';
 import '../../domain/models/tafsir.dart';
+import 'cloudflare_providers.dart';
 
 final tafsirRepositoryProvider = Provider<TafsirRepository>((ref) {
   final baseUri = configuredCloudflareApiBaseUri;
@@ -16,7 +17,12 @@ final tafsirRepositoryProvider = Provider<TafsirRepository>((ref) {
   }
   final client = http.Client();
   ref.onDispose(client.close);
-  final transport = CloudflareTafsirTransport(baseUri: baseUri, client: client);
+  final clientIdStore = ref.watch(cloudflareClientIdStoreProvider);
+  final transport = CloudflareTafsirTransport(
+    baseUri: baseUri,
+    client: client,
+    clientId: clientIdStore.getOrCreate,
+  );
   return QuranFoundationTafsirRepository(transport: transport);
 });
 

@@ -9,17 +9,25 @@ abstract class TafsirTransport {
 class CloudflareTafsirTransport implements TafsirTransport {
   final http.Client client;
   final Uri endpoint;
+  final Future<String> Function() clientId;
 
-  CloudflareTafsirTransport({required Uri baseUri, required this.client})
-    : endpoint = baseUri.resolve('/v1/tafsir');
+  CloudflareTafsirTransport({
+    required Uri baseUri,
+    required this.client,
+    required this.clientId,
+  }) : endpoint = baseUri.resolve('/v1/tafsir');
 
   @override
   Future<Map<String, dynamic>> invoke(Map<String, dynamic> body) async {
     try {
+      final resolvedClientId = await clientId();
       final response = await client
           .post(
             endpoint,
-            headers: const {'content-type': 'application/json'},
+            headers: {
+              'content-type': 'application/json',
+              'x-client-id': resolvedClientId,
+            },
             body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 20));

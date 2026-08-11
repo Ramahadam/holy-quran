@@ -11,6 +11,7 @@ void main() {
       late http.Request capturedRequest;
       final transport = CloudflareFeedbackTransport(
         baseUri: Uri.parse('https://api.example.com'),
+        clientId: () async => '0123456789abcdef0123456789abcdef',
         client: MockClient((request) async {
           capturedRequest = request;
           return http.Response(jsonEncode({'submitted': true}), 201);
@@ -26,12 +27,17 @@ void main() {
 
       expect(capturedRequest.url.path, '/v1/feedback');
       expect(capturedRequest.method, 'POST');
+      expect(
+        capturedRequest.headers['x-client-id'],
+        '0123456789abcdef0123456789abcdef',
+      );
       expect(jsonDecode(capturedRequest.body), payload);
     });
 
     test('wraps a rejected submission', () async {
       final transport = CloudflareFeedbackTransport(
         baseUri: Uri.parse('https://api.example.com'),
+        clientId: () async => '0123456789abcdef0123456789abcdef',
         client: MockClient(
           (_) async => http.Response(jsonEncode({'error': 'Invalid'}), 400),
         ),
