@@ -27,17 +27,25 @@ abstract class FeedbackTransport {
 class CloudflareFeedbackTransport implements FeedbackTransport {
   final http.Client client;
   final Uri endpoint;
+  final Future<String> Function() clientId;
 
-  CloudflareFeedbackTransport({required Uri baseUri, required this.client})
-    : endpoint = baseUri.resolve('/v1/feedback');
+  CloudflareFeedbackTransport({
+    required Uri baseUri,
+    required this.client,
+    required this.clientId,
+  }) : endpoint = baseUri.resolve('/v1/feedback');
 
   @override
   Future<void> submit(Map<String, dynamic> payload) async {
     try {
+      final resolvedClientId = await clientId();
       final response = await client
           .post(
             endpoint,
-            headers: const {'content-type': 'application/json'},
+            headers: {
+              'content-type': 'application/json',
+              'x-client-id': resolvedClientId,
+            },
             body: jsonEncode(payload),
           )
           .timeout(const Duration(seconds: 15));

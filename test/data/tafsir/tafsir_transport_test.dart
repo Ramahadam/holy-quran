@@ -11,6 +11,7 @@ void main() {
       late http.Request capturedRequest;
       final transport = CloudflareTafsirTransport(
         baseUri: Uri.parse('https://api.example.com'),
+        clientId: () async => '0123456789abcdef0123456789abcdef',
         client: MockClient((request) async {
           capturedRequest = request;
           return http.Response(
@@ -34,6 +35,10 @@ void main() {
 
       expect(capturedRequest.url.path, '/v1/tafsir');
       expect(capturedRequest.method, 'POST');
+      expect(
+        capturedRequest.headers['x-client-id'],
+        '0123456789abcdef0123456789abcdef',
+      );
       expect(jsonDecode(capturedRequest.body), {'operation': 'sources'});
       expect(response['sources'], hasLength(1));
     });
@@ -41,6 +46,7 @@ void main() {
     test('surfaces a safe Worker error', () async {
       final transport = CloudflareTafsirTransport(
         baseUri: Uri.parse('https://api.example.com'),
+        clientId: () async => '0123456789abcdef0123456789abcdef',
         client: MockClient(
           (_) async => http.Response(
             jsonEncode({'error': 'The tafsir provider is unavailable.'}),

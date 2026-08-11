@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:holy_quran_app/data/backend/cloudflare_client_id_store.dart';
 import 'package:holy_quran_app/data/feedback/anonymous_feedback_service.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,6 +19,7 @@ void main() {
         transport: CloudflareFeedbackTransport(
           baseUri: Uri.parse(_cloudflareApiBaseUrl),
           client: client,
+          clientId: CloudflareClientIdStore().getOrCreate,
         ),
       );
 
