@@ -25,7 +25,7 @@ import '../../domain/models/surah.dart';
 import '../../domain/models/verse.dart';
 import 'locale_provider.dart';
 
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 const int feedbackPromptTestDelaySeconds = int.fromEnvironment(
   'FEEDBACK_PROMPT_TEST_DELAY_SECONDS',

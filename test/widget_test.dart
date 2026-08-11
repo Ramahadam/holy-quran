@@ -19,6 +19,7 @@ import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
+import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
@@ -721,41 +722,87 @@ void main() {
       expect(find.textContaining('Failed to load surahs'), findsOneWidget);
     });
 
-    testWidgets('applies dark mode from the home menu', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            surahListProvider.overrideWith((ref) async => [_surah1]),
-            lastReadPositionProvider.overrideWith((ref) async => null),
-            recentBookmarksProvider.overrideWith((ref) async => const []),
-          ],
-          child: Consumer(
-            builder: (context, ref, _) => MaterialApp(
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: ref.watch(themeModeProvider),
-              home: HomeScreen(),
+    testWidgets('uses explicit light and dark modes from the home menu', (
+      tester,
+    ) async {
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
+      for (final platformBrightness in Brightness.values) {
+        tester.platformDispatcher.platformBrightnessTestValue =
+            platformBrightness;
+
+        await tester.pumpWidget(
+          ProviderScope(
+            key: ValueKey(platformBrightness),
+            overrides: [
+              surahListProvider.overrideWith((ref) async => [_surah1]),
+              lastReadPositionProvider.overrideWith((ref) async => null),
+              recentBookmarksProvider.overrideWith((ref) async => const []),
+            ],
+            child: Consumer(
+              builder: (context, ref, _) => MaterialApp(
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: ref.watch(themeModeProvider),
+                home: HomeScreen(),
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(
-        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-        ThemeMode.system,
-      );
+        expect(
+          tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+          ThemeMode.light,
+        );
+        expect(
+          Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+          Brightness.light,
+        );
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      expect(find.text('Dark mode'), findsOneWidget);
-      await tester.tap(find.text('Dark mode'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Menu'));
+        await tester.pumpAndSettle();
+        expect(find.text('Dark mode'), findsOneWidget);
+        await tester.tap(find.text('Dark mode'));
+        await tester.pumpAndSettle();
 
-      expect(
-        tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
-        ThemeMode.dark,
-      );
+        expect(
+          tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+          ThemeMode.dark,
+        );
+
+        await tester.tap(find.byTooltip('Menu'));
+        await tester.pumpAndSettle();
+        final darkModeSemantics = tester
+            .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
+            .getSemanticsData();
+        expect(
+          darkModeSemantics.flagsCollection.isChecked,
+          CheckedState.isTrue,
+        );
+
+        await tester.tap(find.text('Dark mode'));
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+          ThemeMode.light,
+        );
+        expect(
+          Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+          Brightness.light,
+        );
+
+        await tester.tap(find.byTooltip('Menu'));
+        await tester.pumpAndSettle();
+        final lightModeSemantics = tester
+            .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
+            .getSemanticsData();
+        expect(
+          lightModeSemantics.flagsCollection.isChecked,
+          CheckedState.isFalse,
+        );
+      }
     });
 
     testWidgets('shows Last Read banner when a reading position exists', (
@@ -2483,6 +2530,7 @@ void main() {
       expect(find.byType(VerseDetailScreen), findsOneWidget);
       expect(find.text('1:1'), findsOneWidget);
       expect(find.text('In the name of Allah'), findsOneWidget);
+      expect(find.text(_verse1.arabicText), findsNothing);
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -2985,15 +3033,13 @@ void main() {
       expect(badgeDecoration.shape, BoxShape.rectangle);
       expect(arabicName.style?.color, colors.onSurface);
       expect(
-        find.bySemanticsLabel('Surah 1, الفاتحة, 7 verses'),
+        find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'),
         findsOneWidget,
       );
       semanticsHandle.dispose();
     });
 
-    testWidgets('renders Arabic name and localized verse count', (
-      tester,
-    ) async {
+    testWidgets('adds the English meaning in English mode', (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -3003,11 +3049,29 @@ void main() {
         ),
       );
       expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('The Opening'), findsNothing);
-      expect(find.text('7 verses'), findsOneWidget);
+      expect(find.text('The Opening · 7 verses'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       await tester.tap(find.byType(SurahTile));
       expect(tapped, isTrue);
+    });
+
+    testWidgets('keeps the Surah index Arabic-only in Arabic mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SurahTile(surah: _surah1, onTap: () {}),
+          ),
+        ),
+      );
+
+      expect(find.text('الفاتحة'), findsOneWidget);
+      expect(find.textContaining('The Opening'), findsNothing);
+      expect(find.text('7 آيات'), findsOneWidget);
     });
   });
 
@@ -3080,7 +3144,9 @@ void main() {
   });
 
   group('VerseDetailScreen', () {
-    testWidgets('renders large Quran text and translation', (tester) async {
+    testWidgets('renders only the English ayah at a balanced size', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -3095,9 +3161,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final arabicText = tester.widget<Text>(find.text(_verse1.arabicText));
-      expect(arabicText.style?.fontSize, 36);
-      expect(find.text('In the name of Allah'), findsOneWidget);
+      final englishText = tester.widget<Text>(
+        find.text('In the name of Allah'),
+      );
+      expect(englishText.style?.fontSize, lessThanOrEqualTo(30));
+      expect(find.text(_verse1.arabicText), findsNothing);
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
     });
 

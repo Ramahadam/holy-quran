@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:qcf_quran/qcf_quran.dart';
 
 import '../../domain/models/juz.dart';
 import '../../domain/models/surah.dart';
@@ -23,22 +22,19 @@ class JuzTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final startSurahName = isArabic
+        ? startSurah.nameArabic
+        : startSurah.nameEnglish;
     final startLabel =
-        '${startSurah.nameArabic} '
+        '$startSurahName '
         '${juz.startSurahNumber}:${juz.startVerseNumber}';
-    final arabicTitle = 'الجزء ${convertToArabicNumber(juz.number.toString())}';
     return QuranIndexTile(
       keyPrefix: 'juz',
       number: juz.number,
       title: l10n.juzNumber(juz.number),
       subtitle: l10n.juzStartsAt(startLabel, page),
-      arabicTitle: arabicTitle,
-      semanticsLabel: l10n.juzSemantics(
-        juz.number,
-        arabicTitle,
-        startLabel,
-        page,
-      ),
+      semanticsLabel: l10n.juzSemantics(juz.number, startLabel, page),
       onTap: onTap,
     );
   }

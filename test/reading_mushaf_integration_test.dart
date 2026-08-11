@@ -37,6 +37,24 @@ const _verse1 = Verse(
 );
 
 void main() {
+  testWidgets('Mushaf advances from page 1 to page 2 in RTL app mode', (
+    tester,
+  ) async {
+    await _pumpReading(tester, textDirection: TextDirection.rtl);
+    await _enterMushaf(tester);
+
+    await _expectForwardMushafDragAdvances(tester);
+  });
+
+  testWidgets('Mushaf uses the same forward drag in LTR app mode', (
+    tester,
+  ) async {
+    await _pumpReading(tester);
+    await _enterMushaf(tester);
+
+    await _expectForwardMushafDragAdvances(tester);
+  });
+
   testWidgets('single tap on the Mushaf page toggles immersive controls', (
     tester,
   ) async {
@@ -230,6 +248,7 @@ Future<void> _pumpReading(
   _MemoryBookmarkRepository? bookmarkRepository,
   _MemoryReadingPositionRepository? positionRepository,
   List<Override> extraOverrides = const [],
+  TextDirection textDirection = TextDirection.ltr,
 }) async {
   final bookmarks = bookmarkRepository ?? _MemoryBookmarkRepository();
   await tester.pumpWidget(
@@ -247,7 +266,12 @@ Future<void> _pumpReading(
         ).overrideWith((ref) => bookmarks.idsForSurah(1)),
         ...extraOverrides,
       ],
-      child: const MaterialApp(home: ReadingScreen(surah: _alFatihah)),
+      child: MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: const ReadingScreen(surah: _alFatihah),
+        ),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -257,6 +281,15 @@ Future<void> _enterMushaf(WidgetTester tester) async {
   await tester.tap(find.text('Mushaf'));
   await tester.pump();
   await tester.pump();
+}
+
+Future<void> _expectForwardMushafDragAdvances(WidgetTester tester) async {
+  final controller = tester.widget<PageView>(find.byType(PageView)).controller!;
+  await tester.drag(find.byType(PageView), const Offset(500, 0));
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
+
+  expect(controller.page, 1);
 }
 
 class _MemoryBookmarkRepository implements BookmarkRepository {

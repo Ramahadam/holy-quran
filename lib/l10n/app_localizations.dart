@@ -665,13 +665,8 @@ abstract class AppLocalizations {
   /// No description provided for @juzSemantics.
   ///
   /// In en, this message translates to:
-  /// **'Juz {number}, {arabicTitle}, starts at {startLabel}, page {page}'**
-  String juzSemantics(
-    int number,
-    String arabicTitle,
-    String startLabel,
-    int page,
-  );
+  /// **'Juz {number}, starts at {startLabel}, page {page}'**
+  String juzSemantics(int number, String startLabel, int page);
 
   /// No description provided for @pageNumber.
   ///
@@ -720,6 +715,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ayah Study'**
   String get ayahStudy;
+
+  /// No description provided for @previousAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Ayah'**
+  String get previousAyah;
+
+  /// No description provided for @nextAyah.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Ayah'**
+  String get nextAyah;
+
+  /// No description provided for @ayahNavigationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load this Ayah.'**
+  String get ayahNavigationUnavailable;
 
   /// No description provided for @bookmarkVerse.
   ///
