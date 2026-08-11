@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/data/backend/cloudflare_client_id_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,5 +29,17 @@ void main() {
 
     expect(clientId, matches(RegExp(r'^[a-f0-9]{32}$')));
     expect(clientId, isNot('not-a-client-id'));
+  });
+
+  test('falls back when preferences do not respond', () async {
+    final store = CloudflareClientIdStore(
+      loadPreferences: () => Completer<SharedPreferences>().future,
+      preferencesTimeout: Duration.zero,
+    );
+
+    final clientId = await store.getOrCreate();
+
+    expect(clientId, matches(RegExp(r'^[a-f0-9]{32}$')));
+    expect(await store.getOrCreate(), clientId);
   });
 }
