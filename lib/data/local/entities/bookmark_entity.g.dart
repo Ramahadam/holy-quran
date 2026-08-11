@@ -13,9 +13,9 @@ extension GetBookmarkEntityCollection on Isar {
   IsarCollection<BookmarkEntity> get bookmarkEntitys => this.collection();
 }
 
-final BookmarkEntitySchema = CollectionSchema(
+const BookmarkEntitySchema = CollectionSchema(
   name: r'BookmarkEntity',
-  id: int.parse('-7369956597930324689'),
+  id: -7369956597930324689,
   properties: {
     r'note': PropertySchema(
       id: 0,
@@ -45,7 +45,7 @@ final BookmarkEntitySchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'verseId': IndexSchema(
-      id: int.parse('1744958713610519296'),
+      id: 1744958713610519296,
       name: r'verseId',
       unique: true,
       replace: true,
@@ -58,7 +58,7 @@ final BookmarkEntitySchema = CollectionSchema(
       ],
     ),
     r'surahNumber': IndexSchema(
-      id: int.parse('9024003441292455669'),
+      id: 9024003441292455669,
       name: r'surahNumber',
       unique: false,
       replace: false,
@@ -206,8 +206,7 @@ extension BookmarkEntityByIndex on IsarCollection<BookmarkEntity> {
 
   List<Id> putAllByVerseIdSync(List<BookmarkEntity> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'verseId', objects,
-        saveLinks: saveLinks);
+    return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
   }
 }
 
