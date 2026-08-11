@@ -118,7 +118,9 @@ void main() {
     test(
       'requests notification and exact alarm permissions on Android',
       () async {
-        final scheduler = LocalPrayerReminderScheduler();
+        final scheduler = LocalPrayerReminderScheduler(
+          localTimezoneNameProvider: () async => 'Etc/UTC',
+        );
 
         final granted = await scheduler.requestPermission();
 
@@ -137,7 +139,9 @@ void main() {
     test(
       'schedules daily reminders as exact allow-while-idle alarms',
       () async {
-        final scheduler = LocalPrayerReminderScheduler();
+        final scheduler = LocalPrayerReminderScheduler(
+          localTimezoneNameProvider: () async => 'Etc/UTC',
+        );
         final settings = PrayerReminderSettings.defaults.copyWith(
           enabled: true,
           prayerTimeMinutes: 0,
@@ -159,6 +163,7 @@ void main() {
     test('uses Arabic notification text for Arabic locales', () async {
       final scheduler = LocalPrayerReminderScheduler(
         localeProvider: () => const Locale('ar'),
+        localTimezoneNameProvider: () async => 'Etc/UTC',
       );
       final settings = PrayerReminderSettings.defaults.copyWith(
         enabled: true,
@@ -187,6 +192,7 @@ void main() {
     test('uses English notification text for non-Arabic locales', () async {
       final scheduler = LocalPrayerReminderScheduler(
         localeProvider: () => const Locale('en'),
+        localTimezoneNameProvider: () async => 'Etc/UTC',
       );
       final settings = PrayerReminderSettings.defaults.copyWith(
         enabled: true,
@@ -215,7 +221,9 @@ void main() {
     test(
       'schedules snoozed reminders as exact allow-while-idle alarms',
       () async {
-        final scheduler = LocalPrayerReminderScheduler();
+        final scheduler = LocalPrayerReminderScheduler(
+          localTimezoneNameProvider: () async => 'Etc/UTC',
+        );
         final settings = PrayerReminderSettings.defaults.copyWith(
           enabled: true,
         );
@@ -231,6 +239,53 @@ void main() {
         expect(platformSpecifics['scheduleMode'], 'exactAllowWhileIdle');
       },
     );
+
+    test(
+      'keeps the selected wall-clock time across a DST transition',
+      () async {
+        final scheduler = LocalPrayerReminderScheduler(
+          localTimezoneNameProvider: () async => 'America/New_York',
+          nowProvider: () => DateTime.utc(2026, 3, 7, 15),
+        );
+        final settings = PrayerReminderSettings.defaults.copyWith(
+          enabled: true,
+          prayerTimeMinutes: 9 * 60,
+          offsetMinutes: 0,
+        );
+
+        await scheduler.schedule(settings);
+
+        final arguments = _scheduledNotificationArguments(calls);
+        expect(arguments['timeZoneName'], 'America/New_York');
+        expect(arguments['scheduledDateTime'], '2026-03-08T09:00:00');
+        expect(
+          arguments['scheduledDateTimeISO8601'],
+          '2026-03-08T09:00:00.000-0400',
+        );
+      },
+    );
+
+    test('uses the device wall-clock time in a non-DST timezone', () async {
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Asia/Dubai',
+        nowProvider: () => DateTime.utc(2026, 6, 1, 6),
+      );
+      final settings = PrayerReminderSettings.defaults.copyWith(
+        enabled: true,
+        prayerTimeMinutes: 9 * 60,
+        offsetMinutes: 0,
+      );
+
+      await scheduler.schedule(settings);
+
+      final arguments = _scheduledNotificationArguments(calls);
+      expect(arguments['timeZoneName'], 'Asia/Dubai');
+      expect(arguments['scheduledDateTime'], '2026-06-02T09:00:00');
+      expect(
+        arguments['scheduledDateTimeISO8601'],
+        '2026-06-02T09:00:00.000+0400',
+      );
+    });
   });
 
   group('PrayerReminderService', () {
@@ -303,6 +358,49 @@ void main() {
 
       expect(scheduler.snoozed, store.loaded);
     });
+
+    test(
+      'reschedules an enabled reminder after the timezone changes',
+      () async {
+        final settings = PrayerReminderSettings.defaults.copyWith(
+          enabled: true,
+        );
+        final store = _FakePrayerReminderSettingsStore(loaded: settings);
+        final scheduler = _FakePrayerReminderScheduler(
+          permissionGranted: true,
+          timezoneChanged: true,
+        );
+        final service = PrayerReminderService(
+          settingsStore: store,
+          scheduler: scheduler,
+        );
+
+        await service.synchronizeTimezone();
+
+        expect(scheduler.timezoneSynchronizations, 1);
+        expect(scheduler.scheduled, settings);
+        expect(scheduler.permissionRequests, 0);
+      },
+    );
+
+    test('does not reschedule when the timezone is unchanged', () async {
+      final store = _FakePrayerReminderSettingsStore(
+        loaded: PrayerReminderSettings.defaults.copyWith(enabled: true),
+      );
+      final scheduler = _FakePrayerReminderScheduler(
+        permissionGranted: true,
+        timezoneChanged: false,
+      );
+      final service = PrayerReminderService(
+        settingsStore: store,
+        scheduler: scheduler,
+      );
+
+      await service.synchronizeTimezone();
+
+      expect(scheduler.timezoneSynchronizations, 1);
+      expect(scheduler.scheduled, isNull);
+    });
   });
 }
 
@@ -333,12 +431,17 @@ class _FakePrayerReminderSettingsStore
 
 class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   final bool permissionGranted;
+  final bool timezoneChanged;
   int permissionRequests = 0;
   int cancelCount = 0;
+  int timezoneSynchronizations = 0;
   PrayerReminderSettings? scheduled;
   PrayerReminderSettings? snoozed;
 
-  _FakePrayerReminderScheduler({required this.permissionGranted});
+  _FakePrayerReminderScheduler({
+    required this.permissionGranted,
+    this.timezoneChanged = false,
+  });
 
   @override
   Future<void> cancel() async {
@@ -349,6 +452,12 @@ class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   Future<bool> requestPermission() async {
     permissionRequests += 1;
     return permissionGranted;
+  }
+
+  @override
+  Future<bool> synchronizeTimezone() async {
+    timezoneSynchronizations += 1;
+    return timezoneChanged;
   }
 
   @override

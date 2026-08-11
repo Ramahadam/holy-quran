@@ -162,6 +162,9 @@ class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   }
 
   @override
+  Future<bool> synchronizeTimezone() async => false;
+
+  @override
   Future<void> schedule(PrayerReminderSettings settings) async {
     scheduledSettings = settings;
   }
@@ -193,7 +196,16 @@ class _FakeFeedbackPromptService implements FeedbackPromptController {
 void main() {
   group('HolyQuranApp', () {
     testWidgets('renders MaterialApp', (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: HolyQuranApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
+              () async {},
+            ),
+          ],
+          child: const HolyQuranApp(),
+        ),
+      );
       await tester.pump();
       expect(find.byType(MaterialApp), findsOneWidget);
     });
@@ -203,6 +215,9 @@ void main() {
         ProviderScope(
           overrides: [
             themeModeProvider.overrideWith((ref) => ThemeMode.dark),
+            prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
+              () async {},
+            ),
             initializeDataProvider.overrideWith(
               (ref) => Completer<void>().future,
             ),
@@ -214,6 +229,35 @@ void main() {
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(app.themeMode, ThemeMode.dark);
+    });
+
+    testWidgets('synchronizes the reminder timezone on launch and resume', (
+      tester,
+    ) async {
+      var synchronizationCount = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
+              () async {
+                synchronizationCount += 1;
+              },
+            ),
+            initializeDataProvider.overrideWith(
+              (ref) => Completer<void>().future,
+            ),
+          ],
+          child: const HolyQuranApp(),
+        ),
+      );
+      await tester.pump();
+      expect(synchronizationCount, 1);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+
+      expect(synchronizationCount, 2);
     });
   });
 
