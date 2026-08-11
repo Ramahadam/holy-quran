@@ -14,6 +14,14 @@ class PrayerReminderService {
 
   Future<PrayerReminderSettings> loadSettings() => _settingsStore.load();
 
+  Future<void> synchronizeTimezone() async {
+    if (!await _scheduler.synchronizeTimezone()) return;
+
+    final settings = await _settingsStore.load();
+    if (!settings.enabled) return;
+    await _scheduler.schedule(settings);
+  }
+
   Future<bool> saveSettings(PrayerReminderSettings settings) async {
     await _settingsStore.save(settings);
 

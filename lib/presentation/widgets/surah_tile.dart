@@ -13,16 +13,22 @@ class SurahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+    final verseCount = l10n.verseCount(surah.numberOfVerses);
     return QuranIndexTile(
       keyPrefix: 'surah',
       number: surah.surahNumber,
       title: surah.nameArabic,
-      subtitle: l10n.verseCount(surah.numberOfVerses),
-      semanticsLabel: l10n.surahSemantics(
-        surah.surahNumber,
-        surah.nameArabic,
-        surah.numberOfVerses,
-      ),
+      subtitle: isEnglish ? '${surah.nameEnglish} · $verseCount' : verseCount,
+      semanticsLabel: isEnglish
+          ? '${l10n.surahNumber(surah.surahNumber.toString())}, '
+                '${surah.nameArabic}, '
+                '${surah.nameEnglish}, $verseCount'
+          : l10n.surahSemantics(
+              surah.surahNumber,
+              surah.nameArabic,
+              surah.numberOfVerses,
+            ),
       onTap: onTap,
     );
   }

@@ -1,13 +1,15 @@
 import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'prayer_reminder_settings.dart';
 
 abstract class PrayerReminderScheduler {
   Future<bool> requestPermission();
+  Future<bool> synchronizeTimezone();
   Future<void> schedule(PrayerReminderSettings settings);
   Future<void> cancel();
   Future<void> snooze(PrayerReminderSettings settings);
@@ -22,16 +24,26 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
   final FlutterLocalNotificationsPlugin _notifications;
   final Future<void> Function()? _onSnoozeRequested;
   final Locale Function() _localeProvider;
+  final Future<String> Function() _localTimezoneNameProvider;
+  final DateTime Function() _nowProvider;
+  String? _configuredTimezoneName;
+  bool _timezonesInitialized = false;
   bool _initialized = false;
 
   LocalPrayerReminderScheduler({
     FlutterLocalNotificationsPlugin? notifications,
     Future<void> Function()? onSnoozeRequested,
     Locale Function()? localeProvider,
+    Future<String> Function()? localTimezoneNameProvider,
+    DateTime Function()? nowProvider,
   }) : _notifications = notifications ?? FlutterLocalNotificationsPlugin(),
        _onSnoozeRequested = onSnoozeRequested,
        _localeProvider =
-           localeProvider ?? (() => PlatformDispatcher.instance.locale);
+           localeProvider ?? (() => PlatformDispatcher.instance.locale),
+       _localTimezoneNameProvider =
+           localTimezoneNameProvider ??
+           (() async => (await FlutterTimezone.getLocalTimezone()).identifier),
+       _nowProvider = nowProvider ?? DateTime.now;
 
   @override
   Future<bool> requestPermission() async {
@@ -48,15 +60,46 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
   }
 
   @override
+  Future<bool> synchronizeTimezone() async {
+    if (!_timezonesInitialized) {
+      tz.initializeTimeZones();
+      _timezonesInitialized = true;
+    }
+
+    final timezoneName = await _localTimezoneNameProvider();
+    final changed = _configuredTimezoneName != timezoneName;
+    tz.setLocalLocation(tz.getLocation(timezoneName));
+    _configuredTimezoneName = timezoneName;
+    return changed;
+  }
+
+  @override
   Future<void> schedule(PrayerReminderSettings settings) async {
+    await synchronizeTimezone();
     await _initialize();
     await _notifications.cancel(id: _dailyReminderId);
 
     if (!settings.enabled) return;
 
-    final scheduledAt = tz.TZDateTime.from(
-      settings.nextReminderAfter(DateTime.now()),
+    final localNow = tz.TZDateTime.from(_nowProvider(), tz.local);
+    final wallClockNow = DateTime(
+      localNow.year,
+      localNow.month,
+      localNow.day,
+      localNow.hour,
+      localNow.minute,
+      localNow.second,
+      localNow.millisecond,
+      localNow.microsecond,
+    );
+    final nextReminder = settings.nextReminderAfter(wallClockNow);
+    final scheduledAt = tz.TZDateTime(
       tz.local,
+      nextReminder.year,
+      nextReminder.month,
+      nextReminder.day,
+      nextReminder.hour,
+      nextReminder.minute,
     );
     final text = _PrayerReminderNotificationText.forLocale(
       _localeProvider(),
@@ -84,9 +127,10 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
 
   @override
   Future<void> snooze(PrayerReminderSettings settings) async {
+    await synchronizeTimezone();
     await _initialize();
     final scheduledAt = tz.TZDateTime.from(
-      DateTime.now().add(Duration(minutes: settings.snoozeMinutes)),
+      _nowProvider().add(Duration(minutes: settings.snoozeMinutes)),
       tz.local,
     );
     final text = _PrayerReminderNotificationText.forLocale(_localeProvider());
@@ -105,7 +149,6 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
   Future<void> _initialize() async {
     if (_initialized) return;
 
-    tz.initializeTimeZones();
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('ic_notification'),
       iOS: DarwinInitializationSettings(),

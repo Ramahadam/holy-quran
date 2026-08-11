@@ -134,6 +134,13 @@ final prayerReminderServiceProvider = Provider<PrayerReminderService>((ref) {
   );
 });
 
+typedef PrayerReminderTimezoneSynchronizer = Future<void> Function();
+
+final prayerReminderTimezoneSynchronizerProvider =
+    Provider<PrayerReminderTimezoneSynchronizer>((ref) {
+      return ref.watch(prayerReminderServiceProvider).synchronizeTimezone;
+    });
+
 final prayerReminderSettingsProvider = FutureProvider<PrayerReminderSettings>((
   ref,
 ) {

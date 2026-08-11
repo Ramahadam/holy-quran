@@ -19,6 +19,7 @@ import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
+import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
@@ -161,6 +162,9 @@ class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   }
 
   @override
+  Future<bool> synchronizeTimezone() async => false;
+
+  @override
   Future<void> schedule(PrayerReminderSettings settings) async {
     scheduledSettings = settings;
   }
@@ -192,7 +196,16 @@ class _FakeFeedbackPromptService implements FeedbackPromptController {
 void main() {
   group('HolyQuranApp', () {
     testWidgets('renders MaterialApp', (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: HolyQuranApp()));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
+              () async {},
+            ),
+          ],
+          child: const HolyQuranApp(),
+        ),
+      );
       await tester.pump();
       expect(find.byType(MaterialApp), findsOneWidget);
     });
@@ -202,6 +215,9 @@ void main() {
         ProviderScope(
           overrides: [
             themeModeProvider.overrideWith((ref) => ThemeMode.dark),
+            prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
+              () async {},
+            ),
             initializeDataProvider.overrideWith(
               (ref) => Completer<void>().future,
             ),
@@ -213,6 +229,35 @@ void main() {
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(app.themeMode, ThemeMode.dark);
+    });
+
+    testWidgets('synchronizes the reminder timezone on launch and resume', (
+      tester,
+    ) async {
+      var synchronizationCount = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
+              () async {
+                synchronizationCount += 1;
+              },
+            ),
+            initializeDataProvider.overrideWith(
+              (ref) => Completer<void>().future,
+            ),
+          ],
+          child: const HolyQuranApp(),
+        ),
+      );
+      await tester.pump();
+      expect(synchronizationCount, 1);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+
+      expect(synchronizationCount, 2);
     });
   });
 
@@ -3032,15 +3077,13 @@ void main() {
       expect(badgeDecoration.shape, BoxShape.rectangle);
       expect(arabicName.style?.color, colors.onSurface);
       expect(
-        find.bySemanticsLabel('Surah 1, الفاتحة, 7 verses'),
+        find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'),
         findsOneWidget,
       );
       semanticsHandle.dispose();
     });
 
-    testWidgets('renders Arabic name and localized verse count', (
-      tester,
-    ) async {
+    testWidgets('adds the English meaning in English mode', (tester) async {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
@@ -3050,11 +3093,29 @@ void main() {
         ),
       );
       expect(find.text('الفاتحة'), findsOneWidget);
-      expect(find.text('The Opening'), findsNothing);
-      expect(find.text('7 verses'), findsOneWidget);
+      expect(find.text('The Opening · 7 verses'), findsOneWidget);
       expect(find.text('1'), findsOneWidget);
       await tester.tap(find.byType(SurahTile));
       expect(tapped, isTrue);
+    });
+
+    testWidgets('keeps the Surah index Arabic-only in Arabic mode', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('ar'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SurahTile(surah: _surah1, onTap: () {}),
+          ),
+        ),
+      );
+
+      expect(find.text('الفاتحة'), findsOneWidget);
+      expect(find.textContaining('The Opening'), findsNothing);
+      expect(find.text('7 آيات'), findsOneWidget);
     });
   });
 
