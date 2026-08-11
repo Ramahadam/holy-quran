@@ -1,16 +1,14 @@
 export interface Env {
   FEEDBACK_DB: D1Database;
+  TAFSIR_RATE_LIMITER: RateLimit;
+  FEEDBACK_RATE_LIMITER: RateLimit;
+  FEEDBACK_NETWORK_RATE_LIMITER: RateLimit;
   QF_CLIENT_ID: string;
   QF_CLIENT_SECRET: string;
   QF_AUTH_BASE_URL?: string;
   QF_API_BASE_URL?: string;
+  ALLOWED_ORIGINS?: string;
 }
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "content-type",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-};
 
 const defaultAuthBaseUrl = "https://oauth2.quran.foundation";
 const defaultApiBaseUrl = "https://apis.quran.foundation";
@@ -27,6 +25,7 @@ class ServiceError extends Error {
   constructor(
     message: string,
     readonly status: number,
+    readonly headers: Readonly<Record<string, string>> = {},
   ) {
     super(message);
   }
@@ -36,14 +35,46 @@ function jsonResponse(
   body: unknown,
   status = 200,
   cacheControl = "no-store",
+  headers: Readonly<Record<string, string>> = {},
 ): Response {
   return Response.json(body, {
     status,
     headers: {
-      ...corsHeaders,
       "Cache-Control": cacheControl,
+      "Referrer-Policy": "no-referrer",
+      "X-Content-Type-Options": "nosniff",
+      ...headers,
     },
   });
+}
+
+function clientRateLimitKey(request: Request): string {
+  const clientId = request.headers.get("x-client-id")?.trim().toLowerCase();
+  if (clientId && /^[a-f0-9]{32}$/.test(clientId)) {
+    return `client:${clientId}`;
+  }
+  return networkRateLimitKey(request);
+}
+
+function networkRateLimitKey(request: Request): string {
+  const connectingIp = request.headers.get("cf-connecting-ip")?.trim();
+  return `network:${connectingIp || "unknown"}`;
+}
+
+async function enforceRateLimit(
+  rateLimiter: RateLimit,
+  key: string,
+): Promise<void> {
+  // Counters are approximate and local to a Cloudflare location.
+  // https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/
+  const { success } = await rateLimiter.limit({ key });
+  if (!success) {
+    throw new ServiceError(
+      "Too many requests. Please try again shortly.",
+      429,
+      { "Retry-After": "60" },
+    );
+  }
 }
 
 function requireHttpsUrl(value: string): string {
@@ -157,41 +188,52 @@ async function quranFoundationGet(env: Env, path: string): Promise<unknown> {
   }
 }
 
-async function getSources(env: Env): Promise<Response> {
-  const payload = await quranFoundationGet(
-    env,
-    "/content/api/v4/resources/tafsirs?language=en",
-  );
-  if (!isRecord(payload) || !Array.isArray(payload.tafsirs)) {
-    throw new ServiceError("The tafsir provider returned invalid data.", 502);
-  }
-
-  const sources = payload.tafsirs.map((value) => {
-    if (
-      !isRecord(value) ||
-      typeof value.id !== "number" ||
-      typeof value.name !== "string" ||
-      (value.author_name !== null && typeof value.author_name !== "string") ||
-      typeof value.language_name !== "string" ||
-      typeof value.slug !== "string"
-    ) {
+async function getSources(
+  request: Request,
+  env: Env,
+  context?: ExecutionContext,
+): Promise<Response> {
+  return cachedTafsirResponse(request, "sources", context, async () => {
+    const payload = await quranFoundationGet(
+      env,
+      "/content/api/v4/resources/tafsirs?language=en",
+    );
+    if (!isRecord(payload) || !Array.isArray(payload.tafsirs)) {
       throw new ServiceError("The tafsir provider returned invalid data.", 502);
     }
-    return {
-      id: value.id,
-      name: value.name,
-      authorName: value.author_name ?? "",
-      languageName: value.language_name,
-      slug: value.slug,
-    };
-  });
 
-  return jsonResponse({ sources }, 200, "public, max-age=3600");
+    const sources = payload.tafsirs.map((value) => {
+      if (
+        !isRecord(value) ||
+        typeof value.id !== "number" ||
+        typeof value.name !== "string" ||
+        (value.author_name !== null && typeof value.author_name !== "string") ||
+        typeof value.language_name !== "string" ||
+        typeof value.slug !== "string"
+      ) {
+        throw new ServiceError(
+          "The tafsir provider returned invalid data.",
+          502,
+        );
+      }
+      return {
+        id: value.id,
+        name: value.name,
+        authorName: value.author_name ?? "",
+        languageName: value.language_name,
+        slug: value.slug,
+      };
+    });
+
+    return jsonResponse({ sources }, 200, "public, max-age=3600");
+  });
 }
 
 async function getAyahTafsir(
+  request: Request,
   env: Env,
   body: Record<string, unknown>,
+  context?: ExecutionContext,
 ): Promise<Response> {
   const verseKey = body.verseKey;
   const resourceId = body.resourceId;
@@ -206,42 +248,89 @@ async function getAyahTafsir(
     throw new ServiceError("Invalid ayah or tafsir source.", 400);
   }
 
-  const payload = await quranFoundationGet(
-    env,
-    `/content/api/v4/tafsirs/${resourceId}/by_ayah/${encodeURIComponent(verseKey)}`,
-  );
-  if (
-    !isRecord(payload) ||
-    !isRecord(payload.tafsir) ||
-    payload.tafsir.resource_id !== resourceId ||
-    typeof payload.tafsir.text !== "string"
-  ) {
-    throw new ServiceError("The tafsir provider returned invalid data.", 502);
-  }
+  return cachedTafsirResponse(
+    request,
+    `ayah/${resourceId}/${encodeURIComponent(verseKey)}`,
+    context,
+    async () => {
+      const payload = await quranFoundationGet(
+        env,
+        `/content/api/v4/tafsirs/${resourceId}/by_ayah/${encodeURIComponent(verseKey)}`,
+      );
+      if (
+        !isRecord(payload) ||
+        !isRecord(payload.tafsir) ||
+        payload.tafsir.resource_id !== resourceId ||
+        typeof payload.tafsir.text !== "string"
+      ) {
+        throw new ServiceError(
+          "The tafsir provider returned invalid data.",
+          502,
+        );
+      }
 
-  return jsonResponse(
-    {
-      tafsir: {
-        resourceId: payload.tafsir.resource_id,
-        text: payload.tafsir.text,
-      },
+      return jsonResponse(
+        {
+          tafsir: {
+            resourceId: payload.tafsir.resource_id,
+            text: payload.tafsir.text,
+          },
+        },
+        200,
+        "public, max-age=3600",
+      );
     },
-    200,
-    "public, max-age=3600",
   );
 }
 
-async function handleTafsir(request: Request, env: Env): Promise<Response> {
+async function cachedTafsirResponse(
+  request: Request,
+  keyPath: string,
+  context: ExecutionContext | undefined,
+  load: () => Promise<Response>,
+): Promise<Response> {
+  // Cache API writes require a GET key and can continue through waitUntil().
+  // https://developers.cloudflare.com/workers/runtime-apis/cache/
+  const cache = typeof caches === "undefined" ? undefined : caches.default;
+  if (!cache) return load();
+
+  const key = new Request(
+    new URL(`/__cache/v1/tafsir/${keyPath}`, request.url),
+    { method: "GET" },
+  );
+  const cached = await cache.match(key).catch(() => undefined);
+  if (cached) return cached;
+
+  const response = await load();
+  const cacheWrite = cache.put(key, response.clone()).catch(() => undefined);
+  if (context) {
+    context.waitUntil(cacheWrite);
+  } else {
+    await cacheWrite;
+  }
+  return response;
+}
+
+async function handleTafsir(
+  request: Request,
+  env: Env,
+  context?: ExecutionContext,
+): Promise<Response> {
   if (request.method !== "POST") {
     return jsonResponse({ error: "Method not allowed." }, 405);
   }
 
+  await enforceRateLimit(
+    env.TAFSIR_RATE_LIMITER,
+    clientRateLimitKey(request),
+  );
+
   const body = await readJsonObject(request, 2048);
   if (body.operation === "sources") {
-    return getSources(env);
+    return getSources(request, env, context);
   }
   if (body.operation === "ayah") {
-    return getAyahTafsir(env, body);
+    return getAyahTafsir(request, env, body, context);
   }
   throw new ServiceError("Invalid operation.", 400);
 }
@@ -250,6 +339,15 @@ async function handleFeedback(request: Request, env: Env): Promise<Response> {
   if (request.method !== "POST") {
     return jsonResponse({ error: "Method not allowed." }, 405);
   }
+
+  await enforceRateLimit(
+    env.FEEDBACK_RATE_LIMITER,
+    clientRateLimitKey(request),
+  );
+  await enforceRateLimit(
+    env.FEEDBACK_NETWORK_RATE_LIMITER,
+    networkRateLimitKey(request),
+  );
 
   const body = await readJsonObject(request, 4096);
   const feedbackText = body.feedback_text;
@@ -315,29 +413,86 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-async function fetchHandler(request: Request, env: Env): Promise<Response> {
+function isAllowedBrowserOrigin(request: Request, env: Env): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  return (env.ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .includes(origin);
+}
+
+function withCorsHeaders(response: Response, request: Request): Response {
+  const origin = request.headers.get("origin");
+  if (!origin) return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("Access-Control-Allow-Origin", origin);
+  const vary = headers.get("Vary");
+  headers.set("Vary", vary ? `${vary}, Origin` : "Origin");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function preflightResponse(request: Request, env: Env): Response {
+  if (!isAllowedBrowserOrigin(request, env)) {
+    return jsonResponse({ error: "Browser origin is not allowed." }, 403);
+  }
+
+  const response = new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Headers": "content-type, x-client-id",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Max-Age": "86400",
+    },
+  });
+  return withCorsHeaders(response, request);
+}
+
+async function fetchHandler(
+  request: Request,
+  env: Env,
+  context?: ExecutionContext,
+): Promise<Response> {
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    return preflightResponse(request, env);
   }
 
   const path = new URL(request.url).pathname.replace(/\/$/, "") || "/";
+  let response: Response;
   try {
     if (path === "/health" && request.method === "GET") {
-      return jsonResponse({ status: "ok" });
+      response = jsonResponse({ status: "ok" });
+    } else if (path === "/v1/tafsir") {
+      response = await handleTafsir(request, env, context);
+    } else if (path === "/v1/feedback") {
+      response = await handleFeedback(request, env);
+    } else {
+      response = jsonResponse({ error: "Not found." }, 404);
     }
-    if (path === "/v1/tafsir") {
-      return await handleTafsir(request, env);
-    }
-    if (path === "/v1/feedback") {
-      return await handleFeedback(request, env);
-    }
-    return jsonResponse({ error: "Not found." }, 404);
   } catch (error) {
     if (error instanceof ServiceError) {
-      return jsonResponse({ error: error.message }, error.status);
+      response = jsonResponse(
+        { error: error.message },
+        error.status,
+        "no-store",
+        error.headers,
+      );
+    } else {
+      response = jsonResponse(
+        { error: "The service is temporarily unavailable." },
+        500,
+      );
     }
-    return jsonResponse({ error: "The service is temporarily unavailable." }, 500);
   }
+  return isAllowedBrowserOrigin(request, env)
+    ? withCorsHeaders(response, request)
+    : response;
 }
 
 export default { fetch: fetchHandler } satisfies ExportedHandler<Env>;
