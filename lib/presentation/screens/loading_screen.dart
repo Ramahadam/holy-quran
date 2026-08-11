@@ -67,6 +67,12 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
                       context,
                     ).textTheme.bodyMedium?.copyWith(color: Colors.red),
                   ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    key: const ValueKey('quranDataRetryButton'),
+                    onPressed: () => ref.invalidate(initializeDataProvider),
+                    child: Text(context.l10n.retry),
+                  ),
                 ],
               ),
             ),

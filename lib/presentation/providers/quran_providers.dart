@@ -152,7 +152,13 @@ final prayerReminderSettingsProvider = FutureProvider<PrayerReminderSettings>((
 
 final initializeDataProvider = FutureProvider<void>((ref) async {
   final repo = ref.watch(quranRepositoryProvider);
-  await repo.loadQuranData();
+  try {
+    await repo.loadQuranData();
+  } catch (error, stackTrace) {
+    debugPrint('Quran data initialization failed: $error');
+    debugPrint('Stack trace: $stackTrace');
+    Error.throwWithStackTrace(error, stackTrace);
+  }
 });
 
 final surahListProvider = FutureProvider<List<Surah>>((ref) async {

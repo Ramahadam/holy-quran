@@ -13,10 +13,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get databaseError =>
-      'تعذر فتح قاعدة البيانات.\nيرجى إعادة تشغيل التطبيق.';
+      'تعذر فتح قاعدة البيانات.\nبيانات قراءتك المحفوظة آمنة. يرجى إعادة المحاولة.';
 
   @override
-  String get dataLoadError => 'تعذر تحميل البيانات.\nيرجى إعادة تشغيل التطبيق.';
+  String get dataLoadError => 'تعذر تحميل بيانات القرآن.\nيرجى إعادة المحاولة.';
 
   @override
   String get preparingApp => 'جارٍ إعداد رحابك الرقمية...';

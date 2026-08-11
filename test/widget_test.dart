@@ -329,7 +329,7 @@ void main() {
       );
       await tester.pump();
       await tester.pump();
-      expect(find.textContaining('Failed to load data'), findsOneWidget);
+      expect(find.textContaining('Failed to load Quran data'), findsOneWidget);
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
     });
 

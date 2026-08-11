@@ -107,13 +107,13 @@ abstract class AppLocalizations {
   /// No description provided for @databaseError.
   ///
   /// In en, this message translates to:
-  /// **'Could not open the database.\nPlease restart the app.'**
+  /// **'Could not open the database.\nYour saved reading data is safe. Please try again.'**
   String get databaseError;
 
   /// No description provided for @dataLoadError.
   ///
   /// In en, this message translates to:
-  /// **'Failed to load data.\nPlease restart the app.'**
+  /// **'Failed to load Quran data.\nPlease try again.'**
   String get dataLoadError;
 
   /// No description provided for @preparingApp.
