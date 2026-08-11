@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../data/local/isar_service.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n.dart';
 import 'providers/locale_provider.dart';
@@ -82,11 +83,42 @@ class _HolyQuranAppState extends ConsumerState<HolyQuranApp>
   }
 }
 
-class DatabaseErrorApp extends ConsumerWidget {
-  const DatabaseErrorApp({super.key});
+class DatabaseErrorApp extends ConsumerStatefulWidget {
+  final Future<void> Function()? retryDatabase;
+
+  const DatabaseErrorApp({super.key, this.retryDatabase});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DatabaseErrorApp> createState() => _DatabaseErrorAppState();
+}
+
+class _DatabaseErrorAppState extends ConsumerState<DatabaseErrorApp> {
+  bool _retrying = false;
+  bool _recovered = false;
+
+  Future<void> _retry() async {
+    if (_retrying) return;
+    setState(() => _retrying = true);
+
+    try {
+      final retryDatabase = widget.retryDatabase;
+      if (retryDatabase == null) {
+        await IsarService.getInstance();
+      } else {
+        await retryDatabase();
+      }
+      if (mounted) setState(() => _recovered = true);
+    } catch (error, stackTrace) {
+      debugPrint('Database retry failed: $error');
+      debugPrint('Stack trace: $stackTrace');
+      if (mounted) setState(() => _retrying = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_recovered) return const HolyQuranApp();
+
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(appLocaleProvider);
 
@@ -114,6 +146,17 @@ class DatabaseErrorApp extends ConsumerWidget {
                     context.l10n.databaseError,
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    key: const ValueKey('databaseRetryButton'),
+                    onPressed: _retrying ? null : _retry,
+                    child: _retrying
+                        ? const SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(context.l10n.retry),
                   ),
                 ],
               ),
