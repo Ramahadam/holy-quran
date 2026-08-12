@@ -111,6 +111,38 @@ void main() {
     expect(await database.quranDataMetadataEntitys.count(), 1);
   });
 
+  test('reads installed Quran data in canonical order', () async {
+    final repository = _repository(database, bundledAssets);
+    await repository.loadQuranData();
+
+    final surahs = await repository.getAllSurahs();
+    final surah = await repository.getSurahByNumber(1);
+    final verses = await repository.getVersesBySurah(1);
+    final pageVerses = await repository.getVersesByPage(1);
+
+    expect(await repository.isDataLoaded(), isTrue);
+    expect(surahs.first.surahNumber, 1);
+    expect(surahs.last.surahNumber, 114);
+    expect(surah?.nameEnglish, 'The Opener');
+    expect(verses.map((verse) => verse.verseNumber), [1, 2, 3, 4, 5, 6, 7]);
+    expect(pageVerses, isNotEmpty);
+    expect(
+      pageVerses,
+      orderedEquals(
+        [...pageVerses]..sort((left, right) {
+          final surahOrder = left.surahNumber.compareTo(right.surahNumber);
+          return surahOrder != 0
+              ? surahOrder
+              : left.verseNumber.compareTo(right.verseNumber);
+        }),
+      ),
+    );
+    expect((await repository.getVerseById('1:1'))?.verseId, '1:1');
+    expect(await repository.getPageForVerse('1:1'), 1);
+    expect(await repository.getStartPageForSurah(1), 1);
+    await expectLater(repository.getVersesByPage(0), throwsArgumentError);
+  });
+
   test(
     'preserves installed Quran content when an upgrade checksum fails',
     () async {
