@@ -13,8 +13,7 @@ import '../../l10n/l10n.dart';
 import '../providers/locale_provider.dart';
 import '../providers/quran_providers.dart';
 import '../providers/theme_mode_provider.dart';
-import '../widgets/juz_tile.dart';
-import '../widgets/surah_tile.dart';
+import '../widgets/quran_index.dart';
 import 'reading_screen.dart';
 
 enum _HomeMenuAction {
@@ -28,8 +27,6 @@ enum _HomeMenuAction {
 }
 
 enum _FeedbackPromptAction { notNow, giveFeedback }
-
-enum _QuranIndexSection { surahs, juz }
 
 enum _BackupPassphrasePurpose { save, share, restore }
 
@@ -46,7 +43,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _heartbeatPromptScheduled = false;
   Timer? _heartbeatPromptRefreshTimer;
-  _QuranIndexSection _indexSection = _QuranIndexSection.surahs;
 
   @override
   void dispose() {
@@ -263,54 +259,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   surahsByNumber: surahsByNumber,
                   onOpenReading: _openReadingScreen,
                 ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: SegmentedButton<_QuranIndexSection>(
-                  segments: [
-                    ButtonSegment(
-                      value: _QuranIndexSection.surahs,
-                      label: Text(l10n.surahs),
-                    ),
-                    ButtonSegment(
-                      value: _QuranIndexSection.juz,
-                      label: Text(l10n.juz),
-                    ),
-                  ],
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.resolveWith((states) {
-                      final colors = Theme.of(context).colorScheme;
-                      return states.contains(WidgetState.selected)
-                          ? colors.primaryContainer
-                          : colors.surfaceContainerLow;
-                    }),
-                    foregroundColor: WidgetStateProperty.resolveWith((states) {
-                      final colors = Theme.of(context).colorScheme;
-                      return states.contains(WidgetState.selected)
-                          ? colors.onPrimaryContainer
-                          : colors.onSurfaceVariant;
-                    }),
-                    side: WidgetStatePropertyAll(
-                      BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withValues(alpha: 0.7),
-                      ),
-                    ),
-                    textStyle: const WidgetStatePropertyAll(
-                      TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  selected: {_indexSection},
-                  showSelectedIcon: false,
-                  onSelectionChanged: (selection) {
-                    setState(() => _indexSection = selection.first);
-                  },
-                ),
-              ),
               Expanded(
-                child: _indexSection == _QuranIndexSection.surahs
-                    ? _buildSurahList(surahs)
-                    : _buildJuzList(surahsByNumber),
+                child: QuranIndex(
+                  surahs: surahs,
+                  onOpenReading: _openReadingScreen,
+                ),
               ),
             ],
           );
@@ -330,64 +283,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
     );
-  }
-
-  Widget _buildSurahList(List<Surah> surahs) {
-    if (surahs.isEmpty) {
-      return Center(child: Text(context.l10n.noSurahs));
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: surahs.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final surah = surahs[index];
-        return SurahTile(
-          surah: surah,
-          onTap: () => unawaited(_openReadingScreen(surah)),
-        );
-      },
-    );
-  }
-
-  Widget _buildJuzList(Map<int, Surah> surahsByNumber) {
-    return ref
-        .watch(juzListProvider)
-        .when(
-          data: (entries) => ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-            itemCount: entries.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              final startSurah = surahsByNumber[entry.juz.startSurahNumber]!;
-              return JuzTile(
-                juz: entry.juz,
-                startSurah: startSurah,
-                page: entry.page,
-                onTap: () => unawaited(
-                  _openReadingScreen(
-                    startSurah,
-                    initialVerseId: entry.juz.startVerseId,
-                  ),
-                ),
-              );
-            },
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                context.l10n.juzLoadError,
-                textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.red),
-              ),
-            ),
-          ),
-        );
   }
 
   void _maybeScheduleHeartbeatPrompt(AsyncValue<bool> promptAsync) {
