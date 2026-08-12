@@ -13,18 +13,9 @@ import '../../l10n/l10n.dart';
 import '../providers/locale_provider.dart';
 import '../providers/quran_providers.dart';
 import '../providers/theme_mode_provider.dart';
+import '../widgets/home_actions_menu.dart';
 import '../widgets/quran_index.dart';
 import 'reading_screen.dart';
-
-enum _HomeMenuAction {
-  switchLanguage,
-  toggleDarkMode,
-  saveBackup,
-  shareBackup,
-  restoreBackup,
-  feedback,
-  reminders,
-}
 
 enum _FeedbackPromptAction { notNow, giveFeedback }
 
@@ -60,8 +51,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final themeMode = ref.watch(themeModeProvider);
     final darkModeEnabled = themeMode == ThemeMode.dark;
     final locale = ref.watch(appLocaleProvider);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
 
     _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
@@ -80,149 +69,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
-          PopupMenuButton<_HomeMenuAction>(
-            key: const ValueKey('homeMenuButton'),
-            tooltip: l10n.menu,
-            position: PopupMenuPosition.under,
-            offset: const Offset(0, 4),
-            color: colors.surfaceContainerHigh,
-            surfaceTintColor: Colors.transparent,
-            elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(
-                color: colors.outlineVariant.withValues(alpha: 0.7),
-              ),
-            ),
-            constraints: const BoxConstraints(minWidth: 252, maxWidth: 280),
-            onSelected: (action) {
-              switch (action) {
-                case _HomeMenuAction.switchLanguage:
-                  final nextLocale = locale.languageCode == 'ar'
-                      ? const Locale('en')
-                      : const Locale('ar');
-                  unawaited(
-                    ref.read(appLocaleProvider.notifier).setLocale(nextLocale),
-                  );
-                case _HomeMenuAction.toggleDarkMode:
-                  unawaited(
-                    ref
-                        .read(themeModeProvider.notifier)
-                        .setThemeMode(
-                          darkModeEnabled ? ThemeMode.light : ThemeMode.dark,
-                        ),
-                  );
-                case _HomeMenuAction.saveBackup:
-                  _saveBackup(context);
-                case _HomeMenuAction.shareBackup:
-                  _shareBackup(context);
-                case _HomeMenuAction.restoreBackup:
-                  _restoreBackup(context);
-                case _HomeMenuAction.feedback:
-                  _showFeedbackDialog(context);
-                case _HomeMenuAction.reminders:
-                  _showPrayerReminderDialog(context);
-              }
+          HomeActionsMenu(
+            darkModeEnabled: darkModeEnabled,
+            onSwitchLanguage: () {
+              final nextLocale = locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar');
+              unawaited(
+                ref.read(appLocaleProvider.notifier).setLocale(nextLocale),
+              );
             },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: _HomeMenuAction.switchLanguage,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-language'),
-                  icon: Icons.translate_rounded,
-                  label: l10n.switchLanguage,
-                ),
-              ),
-              const PopupMenuDivider(height: 9),
-              PopupMenuItem(
-                value: _HomeMenuAction.toggleDarkMode,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-darkMode'),
-                  icon: darkModeEnabled
-                      ? Icons.dark_mode_rounded
-                      : Icons.dark_mode_outlined,
-                  label: l10n.darkMode,
-                  checked: darkModeEnabled,
-                ),
-              ),
-              const PopupMenuDivider(height: 9),
-              PopupMenuItem(
-                value: _HomeMenuAction.reminders,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-reminders'),
-                  icon: Icons.notifications_active_outlined,
-                  label: l10n.readingReminders,
-                ),
-              ),
-              PopupMenuItem(
-                value: _HomeMenuAction.feedback,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-feedback'),
-                  icon: Icons.feedback_outlined,
-                  label: l10n.sendFeedback,
-                ),
-              ),
-              const PopupMenuDivider(height: 9),
-              PopupMenuItem(
-                value: _HomeMenuAction.saveBackup,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-saveBackup'),
-                  icon: Icons.save_alt_rounded,
-                  label: l10n.saveBackupToDevice,
-                ),
-              ),
-              PopupMenuItem(
-                value: _HomeMenuAction.shareBackup,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-shareBackup'),
-                  icon: Icons.share_outlined,
-                  label: l10n.shareBackup,
-                ),
-              ),
-              PopupMenuItem(
-                value: _HomeMenuAction.restoreBackup,
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: _HomeMenuItem(
-                  rowKey: const ValueKey('homeMenu-restoreBackup'),
-                  icon: Icons.download_rounded,
-                  label: l10n.restoreBackup,
-                ),
-              ),
-            ],
-            child: SizedBox.square(
-              dimension: 48,
-              child: Center(
-                child: Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: colors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: colors.outlineVariant.withValues(alpha: 0.7),
-                    ),
+            onToggleDarkMode: () => unawaited(
+              ref
+                  .read(themeModeProvider.notifier)
+                  .setThemeMode(
+                    darkModeEnabled ? ThemeMode.light : ThemeMode.dark,
                   ),
-                  child: Icon(
-                    Icons.more_horiz_rounded,
-                    color: colors.onSurfaceVariant,
-                    size: 22,
-                  ),
-                ),
-              ),
             ),
+            onOpenReminders: () =>
+                unawaited(_showPrayerReminderDialog(context)),
+            onSendFeedback: () => unawaited(_showFeedbackDialog(context)),
+            onSaveBackup: () => unawaited(_saveBackup(context)),
+            onShareBackup: () => unawaited(_shareBackup(context)),
+            onRestoreBackup: () => unawaited(_restoreBackup(context)),
           ),
         ],
       ),
@@ -1431,56 +1300,6 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
         _submitting = false;
       });
     }
-  }
-}
-
-class _HomeMenuItem extends StatelessWidget {
-  final Key rowKey;
-  final IconData icon;
-  final String label;
-  final bool? checked;
-
-  const _HomeMenuItem({
-    required this.rowKey,
-    required this.icon,
-    required this.label,
-    this.checked,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Semantics(
-      key: rowKey,
-      checked: checked,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              Icon(icon, color: colors.primary, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              if (checked == true) ...[
-                const SizedBox(width: 12),
-                Icon(Icons.check_rounded, color: colors.primary, size: 18),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
