@@ -26,8 +26,6 @@ import '../../domain/models/verse.dart';
 import 'cloudflare_providers.dart';
 import 'locale_provider.dart';
 
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
-
 const int feedbackPromptTestDelaySeconds = int.fromEnvironment(
   'FEEDBACK_PROMPT_TEST_DELAY_SECONDS',
 );

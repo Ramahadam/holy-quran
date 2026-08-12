@@ -7,6 +7,7 @@ import '../l10n/app_localizations.dart';
 import '../l10n/l10n.dart';
 import 'providers/locale_provider.dart';
 import 'providers/quran_providers.dart';
+import 'providers/theme_mode_provider.dart';
 import 'screens/loading_screen.dart';
 import 'theme/app_theme.dart';
 
