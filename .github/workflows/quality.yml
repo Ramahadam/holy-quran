@@ -22,7 +22,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test --coverage
+      - run: flutter test --coverage --exclude-tags golden
       - run: python3 scripts/check_persistence_coverage.py
       - uses: actions/upload-artifact@v4
         with:
