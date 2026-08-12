@@ -12,6 +12,7 @@ import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 import 'package:holy_quran_app/presentation/screens/verse_detail_screen.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
+import 'package:holy_quran_app/presentation/providers/theme_mode_provider.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
 import 'package:holy_quran_app/data/repositories/reading_position_repository.dart';
 import 'package:holy_quran_app/data/feedback/feedback_prompt_service.dart';
@@ -214,7 +215,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            themeModeProvider.overrideWith((ref) => ThemeMode.dark),
+            initialThemeModeProvider.overrideWithValue(ThemeMode.dark),
             prayerReminderTimezoneSynchronizerProvider.overrideWithValue(
               () async {},
             ),
@@ -274,7 +275,9 @@ void main() {
     ) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [themeModeProvider.overrideWith((ref) => ThemeMode.dark)],
+          overrides: [
+            initialThemeModeProvider.overrideWithValue(ThemeMode.dark),
+          ],
           child: const DatabaseErrorApp(),
         ),
       );

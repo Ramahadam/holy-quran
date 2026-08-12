@@ -12,6 +12,7 @@ import '../../domain/models/surah.dart';
 import '../../l10n/l10n.dart';
 import '../providers/locale_provider.dart';
 import '../providers/quran_providers.dart';
+import '../providers/theme_mode_provider.dart';
 import '../widgets/juz_tile.dart';
 import '../widgets/surah_tile.dart';
 import 'reading_screen.dart';
@@ -108,9 +109,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ref.read(appLocaleProvider.notifier).setLocale(nextLocale),
                   );
                 case _HomeMenuAction.toggleDarkMode:
-                  ref.read(themeModeProvider.notifier).state = darkModeEnabled
-                      ? ThemeMode.light
-                      : ThemeMode.dark;
+                  unawaited(
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(
+                          darkModeEnabled ? ThemeMode.light : ThemeMode.dark,
+                        ),
+                  );
                 case _HomeMenuAction.saveBackup:
                   _saveBackup(context);
                 case _HomeMenuAction.shareBackup:
