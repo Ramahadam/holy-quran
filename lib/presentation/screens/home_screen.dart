@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/backup/quran_backup_file_operations.dart';
 import '../../data/backup/quran_backup_service.dart';
-import '../../data/feedback/anonymous_feedback_service.dart';
 import '../../data/notifications/prayer_reminder_settings.dart';
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/surah.dart';
@@ -15,6 +14,7 @@ import '../providers/quran_providers.dart';
 import '../providers/theme_mode_provider.dart';
 import '../widgets/home_actions_menu.dart';
 import '../widgets/home_dialog.dart';
+import '../widgets/home_feedback_dialog.dart';
 import '../widgets/quran_index.dart';
 import 'reading_screen.dart';
 
@@ -285,7 +285,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<bool> _showFeedbackDialog(BuildContext context) async {
     return await showDialog<bool>(
           context: context,
-          builder: (context) => _FeedbackDialog(
+          builder: (context) => HomeFeedbackDialog(
             onSubmitted: () async {
               await ref
                   .read(feedbackPromptServiceProvider)
@@ -986,155 +986,6 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
       PrayerReminderPrayer.maghrib => context.l10n.maghrib,
       PrayerReminderPrayer.isha => context.l10n.isha,
     };
-  }
-}
-
-class _FeedbackDialog extends ConsumerStatefulWidget {
-  final Future<void> Function()? onSubmitted;
-
-  const _FeedbackDialog({this.onSubmitted});
-
-  @override
-  ConsumerState<_FeedbackDialog> createState() => _FeedbackDialogState();
-}
-
-class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
-  final TextEditingController _feedbackController = TextEditingController();
-  bool _submitting = false;
-  String? _errorText;
-
-  @override
-  void dispose() {
-    _feedbackController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final colors = Theme.of(context).colorScheme;
-
-    return HomeDialog(
-      dialogKey: const ValueKey('homeDialog-feedback'),
-      headerKey: const ValueKey('homeDialogHeader-feedback'),
-      icon: Icons.feedback_outlined,
-      title: l10n.sendFeedback,
-      subtitle: l10n.feedbackSubtitle,
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _feedbackController,
-              autofocus: true,
-              minLines: 4,
-              maxLines: 6,
-              maxLength: AnonymousFeedbackService.maxLength,
-              textInputAction: TextInputAction.newline,
-              decoration: homeDialogInputDecoration(
-                context,
-                labelText: l10n.feedback,
-                hintText: l10n.feedbackHint,
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 12),
-            HomeDialogNotice(
-              noticeKey: const ValueKey('feedbackPrivacyNotice'),
-              icon: Icons.privacy_tip_outlined,
-              text: l10n.feedbackPrivacy,
-            ),
-            if (_errorText != null) ...[
-              const SizedBox(height: 12),
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  _errorText!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: colors.error),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          style: TextButton.styleFrom(minimumSize: const Size(64, 44)),
-          onPressed: _submitting
-              ? null
-              : () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
-        ),
-        if (_submitting)
-          FilledButton(
-            style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
-            onPressed: null,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox.square(
-                  dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                const SizedBox(width: 8),
-                Text(l10n.sending),
-              ],
-            ),
-          )
-        else
-          FilledButton.icon(
-            style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
-            onPressed: _submit,
-            icon: const Icon(Icons.send_rounded, size: 18),
-            label: Text(l10n.send),
-          ),
-      ],
-    );
-  }
-
-  Future<void> _submit() async {
-    setState(() {
-      _submitting = true;
-      _errorText = null;
-    });
-
-    try {
-      await ref
-          .read(anonymousFeedbackServiceProvider)
-          .submitFeedback(_feedbackController.text);
-      try {
-        await widget.onSubmitted?.call();
-      } catch (e) {
-        debugPrint('Failed to mark feedback prompt submitted: $e');
-      }
-      if (!mounted) return;
-      Navigator.of(context).pop(true);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.feedbackSent),
-          duration: const Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } on FeedbackValidationException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _errorText = e.message == 'Feedback is too long.'
-            ? context.l10n.feedbackTooLong
-            : context.l10n.feedbackRequired;
-        _submitting = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      debugPrint('Failed to submit anonymous feedback: $e');
-      setState(() {
-        _errorText = context.l10n.feedbackSendFailed;
-        _submitting = false;
-      });
-    }
   }
 }
 
