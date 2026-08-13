@@ -1,13 +1,13 @@
 part of '../screens/reading_screen.dart';
 
-const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
+const _kfgqpcHafsFontFamily = AppTheme.quranFontFamily;
 const _bismillahOpeningWord = 'بِسْمِ';
 const _bismillahAllahWord = 'ٱللَّهِ';
 const _bismillahLastWord = 'ٱلرَّحِيمِ';
 const _bismillahText = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
 const _bismillahLineHeight = 1.7;
-const _classicPageHorizontalPadding = 8.0;
+const _classicPageHorizontalPadding = 24.0;
 const _classicPageVerticalPadding = 12.0;
 const _classicVerseVerticalPadding = 4.0;
 const _classicArabicMinFontSize = 24.0;
@@ -715,6 +715,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
               textWidthBasis: TextWidthBasis.parent,
               text: TextSpan(
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                  fontFamily: _kfgqpcHafsFontFamily,
                   fontSize: fontSize,
                   fontWeight: FontWeight.w400,
                   height: _classicArabicLineHeight,

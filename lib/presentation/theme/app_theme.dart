@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  static const String quranFontFamily = 'KFGQPCHafsUthmanicScript';
+
   static const Color cream = Color(0xFFFFF9F0);
   static const Color mushafBackground = Color(0xFFFFF4CB);
   static const Color mushafPage = Color(0xFFFFFBF2);
