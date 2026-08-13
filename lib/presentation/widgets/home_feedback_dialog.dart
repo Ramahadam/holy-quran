@@ -6,6 +6,39 @@ import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import 'home_dialog.dart';
 
+enum HomeFeedbackPromptAction { notNow, giveFeedback }
+
+class HomeFeedbackPromptDialog extends StatelessWidget {
+  const HomeFeedbackPromptDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return HomeDialog(
+      dialogKey: const ValueKey('homeDialog-feedbackPrompt'),
+      headerKey: const ValueKey('homeDialogHeader-feedbackPrompt'),
+      icon: Icons.favorite_border_rounded,
+      title: context.l10n.feedbackPromptTitle,
+      subtitle: context.l10n.feedbackPromptSubtitle,
+      content: Text(context.l10n.feedbackPromptBody),
+      actions: [
+        TextButton(
+          style: TextButton.styleFrom(minimumSize: const Size(72, 44)),
+          onPressed: () =>
+              Navigator.of(context).pop(HomeFeedbackPromptAction.notNow),
+          child: Text(context.l10n.notNow),
+        ),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(minimumSize: const Size(136, 44)),
+          onPressed: () =>
+              Navigator.of(context).pop(HomeFeedbackPromptAction.giveFeedback),
+          icon: const Icon(Icons.feedback_outlined),
+          label: Text(context.l10n.giveFeedback),
+        ),
+      ],
+    );
+  }
+}
+
 class HomeFeedbackDialog extends ConsumerStatefulWidget {
   final Future<void> Function()? onSubmitted;
 

@@ -12,13 +12,10 @@ import '../providers/quran_providers.dart';
 import '../providers/theme_mode_provider.dart';
 import '../widgets/home_actions_menu.dart';
 import '../widgets/home_backup_passphrase_dialog.dart';
-import '../widgets/home_dialog.dart';
 import '../widgets/home_feedback_dialog.dart';
 import '../widgets/home_prayer_reminder_dialog.dart';
 import '../widgets/quran_index.dart';
 import 'reading_screen.dart';
-
-enum _FeedbackPromptAction { notNow, giveFeedback }
 
 typedef _OpenReading =
     Future<void> Function(Surah surah, {String? initialVerseId});
@@ -296,37 +293,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _showHeartbeatFeedbackPrompt(BuildContext context) async {
-    final action = await showDialog<_FeedbackPromptAction>(
+    final action = await showDialog<HomeFeedbackPromptAction>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => HomeDialog(
-        dialogKey: const ValueKey('homeDialog-feedbackPrompt'),
-        headerKey: const ValueKey('homeDialogHeader-feedbackPrompt'),
-        icon: Icons.favorite_border_rounded,
-        title: context.l10n.feedbackPromptTitle,
-        subtitle: context.l10n.feedbackPromptSubtitle,
-        content: Text(context.l10n.feedbackPromptBody),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(minimumSize: const Size(72, 44)),
-            onPressed: () =>
-                Navigator.of(context).pop(_FeedbackPromptAction.notNow),
-            child: Text(context.l10n.notNow),
-          ),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(minimumSize: const Size(136, 44)),
-            onPressed: () =>
-                Navigator.of(context).pop(_FeedbackPromptAction.giveFeedback),
-            icon: const Icon(Icons.feedback_outlined),
-            label: Text(context.l10n.giveFeedback),
-          ),
-        ],
-      ),
+      builder: (context) => const HomeFeedbackPromptDialog(),
     );
 
     if (!mounted || action == null) return;
 
-    if (action == _FeedbackPromptAction.notNow) {
+    if (action == HomeFeedbackPromptAction.notNow) {
       await ref.read(feedbackPromptServiceProvider).dismissPrompt();
       ref.invalidate(feedbackPromptShouldShowProvider);
       return;
