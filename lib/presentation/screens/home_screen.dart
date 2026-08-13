@@ -14,6 +14,7 @@ import '../providers/locale_provider.dart';
 import '../providers/quran_providers.dart';
 import '../providers/theme_mode_provider.dart';
 import '../widgets/home_actions_menu.dart';
+import '../widgets/home_dialog.dart';
 import '../widgets/quran_index.dart';
 import 'reading_screen.dart';
 
@@ -300,7 +301,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final action = await showDialog<_FeedbackPromptAction>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _HomeDialog(
+      builder: (context) => HomeDialog(
         dialogKey: const ValueKey('homeDialog-feedbackPrompt'),
         headerKey: const ValueKey('homeDialogHeader-feedbackPrompt'),
         icon: Icons.favorite_border_rounded,
@@ -353,172 +354,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
-}
-
-class _HomeDialog extends StatelessWidget {
-  final Key dialogKey;
-  final Key headerKey;
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Widget content;
-  final List<Widget> actions;
-
-  const _HomeDialog({
-    required this.dialogKey,
-    required this.headerKey,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.content,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return AlertDialog(
-      key: dialogKey,
-      backgroundColor: colors.surfaceContainerHigh,
-      surfaceTintColor: Colors.transparent,
-      elevation: 8,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
-      ),
-      titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      title: Row(
-        key: headerKey,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: colors.primaryContainer,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: colors.onPrimaryContainer, size: 21),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      contentPadding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      content: content,
-      actionsPadding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      actions: actions,
-    );
-  }
-}
-
-class _HomeDialogNotice extends StatelessWidget {
-  final Key noticeKey;
-  final IconData icon;
-  final String text;
-
-  const _HomeDialogNotice({
-    required this.noticeKey,
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(14),
-      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.6)),
-    );
-
-    return Material(
-      key: noticeKey,
-      color: colors.surfaceContainerLow,
-      shape: shape,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: colors.primary, size: 19),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                text,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-InputDecoration _homeDialogInputDecoration(
-  BuildContext context, {
-  required String labelText,
-  String? hintText,
-  IconData? prefixIcon,
-  bool alignLabelWithHint = false,
-}) {
-  final colors = Theme.of(context).colorScheme;
-  final borderRadius = BorderRadius.circular(14);
-
-  return InputDecoration(
-    labelText: labelText,
-    hintText: hintText,
-    alignLabelWithHint: alignLabelWithHint,
-    prefixIcon: prefixIcon == null ? null : Icon(prefixIcon, size: 20),
-    filled: true,
-    fillColor: colors.surfaceContainerLow,
-    border: OutlineInputBorder(borderRadius: borderRadius),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: borderRadius,
-      borderSide: BorderSide(
-        color: colors.outlineVariant.withValues(alpha: 0.7),
-      ),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: borderRadius,
-      borderSide: BorderSide(color: colors.primary, width: 1.5),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: borderRadius,
-      borderSide: BorderSide(color: colors.error),
-    ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderRadius: borderRadius,
-      borderSide: BorderSide(color: colors.error, width: 1.5),
-    ),
-  );
 }
 
 class _BackupPassphraseDialog extends StatefulWidget {
@@ -581,7 +416,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
       ),
     };
 
-    return _HomeDialog(
+    return HomeDialog(
       dialogKey: ValueKey('homeDialog-$keyName'),
       headerKey: ValueKey('homeDialogHeader-$keyName'),
       icon: icon,
@@ -602,7 +437,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               onSubmitted: (_) {
                 if (!confirm) _submit();
               },
-              decoration: _homeDialogInputDecoration(
+              decoration: homeDialogInputDecoration(
                 context,
                 labelText: l10n.passphrase,
                 prefixIcon: Icons.lock_outline_rounded,
@@ -615,7 +450,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
                 obscureText: true,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => _submit(),
-                decoration: _homeDialogInputDecoration(
+                decoration: homeDialogInputDecoration(
                   context,
                   labelText: l10n.confirmPassphrase,
                   prefixIcon: Icons.lock_outline_rounded,
@@ -623,7 +458,7 @@ class _BackupPassphraseDialogState extends State<_BackupPassphraseDialog> {
               ),
             ],
             const SizedBox(height: 12),
-            _HomeDialogNotice(
+            HomeDialogNotice(
               noticeKey: const ValueKey('backupProtectionNotice'),
               icon: Icons.shield_outlined,
               text: confirm
@@ -714,7 +549,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
     final colors = theme.colorScheme;
 
     return settingsAsync.when(
-      loading: () => _HomeDialog(
+      loading: () => HomeDialog(
         dialogKey: const ValueKey('homeDialog-remindersLoading'),
         headerKey: const ValueKey('homeDialogHeader-remindersLoading'),
         icon: Icons.notifications_active_outlined,
@@ -731,13 +566,13 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
         ),
         actions: [],
       ),
-      error: (_, _) => _HomeDialog(
+      error: (_, _) => HomeDialog(
         dialogKey: const ValueKey('homeDialog-remindersError'),
         headerKey: const ValueKey('homeDialogHeader-remindersError'),
         icon: Icons.notifications_off_outlined,
         title: l10n.readingReminders,
         subtitle: l10n.reminderSettingsUnavailable,
-        content: _HomeDialogNotice(
+        content: HomeDialogNotice(
           noticeKey: const ValueKey('reminderLoadErrorNotice'),
           icon: Icons.error_outline_rounded,
           text: l10n.reminderSettingsLoadFailed,
@@ -767,7 +602,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
           ),
         );
 
-        return _HomeDialog(
+        return HomeDialog(
           dialogKey: const ValueKey('homeDialog-reminders'),
           headerKey: const ValueKey('homeDialogHeader-reminders'),
           icon: Icons.notifications_active_outlined,
@@ -809,7 +644,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   isExpanded: true,
                   borderRadius: BorderRadius.circular(14),
                   icon: const Icon(Icons.expand_more_rounded),
-                  decoration: _homeDialogInputDecoration(
+                  decoration: homeDialogInputDecoration(
                     context,
                     labelText: l10n.prayer,
                     prefixIcon: Icons.mosque_outlined,
@@ -907,7 +742,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   isExpanded: true,
                   borderRadius: BorderRadius.circular(14),
                   icon: const Icon(Icons.expand_more_rounded),
-                  decoration: _homeDialogInputDecoration(
+                  decoration: homeDialogInputDecoration(
                     context,
                     labelText: l10n.reminderAfter,
                     prefixIcon: Icons.notifications_none_rounded,
@@ -938,7 +773,7 @@ class _PrayerReminderDialogState extends ConsumerState<_PrayerReminderDialog> {
                   isExpanded: true,
                   borderRadius: BorderRadius.circular(14),
                   icon: const Icon(Icons.expand_more_rounded),
-                  decoration: _homeDialogInputDecoration(
+                  decoration: homeDialogInputDecoration(
                     context,
                     labelText: l10n.snooze,
                     prefixIcon: Icons.snooze_rounded,
@@ -1179,7 +1014,7 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
     final l10n = context.l10n;
     final colors = Theme.of(context).colorScheme;
 
-    return _HomeDialog(
+    return HomeDialog(
       dialogKey: const ValueKey('homeDialog-feedback'),
       headerKey: const ValueKey('homeDialogHeader-feedback'),
       icon: Icons.feedback_outlined,
@@ -1197,7 +1032,7 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
               maxLines: 6,
               maxLength: AnonymousFeedbackService.maxLength,
               textInputAction: TextInputAction.newline,
-              decoration: _homeDialogInputDecoration(
+              decoration: homeDialogInputDecoration(
                 context,
                 labelText: l10n.feedback,
                 hintText: l10n.feedbackHint,
@@ -1205,7 +1040,7 @@ class _FeedbackDialogState extends ConsumerState<_FeedbackDialog> {
               ),
             ),
             const SizedBox(height: 12),
-            _HomeDialogNotice(
+            HomeDialogNotice(
               noticeKey: const ValueKey('feedbackPrivacyNotice'),
               icon: Icons.privacy_tip_outlined,
               text: l10n.feedbackPrivacy,
