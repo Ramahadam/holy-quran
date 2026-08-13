@@ -142,9 +142,6 @@ npx wrangler secret put QF_CLIENT_SECRET
 npm run deploy
 ```
 
-Do not put Worker secrets in `wrangler.jsonc`, Dart defines, `.env`, or committed
-files.
-
 ## Release builds
 
 After updating `version` in `pubspec.yaml` and passing the verification commands,
