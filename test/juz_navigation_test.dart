@@ -164,7 +164,10 @@ void main() {
     );
     expect(readingScreen.surah, _alBaqarah);
     expect(readingScreen.initialVerseId, '2:142');
-    expect(find.text('Page 22'), findsOneWidget);
+    final readerContext = tester.widget<Text>(
+      find.byKey(const Key('readerHeaderContext')),
+    );
+    expect(readerContext.data, contains('22'));
 
     final initialVerse = find.textContaining(
       'نص الآية 142',

@@ -1637,7 +1637,7 @@ void main() {
     });
 
     testWidgets(
-      'uses comfortable Classic typography and width on compact phones',
+      'uses the bundled Quran font for comfortable Classic typography',
       (tester) async {
         const longVerse = Verse(
           verseId: '1:3',
@@ -1675,7 +1675,7 @@ void main() {
 
         final scrollView = tester.widget<ListView>(find.byType(ListView));
         final padding = scrollView.padding as EdgeInsets;
-        expect(padding.horizontal, 16);
+        expect(padding.horizontal, 48);
 
         final richTextFinder = find.textContaining(
           'ٱلرَّحْمَـٰنِ',
@@ -1688,17 +1688,16 @@ void main() {
           (span) => span.text?.contains('٣') ?? false,
         );
         expect(richText.textAlign, TextAlign.justify);
-        expect(style?.fontFamily, isNot('KFGQPCHafsUthmanicScript'));
+        expect(style?.fontFamily, 'KFGQPCHafsUthmanicScript');
+        expect(style?.fontWeight, FontWeight.w400);
         expect(markerSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
-        expect(style?.fontSize, greaterThanOrEqualTo(24));
-        expect(style?.fontSize, lessThanOrEqualTo(30));
+        expect(style?.fontSize, closeTo(26.832, .001));
         expect(style?.height, 1.6);
-        expect(richText.textScaler.scale(style!.fontSize!), greaterThan(31));
         expect(
-          richText.textScaler.scale(style.fontSize!),
-          lessThanOrEqualTo(36),
+          richText.textScaler.scale(style!.fontSize!),
+          closeTo(32.1984, .001),
         );
-        expect(tester.getSize(richTextFinder).width, 344);
+        expect(tester.getSize(richTextFinder).width, 312);
         expect(tester.takeException(), isNull);
       },
     );
@@ -1919,7 +1918,7 @@ void main() {
       final scrollView = tester.widget<ListView>(find.byType(ListView));
       expect(scrollView.controller!.offset, 0);
       expect(find.textContaining('الٓمٓ', findRichText: true), findsOneWidget);
-      expect(find.text('Page 2'), findsOneWidget);
+      expect(find.textContaining('Page 2'), findsOneWidget);
     });
 
     testWidgets('removes embedded Classic marker glyphs', (tester) async {
@@ -1995,9 +1994,16 @@ void main() {
       expect(find.byType(PageView), findsOneWidget);
     });
 
-    testWidgets('uses a compact app bar mode switch in Classic', (
+    testWidgets('uses calm contextual reader chrome in Classic', (
       tester,
     ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(360, 640);
+      addTearDown(() {
+        tester.view.resetDevicePixelRatio();
+        tester.view.resetPhysicalSize();
+      });
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -2014,10 +2020,23 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.preferredSize.height, lessThanOrEqualTo(56));
+      final appBar = tester.widget<AppBar>(
+        find.byKey(const ValueKey('readerAppBar')),
+      );
+      expect(appBar.preferredSize.height, 68);
+      expect(appBar.backgroundColor, AppTheme.mushafPage);
       expect(find.byType(SegmentedButton<ReadingMode>), findsNothing);
+      expect(find.byKey(const ValueKey('readerHeaderSurah')), findsOneWidget);
+      expect(find.byKey(const ValueKey('readerHeaderContext')), findsOneWidget);
+      final modeSwitch = tester.widget<TextButton>(
+        find.byKey(const ValueKey('readerModeSwitch')),
+      );
+      expect(
+        modeSwitch.style?.foregroundColor?.resolve({}),
+        AppTheme.light.colorScheme.primary,
+      );
       expect(find.text('Mushaf'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('switches between Classic and Mushaf modes', (tester) async {
@@ -2627,7 +2646,7 @@ void main() {
       expect(positionRepo.savedPosition?.verseId, isNot('1:1'));
     });
 
-    testWidgets('uses native Arabic text with KFGQPC Bismillah styling', (
+    testWidgets('uses one bundled Quran font for text and Bismillah', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -2650,7 +2669,7 @@ void main() {
         find.textContaining('بِسْمِ', findRichText: true),
       );
       final textSpan = richText.text as TextSpan;
-      expect(textSpan.style?.fontFamily, isNot('KFGQPCHafsUthmanicScript'));
+      expect(textSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
       expect(
         textSpan.children?.first.style?.fontFamily,
         'KFGQPCHafsUthmanicScript',
@@ -2775,43 +2794,65 @@ void main() {
       },
     );
 
-    testWidgets('uses a compact framed Classic Surah opening', (tester) async {
-      const surah2 = Surah(
-        surahNumber: 2,
-        nameArabic: 'البقرة',
-        nameEnglish: 'The Cow',
-        numberOfVerses: 286,
-      );
-      const verse = Verse(
-        verseId: '2:1',
-        surahNumber: 2,
-        verseNumber: 1,
-        arabicText: 'الٓمٓ',
-      );
+    testWidgets(
+      'uses the approved complete Classic Surah title treatment',
+      (tester) async {
+        const surah2 = Surah(
+          surahNumber: 2,
+          nameArabic: 'البقرة',
+          nameEnglish: 'The Cow',
+          numberOfVerses: 286,
+        );
+        const verse = Verse(
+          verseId: '2:1',
+          surahNumber: 2,
+          verseNumber: 1,
+          arabicText: 'الٓمٓ',
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            startPageForSurahProvider(2).overrideWith((ref) async => 2),
-            classicVersesProvider(2).overrideWith((ref) async => [verse]),
-            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
-            surahListProvider.overrideWith((ref) async => [surah2]),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            home: const ReadingScreen(surah: surah2),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(2).overrideWith((ref) async => 2),
+              classicVersesProvider(2).overrideWith((ref) async => [verse]),
+              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+              surahListProvider.overrideWith((ref) async => [surah2]),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: const ReadingScreen(surah: surah2),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final title = find.byKey(const ValueKey('classicSurahTitle'));
-      expect(title, findsOneWidget);
-      expect(find.text('سورة البقرة'), findsOneWidget);
-      expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
-      expect(tester.getSize(title).height, lessThanOrEqualTo(56));
-    });
+        final title = find.byKey(const ValueKey('classicSurahTitle'));
+        expect(title, findsOneWidget);
+        final surahTitleFinder = find.descendant(
+          of: title,
+          matching: find.text('سورة البقرة'),
+        );
+        expect(surahTitleFinder, findsOneWidget);
+        expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
+        final surahTitle = tester.widget<Text>(surahTitleFinder);
+        expect(surahTitle.style?.fontSize, 25);
+        expect(surahTitle.style?.fontWeight, FontWeight.w600);
+        final filledDecorations = tester
+            .widgetList<DecoratedBox>(
+              find.descendant(of: title, matching: find.byType(DecoratedBox)),
+            )
+            .map((widget) => widget.decoration)
+            .whereType<BoxDecoration>()
+            .where((decoration) => decoration.color != null);
+        expect(filledDecorations, isEmpty);
+        expect(
+          find.descendant(of: title, matching: find.byType(Divider)),
+          findsNothing,
+        );
+        expect(tester.getSize(title).height, lessThanOrEqualTo(56));
+      },
+    );
 
     testWidgets('separates Al-Fatihah Bismillah from its verse paragraph', (
       tester,
@@ -2898,7 +2939,12 @@ void main() {
 
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(find.text('الجزء الثاني'), findsOneWidget);
-      expect(find.byKey(const ValueKey('classicJuzDivider-2')), findsOneWidget);
+      final juzDivider = find.byKey(const ValueKey('classicJuzDivider-2'));
+      expect(juzDivider, findsOneWidget);
+      expect(
+        find.descendant(of: juzDivider, matching: find.byType(Divider)),
+        findsNWidgets(2),
+      );
     });
 
     testWidgets('does not show Bismillah for a continuation verse in Classic', (

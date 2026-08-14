@@ -14,6 +14,7 @@ import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
 import '../widgets/mushaf_reader_chrome.dart';
 import '../widgets/mushaf_sample_page.dart';
+import '../widgets/reader_app_bar.dart';
 import 'verse_detail_screen.dart';
 
 part '../widgets/reading_classic_content.dart';
@@ -191,6 +192,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   }
 
   PreferredSizeWidget _buildAppBar() {
+    final currentModeLabel = _readingMode == ReadingMode.classic
+        ? context.l10n.classic
+        : context.l10n.mushaf;
     final targetMode = _readingMode == ReadingMode.classic
         ? ReadingMode.mushaf
         : ReadingMode.classic;
@@ -201,21 +205,13 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         ? Icons.image_outlined
         : Icons.menu_book;
 
-    return AppBar(
-      toolbarHeight: 56,
-      title: Text(
-        context.l10n.pageNumber(_currentPage),
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-      centerTitle: true,
-      actions: [
-        TextButton.icon(
-          onPressed: () => _setReadingMode(targetMode),
-          icon: Icon(targetIcon),
-          label: Text(targetLabel),
-        ),
-        const SizedBox(width: 8),
-      ],
+    return ReaderAppBar(
+      surahName: widget.surah.nameArabic,
+      contextLabel:
+          '${context.l10n.pageNumber(_currentPage)} · $currentModeLabel',
+      switchModeLabel: targetLabel,
+      switchModeIcon: targetIcon,
+      onSwitchMode: () => _setReadingMode(targetMode),
     );
   }
 
