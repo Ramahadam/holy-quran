@@ -1691,16 +1691,11 @@ void main() {
         expect(style?.fontFamily, 'KFGQPCHafsUthmanicScript');
         expect(style?.fontWeight, FontWeight.w400);
         expect(markerSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
-        expect(style?.fontSize, greaterThanOrEqualTo(24));
-        expect(style?.fontSize, lessThanOrEqualTo(30));
+        expect(style?.fontSize, closeTo(26.832, .001));
         expect(style?.height, 1.6);
         expect(
           richText.textScaler.scale(style!.fontSize!),
-          greaterThanOrEqualTo(28),
-        );
-        expect(
-          richText.textScaler.scale(style.fontSize!),
-          lessThanOrEqualTo(36),
+          closeTo(32.1984, .001),
         );
         expect(tester.getSize(richTextFinder).width, 312);
         expect(tester.takeException(), isNull);
