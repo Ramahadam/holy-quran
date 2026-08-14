@@ -553,7 +553,7 @@ class _ClassicSurahOpening extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontFamily: mushafSurahTitleFontFamily,
                   color: colorScheme.primary,
-                  fontSize: 30,
+                  fontSize: 25,
                   fontWeight: FontWeight.w600,
                   height: 1.15,
                 ),

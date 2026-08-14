@@ -2795,7 +2795,7 @@ void main() {
     );
 
     testWidgets(
-      'makes the complete Classic Surah title larger than Bismillah',
+      'uses the approved complete Classic Surah title treatment',
       (tester) async {
         const surah2 = Surah(
           surahNumber: 2,
@@ -2836,15 +2836,8 @@ void main() {
         expect(surahTitleFinder, findsOneWidget);
         expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
         final surahTitle = tester.widget<Text>(surahTitleFinder);
-        final bismillah = tester.widget<Text>(
-          find.byKey(const ValueKey('classicBismillah')),
-        );
-        final bismillahSpan = bismillah.textSpan! as TextSpan;
-        expect(surahTitle.style?.fontSize, 30);
-        expect(
-          surahTitle.style!.fontSize!,
-          greaterThan(bismillahSpan.style!.fontSize!),
-        );
+        expect(surahTitle.style?.fontSize, 25);
+        expect(surahTitle.style?.fontWeight, FontWeight.w600);
         final filledDecorations = tester
             .widgetList<DecoratedBox>(
               find.descendant(of: title, matching: find.byType(DecoratedBox)),
