@@ -2794,7 +2794,7 @@ void main() {
       },
     );
 
-    testWidgets('uses a compact framed Classic Surah opening', (tester) async {
+    testWidgets('uses a calm unboxed Classic Surah opening', (tester) async {
       const surah2 = Surah(
         surahNumber: 2,
         nameArabic: 'البقرة',
@@ -2829,7 +2829,19 @@ void main() {
       expect(title, findsOneWidget);
       expect(find.text('سورة البقرة'), findsOneWidget);
       expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
-      expect(tester.getSize(title).height, lessThanOrEqualTo(56));
+      final filledDecorations = tester
+          .widgetList<DecoratedBox>(
+            find.descendant(of: title, matching: find.byType(DecoratedBox)),
+          )
+          .map((widget) => widget.decoration)
+          .whereType<BoxDecoration>()
+          .where((decoration) => decoration.color != null);
+      expect(filledDecorations, isEmpty);
+      expect(
+        find.descendant(of: title, matching: find.byType(Divider)),
+        findsNWidgets(2),
+      );
+      expect(tester.getSize(title).height, lessThanOrEqualTo(48));
     });
 
     testWidgets('separates Al-Fatihah Bismillah from its verse paragraph', (

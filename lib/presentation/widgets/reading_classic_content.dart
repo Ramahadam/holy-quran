@@ -543,35 +543,39 @@ class _ClassicSurahOpening extends ConsumerWidget {
         children: [
           Semantics(
             header: true,
-            child: ConstrainedBox(
+            child: Padding(
               key: const ValueKey('classicSurahTitle'),
-              constraints: const BoxConstraints(maxWidth: 320),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer.withValues(alpha: 0.22),
-                  border: Border.all(
-                    color: colorScheme.primary.withValues(alpha: 0.45),
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontFamily: mushafSurahTitleFontFamily,
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      color: colorScheme.primary.withValues(alpha: 0.28),
                     ),
-                    textAlign: TextAlign.center,
-                    textDirection: TextDirection.rtl,
-                    maxLines: 1,
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      label,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontFamily: mushafSurahTitleFontFamily,
+                        color: colorScheme.primary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                      textDirection: TextDirection.rtl,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(
+                      color: colorScheme.primary.withValues(alpha: 0.28),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
