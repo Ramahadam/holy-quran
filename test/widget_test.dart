@@ -2839,7 +2839,7 @@ void main() {
       expect(filledDecorations, isEmpty);
       expect(
         find.descendant(of: title, matching: find.byType(Divider)),
-        findsNWidgets(2),
+        findsNothing,
       );
       expect(tester.getSize(title).height, lessThanOrEqualTo(48));
     });
@@ -2929,7 +2929,12 @@ void main() {
 
       expect(find.text('الجزء الأول'), findsOneWidget);
       expect(find.text('الجزء الثاني'), findsOneWidget);
-      expect(find.byKey(const ValueKey('classicJuzDivider-2')), findsOneWidget);
+      final juzDivider = find.byKey(const ValueKey('classicJuzDivider-2'));
+      expect(juzDivider, findsOneWidget);
+      expect(
+        find.descendant(of: juzDivider, matching: find.byType(Divider)),
+        findsNWidgets(2),
+      );
     });
 
     testWidgets('does not show Bismillah for a continuation verse in Classic', (

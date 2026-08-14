@@ -546,36 +546,19 @@ class _ClassicSurahOpening extends ConsumerWidget {
             child: Padding(
               key: const ValueKey('classicSurahTitle'),
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Divider(
-                      color: colorScheme.primary.withValues(alpha: 0.28),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontFamily: mushafSurahTitleFontFamily,
-                        color: colorScheme.primary,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                      textAlign: TextAlign.center,
-                      textDirection: TextDirection.rtl,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(
-                      color: colorScheme.primary.withValues(alpha: 0.28),
-                    ),
-                  ),
-                ],
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontFamily: mushafSurahTitleFontFamily,
+                  color: colorScheme.primary,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  height: 1.2,
+                ),
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
