@@ -2794,55 +2794,72 @@ void main() {
       },
     );
 
-    testWidgets('uses a calm unboxed Classic Surah opening', (tester) async {
-      const surah2 = Surah(
-        surahNumber: 2,
-        nameArabic: 'البقرة',
-        nameEnglish: 'The Cow',
-        numberOfVerses: 286,
-      );
-      const verse = Verse(
-        verseId: '2:1',
-        surahNumber: 2,
-        verseNumber: 1,
-        arabicText: 'الٓمٓ',
-      );
+    testWidgets(
+      'makes the complete Classic Surah title larger than Bismillah',
+      (tester) async {
+        const surah2 = Surah(
+          surahNumber: 2,
+          nameArabic: 'البقرة',
+          nameEnglish: 'The Cow',
+          numberOfVerses: 286,
+        );
+        const verse = Verse(
+          verseId: '2:1',
+          surahNumber: 2,
+          verseNumber: 1,
+          arabicText: 'الٓمٓ',
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            startPageForSurahProvider(2).overrideWith((ref) async => 2),
-            classicVersesProvider(2).overrideWith((ref) async => [verse]),
-            bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
-            surahListProvider.overrideWith((ref) async => [surah2]),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            home: const ReadingScreen(surah: surah2),
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(2).overrideWith((ref) async => 2),
+              classicVersesProvider(2).overrideWith((ref) async => [verse]),
+              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+              surahListProvider.overrideWith((ref) async => [surah2]),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: const ReadingScreen(surah: surah2),
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      final title = find.byKey(const ValueKey('classicSurahTitle'));
-      expect(title, findsOneWidget);
-      expect(find.text('سورة البقرة'), findsOneWidget);
-      expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
-      final filledDecorations = tester
-          .widgetList<DecoratedBox>(
-            find.descendant(of: title, matching: find.byType(DecoratedBox)),
-          )
-          .map((widget) => widget.decoration)
-          .whereType<BoxDecoration>()
-          .where((decoration) => decoration.color != null);
-      expect(filledDecorations, isEmpty);
-      expect(
-        find.descendant(of: title, matching: find.byType(Divider)),
-        findsNothing,
-      );
-      expect(tester.getSize(title).height, lessThanOrEqualTo(48));
-    });
+        final title = find.byKey(const ValueKey('classicSurahTitle'));
+        expect(title, findsOneWidget);
+        final surahTitleFinder = find.descendant(
+          of: title,
+          matching: find.text('سورة البقرة'),
+        );
+        expect(surahTitleFinder, findsOneWidget);
+        expect(find.bySemanticsLabel('سورة البقرة'), findsOneWidget);
+        final surahTitle = tester.widget<Text>(surahTitleFinder);
+        final bismillah = tester.widget<Text>(
+          find.byKey(const ValueKey('classicBismillah')),
+        );
+        final bismillahSpan = bismillah.textSpan! as TextSpan;
+        expect(surahTitle.style?.fontSize, 30);
+        expect(
+          surahTitle.style!.fontSize!,
+          greaterThan(bismillahSpan.style!.fontSize!),
+        );
+        final filledDecorations = tester
+            .widgetList<DecoratedBox>(
+              find.descendant(of: title, matching: find.byType(DecoratedBox)),
+            )
+            .map((widget) => widget.decoration)
+            .whereType<BoxDecoration>()
+            .where((decoration) => decoration.color != null);
+        expect(filledDecorations, isEmpty);
+        expect(
+          find.descendant(of: title, matching: find.byType(Divider)),
+          findsNothing,
+        );
+        expect(tester.getSize(title).height, lessThanOrEqualTo(56));
+      },
+    );
 
     testWidgets('separates Al-Fatihah Bismillah from its verse paragraph', (
       tester,

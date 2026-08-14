@@ -543,6 +543,8 @@ class _ClassicSurahOpening extends ConsumerWidget {
         children: [
           Semantics(
             header: true,
+            label: label,
+            excludeSemantics: true,
             child: Padding(
               key: const ValueKey('classicSurahTitle'),
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -551,9 +553,9 @@ class _ClassicSurahOpening extends ConsumerWidget {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontFamily: mushafSurahTitleFontFamily,
                   color: colorScheme.primary,
-                  fontSize: 22,
+                  fontSize: 30,
                   fontWeight: FontWeight.w600,
-                  height: 1.2,
+                  height: 1.15,
                 ),
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
