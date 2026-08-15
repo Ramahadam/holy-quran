@@ -68,7 +68,7 @@ const _verse112 = Verse(
   page: 604,
 );
 
-const _bismillah = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+const _bismillah = 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ';
 
 List<Verse> _surahVerses(int count) => List.generate(
   count,
@@ -1742,7 +1742,7 @@ void main() {
         verseId: '2:2',
         surahNumber: 2,
         verseNumber: 2,
-        arabicText: 'ذَٰلِكَ ٱلْكِتَـٰبُ',
+        arabicText: 'ذَٰلِكَ ٱلۡكِتَٰبُ',
         page: 2,
       );
       const surah2 = Surah(
@@ -1777,10 +1777,7 @@ void main() {
       final textSpan = richText.text as TextSpan;
 
       expect(richText.textAlign, TextAlign.justify);
-      expect(
-        textSpan.toPlainText(),
-        'الٓمٓ\u00a0١ ذَٰلِكَ ٱلْكِتَـٰبُ\u00a0٢ ',
-      );
+      expect(textSpan.toPlainText(), 'الٓمٓ\u00a0١ ذَٰلِكَ ٱلۡكِتَٰبُ\u00a0٢ ');
     });
 
     testWidgets('flows Classic ayahs continuously across ayah 24', (
@@ -1947,7 +1944,9 @@ void main() {
       expect(find.textContaining('Page 2'), findsOneWidget);
     });
 
-    testWidgets('removes embedded Classic marker glyphs', (tester) async {
+    testWidgets('preserves QPC marks and removes embedded Classic markers', (
+      tester,
+    ) async {
       const markedVerse = Verse(
         verseId: '1:3',
         surahNumber: 1,
@@ -1975,14 +1974,14 @@ void main() {
         find.textContaining('أُو', findRichText: true),
       );
       final text = (richText.text as TextSpan).toPlainText();
-      expect(text, 'أُولَـٰٓئِكَ أَنَا أُحْىِۦ أَلِيمٌ بِمَا\u00a0٣ ');
+      expect(text, 'أُو۟لَـٰٓئِكَ أَنَا۠ أُحْىِۦ أَلِيمٌۢ بِمَا\u00a0٣ ');
       expect(text, isNot(contains('۞')));
       expect(text, isNot(contains('۝')));
       expect(text, isNot(contains('ۖ')));
       expect(text, isNot(contains('ۚ')));
-      expect(text, isNot(contains('۟')));
-      expect(text, isNot(contains('۠')));
-      expect(text, isNot(contains('ۢ')));
+      expect(text, contains('۟'));
+      expect(text, contains('۠'));
+      expect(text, contains('ۢ'));
       expect(text, isNot(contains('أُو لَـٰٓئِكَ')));
     });
 
@@ -2705,12 +2704,29 @@ void main() {
     testWidgets('uses one bundled Quran font for text and Bismillah', (
       tester,
     ) async {
+      const qpcBismillahVerse = Verse(
+        verseId: '1:1',
+        surahNumber: 1,
+        verseNumber: 1,
+        arabicText: _bismillah,
+      );
+      const qpcVerse = Verse(
+        verseId: '1:2',
+        surahNumber: 1,
+        verseNumber: 2,
+        arabicText: 'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ',
+      );
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
-            versesByPageProvider(1).overrideWith((ref) async => [_verse1]),
+            classicVersesProvider(
+              1,
+            ).overrideWith((ref) async => [qpcBismillahVerse, qpcVerse]),
+            versesByPageProvider(
+              1,
+            ).overrideWith((ref) async => [qpcBismillahVerse, qpcVerse]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
           ],
           child: MaterialApp(
@@ -2721,13 +2737,17 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      final richText = tester.widget<RichText>(
-        find.textContaining('بِسْمِ', findRichText: true),
+      final bismillah = tester.widget<Text>(
+        find.byKey(const ValueKey('classicBismillah')),
       );
-      final textSpan = richText.text as TextSpan;
-      expect(textSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
+      final bismillahSpan = bismillah.textSpan! as TextSpan;
+      final verseText = tester.widget<RichText>(
+        find.textContaining('ٱلۡحَمۡدُ', findRichText: true),
+      );
+      final verseSpan = verseText.text as TextSpan;
+      expect(bismillahSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
       expect(
-        textSpan.children?.first.style?.fontFamily,
+        verseSpan.style?.fontFamily,
         'KFGQPCHafsUthmanicScript',
       );
     });
@@ -2735,11 +2755,20 @@ void main() {
     testWidgets(
       'uses the Al-Fatihah Bismillah treatment when verse data includes it',
       (tester) async {
+        const qpcBismillahVerse = Verse(
+          verseId: '1:1',
+          surahNumber: 1,
+          verseNumber: 1,
+          arabicText: _bismillah,
+        );
+
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
               startPageForSurahProvider(1).overrideWith((ref) async => 1),
-              classicVersesProvider(1).overrideWith((ref) async => [_verse1]),
+              classicVersesProvider(
+                1,
+              ).overrideWith((ref) async => [qpcBismillahVerse]),
               bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
             ],
             child: MaterialApp(
@@ -2750,13 +2779,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        final richText = tester.widget<RichText>(
-          find.textContaining('بِسْمِ', findRichText: true),
+        final bismillah = tester.widget<Text>(
+          find.byKey(const ValueKey('classicBismillah')),
         );
-        final children = (richText.text as TextSpan).children!;
-        expect(children.first.style?.color, isNull);
-        expect(children.first.style?.fontSize, 28);
-        expect(children.first.style?.height, 1.7);
+        final rootSpan = bismillah.textSpan! as TextSpan;
+        expect(rootSpan.style?.fontFamily, 'KFGQPCHafsUthmanicScript');
+        expect(rootSpan.style?.fontSize, 28);
+        expect(rootSpan.style?.height, 1.7);
       },
     );
 

@@ -1,10 +1,10 @@
 part of '../screens/reading_screen.dart';
 
 const _kfgqpcHafsFontFamily = AppTheme.quranFontFamily;
-const _bismillahOpeningWord = 'بِسْمِ';
+const _bismillahOpeningWord = 'بِسۡمِ';
 const _bismillahAllahWord = 'ٱللَّهِ';
 const _bismillahLastWord = 'ٱلرَّحِيمِ';
-const _bismillahText = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+const _bismillahText = 'بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ';
 const _bismillahFontSize = 28.0;
 const _bismillahLineHeight = 1.7;
 const _classicPageHorizontalPadding = 24.0;
@@ -19,7 +19,6 @@ const _classicAyahMarkerLineHeight = 1.0;
 final _classicEmbeddedMarkerPattern = RegExp(
   r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
 );
-final _classicInlineAnnotationPattern = RegExp(r'[ۣ۪ۭ۟۠ۡۢۤۧۨ۫۬]');
 final _whitespacePattern = RegExp(r'\s+');
 
 double _classicFontSizeForWidth(double width) =>
@@ -73,7 +72,6 @@ String _classicDisplayArabicText(Verse verse) {
 }
 
 String _normalizedClassicArabicText(Verse verse) => verse.arabicText
-    .replaceAll(_classicInlineAnnotationPattern, '')
     .replaceAll(_classicEmbeddedMarkerPattern, ' ')
     .replaceAll(_whitespacePattern, ' ')
     .trim();
@@ -491,12 +489,12 @@ class _BismillahHeader extends StatelessWidget {
           TextSpan(
             style: baseStyle,
             children: [
-              const TextSpan(text: 'بِسْمِ '),
+              const TextSpan(text: 'بِسۡمِ '),
               TextSpan(
                 text: _bismillahAllahWord,
                 style: const TextStyle(color: AppTheme.quranRed),
               ),
-              const TextSpan(text: ' ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'),
+              const TextSpan(text: ' ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ'),
             ],
           ),
           textAlign: TextAlign.center,

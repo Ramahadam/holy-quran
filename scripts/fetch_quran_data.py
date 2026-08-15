@@ -12,6 +12,9 @@ import sys
 import urllib.request
 
 
+_QPC_HAFS_AYAH_NUMBER_PATTERN = re.compile(r"\s+[٠-٩]+$")
+
+
 def fetch_json(url):
     req = urllib.request.Request(url, headers={
         'Accept': 'application/json',
@@ -24,6 +27,11 @@ def fetch_json(url):
 def strip_html(text):
     """Remove HTML tags like <sup foot_note=...>1</sup>"""
     return re.sub(r'<[^>]+>', '', text)
+
+
+def strip_qpc_hafs_ayah_number(text):
+    """Remove the endpoint's trailing ayah number; the app draws its own."""
+    return _QPC_HAFS_AYAH_NUMBER_PATTERN.sub('', text)
 
 
 def main():
@@ -39,7 +47,7 @@ def main():
 
         try:
             arabic_data = fetch_json(
-                f"https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number={surah_num}"
+                f"https://api.quran.com/api/v4/quran/verses/qpc_hafs?chapter_number={surah_num}"
             )
             trans_data = fetch_json(
                 f"https://api.quran.com/api/v4/quran/translations/20?chapter_number={surah_num}"
@@ -60,7 +68,9 @@ def main():
                     'verseId': verse_key,
                     'surahNumber': int(surah),
                     'verseNumber': int(verse_num),
-                    'arabicText': verse['text_uthmani'],
+                    'arabicText': strip_qpc_hafs_ayah_number(
+                        verse['text_qpc_hafs']
+                    ),
                     'translation': translation,
                 })
 
