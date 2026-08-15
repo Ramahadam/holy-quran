@@ -4,24 +4,24 @@ class AppTheme {
   static const String quranFontFamily = 'KFGQPCHafsUthmanicScript';
 
   // Light semantic roles.
-  static const Color appBackground = Color(0xFFFFF9F0);
-  static const Color appSurface = Color(0xFFFFFBF2);
-  static const Color readerPage = appSurface;
+  static const Color appBackground = Color(0xFFF3E9D8);
+  static const Color appSurface = Color(0xFFF8F1E5);
+  static const Color readerPage = Color(0xFFFCF6EC);
   static const Color mushafPaper = Color(0xFFFFF4CB);
-  static const Color surfaceContainer = Color(0xFFFCF6EB);
-  static const Color elevatedSurface = Color(0xFFF7EFE2);
-  static const Color highestSurface = Color(0xFFF1E7D8);
-  static const Color dimSurface = Color(0xFFF2EADF);
+  static const Color surfaceContainer = Color(0xFFF5EDDF);
+  static const Color elevatedSurface = appSurface;
+  static const Color highestSurface = Color(0xFFFBF5EA);
+  static const Color dimSurface = Color(0xFFEFE4D2);
 
   static const Color primaryAction = Color(0xFF2E7D32);
   static const Color onPrimaryAction = Color(0xFFFFFFFF);
-  static const Color selectedSurface = Color(0xFFE6F0E4);
+  static const Color selectedSurface = Color(0xFFDCE8D9);
   static const Color onSelectedSurface = Color(0xFF1C4C20);
 
   static const Color primaryText = Color(0xFF1A1A1A);
   static const Color secondaryText = Color(0xFF555555);
   static const Color controlOutline = Color(0xFF756B5C);
-  static const Color subtleDivider = Color(0xFFE8DCC8);
+  static const Color subtleDivider = Color(0xFFD9CCB8);
 
   // Quranic accents stay separate from application interaction colors.
   static const Color quranGold = Color(0xFFB8860B);
@@ -61,7 +61,7 @@ class AppTheme {
         surfaceDim: dimSurface,
         surfaceBright: appSurface,
         surfaceContainerLowest: appSurface,
-        surfaceContainerLow: appSurface,
+        surfaceContainerLow: surfaceContainer,
         surfaceContainer: surfaceContainer,
         surfaceContainerHigh: elevatedSurface,
         surfaceContainerHighest: highestSurface,

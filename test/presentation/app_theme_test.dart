@@ -12,9 +12,9 @@ void main() {
 
         expect(theme.scaffoldBackgroundColor, AppTheme.appBackground);
         expect(colors.surface, AppTheme.appSurface);
-        expect(colors.surfaceContainerLow, AppTheme.appSurface);
+        expect(colors.surfaceContainerLow, AppTheme.surfaceContainer);
         expect(colors.surfaceContainerHigh, AppTheme.elevatedSurface);
-        expect(AppTheme.readerPage, AppTheme.appSurface);
+        expect(AppTheme.readerPage, isNot(AppTheme.appSurface));
         expect(AppTheme.mushafPaper, isNot(AppTheme.appSurface));
         expect(colors.primary, AppTheme.primaryAction);
         expect(colors.onPrimary, AppTheme.onPrimaryAction);
@@ -94,6 +94,19 @@ void main() {
         );
       },
     );
+
+    test('keeps large light surfaces below near-white glare levels', () {
+      final backgroundLuminance = AppTheme.appBackground.computeLuminance();
+      final surfaceLuminance = AppTheme.appSurface.computeLuminance();
+      final containerLuminance = AppTheme.surfaceContainer.computeLuminance();
+      final readerLuminance = AppTheme.readerPage.computeLuminance();
+
+      expect(backgroundLuminance, lessThanOrEqualTo(.86));
+      expect(surfaceLuminance, lessThanOrEqualTo(.91));
+      expect(readerLuminance, lessThanOrEqualTo(.93));
+      expect(containerLuminance, lessThan(surfaceLuminance));
+      expect(backgroundLuminance, lessThan(surfaceLuminance));
+    });
 
     test('Quranic accents remain distinct and readable on the reader page', () {
       expect(AppTheme.quranGold, isNot(AppTheme.primaryAction));
