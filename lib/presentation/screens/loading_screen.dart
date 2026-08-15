@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
-import '../theme/app_theme.dart';
 import 'home_screen.dart';
 
 class LoadingScreen extends ConsumerStatefulWidget {
@@ -31,41 +30,42 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     final initState = ref.watch(initializeDataProvider);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              style: theme.textTheme.headlineLarge?.copyWith(
                 fontSize: 24,
-                color: Theme.of(context).colorScheme.primary,
+                color: colors.primary,
               ),
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 48),
             initState.when(
-              data: (_) => const Icon(
+              data: (_) => Icon(
                 Icons.check_circle_outline,
-                color: AppTheme.islamicGreen,
+                color: colors.primary,
                 size: 48,
               ),
-              loading: () =>
-                  const CircularProgressIndicator(color: AppTheme.islamicGreen),
+              loading: () => CircularProgressIndicator(color: colors.primary),
               error: (e, _) => Column(
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  Icon(Icons.error_outline, color: colors.error, size: 48),
                   const SizedBox(height: 16),
                   Text(
                     context.l10n.dataLoadError,
                     textAlign: TextAlign.center,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.error,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
@@ -79,9 +79,9 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
             const SizedBox(height: 24),
             Text(
               context.l10n.preparingApp,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontStyle: FontStyle.italic,
+              ),
             ),
           ],
         ),

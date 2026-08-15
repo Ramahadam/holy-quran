@@ -140,9 +140,9 @@ class _QuranIndexState extends ConsumerState<QuranIndex> {
               child: Text(
                 context.l10n.juzLoadError,
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ),
           ),

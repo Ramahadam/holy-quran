@@ -28,19 +28,17 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = isDark ? AppTheme.darkSurface : AppTheme.mushafPage;
-    final borderColor = isDark ? AppTheme.darkDivider : AppTheme.divider;
     final accentWash = colors.primary.withValues(alpha: isDark ? .16 : .08);
 
     return AppBar(
       key: const ValueKey('readerAppBar'),
       automaticallyImplyLeading: false,
       toolbarHeight: height,
-      backgroundColor: backgroundColor,
+      backgroundColor: colors.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      shape: Border(bottom: BorderSide(color: borderColor)),
+      shape: Border(bottom: BorderSide(color: colors.outlineVariant)),
       leadingWidth: 64,
       leading: Center(
         child: IconButton(

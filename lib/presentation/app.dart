@@ -141,7 +141,11 @@ class _DatabaseErrorAppState extends ConsumerState<DatabaseErrorApp> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 64),
+                  Icon(
+                    Icons.error_outline,
+                    color: Theme.of(context).colorScheme.error,
+                    size: 64,
+                  ),
                   const SizedBox(height: 24),
                   Text(
                     context.l10n.databaseError,

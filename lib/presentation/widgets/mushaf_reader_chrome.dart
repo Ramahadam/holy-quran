@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 
-import '../theme/app_theme.dart';
 import 'mushaf_sample_page.dart';
 
 const _mushafPageContextStripHeight = 32.0;
@@ -129,16 +128,8 @@ class _MushafPageContextStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pageContext = _mushafPageContext(pageNumber);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? AppTheme.darkSurface.withValues(alpha: .9)
-        : const Color(0xFFF7EEDB).withValues(alpha: .9);
-    final borderColor = isDark
-        ? AppTheme.darkIslamicGreenBorder.withValues(alpha: .72)
-        : const Color(0xFFB98B42).withValues(alpha: .42);
-    final textColor = isDark
-        ? AppTheme.darkTextPrimary
-        : const Color(0xFF2B2113);
+    final colors = Theme.of(context).colorScheme;
+    final backgroundColor = colors.surface.withValues(alpha: .9);
 
     return SizedBox(
       width: double.infinity,
@@ -152,7 +143,7 @@ class _MushafPageContextStrip extends StatelessWidget {
             key: const ValueKey('mushafPageContextStrip'),
             decoration: BoxDecoration(
               color: backgroundColor,
-              border: Border(bottom: BorderSide(color: borderColor)),
+              border: Border(bottom: BorderSide(color: colors.outlineVariant)),
             ),
             child: Directionality(
               textDirection: TextDirection.ltr,
@@ -173,7 +164,7 @@ class _MushafPageContextStrip extends StatelessWidget {
                             textDirection: TextDirection.rtl,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: textColor,
+                                  color: colors.onSurface,
                                   fontWeight: FontWeight.w700,
                                   height: 1,
                                 ),
@@ -194,7 +185,7 @@ class _MushafPageContextStrip extends StatelessWidget {
                             maxLines: 1,
                             textDirection: TextDirection.rtl,
                             style: TextStyle(
-                              color: textColor,
+                              color: colors.onSurface,
                               fontFamily: mushafSurahTitleFontFamily,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -224,15 +215,8 @@ class _MushafPageNumberOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? AppTheme.darkSurface.withValues(alpha: .92)
-        : const Color(0xFFF7EEDB).withValues(alpha: .92);
-    final borderColor = isDark
-        ? AppTheme.darkIslamicGreenBorder
-        : const Color(0xFFB98B42).withValues(alpha: .46);
-    final textColor = isDark
-        ? AppTheme.darkTextPrimary
-        : const Color(0xFF2B2113);
+    final colors = Theme.of(context).colorScheme;
+    final backgroundColor = colors.surface.withValues(alpha: .92);
 
     return Positioned(
       left: 0,
@@ -245,7 +229,7 @@ class _MushafPageNumberOverlay extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: borderColor),
+              border: Border.all(color: colors.outlineVariant),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isDark ? .28 : .12),
@@ -261,7 +245,7 @@ class _MushafPageNumberOverlay extends StatelessWidget {
                 key: const ValueKey('mushafPageNumberText'),
                 textDirection: TextDirection.rtl,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: textColor,
+                  color: colors.onSurface,
                   fontWeight: FontWeight.w700,
                   height: 1,
                 ),
