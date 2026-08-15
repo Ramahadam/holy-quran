@@ -284,7 +284,7 @@ void main() {
       await tester.pump();
 
       final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
-      expect(scaffold.backgroundColor, AppTheme.darkBackground);
+      expect(scaffold.backgroundColor, AppTheme.darkAppBackground);
     });
   });
 
@@ -312,6 +312,32 @@ void main() {
         findsOneWidget,
       );
       // Resolve to avoid pending-microtask assertion on teardown.
+      completer.complete();
+    });
+
+    testWidgets('uses the semantic primary action in dark loading state', (
+      tester,
+    ) async {
+      final completer = Completer<void>();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            initializeDataProvider.overrideWith((ref) => completer.future),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: ThemeMode.dark,
+            home: const LoadingScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final indicator = tester.widget<CircularProgressIndicator>(
+        find.byType(CircularProgressIndicator),
+      );
+      expect(indicator.color, AppTheme.dark.colorScheme.primary);
       completer.complete();
     });
 
@@ -403,7 +429,7 @@ void main() {
           matching: find.byType(ColoredBox),
         ),
       );
-      expect(background.color, AppTheme.darkBackground);
+      expect(background.color, AppTheme.darkAppBackground);
     });
 
     testWidgets('fits opening Mushaf page on a compact mobile viewport', (
@@ -1820,7 +1846,7 @@ void main() {
 
       final markerSpan = textSpan.children!.whereType<TextSpan>().last;
       expect(markerSpan.text, '\u00a0٣ ');
-      expect(markerSpan.style?.color, AppTheme.classicAyahMarker);
+      expect(markerSpan.style?.color, AppTheme.quranAyahMarker);
       expect(markerSpan.style?.fontWeight, FontWeight.w500);
       expect(
         markerSpan.style?.fontSize,
@@ -2024,7 +2050,7 @@ void main() {
         find.byKey(const ValueKey('readerAppBar')),
       );
       expect(appBar.preferredSize.height, 68);
-      expect(appBar.backgroundColor, AppTheme.mushafPage);
+      expect(appBar.backgroundColor, AppTheme.light.colorScheme.surface);
       expect(find.byType(SegmentedButton<ReadingMode>), findsNothing);
       expect(find.byKey(const ValueKey('readerHeaderSurah')), findsOneWidget);
       expect(find.byKey(const ValueKey('readerHeaderContext')), findsOneWidget);
@@ -2114,6 +2140,20 @@ void main() {
             .data,
         '١',
       );
+      final overlayDecoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const ValueKey('mushafPageNumberOverlay')),
+                  )
+                  .decoration
+              as BoxDecoration;
+      final overlayBorder = overlayDecoration.border! as Border;
+      final lightColors = AppTheme.light.colorScheme;
+      expect(
+        overlayDecoration.color,
+        lightColors.surface.withValues(alpha: .92),
+      );
+      expect(overlayBorder.top.color, lightColors.outlineVariant);
 
       await tester.pump(const Duration(milliseconds: 1501));
       await tester.pump();
@@ -2163,6 +2203,20 @@ void main() {
             .data,
         'الجزء الأول',
       );
+      final contextDecoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find.byKey(const ValueKey('mushafPageContextStrip')),
+                  )
+                  .decoration
+              as BoxDecoration;
+      final contextBorder = contextDecoration.border! as Border;
+      final lightColors = AppTheme.light.colorScheme;
+      expect(
+        contextDecoration.color,
+        lightColors.surface.withValues(alpha: .9),
+      );
+      expect(contextBorder.bottom.color, lightColors.outlineVariant);
 
       await tester.pump(const Duration(milliseconds: 1501));
       await tester.pump();
@@ -2466,13 +2520,15 @@ void main() {
         find.byKey(const ValueKey('mushafPageSurahText')),
       );
 
-      expect(decoration.color, AppTheme.darkSurface.withValues(alpha: .92));
-      expect(overlayText.style?.color, AppTheme.darkTextPrimary);
-      expect(
-        contextDecoration.color,
-        AppTheme.darkSurface.withValues(alpha: .9),
-      );
-      expect(contextText.style?.color, AppTheme.darkTextPrimary);
+      final darkColors = AppTheme.dark.colorScheme;
+      final overlayBorder = decoration.border! as Border;
+      final contextBorder = contextDecoration.border! as Border;
+      expect(decoration.color, darkColors.surface.withValues(alpha: .92));
+      expect(overlayText.style?.color, darkColors.onSurface);
+      expect(overlayBorder.top.color, darkColors.outlineVariant);
+      expect(contextDecoration.color, darkColors.surface.withValues(alpha: .9));
+      expect(contextText.style?.color, darkColors.onSurface);
+      expect(contextBorder.bottom.color, darkColors.outlineVariant);
     });
 
     testWidgets('saves long-pressed Mushaf verse as the last-read VerseID', (
@@ -2737,7 +2793,7 @@ void main() {
       expect(rootSpan.style?.fontSize, 28);
       expect(rootSpan.style?.height, 1.7);
       expect(allahSpan.text, 'ٱللَّهِ');
-      expect(allahSpan.style?.color, AppTheme.bismillahAllah);
+      expect(allahSpan.style?.color, AppTheme.quranRed);
 
       final verseParagraph = tester.widget<RichText>(
         find.textContaining('ٱلْحَمْدُ', findRichText: true),

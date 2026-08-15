@@ -361,9 +361,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
           child: Text(
             context.l10n.verseLoadError,
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
         ),
       ),
@@ -495,9 +495,9 @@ class _QuranPageState extends ConsumerState<_QuranPage> {
           child: Text(
             context.l10n.verseLoadError,
             textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
         ),
       ),

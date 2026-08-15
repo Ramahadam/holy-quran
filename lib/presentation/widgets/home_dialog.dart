@@ -149,9 +149,7 @@ InputDecoration homeDialogInputDecoration(
     border: OutlineInputBorder(borderRadius: borderRadius),
     enabledBorder: OutlineInputBorder(
       borderRadius: borderRadius,
-      borderSide: BorderSide(
-        color: colors.outlineVariant.withValues(alpha: 0.7),
-      ),
+      borderSide: BorderSide(color: colors.outline),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: borderRadius,

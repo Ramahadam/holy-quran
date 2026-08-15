@@ -140,9 +140,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Text(
               l10n.surahLoadError,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: Colors.red),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ),

@@ -13,8 +13,8 @@ const _referenceBasmalaTextScale = 1.16;
 const _referenceBasmalaHeightScale = 1.06;
 const _juz30BasmalaTextScale = 1.0;
 const _juz30BasmalaLineHeight = 1.72;
-const _allahHighlightColor = Color(0xFFB34437);
-const _bookmarkMarkerColor = Color(0x33B98B42);
+const _allahHighlightColor = AppTheme.quranRed;
+const _bookmarkMarkerColor = AppTheme.bookmarkHighlight;
 const _singleSlotChromeAsset =
     'assets/mushaf/chrome/quran_single_slot_centered.png';
 final Map<String, String> _normalVerseTextById = {
@@ -139,7 +139,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
     }
 
     return ColoredBox(
-      color: isDark ? AppTheme.darkBackground : AppTheme.mushafBackground,
+      color: isDark ? AppTheme.darkAppBackground : AppTheme.mushafPaper,
       child: SafeArea(
         child: SizedBox.expand(
           child: LayoutBuilder(
@@ -177,7 +177,7 @@ class _MushafSamplePageState extends State<MushafSamplePage> {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       border: isDark
-                          ? Border.all(color: AppTheme.darkDivider)
+                          ? Border.all(color: AppTheme.darkSubtleDivider)
                           : null,
                       boxShadow: isDark
                           ? [
@@ -790,7 +790,7 @@ class _MushafPageFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const DecoratedBox(
-      decoration: BoxDecoration(color: AppTheme.mushafPage),
+      decoration: BoxDecoration(color: AppTheme.readerPage),
     );
   }
 }
@@ -808,9 +808,9 @@ class _UnsupportedMushafSamplePage extends StatelessWidget {
         child: Text(
           context.l10n.invalidMushafPage(page),
           textAlign: TextAlign.center,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
       ),
     );

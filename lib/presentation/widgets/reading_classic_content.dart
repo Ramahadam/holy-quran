@@ -494,7 +494,7 @@ class _BismillahHeader extends StatelessWidget {
               const TextSpan(text: 'بِسْمِ '),
               TextSpan(
                 text: _bismillahAllahWord,
-                style: const TextStyle(color: AppTheme.bismillahAllah),
+                style: const TextStyle(color: AppTheme.quranRed),
               ),
               const TextSpan(text: ' ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ'),
             ],
@@ -740,8 +740,8 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
   List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {
     final bookmarkedColor = Theme.of(context).colorScheme.onPrimaryContainer;
     final markerColor = Theme.of(context).brightness == Brightness.light
-        ? AppTheme.classicAyahMarker
-        : AppTheme.goldAccent;
+        ? AppTheme.quranAyahMarker
+        : AppTheme.quranGold;
     final baseStyleIsBookmarked =
         widget.verses.length == 1 &&
         widget.bookmarks.contains(widget.verses.single.verseId);
@@ -815,8 +815,8 @@ class _ArabicVerse extends StatelessWidget {
           builder: (context, constraints) {
             final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
             final markerColor = Theme.of(context).brightness == Brightness.light
-                ? AppTheme.classicAyahMarker
-                : AppTheme.goldAccent;
+                ? AppTheme.quranAyahMarker
+                : AppTheme.quranGold;
             return RichText(
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.justify,
