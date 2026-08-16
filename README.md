@@ -64,7 +64,8 @@ new digest. A validation or transaction failure leaves the previously installed
 Quran content intact. Bookmarks and last-read state use separate collections
 and are preserved across Quran content upgrades.
 
-`scripts/fetch_quran_data.py` is an upstream-data fetch helper, not a complete
+`scripts/fetch_quran_data.py` fetches Quran Foundation QPC Hafs text for the
+bundled KFGQPC font. It is an upstream-data fetch helper, not a complete
 asset-release pipeline: its output still requires verified Mushaf page
 assignments. Any Quran asset update must preserve those assignments, regenerate
 `assets/quran/checksums.txt`, pass the repository upgrade tests, and pass the
@@ -119,6 +120,7 @@ npm test
 Verify the Python tooling with Python 3.12 or later:
 
 ```sh
+python3 scripts/test_fetch_quran_data.py
 python3 scripts/test_verify_madani_page_boundaries.py
 python3 scripts/test_import_mushaf_svg_coordinates.py
 ```
