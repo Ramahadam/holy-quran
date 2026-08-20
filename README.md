@@ -101,12 +101,17 @@ flutter test --coverage --exclude-tags golden
 python3 scripts/check_persistence_coverage.py
 ```
 
-Golden tests are renderer/platform sensitive and run separately on the platform
-that owns the checked-in snapshots:
+Golden tests are renderer/platform sensitive. The checked-in snapshots are
+owned by the CI environment: macOS 26 Intel with Flutter 3.38.9. To reproduce
+the required `Mushaf visual regression` check locally in that environment:
 
 ```sh
+flutter pub get
 flutter test --tags golden
 ```
+
+A mismatch fails the check and CI uploads the expected, actual, isolated-diff,
+and masked-diff images generated under `test/failures/`.
 
 Verify the Cloudflare Worker with Node.js 22 or later:
 

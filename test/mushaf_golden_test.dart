@@ -37,6 +37,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           debugShowCheckedModeBanner: false,
+          locale: const Locale('en'),
           home: Scaffold(
             body: RepaintBoundary(
               key: ValueKey('mushaf-golden-$page'),
