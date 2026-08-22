@@ -2659,11 +2659,56 @@ void main() {
       expect(positionRepo.savedPosition?.verseId, '1:1');
     });
 
-    testWidgets('saves the visible Classic verse as the last-read VerseID', (
+    testWidgets('tracks and restores the exact visible Classic verse', (
       tester,
     ) async {
       final positionRepo = _FakeReadingPositionRepository();
-      final verses = _surahVerses(40);
+      const surah2 = Surah(
+        surahNumber: 2,
+        nameArabic: 'البقرة',
+        nameEnglish: 'The Cow',
+        numberOfVerses: 3,
+      );
+      final longVerse2Text = List.filled(48, 'كلمةثانية').join(' ');
+      final longVerse5Text = List.filled(64, 'كلمةخامسة').join(' ');
+      final verses = [
+        _verse1,
+        Verse(
+          verseId: '1:2',
+          surahNumber: 1,
+          verseNumber: 2,
+          arabicText: longVerse2Text,
+          page: 1,
+        ),
+        const Verse(
+          verseId: '1:3',
+          surahNumber: 1,
+          verseNumber: 3,
+          arabicText: 'آية قصيرة',
+          page: 1,
+        ),
+        const Verse(
+          verseId: '2:1',
+          surahNumber: 2,
+          verseNumber: 1,
+          arabicText: 'الٓمٓ',
+          page: 2,
+        ),
+        Verse(
+          verseId: '2:2',
+          surahNumber: 2,
+          verseNumber: 2,
+          arabicText: longVerse5Text,
+          page: 2,
+        ),
+        const Verse(
+          verseId: '2:3',
+          surahNumber: 2,
+          verseNumber: 3,
+          arabicText: 'آية ختامية',
+          page: 2,
+        ),
+      ];
 
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(360, 640);
@@ -2672,33 +2717,96 @@ void main() {
         tester.view.resetPhysicalSize();
       });
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            readingPositionRepositoryProvider.overrideWithValue(positionRepo),
-            startPageForSurahProvider(1).overrideWith((ref) async => 1),
-            classicVersesProvider(1).overrideWith((ref) async => verses),
-            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            home: ReadingScreen(surah: _surah1),
+      Future<void> pumpReader({String? initialVerseId}) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              readingPositionRepositoryProvider.overrideWithValue(positionRepo),
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              if (initialVerseId != null)
+                pageForVerseProvider(
+                  initialVerseId,
+                ).overrideWith((ref) async => 2),
+              classicVersesProvider(1).overrideWith((ref) async => verses),
+              bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+              bookmarksBySurahProvider(2).overrideWith((ref) async => {}),
+              surahListProvider.overrideWith(
+                (ref) async => const [_surah1, surah2],
+              ),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              home: ReadingScreen(
+                surah: _surah1,
+                initialVerseId: initialVerseId,
+              ),
+            ),
           ),
-        ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      Future<void> saveWithViewportInside(String verseText) async {
+        final paragraphFinder = find.textContaining(
+          verseText,
+          findRichText: true,
+        );
+        for (
+          var attempt = 0;
+          attempt < 20 && paragraphFinder.evaluate().isEmpty;
+          attempt++
+        ) {
+          await tester.drag(find.byType(ListView), const Offset(0, -300));
+          await tester.pump();
+        }
+        expect(paragraphFinder, findsOneWidget);
+        final paragraph = tester.renderObject<RenderParagraph>(paragraphFinder);
+        final plainText = paragraph.text.toPlainText();
+        final verseStart = plainText.indexOf(verseText);
+        final verseBoxes = paragraph.getBoxesForSelection(
+          TextSelection(
+            baseOffset: verseStart,
+            extentOffset: verseStart + verseText.length,
+          ),
+        );
+        final targetLine = verseBoxes[verseBoxes.length - 2].toRect();
+        final listFinder = find.byType(ListView);
+        final viewportTop = tester.getTopLeft(listFinder).dy;
+        final targetTop = paragraph.localToGlobal(targetLine.topLeft).dy;
+        final controller = tester.widget<ListView>(listFinder).controller!;
+
+        controller.jumpTo(
+          (controller.offset + targetTop - viewportTop + 2).clamp(
+            0,
+            controller.position.maxScrollExtent,
+          ),
+        );
+        await tester.pump();
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+
+      await pumpReader();
+      await saveWithViewportInside(longVerse2Text);
+      expect(positionRepo.savedPosition?.verseId, '1:2');
+
+      positionRepo.savedPosition = null;
+      await pumpReader();
+      await saveWithViewportInside(longVerse5Text);
+      expect(positionRepo.savedPosition?.verseId, '2:2');
+
+      await pumpReader(initialVerseId: positionRepo.savedPosition!.verseId);
+      final restoredVerse = find.textContaining(
+        longVerse5Text,
+        findRichText: true,
       );
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.textContaining('آية 40', findRichText: true),
-        100,
-        scrollable: find.byType(Scrollable),
+      final viewport = tester.getRect(find.byType(SingleChildScrollView));
+      expect(restoredVerse, findsOneWidget);
+      expect(
+        tester.getTopLeft(restoredVerse).dy,
+        inInclusiveRange(viewport.top, viewport.top + viewport.height * 0.25),
       );
-
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump();
-
-      expect(positionRepo.savedPosition?.verseId, isNot('1:1'));
     });
 
     testWidgets('uses one bundled Quran font for text and Bismillah', (
