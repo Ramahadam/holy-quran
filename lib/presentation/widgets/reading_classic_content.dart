@@ -222,8 +222,11 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
   late final ScrollController _scrollController;
   late List<Verse> _verses;
   final GlobalKey _initialVerseKey = GlobalKey();
+  final GlobalKey _scrollViewKey = GlobalKey();
+  final Map<String, GlobalKey<_ClassicVerseParagraphState>> _paragraphKeys = {};
   final Set<String> _additionalBookmarks = {};
   String? _lastReportedVisibleVerseId;
+  bool _visibleVerseUpdateScheduled = false;
   bool _isLoadingAdjacentSurah = false;
 
   @override
@@ -231,7 +234,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     super.initState();
     _verses = List<Verse>.of(widget.verses);
     _scrollController = ScrollController();
-    _scrollController.addListener(_updateVisibleVerse);
+    _scrollController.addListener(_scheduleVisibleVerseUpdate);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateVisibleVerse();
     });
@@ -250,7 +253,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
 
   @override
   void dispose() {
-    _scrollController.removeListener(_updateVisibleVerse);
+    _scrollController.removeListener(_scheduleVisibleVerseUpdate);
     _scrollController.dispose();
     super.dispose();
   }
@@ -271,7 +274,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
         if (!startsAtInitialVerse && context != null) {
           await Scrollable.ensureVisible(
             context,
-            alignment: 0.1,
+            alignment: 0,
             duration: Duration.zero,
           );
         }
@@ -282,6 +285,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     final contentWidgets = _buildVerseWidgets(context, bookmarks);
     final scrollable = widget.useEagerScroll
         ? SingleChildScrollView(
+            key: _scrollViewKey,
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(
@@ -294,6 +298,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
             ),
           )
         : ListView.builder(
+            key: _scrollViewKey,
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.symmetric(
@@ -355,23 +360,34 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     }
   }
 
+  void _scheduleVisibleVerseUpdate() {
+    if (_visibleVerseUpdateScheduled) return;
+    _visibleVerseUpdateScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibleVerseUpdateScheduled = false;
+      if (mounted) _updateVisibleVerse();
+    });
+  }
+
   void _updateVisibleVerse() {
     if (!_scrollController.hasClients) return;
 
-    final maxScrollExtent = _scrollController.position.maxScrollExtent;
-    if (_verses.isEmpty || maxScrollExtent <= 0) return;
+    final scrollView = _scrollViewKey.currentContext?.findRenderObject();
+    if (_verses.isEmpty || scrollView is! RenderBox) return;
 
-    final progress = (_scrollController.offset / maxScrollExtent).clamp(
-      0.0,
-      1.0,
-    );
-    final index = (progress * (_verses.length - 1)).round().clamp(
-      0,
-      _verses.length - 1,
-    );
-    final visibleVerse = _verses[index];
+    final viewport = scrollView.localToGlobal(Offset.zero) & scrollView.size;
+    ({Verse verse, double top})? firstVisible;
+    for (final key in _paragraphKeys.values) {
+      final candidate = key.currentState?.firstVisibleVerseWithin(viewport);
+      if (candidate != null &&
+          (firstVisible == null || candidate.top < firstVisible.top)) {
+        firstVisible = candidate;
+      }
+    }
 
-    if (visibleVerse.verseId != _lastReportedVisibleVerseId) {
+    final visibleVerse = firstVisible?.verse;
+    if (visibleVerse != null &&
+        visibleVerse.verseId != _lastReportedVisibleVerseId) {
       _lastReportedVisibleVerseId = visibleVerse.verseId;
       widget.onVerseVisible?.call(visibleVerse);
     }
@@ -399,6 +415,10 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
 
       widgets.add(
         _ClassicVerseParagraph(
+          key: _paragraphKeys.putIfAbsent(
+            paragraphVerses.first.verseId,
+            () => GlobalKey<_ClassicVerseParagraphState>(),
+          ),
           verses: List<Verse>.unmodifiable(paragraphVerses),
           bookmarks: bookmarks,
           onVerseFocused: widget.onVerseFocused,
@@ -650,6 +670,7 @@ class _ClassicVerseParagraph extends StatefulWidget {
   final ValueChanged<String>? onVerseFocused;
 
   const _ClassicVerseParagraph({
+    super.key,
     required this.verses,
     required this.bookmarks,
     this.onVerseFocused,
@@ -661,6 +682,14 @@ class _ClassicVerseParagraph extends StatefulWidget {
 
 class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
   final Map<String, LongPressGestureRecognizer> _recognizers = {};
+  final GlobalKey _richTextKey = GlobalKey();
+  late List<int> _verseTextEnds;
+
+  @override
+  void initState() {
+    super.initState();
+    _verseTextEnds = _calculateVerseTextEnds();
+  }
 
   @override
   void didUpdateWidget(covariant _ClassicVerseParagraph oldWidget) {
@@ -668,6 +697,9 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
     if (oldWidget.verses != widget.verses ||
         oldWidget.onVerseFocused != widget.onVerseFocused) {
       _disposeRecognizers();
+    }
+    if (oldWidget.verses != widget.verses) {
+      _verseTextEnds = _calculateVerseTextEnds();
     }
   }
 
@@ -696,6 +728,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
           builder: (context, constraints) {
             final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
             return RichText(
+              key: _richTextKey,
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.justify,
               textScaler: MediaQuery.textScalerOf(context),
@@ -733,6 +766,55 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
       return Theme.of(context).colorScheme.onPrimaryContainer;
     }
     return Theme.of(context).textTheme.headlineLarge?.color;
+  }
+
+  ({Verse verse, double top})? firstVisibleVerseWithin(Rect viewport) {
+    final paragraph = _richTextKey.currentContext?.findRenderObject();
+    if (paragraph is! RenderParagraph) return null;
+
+    final paragraphOrigin = paragraph.localToGlobal(Offset.zero);
+    final paragraphBounds = paragraphOrigin & paragraph.size;
+    if (paragraph.size.isEmpty || !paragraphBounds.overlaps(viewport)) {
+      return null;
+    }
+
+    final localTop = (viewport.top - paragraphOrigin.dy).clamp(
+      0.0,
+      paragraph.size.height - 1,
+    );
+    // Classic text flows right-to-left, so the right edge resolves the first
+    // readable text position on the top visible line.
+    final textPosition = paragraph.getPositionForOffset(
+      Offset(paragraph.size.width, localTop),
+    );
+
+    var lowerBound = 0;
+    var upperBound = _verseTextEnds.length;
+    while (lowerBound < upperBound) {
+      final middle = (lowerBound + upperBound) >> 1;
+      if (textPosition.offset < _verseTextEnds[middle]) {
+        upperBound = middle;
+      } else {
+        lowerBound = middle + 1;
+      }
+    }
+    final verseIndex = lowerBound.clamp(0, widget.verses.length - 1);
+    final visibleTop = paragraphBounds.top < viewport.top
+        ? viewport.top
+        : paragraphBounds.top;
+    return (verse: widget.verses[verseIndex], top: visibleTop);
+  }
+
+  List<int> _calculateVerseTextEnds() {
+    var textEnd = 0;
+    final verseTextEnds = <int>[];
+    for (final verse in widget.verses) {
+      textEnd +=
+          _classicDisplayArabicText(verse).length +
+          '\u00a0${_toArabicNumeral(verse.verseNumber)} '.length;
+      verseTextEnds.add(textEnd);
+    }
+    return verseTextEnds;
   }
 
   List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {

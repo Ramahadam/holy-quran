@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qcf_quran/qcf_quran.dart';
@@ -348,7 +349,9 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
               return;
             }
             _currentPageFirstVerseId = verse.verseId;
-            if (verse.page != _currentPage) {
+            if (verse.page >= 1 &&
+                verse.page <= _totalPages &&
+                verse.page != _currentPage) {
               setState(() => _currentPage = verse.page);
             }
           },
