@@ -52,11 +52,41 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
-    final granted = await android?.requestNotificationsPermission();
-    if (granted == false) return false;
+    if (android != null) {
+      final granted = await android.requestNotificationsPermission();
+      if (granted == false) return false;
 
-    final exactAlarmsGranted = await android?.requestExactAlarmsPermission();
-    return exactAlarmsGranted ?? true;
+      final exactAlarmsGranted = await android.requestExactAlarmsPermission();
+      return exactAlarmsGranted ?? true;
+    }
+
+    final ios = _notifications
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    if (ios != null) {
+      return await ios.requestPermissions(
+            alert: true,
+            sound: true,
+            badge: true,
+          ) ??
+          false;
+    }
+
+    final macos = _notifications
+        .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin
+        >();
+    if (macos != null) {
+      return await macos.requestPermissions(
+            alert: true,
+            sound: true,
+            badge: true,
+          ) ??
+          false;
+    }
+
+    return true;
   }
 
   @override
@@ -149,10 +179,15 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
   Future<void> _initialize() async {
     if (_initialized) return;
 
+    const darwinSettings = DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestSoundPermission: false,
+      requestBadgePermission: false,
+    );
     const initializationSettings = InitializationSettings(
       android: AndroidInitializationSettings('ic_notification'),
-      iOS: DarwinInitializationSettings(),
-      macOS: DarwinInitializationSettings(),
+      iOS: darwinSettings,
+      macOS: darwinSettings,
     );
 
     await _notifications.initialize(
