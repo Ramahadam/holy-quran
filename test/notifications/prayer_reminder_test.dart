@@ -116,7 +116,7 @@ void main() {
     });
 
     test(
-      'requests notification and exact alarm permissions on Android',
+      'returns true when Android permissions are already authorized',
       () async {
         final scheduler = LocalPrayerReminderScheduler(
           localTimezoneNameProvider: () async => 'Etc/UTC',
@@ -135,6 +135,77 @@ void main() {
         );
       },
     );
+
+    test('stops when Android notification permission is denied', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (methodCall) async {
+            calls.add(methodCall);
+            return switch (methodCall.method) {
+              'initialize' => true,
+              'requestNotificationsPermission' => false,
+              _ => null,
+            };
+          });
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Etc/UTC',
+      );
+
+      final granted = await scheduler.requestPermission();
+
+      expect(granted, isFalse);
+      expect(
+        calls.map((call) => call.method),
+        isNot(contains('requestExactAlarmsPermission')),
+      );
+    });
+
+    test(
+      'returns false when the Android exact alarm permission flow is cancelled',
+      () async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, (methodCall) async {
+              calls.add(methodCall);
+              return switch (methodCall.method) {
+                'initialize' => true,
+                'requestNotificationsPermission' => true,
+                'requestExactAlarmsPermission' => false,
+                _ => null,
+              };
+            });
+        final scheduler = LocalPrayerReminderScheduler(
+          localTimezoneNameProvider: () async => 'Etc/UTC',
+        );
+
+        final granted = await scheduler.requestPermission();
+
+        expect(granted, isFalse);
+      },
+    );
+
+    test('returns the iOS notification permission result', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      IOSFlutterLocalNotificationsPlugin.registerWith();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (methodCall) async {
+            calls.add(methodCall);
+            return switch (methodCall.method) {
+              'initialize' => true,
+              'requestPermissions' => false,
+              _ => null,
+            };
+          });
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Etc/UTC',
+      );
+
+      final granted = await scheduler.requestPermission();
+
+      expect(granted, isFalse);
+      expect(
+        calls.map((call) => call.method),
+        containsAllInOrder(['initialize', 'requestPermissions']),
+      );
+    });
 
     test(
       'schedules daily reminders as exact allow-while-idle alarms',
@@ -312,21 +383,79 @@ void main() {
       },
     );
 
-    test('saves but does not schedule when permission is denied', () async {
+    test(
+      'keeps reminders disabled and cancels pending alarms when permission is denied',
+      () async {
+        final store = _FakePrayerReminderSettingsStore();
+        final scheduler = _FakePrayerReminderScheduler(
+          permissionGranted: false,
+        );
+        final service = PrayerReminderService(
+          settingsStore: store,
+          scheduler: scheduler,
+        );
+        final settings = PrayerReminderSettings.defaults.copyWith(
+          enabled: true,
+        );
+
+        final saved = await service.saveSettings(settings);
+
+        expect(saved, isFalse);
+        expect(store.saved?.enabled, isFalse);
+        expect(scheduler.permissionRequests, 1);
+        expect(scheduler.scheduled, isNull);
+        expect(scheduler.cancelCount, 1);
+      },
+    );
+
+    test(
+      'does not schedule after restart when the enable permission flow failed',
+      () async {
+        final store = _FakePrayerReminderSettingsStore();
+        final deniedScheduler = _FakePrayerReminderScheduler(
+          permissionGranted: false,
+        );
+        final enabledSettings = PrayerReminderSettings.defaults.copyWith(
+          enabled: true,
+        );
+
+        await PrayerReminderService(
+          settingsStore: store,
+          scheduler: deniedScheduler,
+        ).saveSettings(enabledSettings);
+        final restartScheduler = _FakePrayerReminderScheduler(
+          permissionGranted: true,
+          timezoneChanged: true,
+        );
+        await PrayerReminderService(
+          settingsStore: store,
+          scheduler: restartScheduler,
+        ).synchronizeTimezone();
+
+        expect(store.loaded.enabled, isFalse);
+        expect(restartScheduler.scheduled, isNull);
+      },
+    );
+
+    test('allows enabling after permission is later granted', () async {
       final store = _FakePrayerReminderSettingsStore();
-      final scheduler = _FakePrayerReminderScheduler(permissionGranted: false);
-      final service = PrayerReminderService(
-        settingsStore: store,
-        scheduler: scheduler,
-      );
       final settings = PrayerReminderSettings.defaults.copyWith(enabled: true);
+      await PrayerReminderService(
+        settingsStore: store,
+        scheduler: _FakePrayerReminderScheduler(permissionGranted: false),
+      ).saveSettings(settings);
+      final grantedScheduler = _FakePrayerReminderScheduler(
+        permissionGranted: true,
+      );
 
-      final saved = await service.saveSettings(settings);
+      final saved = await PrayerReminderService(
+        settingsStore: store,
+        scheduler: grantedScheduler,
+      ).saveSettings(settings);
 
-      expect(saved, isFalse);
-      expect(store.saved, settings);
-      expect(scheduler.permissionRequests, 1);
-      expect(scheduler.scheduled, isNull);
+      expect(saved, isTrue);
+      expect(store.loaded.enabled, isTrue);
+      expect(grantedScheduler.scheduled, settings);
     });
 
     test('cancels scheduled notifications when disabled', () async {

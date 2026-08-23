@@ -23,16 +23,20 @@ class PrayerReminderService {
   }
 
   Future<bool> saveSettings(PrayerReminderSettings settings) async {
-    await _settingsStore.save(settings);
-
     if (!settings.enabled) {
+      await _settingsStore.save(settings);
       await _scheduler.cancel();
       return true;
     }
 
     final granted = await _scheduler.requestPermission();
-    if (!granted) return false;
+    if (!granted) {
+      await _settingsStore.save(settings.copyWith(enabled: false));
+      await _scheduler.cancel();
+      return false;
+    }
 
+    await _settingsStore.save(settings);
     await _scheduler.schedule(settings);
     return true;
   }
