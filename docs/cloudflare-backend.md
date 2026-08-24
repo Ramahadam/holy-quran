@@ -32,14 +32,16 @@ the header fall back to Cloudflare's connecting IP for rate limiting.
 Worker rate limits are:
 
 - Tafsir: 120 requests per installation per 60 seconds.
+- Tafsir network ceiling: 1,200 requests per connecting IP per 60 seconds.
 - Feedback: 3 submissions per installation per 60 seconds.
 - Feedback network ceiling: 30 submissions per connecting IP per 60 seconds.
 
 Exceeded limits return HTTP 429 with `Retry-After: 60`. Cloudflare rate-limit
 counters are approximate and local to each Cloudflare location. The looser
-network ceiling supplements the installation limit so rotating client IDs does
-not bypass feedback protection, while reducing false positives on shared
-mobile networks.
+network ceilings supplement the installation limits so rotating client IDs
+does not bypass Tafsir or feedback protection, while reducing false positives
+on shared mobile networks. Network identity is used only as an in-memory rate
+limit key and is not written to feedback or application records.
 
 Successful tafsir source and ayah responses are stored for one hour in the
 Cloudflare Cache API under deterministic synthetic GET keys. Cache entries are
