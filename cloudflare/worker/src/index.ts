@@ -1,6 +1,7 @@
 export interface Env {
   FEEDBACK_DB: D1Database;
   TAFSIR_RATE_LIMITER: RateLimit;
+  TAFSIR_NETWORK_RATE_LIMITER: RateLimit;
   FEEDBACK_RATE_LIMITER: RateLimit;
   FEEDBACK_NETWORK_RATE_LIMITER: RateLimit;
   QF_CLIENT_ID: string;
@@ -323,6 +324,10 @@ async function handleTafsir(
   await enforceRateLimit(
     env.TAFSIR_RATE_LIMITER,
     clientRateLimitKey(request),
+  );
+  await enforceRateLimit(
+    env.TAFSIR_NETWORK_RATE_LIMITER,
+    networkRateLimitKey(request),
   );
 
   const body = await readJsonObject(request, 2048);

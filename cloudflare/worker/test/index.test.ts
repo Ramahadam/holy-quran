@@ -63,6 +63,7 @@ function baseEnv(
   database = new FakeDatabase(),
   options: {
     tafsirRateLimit?: FakeRateLimit;
+    tafsirNetworkRateLimit?: FakeRateLimit;
     feedbackRateLimit?: FakeRateLimit;
     feedbackNetworkRateLimit?: FakeRateLimit;
     allowedOrigins?: string;
@@ -74,6 +75,8 @@ function baseEnv(
     QF_CLIENT_ID: `client-id-${clientSequence}`,
     QF_CLIENT_SECRET: "client-secret",
     TAFSIR_RATE_LIMITER: options.tafsirRateLimit ?? new FakeRateLimit(),
+    TAFSIR_NETWORK_RATE_LIMITER:
+      options.tafsirNetworkRateLimit ?? new FakeRateLimit(),
     FEEDBACK_RATE_LIMITER: options.feedbackRateLimit ?? new FakeRateLimit(),
     FEEDBACK_NETWORK_RATE_LIMITER:
       options.feedbackNetworkRateLimit ?? new FakeRateLimit(),
@@ -191,6 +194,8 @@ describe("feedback", () => {
 
 describe("tafsir", () => {
   it("returns normalized tafsir sources", async () => {
+    const tafsirRateLimit = new FakeRateLimit();
+    const tafsirNetworkRateLimit = new FakeRateLimit();
     const upstreamFetch = vi
       .fn()
       .mockResolvedValueOnce(
@@ -219,15 +224,17 @@ describe("tafsir", () => {
     vi.stubGlobal("fetch", upstreamFetch);
 
     const response = await worker.fetch(
-      new Request("https://example.com/v1/tafsir", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ operation: "sources" }),
-      }),
-      baseEnv(),
+      tafsirRequest({ operation: "sources" }),
+      baseEnv(undefined, { tafsirRateLimit, tafsirNetworkRateLimit }),
     );
 
     expect(response.status).toBe(200);
+    expect(tafsirRateLimit.limit).toHaveBeenCalledWith({
+      key: "client:0123456789abcdef0123456789abcdef",
+    });
+    expect(tafsirNetworkRateLimit.limit).toHaveBeenCalledWith({
+      key: "network:203.0.113.10",
+    });
     expect(await response.json()).toEqual({
       sources: [
         {
@@ -288,6 +295,70 @@ describe("tafsir", () => {
     expect(upstreamFetch).not.toHaveBeenCalled();
     expect(tafsirRateLimit.limit).toHaveBeenCalledWith({
       key: "client:0123456789abcdef0123456789abcdef",
+    });
+  });
+
+  it("returns the same retry guidance when the network limit is exceeded", async () => {
+    const upstreamFetch = vi.fn();
+    vi.stubGlobal("fetch", upstreamFetch);
+    const tafsirNetworkRateLimit = new FakeRateLimit(false);
+
+    const response = await worker.fetch(
+      tafsirRequest({ operation: "sources" }),
+      baseEnv(undefined, { tafsirNetworkRateLimit }),
+    );
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBe("60");
+    expect(await response.json()).toEqual({
+      error: "Too many requests. Please try again shortly.",
+    });
+    expect(upstreamFetch).not.toHaveBeenCalled();
+    expect(tafsirNetworkRateLimit.limit).toHaveBeenCalledWith({
+      key: "network:203.0.113.10",
+    });
+  });
+
+  it("cannot bypass the network limit by rotating client identifiers", async () => {
+    const tafsirRateLimit = new FakeRateLimit();
+    const tafsirNetworkRateLimit = new FakeRateLimit();
+    tafsirNetworkRateLimit.limit
+      .mockResolvedValueOnce({ success: true })
+      .mockResolvedValueOnce({ success: false });
+    const env = baseEnv(undefined, {
+      tafsirRateLimit,
+      tafsirNetworkRateLimit,
+    });
+
+    const first = await worker.fetch(
+      tafsirRequest(
+        { operation: "invalid" },
+        "11111111111111111111111111111111",
+      ),
+      env,
+    );
+    const second = await worker.fetch(
+      tafsirRequest(
+        { operation: "invalid" },
+        "22222222222222222222222222222222",
+      ),
+      env,
+    );
+
+    expect(first.status).toBe(400);
+    expect(second.status).toBe(429);
+    expect(tafsirRateLimit.limit).toHaveBeenNthCalledWith(1, {
+      key: "client:11111111111111111111111111111111",
+    });
+    expect(tafsirRateLimit.limit).toHaveBeenNthCalledWith(2, {
+      key: "client:22222222222222222222222222222222",
+    });
+    expect(tafsirNetworkRateLimit.limit).toHaveBeenCalledTimes(2);
+    expect(tafsirNetworkRateLimit.limit).toHaveBeenNthCalledWith(1, {
+      key: "network:203.0.113.10",
+    });
+    expect(tafsirNetworkRateLimit.limit).toHaveBeenNthCalledWith(2, {
+      key: "network:203.0.113.10",
     });
   });
 
@@ -466,10 +537,13 @@ describe("routing", () => {
   });
 });
 
-function tafsirRequest(body: Record<string, unknown>) {
+function tafsirRequest(
+  body: Record<string, unknown>,
+  clientId = mobileClientHeaders["x-client-id"],
+) {
   return new Request("https://example.com/v1/tafsir", {
     method: "POST",
-    headers: mobileClientHeaders,
+    headers: { ...mobileClientHeaders, "x-client-id": clientId },
     body: JSON.stringify(body),
   });
 }
