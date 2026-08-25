@@ -59,6 +59,14 @@ class PlatformBackupFileOperations implements BackupFileOperations {
     if (await file.length() > maximumBytes) {
       throw const FormatException('Backup file exceeds the allowed size.');
     }
-    return file.readAsBytes();
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in file.openRead(0, maximumBytes + 1)) {
+      bytes.add(chunk);
+    }
+    final contents = bytes.takeBytes();
+    if (contents.length > maximumBytes) {
+      throw const FormatException('Backup file exceeds the allowed size.');
+    }
+    return contents;
   }
 }
