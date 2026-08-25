@@ -13,9 +13,11 @@ import 'package:holy_quran_app/data/local/entities/surah_entity.dart';
 import 'package:holy_quran_app/data/local/entities/verse_entity.dart';
 import 'package:holy_quran_app/data/local/isar_service.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository_impl.dart';
+import 'package:holy_quran_app/data/repositories/quran_repository.dart';
 import 'package:holy_quran_app/data/repositories/reading_position_repository_impl.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
+import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:isar/isar.dart';
 
 void main() {
@@ -125,6 +127,7 @@ void main() {
       final service = QuranBackupService(
         bookmarkRepository: bookmarkRepository,
         readingPositionRepository: readingPositionRepository,
+        quranRepository: _FakeQuranRepository(),
         codec: codec,
       );
 
@@ -170,6 +173,7 @@ void main() {
     final service = QuranBackupService(
       bookmarkRepository: bookmarkRepository,
       readingPositionRepository: readingPositionRepository,
+      quranRepository: _FakeQuranRepository(),
       codec: _testCodec(),
     );
 
@@ -181,6 +185,24 @@ void main() {
     expect((await bookmarkRepository.getAllBookmarks()).single.verseId, '1:1');
     expect((await readingPositionRepository.getLastPosition())?.verseId, '1:7');
   });
+}
+
+class _FakeQuranRepository extends Fake implements QuranRepository {
+  @override
+  Future<List<Surah>> getAllSurahs() async => const [
+    Surah(
+      surahNumber: 1,
+      nameArabic: 'الفاتحة',
+      nameEnglish: 'Al-Fatihah',
+      numberOfVerses: 7,
+    ),
+    Surah(
+      surahNumber: 2,
+      nameArabic: 'البقرة',
+      nameEnglish: 'Al-Baqarah',
+      numberOfVerses: 286,
+    ),
+  ];
 }
 
 QuranBackupCodec _testCodec() {

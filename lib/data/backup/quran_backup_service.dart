@@ -1,6 +1,7 @@
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/reading_position.dart';
 import '../repositories/bookmark_repository.dart';
+import '../repositories/quran_repository.dart';
 import '../repositories/reading_position_repository.dart';
 import 'quran_backup_codec.dart';
 import 'quran_backup_limits.dart';
@@ -24,11 +25,13 @@ class BackupRestoreException implements Exception {
 class QuranBackupService {
   final BookmarkRepository bookmarkRepository;
   final ReadingPositionRepository readingPositionRepository;
+  final QuranRepository quranRepository;
   final QuranBackupCodec codec;
 
   const QuranBackupService({
     required this.bookmarkRepository,
     required this.readingPositionRepository,
+    required this.quranRepository,
     required this.codec,
   });
 
@@ -55,6 +58,7 @@ class QuranBackupService {
       throw const FormatException('Backup file exceeds the 5 MiB limit.');
     }
     final data = await codec.decode(bytes, passphrase);
+    await _validateVerseIds(data);
     final previousBookmarks = List<Bookmark>.unmodifiable(
       await bookmarkRepository.getAllBookmarks(),
     );
@@ -73,6 +77,37 @@ class QuranBackupService {
       }
       Error.throwWithStackTrace(restoreError, restoreStackTrace);
     }
+  }
+
+  Future<void> _validateVerseIds(QuranBackupData data) async {
+    final verseCounts = {
+      for (final surah in await quranRepository.getAllSurahs())
+        surah.surahNumber: surah.numberOfVerses,
+    };
+
+    for (final bookmark in data.bookmarks) {
+      if (!_isCanonicalVerseId(bookmark.verseId, verseCounts)) {
+        throw FormatException('Invalid bookmark VerseID: ${bookmark.verseId}.');
+      }
+    }
+
+    final lastRead = data.lastRead;
+    if (lastRead != null &&
+        !_isCanonicalVerseId(lastRead.verseId, verseCounts)) {
+      throw FormatException('Invalid last-read VerseID: ${lastRead.verseId}.');
+    }
+  }
+
+  bool _isCanonicalVerseId(String verseId, Map<int, int> verseCounts) {
+    final parts = verseId.split(':');
+    if (parts.length != 2) return false;
+    final surahNumber = int.tryParse(parts[0]);
+    final verseNumber = int.tryParse(parts[1]);
+    if (surahNumber == null || verseNumber == null || verseNumber < 1) {
+      return false;
+    }
+    final verseCount = verseCounts[surahNumber];
+    return verseCount != null && verseNumber <= verseCount;
   }
 
   Future<void> _replaceState(
