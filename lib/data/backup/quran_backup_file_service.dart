@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'quran_backup_file_operations.dart';
+import 'quran_backup_limits.dart';
 import 'quran_backup_service.dart';
 
 class QuranBackupFileService {
@@ -40,6 +41,7 @@ class QuranBackupFileService {
   }) async {
     final bytes = await fileOperations.pick(
       confirmButtonText: confirmButtonText,
+      maximumBytes: maximumBackupFileBytes,
     );
     if (bytes == null) return BackupFileOperationResult.canceled;
     await backupService.importBackup(bytes, passphrase);

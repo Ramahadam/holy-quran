@@ -3,6 +3,7 @@ import '../../domain/models/reading_position.dart';
 import '../repositories/bookmark_repository.dart';
 import '../repositories/reading_position_repository.dart';
 import 'quran_backup_codec.dart';
+import 'quran_backup_limits.dart';
 
 const minimumBackupPassphraseLength = 8;
 
@@ -50,6 +51,9 @@ class QuranBackupService {
   }
 
   Future<void> importBackup(List<int> bytes, String passphrase) async {
+    if (bytes.length > maximumBackupFileBytes) {
+      throw const FormatException('Backup file exceeds the 5 MiB limit.');
+    }
     final data = await codec.decode(bytes, passphrase);
     final previousBookmarks = List<Bookmark>.unmodifiable(
       await bookmarkRepository.getAllBookmarks(),

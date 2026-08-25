@@ -11,6 +11,8 @@ import 'package:holy_quran_app/data/repositories/reading_position_repository.dar
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 
+const _expectedMaximumBackupFileBytes = 5 * 1024 * 1024;
+
 QuranBackupCodec _testCodec() {
   return QuranBackupCodec(
     kdf: Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: 1, bits: 256),
@@ -65,6 +67,58 @@ void main() {
   });
 
   group('QuranBackupService', () {
+    test('rejects oversized backups before decoding or mutation', () async {
+      final codec = _RecordingBackupCodec();
+      final bookmarkRepo = _FakeBookmarkRepository([
+        Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 30)),
+      ]);
+      final positionRepo = _FakeReadingPositionRepository(
+        ReadingPosition(verseId: '1:7', lastReadAt: DateTime.utc(2026, 5, 30)),
+      );
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: positionRepo,
+        codec: codec,
+      );
+
+      await expectLater(
+        service.importBackup(
+          Uint8List(_expectedMaximumBackupFileBytes + 1),
+          'passphrase',
+        ),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('5 MiB'),
+          ),
+        ),
+      );
+
+      expect(codec.decodeCalled, isFalse);
+      expect(bookmarkRepo.replaced, isFalse);
+      expect(bookmarkRepo.bookmarks.single.verseId, '1:1');
+      expect(positionRepo.savedPosition?.verseId, '1:7');
+    });
+
+    test('accepts a backup at the file-size ceiling', () async {
+      final codec = _RecordingBackupCodec();
+      final bookmarkRepo = _FakeBookmarkRepository([]);
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: _FakeReadingPositionRepository(null),
+        codec: codec,
+      );
+
+      await service.importBackup(
+        Uint8List(_expectedMaximumBackupFileBytes),
+        'passphrase',
+      );
+
+      expect(codec.decodeCalled, isTrue);
+      expect(bookmarkRepo.replaced, isTrue);
+    });
+
     test('exports repository state', () async {
       final bookmarkRepo = _FakeBookmarkRepository([
         Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 30)),
@@ -327,6 +381,7 @@ void main() {
       );
 
       expect(result, BackupFileOperationResult.canceled);
+      expect(operations.pickMaximumBytes, _expectedMaximumBackupFileBytes);
       expect(bookmarkRepo.replaced, isFalse);
     });
   });
@@ -362,6 +417,7 @@ class _FakeBackupFileOperations implements BackupFileOperations {
   String? saveConfirmButtonText;
   String? shareSubject;
   String? shareTitle;
+  int? pickMaximumBytes;
 
   _FakeBackupFileOperations({
     this.saveResult = BackupFileOperationResult.completed,
@@ -370,8 +426,13 @@ class _FakeBackupFileOperations implements BackupFileOperations {
   });
 
   @override
-  Future<Uint8List?> pick({required String confirmButtonText}) async =>
-      pickedBytes;
+  Future<Uint8List?> pick({
+    required String confirmButtonText,
+    required int maximumBytes,
+  }) async {
+    pickMaximumBytes = maximumBytes;
+    return pickedBytes;
+  }
 
   @override
   Future<BackupFileOperationResult> save({
@@ -392,6 +453,23 @@ class _FakeBackupFileOperations implements BackupFileOperations {
     shareSubject = subject;
     shareTitle = title;
     return shareResult;
+  }
+}
+
+class _RecordingBackupCodec extends QuranBackupCodec {
+  bool decodeCalled = false;
+
+  _RecordingBackupCodec()
+    : super(kdf: Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: 1, bits: 256));
+
+  @override
+  Future<QuranBackupData> decode(List<int> bytes, String passphrase) async {
+    decodeCalled = true;
+    return QuranBackupData(
+      bookmarks: const [],
+      lastRead: null,
+      exportedAt: DateTime.utc(2026, 5, 30),
+    );
   }
 }
 
