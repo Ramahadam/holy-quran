@@ -7,9 +7,14 @@ import 'package:holy_quran_app/data/backup/quran_backup_file_operations.dart';
 import 'package:holy_quran_app/data/backup/quran_backup_file_service.dart';
 import 'package:holy_quran_app/data/backup/quran_backup_service.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
+import 'package:holy_quran_app/data/repositories/quran_repository.dart';
 import 'package:holy_quran_app/data/repositories/reading_position_repository.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
+import 'package:holy_quran_app/domain/models/surah.dart';
+
+const _expectedMaximumBackupFileBytes = 5 * 1024 * 1024;
+const _expectedMaximumBackupBookmarks = 6236;
 
 QuranBackupCodec _testCodec() {
   return QuranBackupCodec(
@@ -62,9 +67,128 @@ void main() {
         throwsA(isA<Exception>()),
       );
     });
+
+    test('accepts the maximum number of unique bookmarks', () async {
+      final codec = _testCodec();
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: _syntacticBookmarks(_expectedMaximumBackupBookmarks),
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      final decoded = await codec.decode(bytes, 'passphrase');
+
+      expect(decoded.bookmarks, hasLength(_expectedMaximumBackupBookmarks));
+    });
+
+    test('rejects more bookmarks than canonical verses', () async {
+      final codec = _testCodec();
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: _syntacticBookmarks(_expectedMaximumBackupBookmarks + 1),
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        codec.decode(bytes, 'passphrase'),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('6,236 bookmarks'),
+          ),
+        ),
+      );
+    });
+
+    test('rejects duplicate bookmark VerseIDs', () async {
+      final codec = _testCodec();
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: [
+            Bookmark(verseId: '2:255', timestamp: DateTime.utc(2026, 5, 29)),
+            Bookmark(verseId: '2:255', timestamp: DateTime.utc(2026, 5, 30)),
+          ],
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        codec.decode(bytes, 'passphrase'),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('Duplicate bookmark VerseID'),
+          ),
+        ),
+      );
+    });
   });
 
   group('QuranBackupService', () {
+    test('rejects oversized backups before decoding or mutation', () async {
+      final codec = _RecordingBackupCodec();
+      final bookmarkRepo = _FakeBookmarkRepository([
+        Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 30)),
+      ]);
+      final positionRepo = _FakeReadingPositionRepository(
+        ReadingPosition(verseId: '1:7', lastReadAt: DateTime.utc(2026, 5, 30)),
+      );
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
+        codec: codec,
+      );
+
+      await expectLater(
+        service.importBackup(
+          Uint8List(_expectedMaximumBackupFileBytes + 1),
+          'passphrase',
+        ),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('5 MiB'),
+          ),
+        ),
+      );
+
+      expect(codec.decodeCalled, isFalse);
+      expect(bookmarkRepo.replaced, isFalse);
+      expect(bookmarkRepo.bookmarks.single.verseId, '1:1');
+      expect(positionRepo.savedPosition?.verseId, '1:7');
+    });
+
+    test('accepts a backup at the file-size ceiling', () async {
+      final codec = _RecordingBackupCodec();
+      final bookmarkRepo = _FakeBookmarkRepository([]);
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: _FakeReadingPositionRepository(null),
+        quranRepository: _FakeQuranRepository(),
+        codec: codec,
+      );
+
+      await service.importBackup(
+        Uint8List(_expectedMaximumBackupFileBytes),
+        'passphrase',
+      );
+
+      expect(codec.decodeCalled, isTrue);
+      expect(bookmarkRepo.replaced, isTrue);
+    });
+
     test('exports repository state', () async {
       final bookmarkRepo = _FakeBookmarkRepository([
         Bookmark(verseId: '1:1', timestamp: DateTime.utc(2026, 5, 30)),
@@ -75,6 +199,7 @@ void main() {
       final service = QuranBackupService(
         bookmarkRepository: bookmarkRepo,
         readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
         codec: _testCodec(),
       );
 
@@ -89,6 +214,7 @@ void main() {
       final service = QuranBackupService(
         bookmarkRepository: _FakeBookmarkRepository([]),
         readingPositionRepository: _FakeReadingPositionRepository(null),
+        quranRepository: _FakeQuranRepository(),
         codec: _testCodec(),
       );
 
@@ -116,6 +242,7 @@ void main() {
         final service = QuranBackupService(
           bookmarkRepository: bookmarkRepo,
           readingPositionRepository: _FakeReadingPositionRepository(null),
+          quranRepository: _FakeQuranRepository(),
           codec: codec,
         );
 
@@ -143,6 +270,7 @@ void main() {
         readingPositionRepository: _FakeReadingPositionRepository(
           sourcePosition,
         ),
+        quranRepository: _FakeQuranRepository(),
         codec: _testCodec(),
       );
       final targetBookmarkRepo = _FakeBookmarkRepository([
@@ -154,6 +282,7 @@ void main() {
       final targetService = QuranBackupService(
         bookmarkRepository: targetBookmarkRepo,
         readingPositionRepository: targetPositionRepo,
+        quranRepository: _FakeQuranRepository(),
         codec: _testCodec(),
       );
 
@@ -181,6 +310,7 @@ void main() {
       final service = QuranBackupService(
         bookmarkRepository: bookmarkRepo,
         readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
         codec: _testCodec(),
       );
 
@@ -193,6 +323,97 @@ void main() {
       expect(positionRepo.savedPosition, isNull);
     });
 
+    test('rejects a nonexistent bookmark VerseID without mutation', () async {
+      final originalBookmark = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime.utc(2026, 5, 29),
+      );
+      final originalPosition = ReadingPosition(
+        verseId: '1:7',
+        lastReadAt: DateTime.utc(2026, 5, 29),
+      );
+      final bookmarkRepo = _FakeBookmarkRepository([originalBookmark]);
+      final positionRepo = _FakeReadingPositionRepository(originalPosition);
+      final codec = _testCodec();
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
+        codec: codec,
+      );
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: [
+            Bookmark(verseId: '1:8', timestamp: DateTime.utc(2026, 5, 30)),
+          ],
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        service.importBackup(bytes, 'passphrase'),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('bookmark VerseID'),
+          ),
+        ),
+      );
+
+      expect(bookmarkRepo.replaced, isFalse);
+      expect(bookmarkRepo.bookmarks.single.verseId, originalBookmark.verseId);
+      expect(positionRepo.savedPosition?.verseId, originalPosition.verseId);
+    });
+
+    test('rejects a nonexistent last-read VerseID without mutation', () async {
+      final originalBookmark = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime.utc(2026, 5, 29),
+      );
+      final originalPosition = ReadingPosition(
+        verseId: '1:7',
+        lastReadAt: DateTime.utc(2026, 5, 29),
+      );
+      final bookmarkRepo = _FakeBookmarkRepository([originalBookmark]);
+      final positionRepo = _FakeReadingPositionRepository(originalPosition);
+      final codec = _testCodec();
+      final service = QuranBackupService(
+        bookmarkRepository: bookmarkRepo,
+        readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
+        codec: codec,
+      );
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: const [],
+          lastRead: ReadingPosition(
+            verseId: '114:7',
+            lastReadAt: DateTime.utc(2026, 5, 30),
+          ),
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        service.importBackup(bytes, 'passphrase'),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('last-read VerseID'),
+          ),
+        ),
+      );
+
+      expect(bookmarkRepo.replaced, isFalse);
+      expect(bookmarkRepo.bookmarks.single.verseId, originalBookmark.verseId);
+      expect(positionRepo.savedPosition?.verseId, originalPosition.verseId);
+    });
+
     test('clears stale last-read state when backup has none', () async {
       final bookmarkRepo = _FakeBookmarkRepository([]);
       final positionRepo = _FakeReadingPositionRepository(
@@ -201,6 +422,7 @@ void main() {
       final service = QuranBackupService(
         bookmarkRepository: bookmarkRepo,
         readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
         codec: _testCodec(),
       );
       final bytes = await _testCodec().encode(
@@ -236,6 +458,7 @@ void main() {
       final service = QuranBackupService(
         bookmarkRepository: bookmarkRepo,
         readingPositionRepository: positionRepo,
+        quranRepository: _FakeQuranRepository(),
         codec: codec,
       );
       final bytes = await codec.encode(
@@ -327,8 +550,20 @@ void main() {
       );
 
       expect(result, BackupFileOperationResult.canceled);
+      expect(operations.pickMaximumBytes, _expectedMaximumBackupFileBytes);
       expect(bookmarkRepo.replaced, isFalse);
     });
+  });
+}
+
+List<Bookmark> _syntacticBookmarks(int count) {
+  return List.generate(count, (index) {
+    final surah = (index ~/ 999) + 1;
+    final verse = (index % 999) + 1;
+    return Bookmark(
+      verseId: '$surah:$verse',
+      timestamp: DateTime.utc(2026, 5, 30),
+    );
   });
 }
 
@@ -348,6 +583,7 @@ QuranBackupFileService _fileService({
             ),
           ]),
       readingPositionRepository: _FakeReadingPositionRepository(null),
+      quranRepository: _FakeQuranRepository(),
       codec: _testCodec(),
     ),
     fileOperations: operations,
@@ -362,6 +598,7 @@ class _FakeBackupFileOperations implements BackupFileOperations {
   String? saveConfirmButtonText;
   String? shareSubject;
   String? shareTitle;
+  int? pickMaximumBytes;
 
   _FakeBackupFileOperations({
     this.saveResult = BackupFileOperationResult.completed,
@@ -370,8 +607,13 @@ class _FakeBackupFileOperations implements BackupFileOperations {
   });
 
   @override
-  Future<Uint8List?> pick({required String confirmButtonText}) async =>
-      pickedBytes;
+  Future<Uint8List?> pick({
+    required String confirmButtonText,
+    required int maximumBytes,
+  }) async {
+    pickMaximumBytes = maximumBytes;
+    return pickedBytes;
+  }
 
   @override
   Future<BackupFileOperationResult> save({
@@ -393,6 +635,59 @@ class _FakeBackupFileOperations implements BackupFileOperations {
     shareTitle = title;
     return shareResult;
   }
+}
+
+class _RecordingBackupCodec extends QuranBackupCodec {
+  bool decodeCalled = false;
+
+  _RecordingBackupCodec()
+    : super(kdf: Pbkdf2(macAlgorithm: Hmac.sha256(), iterations: 1, bits: 256));
+
+  @override
+  Future<QuranBackupData> decode(List<int> bytes, String passphrase) async {
+    decodeCalled = true;
+    return QuranBackupData(
+      bookmarks: const [],
+      lastRead: null,
+      exportedAt: DateTime.utc(2026, 5, 30),
+    );
+  }
+}
+
+class _FakeQuranRepository extends Fake implements QuranRepository {
+  @override
+  Future<List<Surah>> getAllSurahs() async => const [
+    Surah(
+      surahNumber: 1,
+      nameArabic: 'الفاتحة',
+      nameEnglish: 'Al-Fatihah',
+      numberOfVerses: 7,
+    ),
+    Surah(
+      surahNumber: 2,
+      nameArabic: 'البقرة',
+      nameEnglish: 'Al-Baqarah',
+      numberOfVerses: 286,
+    ),
+    Surah(
+      surahNumber: 18,
+      nameArabic: 'الكهف',
+      nameEnglish: 'Al-Kahf',
+      numberOfVerses: 110,
+    ),
+    Surah(
+      surahNumber: 36,
+      nameArabic: 'يس',
+      nameEnglish: 'Ya-Sin',
+      numberOfVerses: 83,
+    ),
+    Surah(
+      surahNumber: 114,
+      nameArabic: 'الناس',
+      nameEnglish: 'An-Nas',
+      numberOfVerses: 6,
+    ),
+  ];
 }
 
 class _FakeBookmarkRepository implements BookmarkRepository {

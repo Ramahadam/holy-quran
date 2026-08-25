@@ -47,11 +47,26 @@ class PlatformBackupFileOperations implements BackupFileOperations {
   }
 
   @override
-  Future<Uint8List?> pick({required String confirmButtonText}) async {
+  Future<Uint8List?> pick({
+    required String confirmButtonText,
+    required int maximumBytes,
+  }) async {
     final file = await openFile(
       acceptedTypeGroups: const [_backupTypeGroup],
       confirmButtonText: confirmButtonText,
     );
-    return file?.readAsBytes();
+    if (file == null) return null;
+    if (await file.length() > maximumBytes) {
+      throw const FormatException('Backup file exceeds the allowed size.');
+    }
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in file.openRead(0, maximumBytes + 1)) {
+      bytes.add(chunk);
+    }
+    final contents = bytes.takeBytes();
+    if (contents.length > maximumBytes) {
+      throw const FormatException('Backup file exceeds the allowed size.');
+    }
+    return contents;
   }
 }

@@ -56,6 +56,7 @@ final quranBackupServiceProvider = Provider<QuranBackupService>((ref) {
   return QuranBackupService(
     bookmarkRepository: ref.watch(bookmarkRepositoryProvider),
     readingPositionRepository: ref.watch(readingPositionRepositoryProvider),
+    quranRepository: ref.watch(quranRepositoryProvider),
     codec: ref.watch(quranBackupCodecProvider),
   );
 });

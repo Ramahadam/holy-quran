@@ -14,5 +14,8 @@ abstract interface class BackupFileOperations {
     required String title,
   });
 
-  Future<Uint8List?> pick({required String confirmButtonText});
+  Future<Uint8List?> pick({
+    required String confirmButtonText,
+    required int maximumBytes,
+  });
 }

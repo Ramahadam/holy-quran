@@ -86,7 +86,11 @@ verification source.
   is not stored in the feedback table.
 - Backups contain bookmarks and the last-read position. New backups require an
   eight-character passphrase and use PBKDF2-HMAC-SHA256 with AES-256-GCM. The
-  passphrase cannot be recovered.
+  passphrase cannot be recovered. Restore accepts files up to 5 MiB and at most
+  6,236 bookmarks. Duplicate bookmark Verse IDs are rejected. Every bookmark
+  and last-read Verse ID is checked against the bundled Quran data before any
+  bookmarks or reading state are replaced, so validation failures leave local
+  state unchanged.
 
 See [Cloudflare backend](docs/cloudflare-backend.md) for endpoint, D1, caching,
 rate-limit, and deployment details.
