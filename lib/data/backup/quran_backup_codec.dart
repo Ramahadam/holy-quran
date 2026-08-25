@@ -5,6 +5,7 @@ import 'package:cryptography/cryptography.dart';
 
 import '../../domain/models/bookmark.dart';
 import '../../domain/models/reading_position.dart';
+import 'quran_backup_limits.dart';
 
 const _backupAppId = 'holy_quran_app';
 const _backupEnvelopeVersion = 1;
@@ -131,9 +132,20 @@ class QuranBackupCodec {
     );
     final exportedAt = _dateTime(json['exportedAt'], 'exportedAt');
     final bookmarkItems = _asList(json['bookmarks'], 'bookmarks');
-    final bookmarks = bookmarkItems
-        .map((item) => _bookmarkFromJson(_asMap(item, 'bookmark')))
-        .toList();
+    _expect(
+      bookmarkItems.length <= maximumBackupBookmarks,
+      'Backup cannot contain more than 6,236 bookmarks.',
+    );
+    final bookmarks = <Bookmark>[];
+    final bookmarkVerseIds = <String>{};
+    for (final item in bookmarkItems) {
+      final bookmark = _bookmarkFromJson(_asMap(item, 'bookmark'));
+      _expect(
+        bookmarkVerseIds.add(bookmark.verseId),
+        'Duplicate bookmark VerseID: ${bookmark.verseId}.',
+      );
+      bookmarks.add(bookmark);
+    }
 
     final lastReadJson = json['lastRead'];
     ReadingPosition? lastRead;

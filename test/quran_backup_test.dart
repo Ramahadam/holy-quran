@@ -12,6 +12,7 @@ import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 
 const _expectedMaximumBackupFileBytes = 5 * 1024 * 1024;
+const _expectedMaximumBackupBookmarks = 6236;
 
 QuranBackupCodec _testCodec() {
   return QuranBackupCodec(
@@ -62,6 +63,71 @@ void main() {
       await expectLater(
         codec.decode(bytes, 'wrong passphrase'),
         throwsA(isA<Exception>()),
+      );
+    });
+
+    test('accepts the maximum number of unique bookmarks', () async {
+      final codec = _testCodec();
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: _syntacticBookmarks(_expectedMaximumBackupBookmarks),
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      final decoded = await codec.decode(bytes, 'passphrase');
+
+      expect(decoded.bookmarks, hasLength(_expectedMaximumBackupBookmarks));
+    });
+
+    test('rejects more bookmarks than canonical verses', () async {
+      final codec = _testCodec();
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: _syntacticBookmarks(_expectedMaximumBackupBookmarks + 1),
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        codec.decode(bytes, 'passphrase'),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('6,236 bookmarks'),
+          ),
+        ),
+      );
+    });
+
+    test('rejects duplicate bookmark VerseIDs', () async {
+      final codec = _testCodec();
+      final bytes = await codec.encode(
+        QuranBackupData(
+          bookmarks: [
+            Bookmark(verseId: '2:255', timestamp: DateTime.utc(2026, 5, 29)),
+            Bookmark(verseId: '2:255', timestamp: DateTime.utc(2026, 5, 30)),
+          ],
+          lastRead: null,
+          exportedAt: DateTime.utc(2026, 5, 30),
+        ),
+        'passphrase',
+      );
+
+      await expectLater(
+        codec.decode(bytes, 'passphrase'),
+        throwsA(
+          isA<FormatException>().having(
+            (error) => error.message,
+            'message',
+            contains('Duplicate bookmark VerseID'),
+          ),
+        ),
       );
     });
   });
@@ -384,6 +450,17 @@ void main() {
       expect(operations.pickMaximumBytes, _expectedMaximumBackupFileBytes);
       expect(bookmarkRepo.replaced, isFalse);
     });
+  });
+}
+
+List<Bookmark> _syntacticBookmarks(int count) {
+  return List.generate(count, (index) {
+    final surah = (index ~/ 999) + 1;
+    final verse = (index % 999) + 1;
+    return Bookmark(
+      verseId: '$surah:$verse',
+      timestamp: DateTime.utc(2026, 5, 30),
+    );
   });
 }
 
