@@ -84,7 +84,10 @@ bool _hasEmbeddedBismillah(Verse verse) {
 }
 
 int? _classicJuzForVerse(Verse verse) {
-  final juz = getJuzNumber(verse.surahNumber, verse.verseNumber);
+  final juz = qcfQuranDataSource.juzNumber(
+    verse.surahNumber,
+    verse.verseNumber,
+  );
   return juz >= 1 && juz <= 30 ? juz : null;
 }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:qcf_quran/qcf_quran.dart';
 
+import '../../data/quran/qcf_quran_data_source.dart';
 import 'mushaf_sample_page.dart';
 
 const _mushafPageContextStripHeight = 32.0;
@@ -98,20 +98,20 @@ String _toArabicPageNumber(int number) {
 }
 
 ({String surah, String juz}) _mushafPageContext(int pageNumber) {
-  final ranges = getPageData(pageNumber);
+  final ranges = qcfQuranDataSource.pageRanges(pageNumber);
   final first = ranges.first;
   final last = ranges.last;
-  final firstSurah = int.parse(first['surah'].toString());
-  final lastSurah = int.parse(last['surah'].toString());
-  final firstVerse = int.parse(first['start'].toString());
-  final lastVerse = int.parse(last['end'].toString());
-  final firstSurahName = getSurahNameArabic(firstSurah);
-  final lastSurahName = getSurahNameArabic(lastSurah);
+  final firstSurah = first.surahNumber;
+  final lastSurah = last.surahNumber;
+  final firstVerse = first.firstVerse;
+  final lastVerse = last.lastVerse;
+  final firstSurahName = qcfQuranDataSource.surahNameArabic(firstSurah);
+  final lastSurahName = qcfQuranDataSource.surahNameArabic(lastSurah);
   final surah = firstSurah == lastSurah
       ? 'سورة $firstSurahName'
       : 'سورة $firstSurahName – $lastSurahName';
-  final firstJuz = getJuzNumber(firstSurah, firstVerse);
-  final lastJuz = getJuzNumber(lastSurah, lastVerse);
+  final firstJuz = qcfQuranDataSource.juzNumber(firstSurah, firstVerse);
+  final lastJuz = qcfQuranDataSource.juzNumber(lastSurah, lastVerse);
   final juz = firstJuz == lastJuz
       ? mushafJuzLabel(firstJuz)
       : '${mushafJuzLabel(firstJuz)} – '

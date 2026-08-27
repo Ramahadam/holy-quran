@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qcf_quran/qcf_quran.dart';
 
+import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 
 void main() {
@@ -145,6 +146,24 @@ void main() {
     ).singleWhere((span) => span.text == getVerseNumberQCF(2, 6));
 
     expect(verseNumberSpan.style?.backgroundColor, isNotNull);
+  });
+
+  testWidgets('keeps Allah glyphs highlighted with public Quran text', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: Scaffold(body: MushafSamplePage(page: 1))),
+    );
+    await tester.pumpAndSettle();
+
+    final text = tester.widget<Text>(
+      find.byKey(const ValueKey('mushafPageText-1')),
+    );
+    final highlightedGlyphs = _textSpans(
+      text.textSpan!,
+    ).where((span) => span.style?.color == AppTheme.quranRed);
+
+    expect(highlightedGlyphs, isNotEmpty);
   });
 }
 

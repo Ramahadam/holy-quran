@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qcf_quran/qcf_quran.dart';
+import '../../data/quran/qcf_quran_data_source.dart';
 import '../../data/repositories/reading_position_repository.dart';
 import '../../domain/models/reading_position.dart';
 import '../../domain/models/surah.dart';
