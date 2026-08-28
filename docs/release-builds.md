@@ -91,6 +91,17 @@ Build the iOS archive for App Store distribution:
 flutter build ipa --release
 ```
 
-The Cloudflare Worker URL defaults to the production URL. To use a different
-endpoint for a release candidate, provide `CLOUDFLARE_API_BASE_URL` with a
-`--dart-define` or a reviewed `--dart-define-from-file` configuration.
+The Cloudflare Worker URL defaults to the production URL. CI can inject a
+different public endpoint and version explicitly from protected CI variables:
+
+```sh
+flutter build appbundle --release \
+  --dart-define=CLOUDFLARE_API_BASE_URL="$CLOUDFLARE_API_BASE_URL" \
+  --dart-define=APP_VERSION="$APP_VERSION"
+```
+
+These Dart defines are compiled into the client and therefore must not contain
+secrets. Keep Quran Foundation credentials in Cloudflare Worker secrets. If a
+CI job needs credentials to deploy the Worker, supply them through the CI
+secret store directly to the deployment command; do not write a tracked config
+file.

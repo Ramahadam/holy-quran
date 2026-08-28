@@ -28,13 +28,17 @@ copy the example configuration and pass it to Flutter:
 
 ```sh
 cp config/cloudflare.local.example.json config/cloudflare.local.json
+# Replace the example values with the public values for your environment.
 flutter run --dart-define-from-file=config/cloudflare.local.json
 ```
 
-`config/cloudflare.local.json` is ignored by Git. It may contain only public
-client configuration such as `CLOUDFLARE_API_BASE_URL` and `APP_VERSION`.
-Quran Foundation credentials belong in Cloudflare Worker secrets and must never
-be placed in Flutter configuration.
+Git ignores every `config/*.local.json` file, `.env` and its local variants,
+and private key files. Local Flutter configuration may contain only public
+client values such as `CLOUDFLARE_API_BASE_URL` and `APP_VERSION`. Quran
+Foundation credentials belong in Cloudflare Worker secrets and must never be
+placed in Flutter configuration. See the
+[backend configuration security policy](docs/backend-configuration-security.md)
+for the repository and CI rules.
 
 The optional `.env` helper forwards the same public values:
 

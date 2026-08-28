@@ -79,6 +79,10 @@ The production Worker URL is the app default. To override it locally, copy
 flutter run --dart-define-from-file=config/cloudflare.local.json
 ```
 
+Replace every placeholder in the copied file. Git ignores all
+`config/*.local.json` files, and those files may contain only public client
+values. Do not add Worker credentials or other secrets to a Dart define.
+
 The `.env` helper also forwards only the public Worker URL and app version to
 Flutter:
 
@@ -105,3 +109,6 @@ npx wrangler secret put QF_CLIENT_SECRET
 ```
 
 Never place secret values in `wrangler.jsonc`.
+
+The repository-wide local and CI rules are documented in
+[Backend configuration security](backend-configuration-security.md).
