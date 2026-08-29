@@ -12,7 +12,8 @@ void main() {
         surahNumber: 1,
         verseNumber: 1,
         arabicText: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ',
-        translation: 'In the name of Allah, the Entirely Merciful, the Especially Merciful.',
+        translation:
+            'In the name of Allah, the Entirely Merciful, the Especially Merciful.',
       );
 
       expect(verse.verseId, '1:1');
@@ -132,31 +133,34 @@ void main() {
       expect(verse.page, lessThanOrEqualTo(604));
     });
 
-    test('verses with same page number should be sortable by surah and verse', () {
-      final verse1 = const Verse(
-        verseId: '2:1',
-        surahNumber: 2,
-        verseNumber: 1,
-        arabicText: 'test',
-        page: 2,
-      );
+    test(
+      'verses with same page number should be sortable by surah and verse',
+      () {
+        final verse1 = const Verse(
+          verseId: '2:1',
+          surahNumber: 2,
+          verseNumber: 1,
+          arabicText: 'test',
+          page: 2,
+        );
 
-      final verse2 = const Verse(
-        verseId: '2:2',
-        surahNumber: 2,
-        verseNumber: 2,
-        arabicText: 'test',
-        page: 2,
-      );
+        final verse2 = const Verse(
+          verseId: '2:2',
+          surahNumber: 2,
+          verseNumber: 2,
+          arabicText: 'test',
+          page: 2,
+        );
 
-      final verses = [verse2, verse1];
-      verses.sort((a, b) {
-        final cmp = a.surahNumber.compareTo(b.surahNumber);
-        return cmp != 0 ? cmp : a.verseNumber.compareTo(b.verseNumber);
-      });
+        final verses = [verse2, verse1];
+        verses.sort((a, b) {
+          final cmp = a.surahNumber.compareTo(b.surahNumber);
+          return cmp != 0 ? cmp : a.verseNumber.compareTo(b.verseNumber);
+        });
 
-      expect(verses[0].verseId, '2:1');
-      expect(verses[1].verseId, '2:2');
-    });
+        expect(verses[0].verseId, '2:1');
+        expect(verses[1].verseId, '2:2');
+      },
+    );
   });
 }

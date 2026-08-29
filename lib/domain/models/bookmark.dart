@@ -3,11 +3,7 @@ class Bookmark {
   final DateTime timestamp;
   final String? note;
 
-  const Bookmark({
-    required this.verseId,
-    required this.timestamp,
-    this.note,
-  });
+  const Bookmark({required this.verseId, required this.timestamp, this.note});
 
   @override
   bool operator ==(Object other) =>

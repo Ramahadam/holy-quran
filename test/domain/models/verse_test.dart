@@ -24,7 +24,8 @@ void main() {
         surahNumber: 1,
         verseNumber: 1,
         arabicText: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-        translation: 'In the name of Allah, the Most Gracious, the Most Merciful',
+        translation:
+            'In the name of Allah, the Most Gracious, the Most Merciful',
       );
 
       expect(verse.translation, isNotNull);

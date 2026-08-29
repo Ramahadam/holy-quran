@@ -22,10 +22,7 @@ void main() {
     });
 
     test('fromDomain handles null note', () {
-      final bookmark = Bookmark(
-        verseId: '2:255',
-        timestamp: testDate,
-      );
+      final bookmark = Bookmark(verseId: '2:255', timestamp: testDate);
 
       final entity = BookmarkEntity.fromDomain(bookmark);
 
@@ -79,10 +76,7 @@ void main() {
 
     test('handles timestamp precision correctly', () {
       final preciseTime = DateTime(2024, 12, 31, 23, 59, 59, 999, 999);
-      final bookmark = Bookmark(
-        verseId: '1:1',
-        timestamp: preciseTime,
-      );
+      final bookmark = Bookmark(verseId: '1:1', timestamp: preciseTime);
 
       final entity = BookmarkEntity.fromDomain(bookmark);
       final result = entity.toDomain();
@@ -92,11 +86,7 @@ void main() {
     });
 
     test('handles empty note string correctly', () {
-      final bookmark = Bookmark(
-        verseId: '1:1',
-        timestamp: testDate,
-        note: '',
-      );
+      final bookmark = Bookmark(verseId: '1:1', timestamp: testDate, note: '');
 
       final entity = BookmarkEntity.fromDomain(bookmark);
       final result = entity.toDomain();

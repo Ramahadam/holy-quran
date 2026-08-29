@@ -6,10 +6,7 @@ void main() {
     final testDate = DateTime(2024, 1, 1);
 
     test('creates instance with required fields', () {
-      final bookmark = Bookmark(
-        verseId: '1:1',
-        timestamp: testDate,
-      );
+      final bookmark = Bookmark(verseId: '1:1', timestamp: testDate);
 
       expect(bookmark.verseId, '1:1');
       expect(bookmark.timestamp, testDate);
@@ -27,19 +24,13 @@ void main() {
     });
 
     test('equality based on verseId and timestamp', () {
-      final bookmark1 = Bookmark(
-        verseId: '1:1',
-        timestamp: testDate,
-      );
+      final bookmark1 = Bookmark(verseId: '1:1', timestamp: testDate);
       final bookmark2 = Bookmark(
         verseId: '1:1',
         timestamp: testDate,
         note: 'Different note',
       );
-      final bookmark3 = Bookmark(
-        verseId: '2:1',
-        timestamp: testDate,
-      );
+      final bookmark3 = Bookmark(verseId: '2:1', timestamp: testDate);
       final bookmark4 = Bookmark(
         verseId: '1:1',
         timestamp: DateTime(2024, 2, 1),
@@ -56,10 +47,7 @@ void main() {
     });
 
     test('hashCode based on verseId and timestamp', () {
-      final bookmark1 = Bookmark(
-        verseId: '1:1',
-        timestamp: testDate,
-      );
+      final bookmark1 = Bookmark(verseId: '1:1', timestamp: testDate);
       final bookmark2 = Bookmark(
         verseId: '1:1',
         timestamp: testDate,
@@ -70,4 +58,3 @@ void main() {
     });
   });
 }
-
