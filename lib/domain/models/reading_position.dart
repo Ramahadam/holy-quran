@@ -2,10 +2,7 @@ class ReadingPosition {
   final String verseId;
   final DateTime lastReadAt;
 
-  const ReadingPosition({
-    required this.verseId,
-    required this.lastReadAt,
-  });
+  const ReadingPosition({required this.verseId, required this.lastReadAt});
 
   @override
   bool operator ==(Object other) =>

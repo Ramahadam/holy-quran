@@ -7,10 +7,7 @@ void main() {
     final testDate = DateTime(2024, 1, 1, 10, 30);
 
     test('fromDomain converts domain model to entity', () {
-      final position = ReadingPosition(
-        verseId: '2:255',
-        lastReadAt: testDate,
-      );
+      final position = ReadingPosition(verseId: '2:255', lastReadAt: testDate);
 
       final entity = ReadingPositionEntity.fromDomain(position);
 
@@ -30,10 +27,7 @@ void main() {
     });
 
     test('roundtrip conversion preserves all data', () {
-      final original = ReadingPosition(
-        verseId: '114:6',
-        lastReadAt: testDate,
-      );
+      final original = ReadingPosition(verseId: '114:6', lastReadAt: testDate);
 
       final entity = ReadingPositionEntity.fromDomain(original);
       final result = entity.toDomain();
@@ -45,10 +39,7 @@ void main() {
 
     test('handles timestamp precision correctly', () {
       final preciseTime = DateTime(2024, 12, 31, 23, 59, 59, 999, 999);
-      final position = ReadingPosition(
-        verseId: '1:1',
-        lastReadAt: preciseTime,
-      );
+      final position = ReadingPosition(verseId: '1:1', lastReadAt: preciseTime);
 
       final entity = ReadingPositionEntity.fromDomain(position);
       final result = entity.toDomain();
@@ -79,10 +70,7 @@ void main() {
     });
 
     test('handles empty verseId', () {
-      final position = ReadingPosition(
-        verseId: '',
-        lastReadAt: testDate,
-      );
+      final position = ReadingPosition(verseId: '', lastReadAt: testDate);
 
       final entity = ReadingPositionEntity.fromDomain(position);
       final result = entity.toDomain();
@@ -99,10 +87,7 @@ void main() {
       ];
 
       for (final timestamp in timestamps) {
-        final position = ReadingPosition(
-          verseId: '1:1',
-          lastReadAt: timestamp,
-        );
+        final position = ReadingPosition(verseId: '1:1', lastReadAt: timestamp);
 
         final entity = ReadingPositionEntity.fromDomain(position);
         final result = entity.toDomain();
@@ -114,15 +99,9 @@ void main() {
     test('repository singleton: new position overwrites old by fixed id=1', () {
       // The repository always writes to id=1, so saving a new position
       // replaces the previous one regardless of verseId.
-      final position1 = ReadingPosition(
-        verseId: '1:1',
-        lastReadAt: testDate,
-      );
+      final position1 = ReadingPosition(verseId: '1:1', lastReadAt: testDate);
       final laterDate = testDate.add(const Duration(days: 1));
-      final position2 = ReadingPosition(
-        verseId: '2:5',
-        lastReadAt: laterDate,
-      );
+      final position2 = ReadingPosition(verseId: '2:5', lastReadAt: laterDate);
 
       final entity1 = ReadingPositionEntity.fromDomain(position1);
       final entity2 = ReadingPositionEntity.fromDomain(position2);

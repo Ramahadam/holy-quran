@@ -10,7 +10,8 @@ void main() {
         surahNumber: 1,
         verseNumber: 1,
         arabicText: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-        translation: 'In the name of Allah, the Most Gracious, the Most Merciful',
+        translation:
+            'In the name of Allah, the Most Gracious, the Most Merciful',
         page: 1,
       );
 
@@ -21,8 +22,9 @@ void main() {
       expect(entity.verseNumber, 1);
       expect(entity.arabicText, 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ');
       expect(
-          entity.translation,
-          'In the name of Allah, the Most Gracious, the Most Merciful');
+        entity.translation,
+        'In the name of Allah, the Most Gracious, the Most Merciful',
+      );
       expect(entity.page, 1);
     });
 

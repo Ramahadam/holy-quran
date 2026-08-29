@@ -101,6 +101,19 @@ rate-limit, and deployment details.
 
 ## Verification
 
+Run the same non-mutating Dart formatting check used by CI:
+
+```sh
+bash scripts/check_dart_format.sh
+```
+
+The checker uses the Dart SDK shipped with Flutter 3.38.9 in CI. It includes
+maintained Dart source and Flutter localization output, which the pinned Flutter
+generator emits deterministically in formatter-compliant form. It excludes
+`*.g.dart` because those files are owned by the pinned Isar generator and
+manual formatting would be overwritten the next time schemas are generated.
+Review regenerated Isar files separately whenever an entity schema changes.
+
 Run the same Flutter quality lane used by CI:
 
 ```sh
