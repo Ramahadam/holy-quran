@@ -189,6 +189,5 @@ identifiers, versioning, and store-build details.
 
 Active operational documentation lives in `README.md`,
 `docs/cloudflare-backend.md`, and `docs/release-builds.md`. Files under
-`docs/handoffs/` and files named `docs/handoff-*` record historical work and may
-refer to retired Supabase or image-based Mushaf experiments; they are not current
-setup instructions.
+`docs/handoff-*` record historical work and may refer to retired Supabase or
+image-based Mushaf experiments; they are not current setup instructions.
