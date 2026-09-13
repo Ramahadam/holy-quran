@@ -116,3 +116,17 @@ This workflow ensures:
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues for `Ramahadam/holy-quran`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the repository's existing lightweight GitHub label vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repository using root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
