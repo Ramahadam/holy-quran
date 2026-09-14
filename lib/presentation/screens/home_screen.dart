@@ -589,10 +589,42 @@ class _BookmarkRow extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.bookmarkRemoved),
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: context.l10n.undo,
+            onPressed: () => unawaited(_restoreBookmark(context, ref)),
+          ),
         ),
       );
+    }
+  }
+
+  Future<void> _restoreBookmark(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
+      ref.invalidate(recentBookmarksProvider);
+      final surahNum = int.tryParse(bookmark.verseId.split(':').first);
+      if (surahNum != null) {
+        ref.invalidate(bookmarksBySurahProvider(surahNum));
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRestored),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRestoreFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 }

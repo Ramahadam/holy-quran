@@ -632,6 +632,24 @@ abstract class AppLocalizations {
   /// **'Bookmark removed'**
   String get bookmarkRemoved;
 
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @bookmarkRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark restored'**
+  String get bookmarkRestored;
+
+  /// No description provided for @bookmarkRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark could not be restored'**
+  String get bookmarkRestoreFailed;
+
   /// No description provided for @bookmarked.
   ///
   /// In en, this message translates to:

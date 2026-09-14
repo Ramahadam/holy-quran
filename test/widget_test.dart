@@ -40,6 +40,7 @@ import 'support/reading_test_fixtures.dart'
 class _FakeBookmarkRepository implements BookmarkRepository {
   final addedVerseIds = <String>[];
   final removedVerseIds = <String>[];
+  final restoredBookmarks = <Bookmark>[];
 
   @override
   Future<void> addBookmark(String verseId, DateTime timestamp) async {
@@ -47,7 +48,9 @@ class _FakeBookmarkRepository implements BookmarkRepository {
   }
 
   @override
-  Future<void> saveBookmark(Bookmark bookmark) async {}
+  Future<void> saveBookmark(Bookmark bookmark) async {
+    restoredBookmarks.add(bookmark);
+  }
 
   @override
   Future<void> removeBookmark(String verseId) async {
@@ -973,9 +976,15 @@ void main() {
       expect(find.text('الفاتحة · Verse 1'), findsOneWidget);
 
       await tester.tap(find.byTooltip('Remove bookmark'));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(repo.removedVerseIds, ['1:1']);
+      expect(find.text('Undo'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+
+      expect(repo.restoredBookmarks, [bookmark]);
     });
 
     testWidgets('shows a compact, coordinated home action menu', (
@@ -2247,6 +2256,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(bookmarkRepo.addedVerseIds, ['1:1']);
+    });
+
+    testWidgets('offers undo after removing the focused verse bookmark', (
+      tester,
+    ) async {
+      final bookmarkRepo = _FakeBookmarkRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookmarkRepositoryProvider.overrideWithValue(bookmarkRepo),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: VerseDetailScreen(verse: classicVerse1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.bookmark));
+      await tester.pumpAndSettle();
+
+      expect(bookmarkRepo.removedVerseIds, ['1:1']);
+      expect(find.text('Undo'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+
+      expect(bookmarkRepo.restoredBookmarks.single.verseId, '1:1');
     });
   });
 }

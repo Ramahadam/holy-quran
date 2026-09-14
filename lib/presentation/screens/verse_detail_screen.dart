@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/models/bookmark.dart';
 import '../../domain/models/verse.dart';
 import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
@@ -169,7 +172,18 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
   Future<void> _toggleBookmark(BuildContext context, bool isBookmarked) async {
     final verse = _verse;
     final repo = ref.read(bookmarkRepositoryProvider);
+    Bookmark? removedBookmark;
     if (isBookmarked) {
+      try {
+        for (final bookmark in await repo.getAllBookmarks()) {
+          if (bookmark.verseId == verse.verseId) {
+            removedBookmark = bookmark;
+            break;
+          }
+        }
+      } catch (_) {
+        // Removing the bookmark should still work if the metadata lookup fails.
+      }
       await repo.removeBookmark(verse.verseId);
     } else {
       await repo.addBookmark(verse.verseId, DateTime.now());
@@ -186,10 +200,53 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                 ? context.l10n.bookmarkRemoved
                 : context.l10n.bookmarked,
           ),
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: isBookmarked ? 4 : 2),
           behavior: SnackBarBehavior.floating,
+          action: isBookmarked
+              ? SnackBarAction(
+                  label: context.l10n.undo,
+                  onPressed: () => unawaited(
+                    _restoreBookmark(
+                      context,
+                      removedBookmark ??
+                          Bookmark(verseId: verse.verseId, timestamp: DateTime.now()),
+                    ),
+                  ),
+                )
+              : null,
         ),
       );
+    }
+  }
+
+  Future<void> _restoreBookmark(
+    BuildContext context,
+    Bookmark bookmark,
+  ) async {
+    try {
+      await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
+      ref.invalidate(recentBookmarksProvider);
+      final surahNumber = int.tryParse(bookmark.verseId.split(':').first);
+      if (surahNumber != null) {
+        ref.invalidate(bookmarksBySurahProvider(surahNumber));
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRestored),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRestoreFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
