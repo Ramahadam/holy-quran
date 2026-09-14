@@ -7,8 +7,13 @@ import '../../l10n/l10n.dart';
 class AyahBookmarkMarker {
   final String verseId;
   final TextRange range;
+  final String? semanticsLabel;
 
-  const AyahBookmarkMarker({required this.verseId, required this.range});
+  const AyahBookmarkMarker({
+    required this.verseId,
+    required this.range,
+    this.semanticsLabel,
+  });
 }
 
 class AyahBookmarkMarkerOverlay extends StatefulWidget {
@@ -59,7 +64,7 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
             left: position.left,
             top: position.top,
             child: Semantics(
-              label: context.l10n.bookmarked,
+              label: position.marker.semanticsLabel ?? context.l10n.bookmarked,
               container: true,
               child: ExcludeSemantics(
                 child: Icon(
@@ -141,7 +146,8 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
     if (first.length != second.length) return false;
     for (var index = 0; index < first.length; index += 1) {
       if (first[index].verseId != second[index].verseId ||
-          first[index].range != second[index].range) {
+          first[index].range != second[index].range ||
+          first[index].semanticsLabel != second[index].semanticsLabel) {
         return false;
       }
     }

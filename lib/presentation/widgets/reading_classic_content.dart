@@ -731,7 +731,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
           builder: (context, constraints) {
             final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
             return AyahBookmarkMarkerOverlay(
-              markers: _bookmarkMarkers(),
+              markers: _bookmarkMarkers(context),
               iconSize: fontSize * .72,
               child: RichText(
                 key: _richTextKey,
@@ -848,7 +848,7 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
     return spans;
   }
 
-  List<AyahBookmarkMarker> _bookmarkMarkers() {
+  List<AyahBookmarkMarker> _bookmarkMarkers(BuildContext context) {
     var textOffset = 0;
     final markers = <AyahBookmarkMarker>[];
     for (final verse in widget.verses) {
@@ -860,7 +860,13 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
       );
       if (widget.bookmarks.contains(verse.verseId)) {
         markers.add(
-          AyahBookmarkMarker(verseId: verse.verseId, range: markerRange),
+          AyahBookmarkMarker(
+            verseId: verse.verseId,
+            range: markerRange,
+            semanticsLabel:
+                '${context.l10n.verseNumber(verse.verseNumber.toString())}, '
+                '${context.l10n.bookmarked}',
+          ),
         );
       }
       textOffset += markerText.length;
@@ -914,6 +920,9 @@ class _ArabicVerse extends StatelessWidget {
                               _classicDisplayArabicText(verse).length +
                               markerText.length,
                         ),
+                        semanticsLabel:
+                            '${context.l10n.verseNumber(verse.verseNumber.toString())}, '
+                            '${context.l10n.bookmarked}',
                       ),
                     ]
                   : const [],
