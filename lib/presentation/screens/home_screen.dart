@@ -15,6 +15,7 @@ import '../widgets/home_backup_passphrase_dialog.dart';
 import '../widgets/home_feedback_dialog.dart';
 import '../widgets/home_prayer_reminder_dialog.dart';
 import '../widgets/quran_index.dart';
+import 'bookmarks_screen.dart';
 import 'reading_screen.dart';
 
 typedef _OpenReading =
@@ -123,6 +124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   bookmarks: bookmarks,
                   surahsByNumber: surahsByNumber,
                   onOpenReading: _openReadingScreen,
+                  onViewAll: _openBookmarksScreen,
                 ),
               Expanded(
                 child: QuranIndex(
@@ -171,6 +173,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (!mounted) return;
     ref.invalidate(feedbackPromptShouldShowProvider);
     _scheduleHeartbeatPromptRefresh();
+  }
+
+  Future<void> _openBookmarksScreen() async {
+    await Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const BookmarksScreen()));
+    if (!mounted) return;
+    ref.invalidate(recentBookmarksProvider);
+    ref.invalidate(allBookmarksProvider);
   }
 
   void _scheduleHeartbeatPromptRefresh() {
@@ -253,6 +264,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (result == BackupFileOperationResult.completed) {
         ref.invalidate(lastReadPositionProvider);
         ref.invalidate(recentBookmarksProvider);
+        ref.invalidate(allBookmarksProvider);
         ref.invalidate(bookmarksBySurahProvider);
       }
       _showSnackBar(context, switch (result) {
@@ -432,11 +444,13 @@ class _BookmarksSection extends ConsumerWidget {
   final List<Bookmark> bookmarks;
   final Map<int, Surah> surahsByNumber;
   final _OpenReading onOpenReading;
+  final VoidCallback onViewAll;
 
   const _BookmarksSection({
     required this.bookmarks,
     required this.surahsByNumber,
     required this.onOpenReading,
+    required this.onViewAll,
   });
 
   @override
@@ -459,7 +473,7 @@ class _BookmarksSection extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
+              padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
               child: Row(
                 children: [
                   Icon(
@@ -474,6 +488,12 @@ class _BookmarksSection extends ConsumerWidget {
                       color: colors.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    key: const ValueKey('homeViewAllBookmarks'),
+                    onPressed: onViewAll,
+                    child: Text(context.l10n.viewAllBookmarks),
                   ),
                 ],
               ),
@@ -580,6 +600,7 @@ class _BookmarkRow extends ConsumerWidget {
   Future<void> _removeBookmark(BuildContext context, WidgetRef ref) async {
     await ref.read(bookmarkRepositoryProvider).removeBookmark(bookmark.verseId);
     ref.invalidate(recentBookmarksProvider);
+    ref.invalidate(allBookmarksProvider);
     final surahNum = int.tryParse(bookmark.verseId.split(':').first);
     if (surahNum != null) {
       ref.invalidate(bookmarksBySurahProvider(surahNum));

@@ -614,6 +614,24 @@ abstract class AppLocalizations {
   /// **'Bookmarks'**
   String get bookmarks;
 
+  /// No description provided for @viewAllBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAllBookmarks;
+
+  /// No description provided for @bookmarksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved ayahs yet.'**
+  String get bookmarksEmpty;
+
+  /// No description provided for @bookmarksLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your bookmarks.'**
+  String get bookmarksLoadError;
+
   /// No description provided for @surahNumber.
   ///
   /// In en, this message translates to:

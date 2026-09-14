@@ -200,6 +200,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     }
 
     ref.invalidate(recentBookmarksProvider);
+    ref.invalidate(allBookmarksProvider);
     ref.invalidate(bookmarksBySurahProvider(verse.surahNumber));
 
     if (context.mounted) {
