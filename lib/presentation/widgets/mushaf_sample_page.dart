@@ -535,6 +535,9 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
                 start: textOffset + verseDisplayText.length,
                 end: textOffset + verseDisplayText.length + numberText.length,
               ),
+              semanticsLabel:
+                  '${context.l10n.verseNumber(verse.toString())}, '
+                  '${context.l10n.bookmarked}',
             ),
           );
         }

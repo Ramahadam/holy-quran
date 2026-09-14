@@ -51,6 +51,36 @@ void main() {
       expect((richText.text as TextSpan).style?.color, AppTheme.primaryText);
     });
 
+    testWidgets('announces the saved ayah reference with its bookmark marker', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(
+              1,
+            ).overrideWith((ref) async => [classicVerse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: classicSurah1)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.semantics.byPredicate(
+          (node) =>
+              node.label.contains('Verse 1') &&
+              node.label.contains('Bookmarked'),
+        ),
+        findsOneWidget,
+      );
+      semantics.dispose();
+    });
+
     testWidgets('renders with initialVerseId without crashing', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
