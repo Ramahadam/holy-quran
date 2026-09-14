@@ -1685,7 +1685,11 @@ void main() {
         page: 4,
       );
 
-      for (final size in const [Size(360, 640), Size(411, 914)]) {
+      for (final size in const [
+        Size(360, 640),
+        Size(411, 914),
+        Size(430, 932),
+      ]) {
         tester.view.physicalSize = size;
         await tester.pumpWidget(
           ProviderScope(
@@ -1724,6 +1728,9 @@ void main() {
           ),
         );
         final bodyRect = tester.getRect(bodyTextFinder);
+
+        final initialPageRect = tester.getRect(find.byType(MushafQcfPage));
+        final initialBodyRect = bodyRect;
 
         expect(stripRect.width, closeTo(size.width, .1));
         expect(stripRect.height, lessThanOrEqualTo(32));
@@ -1774,6 +1781,8 @@ void main() {
         final controlledPageViewRect = tester.getRect(find.byType(PageView));
 
         expect(find.byType(AppBar), findsOneWidget);
+        expect(controlledPageRect, initialPageRect);
+        expect(controlledBodyRect, initialBodyRect);
         expect(
           controlledPageRect.center.dy,
           closeTo(controlledPageViewRect.center.dy, .1),
@@ -1789,6 +1798,16 @@ void main() {
               'Showing controls must keep the last Quran line visible at '
               '$size.',
         );
+
+        await tester.tapAt(controlledPageRect.center);
+        await tester.pump();
+        await tester.pump();
+
+        final hiddenAgainPageRect = tester.getRect(find.byType(MushafQcfPage));
+        final hiddenAgainBodyRect = tester.getRect(bodyTextFinder);
+        expect(find.byType(AppBar), findsNothing);
+        expect(hiddenAgainPageRect, initialPageRect);
+        expect(hiddenAgainBodyRect, initialBodyRect);
         expect(tester.takeException(), isNull);
       }
     });

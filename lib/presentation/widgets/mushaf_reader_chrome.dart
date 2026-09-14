@@ -36,14 +36,6 @@ class _MushafReaderChromeState extends State<MushafReaderChrome> {
   }
 
   @override
-  void didUpdateWidget(covariant MushafReaderChrome oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.showControls != widget.showControls) {
-      _scheduleSystemUiUpdate();
-    }
-  }
-
-  @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
@@ -52,37 +44,50 @@ class _MushafReaderChromeState extends State<MushafReaderChrome> {
   void _scheduleSystemUiUpdate() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      SystemChrome.setEnabledSystemUIMode(
-        widget.showControls
-            ? SystemUiMode.edgeToEdge
-            : SystemUiMode.immersiveSticky,
-      );
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showControls ? widget.appBar : null,
-      body: SafeArea(
-        child: Column(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: widget.showControls ? null : widget.onShowControls,
-              child: _MushafPageContextStrip(pageNumber: widget.pageNumber),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.showControls ? null : widget.onShowControls,
+                  child: _MushafPageContextStrip(pageNumber: widget.pageNumber),
+                ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      widget.reader,
+                      if (widget.showPageNumber)
+                        _MushafPageNumberOverlay(pageNumber: widget.pageNumber),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: Stack(
-                children: [
-                  widget.reader,
-                  if (widget.showPageNumber)
-                    _MushafPageNumberOverlay(pageNumber: widget.pageNumber),
-                ],
+          ),
+          if (widget.showControls)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(
+                bottom: false,
+                child: SizedBox(
+                  height: widget.appBar.preferredSize.height,
+                  child: widget.appBar,
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
