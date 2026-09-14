@@ -150,6 +150,16 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  _AyahNavigation(
+                    keyPrefix: 'top',
+                    onPrevious: _canGoPrevious && !_isChangingVerse
+                        ? _goToPreviousAyah
+                        : null,
+                    onNext: _canGoNext && !_isChangingVerse
+                        ? _goToNextAyah
+                        : null,
+                  ),
+                  const SizedBox(height: 24),
                   VerseDetailTafsirSection(verseKey: _verse.verseId),
                   const SizedBox(height: 16),
                   _AyahNavigation(
@@ -209,7 +219,10 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                     _restoreBookmark(
                       context,
                       removedBookmark ??
-                          Bookmark(verseId: verse.verseId, timestamp: DateTime.now()),
+                          Bookmark(
+                            verseId: verse.verseId,
+                            timestamp: DateTime.now(),
+                          ),
                     ),
                   ),
                 )
@@ -219,10 +232,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     }
   }
 
-  Future<void> _restoreBookmark(
-    BuildContext context,
-    Bookmark bookmark,
-  ) async {
+  Future<void> _restoreBookmark(BuildContext context, Bookmark bookmark) async {
     try {
       await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
       ref.invalidate(recentBookmarksProvider);
@@ -317,8 +327,14 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
 class _AyahNavigation extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
+  final String keyPrefix;
 
-  const _AyahNavigation({required this.onPrevious, required this.onNext});
+  const _AyahNavigation({
+    super.key,
+    required this.onPrevious,
+    required this.onNext,
+    this.keyPrefix = '',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +342,11 @@ class _AyahNavigation extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            key: const ValueKey('previousAyahButton'),
+            key: ValueKey(
+              keyPrefix.isEmpty
+                  ? 'previousAyahButton'
+                  : '${keyPrefix}PreviousAyahButton',
+            ),
             onPressed: onPrevious,
             icon: const Icon(Icons.arrow_back_rounded),
             label: Text(context.l10n.previousAyah),
@@ -335,7 +355,11 @@ class _AyahNavigation extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: FilledButton.icon(
-            key: const ValueKey('nextAyahButton'),
+            key: ValueKey(
+              keyPrefix.isEmpty
+                  ? 'nextAyahButton'
+                  : '${keyPrefix}NextAyahButton',
+            ),
             onPressed: onNext,
             icon: const Icon(Icons.arrow_forward_rounded),
             label: Text(context.l10n.nextAyah),
