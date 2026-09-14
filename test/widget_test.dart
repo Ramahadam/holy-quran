@@ -2087,6 +2087,26 @@ void main() {
       expect(tapped, isTrue);
     });
 
+    testWidgets('exposes the row activation to screen readers', (tester) async {
+      final semanticsHandle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SurahTile(surah: classicSurah1, onTap: () {}),
+          ),
+        ),
+      );
+
+      final semantics = tester
+          .getSemantics(find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'))
+          .getSemanticsData();
+
+      expect(semantics.flagsCollection.isButton, isTrue);
+      expect(semantics.hasAction(SemanticsAction.tap), isTrue);
+      semanticsHandle.dispose();
+    });
+
     testWidgets('keeps the Surah index Arabic-only in Arabic mode', (
       tester,
     ) async {

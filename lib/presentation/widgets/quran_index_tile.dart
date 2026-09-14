@@ -32,6 +32,7 @@ class QuranIndexTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticsLabel,
+      onTap: onTap,
       excludeSemantics: true,
       child: Material(
         key: ValueKey('${keyPrefix}Card-$number'),
