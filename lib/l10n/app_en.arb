@@ -96,6 +96,8 @@
   "@surahNumber": {"placeholders": {"number": {"type": "String"}}},
   "removeBookmark": "Remove bookmark",
   "bookmarkRemoved": "Bookmark removed",
+  "bookmarkRemoveFailed": "Bookmark could not be removed",
+  "bookmarkSaveFailed": "Bookmark could not be saved",
   "undo": "Undo",
   "bookmarkRestored": "Bookmark restored",
   "bookmarkRestoreFailed": "Bookmark could not be restored",

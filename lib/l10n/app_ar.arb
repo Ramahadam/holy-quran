@@ -92,6 +92,8 @@
   "surahNumber": "سورة {number}",
   "removeBookmark": "إزالة من المحفوظات",
   "bookmarkRemoved": "أزيلت الآية من المحفوظات",
+  "bookmarkRemoveFailed": "تعذرت إزالة الآية من المحفوظات",
+  "bookmarkSaveFailed": "تعذر حفظ الآية في المحفوظات",
   "undo": "تراجع",
   "bookmarkRestored": "تمت استعادة المحفوظة",
   "bookmarkRestoreFailed": "تعذرت استعادة المحفوظة",

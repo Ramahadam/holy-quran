@@ -301,6 +301,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookmarkRemoved => 'أزيلت الآية من المحفوظات';
 
   @override
+  String get bookmarkRemoveFailed => 'تعذرت إزالة الآية من المحفوظات';
+
+  @override
+  String get bookmarkSaveFailed => 'تعذر حفظ الآية في المحفوظات';
+
+  @override
   String get undo => 'تراجع';
 
   @override

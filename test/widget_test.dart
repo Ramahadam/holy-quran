@@ -41,6 +41,8 @@ class _FakeBookmarkRepository implements BookmarkRepository {
   final addedVerseIds = <String>[];
   final removedVerseIds = <String>[];
   final restoredBookmarks = <Bookmark>[];
+  Object? removeError;
+  Object? saveError;
 
   @override
   Future<void> addBookmark(String verseId, DateTime timestamp) async {
@@ -49,11 +51,15 @@ class _FakeBookmarkRepository implements BookmarkRepository {
 
   @override
   Future<void> saveBookmark(Bookmark bookmark) async {
+    final error = saveError;
+    if (error != null) throw error;
     restoredBookmarks.add(bookmark);
   }
 
   @override
   Future<void> removeBookmark(String verseId) async {
+    final error = removeError;
+    if (error != null) throw error;
     removedVerseIds.add(verseId);
   }
 
@@ -985,6 +991,38 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(repo.restoredBookmarks, [bookmark]);
+    });
+
+    testWidgets('reports a bookmark removal failure without offering undo', (
+      tester,
+    ) async {
+      final repo = _FakeBookmarkRepository()
+        ..removeError = StateError('failed');
+      final bookmark = Bookmark(
+        verseId: '1:1',
+        timestamp: DateTime(2026, 5, 24),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            bookmarkRepositoryProvider.overrideWithValue(repo),
+            surahListProvider.overrideWith((ref) async => [classicSurah1]),
+            lastReadPositionProvider.overrideWith((ref) async => null),
+            recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
+          ],
+          child: MaterialApp(theme: AppTheme.light, home: HomeScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Remove bookmark'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bookmark could not be removed'), findsOneWidget);
+      expect(find.text('Undo'), findsNothing);
+      expect(repo.removedVerseIds, isEmpty);
     });
 
     testWidgets('shows a compact, coordinated home action menu', (

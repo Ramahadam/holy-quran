@@ -309,6 +309,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarkRemoved => 'Bookmark removed';
 
   @override
+  String get bookmarkRemoveFailed => 'Bookmark could not be removed';
+
+  @override
+  String get bookmarkSaveFailed => 'Bookmark could not be saved';
+
+  @override
   String get undo => 'Undo';
 
   @override

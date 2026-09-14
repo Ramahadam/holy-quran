@@ -183,20 +183,32 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     final verse = _verse;
     final repo = ref.read(bookmarkRepositoryProvider);
     Bookmark? removedBookmark;
-    if (isBookmarked) {
-      try {
+    try {
+      if (isBookmarked) {
         for (final bookmark in await repo.getAllBookmarks()) {
           if (bookmark.verseId == verse.verseId) {
             removedBookmark = bookmark;
             break;
           }
         }
-      } catch (_) {
-        // Removing the bookmark should still work if the metadata lookup fails.
+        await repo.removeBookmark(verse.verseId);
+      } else {
+        await repo.addBookmark(verse.verseId, DateTime.now());
       }
-      await repo.removeBookmark(verse.verseId);
-    } else {
-      await repo.addBookmark(verse.verseId, DateTime.now());
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isBookmarked
+                  ? context.l10n.bookmarkRemoveFailed
+                  : context.l10n.bookmarkSaveFailed,
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
     }
 
     ref.invalidate(recentBookmarksProvider);
@@ -237,6 +249,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     try {
       await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
       ref.invalidate(recentBookmarksProvider);
+      ref.invalidate(allBookmarksProvider);
       final surahNumber = int.tryParse(bookmark.verseId.split(':').first);
       if (surahNumber != null) {
         ref.invalidate(bookmarksBySurahProvider(surahNumber));

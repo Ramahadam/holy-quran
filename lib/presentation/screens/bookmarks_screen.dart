@@ -192,7 +192,21 @@ class _BookmarkListTile extends ConsumerWidget {
   }
 
   Future<void> _removeBookmark(BuildContext context, WidgetRef ref) async {
-    await ref.read(bookmarkRepositoryProvider).removeBookmark(bookmark.verseId);
+    try {
+      await ref
+          .read(bookmarkRepositoryProvider)
+          .removeBookmark(bookmark.verseId);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRemoveFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
     ref.invalidate(allBookmarksProvider);
     ref.invalidate(recentBookmarksProvider);
     final surahNumber = int.tryParse(bookmark.verseId.split(':').first);

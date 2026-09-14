@@ -598,7 +598,21 @@ class _BookmarkRow extends ConsumerWidget {
   }
 
   Future<void> _removeBookmark(BuildContext context, WidgetRef ref) async {
-    await ref.read(bookmarkRepositoryProvider).removeBookmark(bookmark.verseId);
+    try {
+      await ref
+          .read(bookmarkRepositoryProvider)
+          .removeBookmark(bookmark.verseId);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRemoveFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
     ref.invalidate(recentBookmarksProvider);
     ref.invalidate(allBookmarksProvider);
     final surahNum = int.tryParse(bookmark.verseId.split(':').first);
@@ -625,6 +639,7 @@ class _BookmarkRow extends ConsumerWidget {
     try {
       await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
       ref.invalidate(recentBookmarksProvider);
+      ref.invalidate(allBookmarksProvider);
       final surahNum = int.tryParse(bookmark.verseId.split(':').first);
       if (surahNum != null) {
         ref.invalidate(bookmarksBySurahProvider(surahNum));
