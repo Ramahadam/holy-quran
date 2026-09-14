@@ -289,6 +289,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarks => 'Bookmarks';
 
   @override
+  String get viewAllBookmarks => 'View all';
+
+  @override
+  String get bookmarksEmpty => 'No saved ayahs yet.';
+
+  @override
+  String get bookmarksLoadError => 'Could not load your bookmarks.';
+
+  @override
   String surahNumber(String number) {
     return 'Surah $number';
   }
