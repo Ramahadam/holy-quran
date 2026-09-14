@@ -183,14 +183,21 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     final verse = _verse;
     final repo = ref.read(bookmarkRepositoryProvider);
     Bookmark? removedBookmark;
-    try {
-      if (isBookmarked) {
+    if (isBookmarked) {
+      try {
         for (final bookmark in await repo.getAllBookmarks()) {
           if (bookmark.verseId == verse.verseId) {
             removedBookmark = bookmark;
             break;
           }
         }
+      } catch (_) {
+        // Removal can proceed with a fallback timestamp if metadata is unavailable.
+      }
+    }
+
+    try {
+      if (isBookmarked) {
         await repo.removeBookmark(verse.verseId);
       } else {
         await repo.addBookmark(verse.verseId, DateTime.now());
