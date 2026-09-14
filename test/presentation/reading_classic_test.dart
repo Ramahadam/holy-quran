@@ -15,6 +15,42 @@ import '../support/reading_test_fixtures.dart';
 
 void main() {
   group('Classic reader', () {
+    testWidgets('marks saved ayahs without recoloring Quran text', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(1).overrideWith((ref) async => 1),
+            classicVersesProvider(
+              1,
+            ).overrideWith((ref) async => [classicVerse1]),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: ReadingScreen(surah: classicSurah1),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is RichText &&
+                  widget.text.toPlainText().contains('\u00a0١ '),
+            )
+            .first,
+      );
+      expect(
+        find.byKey(const ValueKey('ayahBookmarkMarker-1:1')),
+        findsOneWidget,
+      );
+      expect((richText.text as TextSpan).style?.color, AppTheme.primaryText);
+    });
+
     testWidgets('renders with initialVerseId without crashing', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -1219,8 +1255,12 @@ void main() {
         find.textContaining('بِسْمِ', findRichText: true),
       );
       expect(
+        find.byKey(const ValueKey('ayahBookmarkMarker-1:1')),
+        findsOneWidget,
+      );
+      expect(
         (richText.text as TextSpan).style?.color,
-        Theme.of(context).colorScheme.onPrimaryContainer,
+        Theme.of(context).textTheme.headlineLarge?.color,
       );
     });
 

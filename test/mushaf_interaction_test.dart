@@ -126,7 +126,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('bookmark indication is painted on the ayah marker only', (
+  testWidgets('bookmark indication is overlaid beside the ayah marker', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -145,7 +145,36 @@ void main() {
       text.textSpan!,
     ).singleWhere((span) => span.text == getVerseNumberQCF(2, 6));
 
-    expect(verseNumberSpan.style?.backgroundColor, isNotNull);
+    expect(verseNumberSpan.style?.backgroundColor, isNull);
+    expect(
+      find.byKey(const ValueKey('ayahBookmarkMarker-2:6')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('bookmark indication resolves after an inline Surah header', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: MushafSamplePage(page: 604, bookmarkedVerseIds: {'112:1'}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('ayahBookmarkMarker-112:1')),
+      findsOneWidget,
+    );
+    final text = tester.widget<Text>(
+      find.byKey(const ValueKey('mushafPageText-604')),
+    );
+    final verseNumberSpan = _textSpans(
+      text.textSpan!,
+    ).singleWhere((span) => span.text == getVerseNumberQCF(112, 1));
+    expect(verseNumberSpan.style?.backgroundColor, isNull);
   });
 
   testWidgets('keeps Allah glyphs highlighted with public Quran text', (
