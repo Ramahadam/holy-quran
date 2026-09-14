@@ -331,7 +331,6 @@ class _AyahNavigation extends StatelessWidget {
   final String keyPrefix;
 
   const _AyahNavigation({
-    super.key,
     required this.onPrevious,
     required this.onNext,
     this.keyPrefix = '',
