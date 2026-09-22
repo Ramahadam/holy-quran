@@ -2146,7 +2146,9 @@ void main() {
       );
 
       final semantics = tester
-          .getSemantics(find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'))
+          .getSemantics(
+            find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'),
+          )
           .getSemanticsData();
 
       expect(semantics.flagsCollection.isButton, isTrue);
