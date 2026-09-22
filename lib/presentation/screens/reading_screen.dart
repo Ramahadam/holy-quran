@@ -13,6 +13,7 @@ import '../../domain/models/verse.dart';
 import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
+import '../widgets/ayah_bookmark_marker.dart';
 import '../widgets/mushaf_reader_chrome.dart';
 import '../widgets/mushaf_sample_page.dart';
 import '../widgets/reader_app_bar.dart';

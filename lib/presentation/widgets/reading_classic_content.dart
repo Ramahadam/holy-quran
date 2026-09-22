@@ -730,21 +730,25 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final fontSize = _classicFontSizeForWidth(constraints.maxWidth);
-            return RichText(
-              key: _richTextKey,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.justify,
-              textScaler: MediaQuery.textScalerOf(context),
-              textWidthBasis: TextWidthBasis.parent,
-              text: TextSpan(
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontFamily: _kfgqpcHafsFontFamily,
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w400,
-                  height: _classicArabicLineHeight,
-                  color: _baseTextColor(context),
+            return AyahBookmarkMarkerOverlay(
+              markers: _bookmarkMarkers(context),
+              iconSize: fontSize * .72,
+              child: RichText(
+                key: _richTextKey,
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.justify,
+                textScaler: MediaQuery.textScalerOf(context),
+                textWidthBasis: TextWidthBasis.parent,
+                text: TextSpan(
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontFamily: _kfgqpcHafsFontFamily,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w400,
+                    height: _classicArabicLineHeight,
+                    color: Theme.of(context).textTheme.headlineLarge?.color,
+                  ),
+                  children: _buildVerseSpans(context, fontSize),
                 ),
-                children: _buildVerseSpans(context, fontSize),
               ),
             );
           },
@@ -761,14 +765,6 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
       onLongPress: () => _focusVerse(widget.verses.single),
       child: paragraph,
     );
-  }
-
-  Color? _baseTextColor(BuildContext context) {
-    if (widget.verses.length == 1 &&
-        widget.bookmarks.contains(widget.verses.single.verseId)) {
-      return Theme.of(context).colorScheme.onPrimaryContainer;
-    }
-    return Theme.of(context).textTheme.headlineLarge?.color;
   }
 
   ({Verse verse, double top})? firstVisibleVerseWithin(Rect viewport) {
@@ -821,31 +817,17 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
   }
 
   List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {
-    final bookmarkedColor = Theme.of(context).colorScheme.onPrimaryContainer;
     final markerColor = Theme.of(context).brightness == Brightness.light
         ? AppTheme.quranAyahMarker
         : AppTheme.quranGold;
-    final baseStyleIsBookmarked =
-        widget.verses.length == 1 &&
-        widget.bookmarks.contains(widget.verses.single.verseId);
     final spans = <InlineSpan>[];
 
     for (final verse in widget.verses) {
       final recognizer = widget.verses.length == 1
           ? null
           : _verseRecognizer(verse);
-      final verseStyle =
-          widget.bookmarks.contains(verse.verseId) && !baseStyleIsBookmarked
-          ? TextStyle(color: bookmarkedColor)
-          : null;
 
-      spans.addAll(
-        _classicArabicTextSpans(
-          verse,
-          recognizer: recognizer,
-          style: verseStyle,
-        ),
-      );
+      spans.addAll(_classicArabicTextSpans(verse, recognizer: recognizer));
       spans.add(
         TextSpan(
           // A non-breaking space keeps the ayah marker attached to the final
@@ -864,6 +846,32 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
     }
 
     return spans;
+  }
+
+  List<AyahBookmarkMarker> _bookmarkMarkers(BuildContext context) {
+    var textOffset = 0;
+    final markers = <AyahBookmarkMarker>[];
+    for (final verse in widget.verses) {
+      textOffset += _classicDisplayArabicText(verse).length;
+      final markerText = '\u00a0${_toArabicNumeral(verse.verseNumber)} ';
+      final markerRange = TextRange(
+        start: textOffset,
+        end: textOffset + markerText.length,
+      );
+      if (widget.bookmarks.contains(verse.verseId)) {
+        markers.add(
+          AyahBookmarkMarker(
+            verseId: verse.verseId,
+            range: markerRange,
+            semanticsLabel:
+                '${context.l10n.verseNumber(verse.verseNumber.toString())}, '
+                '${context.l10n.bookmarked}',
+          ),
+        );
+      }
+      textOffset += markerText.length;
+    }
+    return markers;
   }
 
   LongPressGestureRecognizer _verseRecognizer(Verse verse) {
@@ -900,33 +908,51 @@ class _ArabicVerse extends StatelessWidget {
             final markerColor = Theme.of(context).brightness == Brightness.light
                 ? AppTheme.quranAyahMarker
                 : AppTheme.quranGold;
-            return RichText(
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.justify,
-              textScaler: MediaQuery.textScalerOf(context),
-              textWidthBasis: TextWidthBasis.parent,
-              text: TextSpan(
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                  fontFamily: _kfgqpcHafsFontFamily,
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w400,
-                  height: _classicArabicLineHeight,
-                  color: isBookmarked
-                      ? Theme.of(context).colorScheme.onPrimaryContainer
-                      : Theme.of(context).textTheme.headlineLarge?.color,
-                ),
-                children: [
-                  ..._classicArabicTextSpans(verse),
-                  TextSpan(
-                    text: ' ${_toArabicNumeral(verse.verseNumber)} ',
-                    style: TextStyle(
-                      color: markerColor,
-                      fontSize: fontSize * _classicAyahMarkerFontScale,
-                      fontWeight: FontWeight.w500,
-                      height: _classicAyahMarkerLineHeight,
-                    ),
+            final markerText = ' ${_toArabicNumeral(verse.verseNumber)} ';
+            return AyahBookmarkMarkerOverlay(
+              markers: isBookmarked
+                  ? [
+                      AyahBookmarkMarker(
+                        verseId: verse.verseId,
+                        range: TextRange(
+                          start: _classicDisplayArabicText(verse).length,
+                          end:
+                              _classicDisplayArabicText(verse).length +
+                              markerText.length,
+                        ),
+                        semanticsLabel:
+                            '${context.l10n.verseNumber(verse.verseNumber.toString())}, '
+                            '${context.l10n.bookmarked}',
+                      ),
+                    ]
+                  : const [],
+              iconSize: fontSize * .72,
+              child: RichText(
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.justify,
+                textScaler: MediaQuery.textScalerOf(context),
+                textWidthBasis: TextWidthBasis.parent,
+                text: TextSpan(
+                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    fontFamily: _kfgqpcHafsFontFamily,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w400,
+                    height: _classicArabicLineHeight,
+                    color: Theme.of(context).textTheme.headlineLarge?.color,
                   ),
-                ],
+                  children: [
+                    ..._classicArabicTextSpans(verse),
+                    TextSpan(
+                      text: markerText,
+                      style: TextStyle(
+                        color: markerColor,
+                        fontSize: fontSize * _classicAyahMarkerFontScale,
+                        fontWeight: FontWeight.w500,
+                        height: _classicAyahMarkerLineHeight,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

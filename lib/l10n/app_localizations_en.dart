@@ -289,6 +289,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarks => 'Bookmarks';
 
   @override
+  String get viewAllBookmarks => 'View all';
+
+  @override
+  String get bookmarksEmpty => 'No saved ayahs yet.';
+
+  @override
+  String get bookmarksLoadError => 'Could not load your bookmarks.';
+
+  @override
   String surahNumber(String number) {
     return 'Surah $number';
   }
@@ -298,6 +307,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookmarkRemoved => 'Bookmark removed';
+
+  @override
+  String get bookmarkRemoveFailed => 'Bookmark could not be removed';
+
+  @override
+  String get bookmarkSaveFailed => 'Bookmark could not be saved';
+
+  @override
+  String get undo => 'Undo';
+
+  @override
+  String get bookmarkRestored => 'Bookmark restored';
+
+  @override
+  String get bookmarkRestoreFailed => 'Bookmark could not be restored';
 
   @override
   String get bookmarked => 'Bookmarked';

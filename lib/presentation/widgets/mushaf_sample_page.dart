@@ -5,6 +5,7 @@ import 'package:qcf_quran/qcf_quran.dart';
 import '../../data/quran/qcf_quran_data_source.dart';
 import '../../l10n/l10n.dart';
 import '../theme/app_theme.dart';
+import 'ayah_bookmark_marker.dart';
 import 'mushaf_hit_testing.dart';
 
 const _qcfBasmalaFontFamily = 'QCF_P001';
@@ -13,7 +14,6 @@ const _referenceBasmalaHeightScale = 1.06;
 const _juz30BasmalaTextScale = 1.0;
 const _juz30BasmalaLineHeight = 1.72;
 const _allahHighlightColor = AppTheme.quranRed;
-const _bookmarkMarkerColor = AppTheme.bookmarkHighlight;
 const _singleSlotChromeAsset =
     'assets/mushaf/chrome/quran_single_slot_centered.png';
 
@@ -482,6 +482,21 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         MediaQuery.of(context).orientation == Orientation.portrait;
     final isOpeningPage = widget.pageNumber == 1 || widget.pageNumber == 2;
     final verseSpans = <InlineSpan>[];
+    final bookmarkMarkers = <AyahBookmarkMarker>[];
+    var textOffset = 0;
+
+    void addSpans(Iterable<InlineSpan> spans) {
+      verseSpans.addAll(spans);
+      for (final span in spans) {
+        textOffset += span
+            .toPlainText(
+              includeSemanticsLabels: false,
+              includePlaceholders: true,
+            )
+            .length;
+      }
+    }
+
     for (final r in ranges) {
       final surah = r.surahNumber;
       final start = r.firstVerse;
@@ -490,23 +505,43 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
       for (var verse = start; verse <= end; verse += 1) {
         if (verse == start && verse == 1) {
           if (widget.theme.showHeader) {
-            verseSpans.add(
+            addSpans([
               WidgetSpan(
                 child: _MushafInlineSurahHeader(
                   surahNumber: surah,
                   contentScale: widget.contentScale,
                 ),
               ),
-            );
+            ]);
           }
           if (widget.theme.showBasmala &&
               widget.pageNumber != 1 &&
               widget.pageNumber != 187) {
-            verseSpans.addAll(_buildInsertedBasmalaSpans(context));
+            addSpans(_buildInsertedBasmalaSpans(context));
           }
         }
 
-        verseSpans.addAll(
+        final displayText = qcfQuranDataSource.verseGlyphs(surah, verse);
+        final verseDisplayText =
+            verse == ranges.first.firstVerse && displayText.isNotEmpty
+            ? '${displayText.substring(0, 1)}\u200A${displayText.substring(1)}'
+            : displayText;
+        final numberText = qcfQuranDataSource.verseNumberGlyph(surah, verse);
+        if (widget.bookmarkedVerseIds.contains('$surah:$verse')) {
+          bookmarkMarkers.add(
+            AyahBookmarkMarker(
+              verseId: '$surah:$verse',
+              range: TextRange(
+                start: textOffset + verseDisplayText.length,
+                end: textOffset + verseDisplayText.length + numberText.length,
+              ),
+              semanticsLabel:
+                  '${context.l10n.verseNumber(verse.toString())}, '
+                  '${context.l10n.bookmarked}',
+            ),
+          );
+        }
+        addSpans(
           _buildVerseSpans(
             surah: surah,
             verse: verse,
@@ -550,7 +585,14 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
         alignment: isOpeningPage
             ? const Alignment(0, .25)
             : Alignment.topCenter,
-        child: SizedBox(width: screenSize.width, child: pageText),
+        child: SizedBox(
+          width: screenSize.width,
+          child: AyahBookmarkMarkerOverlay(
+            markers: bookmarkMarkers,
+            iconSize: baseFontSize * .7,
+            child: pageText,
+          ),
+        ),
       ),
     );
   }
@@ -611,7 +653,6 @@ class _InspiredQcfPageState extends State<_InspiredQcfPage> {
           fontFamily: pageFont,
           package: 'qcf_quran',
           color: widget.theme.verseNumberColor,
-          backgroundColor: isBookmarked ? _bookmarkMarkerColor : null,
           height: widget.theme.verseNumberHeight * widget.h,
         ),
       ),

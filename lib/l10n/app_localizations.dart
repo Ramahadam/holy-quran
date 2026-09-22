@@ -614,6 +614,24 @@ abstract class AppLocalizations {
   /// **'Bookmarks'**
   String get bookmarks;
 
+  /// No description provided for @viewAllBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAllBookmarks;
+
+  /// No description provided for @bookmarksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No saved ayahs yet.'**
+  String get bookmarksEmpty;
+
+  /// No description provided for @bookmarksLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your bookmarks.'**
+  String get bookmarksLoadError;
+
   /// No description provided for @surahNumber.
   ///
   /// In en, this message translates to:
@@ -631,6 +649,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bookmark removed'**
   String get bookmarkRemoved;
+
+  /// No description provided for @bookmarkRemoveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark could not be removed'**
+  String get bookmarkRemoveFailed;
+
+  /// No description provided for @bookmarkSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark could not be saved'**
+  String get bookmarkSaveFailed;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @bookmarkRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark restored'**
+  String get bookmarkRestored;
+
+  /// No description provided for @bookmarkRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark could not be restored'**
+  String get bookmarkRestoreFailed;
 
   /// No description provided for @bookmarked.
   ///

@@ -281,6 +281,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookmarks => 'الآيات المحفوظة';
 
   @override
+  String get viewAllBookmarks => 'عرض الكل';
+
+  @override
+  String get bookmarksEmpty => 'لا توجد آيات محفوظة بعد.';
+
+  @override
+  String get bookmarksLoadError => 'تعذر تحميل الآيات المحفوظة.';
+
+  @override
   String surahNumber(String number) {
     return 'سورة $number';
   }
@@ -290,6 +299,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get bookmarkRemoved => 'أزيلت الآية من المحفوظات';
+
+  @override
+  String get bookmarkRemoveFailed => 'تعذرت إزالة الآية من المحفوظات';
+
+  @override
+  String get bookmarkSaveFailed => 'تعذر حفظ الآية في المحفوظات';
+
+  @override
+  String get undo => 'تراجع';
+
+  @override
+  String get bookmarkRestored => 'تمت استعادة المحفوظة';
+
+  @override
+  String get bookmarkRestoreFailed => 'تعذرت استعادة المحفوظة';
 
   @override
   String get bookmarked => 'تم حفظ الآية';

@@ -370,6 +370,28 @@ void main() {
     expect(find.text('English explanation'), findsOneWidget);
   });
 
+  testWidgets('keeps adjacent navigation reachable beside the ayah card', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          tafsirRepositoryProvider.overrideWithValue(_FakeTafsirRepository()),
+        ],
+        child: const MaterialApp(home: VerseDetailScreen(verse: _verse)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final topNext = find.byKey(const ValueKey('topNextAyahButton'));
+    final topPrevious = find.byKey(const ValueKey('topPreviousAyahButton'));
+    expect(topNext, findsOneWidget);
+    expect(topPrevious, findsOneWidget);
+    expect(tester.getTopLeft(topNext).dy, lessThan(500));
+    expect(tester.getTopLeft(topPrevious).dy, lessThan(500));
+  });
+
   testWidgets('moves between adjacent surahs without leaving study', (
     tester,
   ) async {

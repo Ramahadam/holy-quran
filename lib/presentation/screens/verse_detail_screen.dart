@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/models/bookmark.dart';
 import '../../domain/models/verse.dart';
 import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
@@ -147,6 +150,16 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  _AyahNavigation(
+                    keyPrefix: 'top',
+                    onPrevious: _canGoPrevious && !_isChangingVerse
+                        ? _goToPreviousAyah
+                        : null,
+                    onNext: _canGoNext && !_isChangingVerse
+                        ? _goToNextAyah
+                        : null,
+                  ),
+                  const SizedBox(height: 24),
                   VerseDetailTafsirSection(verseKey: _verse.verseId),
                   const SizedBox(height: 16),
                   _AyahNavigation(
@@ -169,13 +182,44 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
   Future<void> _toggleBookmark(BuildContext context, bool isBookmarked) async {
     final verse = _verse;
     final repo = ref.read(bookmarkRepositoryProvider);
+    Bookmark? removedBookmark;
     if (isBookmarked) {
-      await repo.removeBookmark(verse.verseId);
-    } else {
-      await repo.addBookmark(verse.verseId, DateTime.now());
+      try {
+        for (final bookmark in await repo.getAllBookmarks()) {
+          if (bookmark.verseId == verse.verseId) {
+            removedBookmark = bookmark;
+            break;
+          }
+        }
+      } catch (_) {
+        // Removal can proceed with a fallback timestamp if metadata is unavailable.
+      }
+    }
+
+    try {
+      if (isBookmarked) {
+        await repo.removeBookmark(verse.verseId);
+      } else {
+        await repo.addBookmark(verse.verseId, DateTime.now());
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isBookmarked
+                  ? context.l10n.bookmarkRemoveFailed
+                  : context.l10n.bookmarkSaveFailed,
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
     }
 
     ref.invalidate(recentBookmarksProvider);
+    ref.invalidate(allBookmarksProvider);
     ref.invalidate(bookmarksBySurahProvider(verse.surahNumber));
 
     if (context.mounted) {
@@ -186,10 +230,54 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                 ? context.l10n.bookmarkRemoved
                 : context.l10n.bookmarked,
           ),
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: isBookmarked ? 4 : 2),
           behavior: SnackBarBehavior.floating,
+          action: isBookmarked
+              ? SnackBarAction(
+                  label: context.l10n.undo,
+                  onPressed: () => unawaited(
+                    _restoreBookmark(
+                      context,
+                      removedBookmark ??
+                          Bookmark(
+                            verseId: verse.verseId,
+                            timestamp: DateTime.now(),
+                          ),
+                    ),
+                  ),
+                )
+              : null,
         ),
       );
+    }
+  }
+
+  Future<void> _restoreBookmark(BuildContext context, Bookmark bookmark) async {
+    try {
+      await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
+      ref.invalidate(recentBookmarksProvider);
+      ref.invalidate(allBookmarksProvider);
+      final surahNumber = int.tryParse(bookmark.verseId.split(':').first);
+      if (surahNumber != null) {
+        ref.invalidate(bookmarksBySurahProvider(surahNumber));
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRestored),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.bookmarkRestoreFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -260,8 +348,13 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
 class _AyahNavigation extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
+  final String keyPrefix;
 
-  const _AyahNavigation({required this.onPrevious, required this.onNext});
+  const _AyahNavigation({
+    required this.onPrevious,
+    required this.onNext,
+    this.keyPrefix = '',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -269,7 +362,11 @@ class _AyahNavigation extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            key: const ValueKey('previousAyahButton'),
+            key: ValueKey(
+              keyPrefix.isEmpty
+                  ? 'previousAyahButton'
+                  : '${keyPrefix}PreviousAyahButton',
+            ),
             onPressed: onPrevious,
             icon: const Icon(Icons.arrow_back_rounded),
             label: Text(context.l10n.previousAyah),
@@ -278,7 +375,11 @@ class _AyahNavigation extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: FilledButton.icon(
-            key: const ValueKey('nextAyahButton'),
+            key: ValueKey(
+              keyPrefix.isEmpty
+                  ? 'nextAyahButton'
+                  : '${keyPrefix}NextAyahButton',
+            ),
             onPressed: onNext,
             icon: const Icon(Icons.arrow_forward_rounded),
             label: Text(context.l10n.nextAyah),

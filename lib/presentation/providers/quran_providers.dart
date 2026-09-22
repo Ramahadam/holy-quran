@@ -233,6 +233,10 @@ final recentBookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
   return ref.watch(bookmarkRepositoryProvider).getRecentBookmarks();
 });
 
+final allBookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
+  return ref.watch(bookmarkRepositoryProvider).getAllBookmarks();
+});
+
 final bookmarksBySurahProvider = FutureProvider.family<Set<String>, int>((
   ref,
   surahNumber,
