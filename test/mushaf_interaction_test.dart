@@ -152,6 +152,51 @@ void main() {
     );
   });
 
+  testWidgets('keeps the bookmark beside the text side of the ayah marker', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: MushafSamplePage(page: 3, bookmarkedVerseIds: {'2:6'}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final paragraph = tester.renderObject<RenderParagraph>(
+      find.byKey(const ValueKey('mushafPageText-3')),
+    );
+    final text = tester.widget<Text>(
+      find.byKey(const ValueKey('mushafPageText-3')),
+    );
+    final verseNumber = getVerseNumberQCF(2, 6);
+    final textOffset = text.textSpan!
+        .toPlainText(includeSemanticsLabels: false, includePlaceholders: true)
+        .indexOf(verseNumber);
+    expect(textOffset, greaterThanOrEqualTo(0));
+    final verseNumberBox = paragraph
+        .getBoxesForSelection(
+          TextSelection(
+            baseOffset: textOffset,
+            extentOffset: textOffset + verseNumber.length,
+          ),
+        )
+        .single
+        .toRect();
+    final verseNumberGlobalBox = verseNumberBox.shift(
+      paragraph.localToGlobal(Offset.zero),
+    );
+    final bookmarkBox = tester.getRect(
+      find.byKey(const ValueKey('ayahBookmarkMarker-2:6')),
+    );
+
+    expect(
+      bookmarkBox.left,
+      greaterThanOrEqualTo(verseNumberGlobalBox.right + 2),
+    );
+  });
+
   testWidgets('bookmark indication resolves after an inline Surah header', (
     tester,
   ) async {

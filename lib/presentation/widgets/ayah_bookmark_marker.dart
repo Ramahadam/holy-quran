@@ -20,12 +20,14 @@ class AyahBookmarkMarkerOverlay extends StatefulWidget {
   final Widget child;
   final List<AyahBookmarkMarker> markers;
   final double iconSize;
+  final TextDirection textDirection;
 
   const AyahBookmarkMarkerOverlay({
     super.key,
     required this.child,
     required this.markers,
     this.iconSize = 18,
+    this.textDirection = TextDirection.rtl,
   });
 
   @override
@@ -42,7 +44,8 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
   void didUpdateWidget(covariant AyahBookmarkMarkerOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_sameMarkers(oldWidget.markers, widget.markers) ||
-        oldWidget.iconSize != widget.iconSize) {
+        oldWidget.iconSize != widget.iconSize ||
+        oldWidget.textDirection != widget.textDirection) {
       _positions = const [];
       _scheduleMeasurement();
     }
@@ -109,13 +112,17 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
 
       final box = boxes.last;
       final gap = 2.0;
-      final left = box.left >= widget.iconSize + gap
+      final textSideLeft = widget.textDirection == TextDirection.rtl
+          ? box.right + gap
+          : box.left - widget.iconSize - gap;
+      final outerSideLeft = widget.textDirection == TextDirection.rtl
           ? box.left - widget.iconSize - gap
           : box.right + gap;
-      final clampedLeft = left.clamp(
-        0.0,
-        (paragraph.size.width - widget.iconSize).clamp(0.0, double.infinity),
-      );
+      final maxLeft = paragraph.size.width - widget.iconSize;
+      final left = textSideLeft >= 0 && textSideLeft <= maxLeft
+          ? textSideLeft
+          : outerSideLeft;
+      final clampedLeft = left.clamp(0.0, maxLeft.clamp(0.0, double.infinity));
       nextPositions.add(
         _MarkerPosition(
           marker: marker,
