@@ -17,7 +17,7 @@ const _classicArabicLineHeight = 1.6;
 const _classicAyahMarkerFontScale = 0.88;
 const _classicAyahMarkerLineHeight = 1.0;
 final _classicEmbeddedMarkerPattern = RegExp(
-  r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
+  r'\s*(?:۞|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
 );
 final _whitespacePattern = RegExp(r'\s+');
 

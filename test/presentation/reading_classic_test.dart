@@ -478,6 +478,38 @@ void main() {
       expect(text, isNot(contains('أُو لَـٰٓئِكَ')));
     });
 
+    testWidgets('shows the Sajda sign in An-Najm 53:62', (tester) async {
+      const surah = Surah(
+        surahNumber: 53,
+        nameArabic: 'النجم',
+        nameEnglish: 'The Star',
+        numberOfVerses: 62,
+      );
+      const sajdaVerse = Verse(
+        verseId: '53:62',
+        surahNumber: 53,
+        verseNumber: 62,
+        arabicText: 'فَٱسۡجُدُواْۤ لِلَّهِۤ وَٱعۡبُدُواْ۩',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            startPageForSurahProvider(53).overrideWith((ref) async => 526),
+            classicVersesProvider(53).overrideWith((ref) async => [sajdaVerse]),
+            bookmarksBySurahProvider(53).overrideWith((ref) async => {}),
+          ],
+          child: const MaterialApp(home: ReadingScreen(surah: surah)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final richText = tester.widget<RichText>(
+        find.textContaining('وَٱعۡبُدُواْ', findRichText: true),
+      );
+      expect(richText.text.toPlainText(), contains('وَٱعۡبُدُواْ۩\u00a0٦٢'));
+    });
+
     testWidgets('uses vertical scrolling for Classic and paging for Mushaf', (
       tester,
     ) async {
