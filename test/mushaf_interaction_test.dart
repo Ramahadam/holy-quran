@@ -16,6 +16,20 @@ void main() {
           ),
         ))
         .load();
+    await (FontLoader('packages/qcf_quran/QCF_P604')..addFont(
+          rootBundle.load(
+            'packages/qcf_quran/assets/fonts/qcf4/'
+            'QCF4604_X-Regular.woff',
+          ),
+        ))
+        .load();
+    await (FontLoader('packages/qcf_quran/QCF_P019')..addFont(
+          rootBundle.load(
+            'packages/qcf_quran/assets/fonts/qcf4/'
+            'QCF4019_X-Regular.woff',
+          ),
+        ))
+        .load();
   });
 
   testWidgets('single tap on the page invokes only the page action', (
@@ -152,49 +166,53 @@ void main() {
     );
   });
 
-  testWidgets('keeps the bookmark beside the text side of the ayah marker', (
+  testWidgets('bookmark stays above its ornament across page layouts', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: MushafSamplePage(page: 3, bookmarkedVerseIds: {'2:6'}),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
+    tester.view.devicePixelRatio = 1;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
 
-    final paragraph = tester.renderObject<RenderParagraph>(
-      find.byKey(const ValueKey('mushafPageText-3')),
-    );
-    final text = tester.widget<Text>(
-      find.byKey(const ValueKey('mushafPageText-3')),
-    );
-    final verseNumber = getVerseNumberQCF(2, 6);
-    final textOffset = text.textSpan!
-        .toPlainText(includeSemanticsLabels: false, includePlaceholders: true)
-        .indexOf(verseNumber);
-    expect(textOffset, greaterThanOrEqualTo(0));
-    final verseNumberBox = paragraph
-        .getBoxesForSelection(
-          TextSelection(
-            baseOffset: textOffset,
-            extentOffset: textOffset + verseNumber.length,
+    for (final (page, surah, verse) in const [
+      (3, 2, 6),
+      (19, 2, 120),
+      (604, 112, 1),
+    ]) {
+      final verseId = '$surah:$verse';
+      for (final size in const [Size(360, 800), Size(800, 600)]) {
+        tester.view.physicalSize = size;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: MushafSamplePage(
+                key: ValueKey('$page-$size'),
+                page: page,
+                bookmarkedVerseIds: {verseId},
+              ),
+            ),
           ),
-        )
-        .single
-        .toRect();
-    final verseNumberGlobalBox = verseNumberBox.shift(
-      paragraph.localToGlobal(Offset.zero),
-    );
-    final bookmarkBox = tester.getRect(
-      find.byKey(const ValueKey('ayahBookmarkMarker-2:6')),
-    );
+        );
+        await tester.pumpAndSettle();
 
-    expect(
-      bookmarkBox.left,
-      greaterThanOrEqualTo(verseNumberGlobalBox.right + 2),
-    );
+        final ornament = _ornamentRect(tester, page, surah, verse);
+        final bookmark = tester.getRect(
+          find.byKey(ValueKey('ayahBookmarkMarker-$verseId')),
+        );
+        final pageSurface = tester.getRect(
+          find.byKey(const ValueKey('canonicalMushafPageSurface')),
+        );
+        expect(
+          (bookmark.center.dx - ornament.center.dx).abs(),
+          lessThan(8),
+          reason: '$verseId $size',
+        );
+        expect(bookmark.bottom, lessThan(ornament.center.dy));
+        expect(pageSurface.contains(bookmark.topLeft), isTrue);
+        expect(pageSurface.contains(bookmark.bottomRight), isTrue);
+      }
+    }
   });
 
   testWidgets('bookmark indication resolves after an inline Surah header', (
@@ -220,6 +238,35 @@ void main() {
       text.textSpan!,
     ).singleWhere((span) => span.text == getVerseNumberQCF(112, 1));
     expect(verseNumberSpan.style?.backgroundColor, isNull);
+  });
+
+  testWidgets('adjacent bookmarked ayahs keep separate markers', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: MushafSamplePage(
+            page: 604,
+            bookmarkedVerseIds: {'112:1', '112:2', '112:3', '112:4'},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final markerRects = <Rect>[];
+    for (final verse in const [1, 2, 3, 4]) {
+      final marker = tester.getRect(
+        find.byKey(ValueKey('ayahBookmarkMarker-112:$verse')),
+      );
+      expect(
+        markerRects.every((other) => !other.overlaps(marker)),
+        isTrue,
+        reason: 'Bookmark for 112:$verse overlaps an adjacent bookmark.',
+      );
+      markerRects.add(marker);
+    }
   });
 
   testWidgets('keeps Allah glyphs highlighted with public Quran text', (
@@ -251,4 +298,28 @@ Iterable<TextSpan> _textSpans(InlineSpan span) sync* {
       yield* _textSpans(child);
     }
   }
+}
+
+Rect _ornamentRect(WidgetTester tester, int page, int surah, int verse) {
+  final paragraph = tester.renderObject<RenderParagraph>(
+    find.byKey(ValueKey('mushafPageText-$page')),
+  );
+  final text = tester.widget<Text>(
+    find.byKey(ValueKey('mushafPageText-$page')),
+  );
+  final glyph = getVerseNumberQCF(surah, verse);
+  final offset = text.textSpan!
+      .toPlainText(includeSemanticsLabels: false, includePlaceholders: true)
+      .indexOf(glyph);
+  expect(offset, greaterThanOrEqualTo(0));
+  final rect = paragraph
+      .getBoxesForSelection(
+        TextSelection(baseOffset: offset, extentOffset: offset + glyph.length),
+      )
+      .single
+      .toRect();
+  return Rect.fromPoints(
+    paragraph.localToGlobal(rect.topLeft),
+    paragraph.localToGlobal(rect.bottomRight),
+  );
 }

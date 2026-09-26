@@ -40,7 +40,7 @@ void main() {
             .byWidgetPredicate(
               (widget) =>
                   widget is RichText &&
-                  widget.text.toPlainText().contains('\u00a0١ '),
+                  widget.text.toPlainText().contains('بِسْمِ'),
             )
             .first,
       );
@@ -48,8 +48,67 @@ void main() {
         find.byKey(const ValueKey('ayahBookmarkMarker-1:1')),
         findsOneWidget,
       );
+      expect(
+        (richText.text as TextSpan).children!.whereType<WidgetSpan>(),
+        hasLength(1),
+      );
       expect((richText.text as TextSpan).style?.color, AppTheme.primaryText);
     });
+
+    testWidgets(
+      'keeps multiple saved-ayah icons inside the Classic text flow',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              classicVersesProvider(
+                1,
+              ).overrideWith((ref) async => classicSurahVerses(2)),
+              bookmarksBySurahProvider(
+                1,
+              ).overrideWith((ref) async => {'1:1', '1:2'}),
+            ],
+            child: const MaterialApp(home: ReadingScreen(surah: classicSurah1)),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final richText = tester.widget<RichText>(
+          find
+              .byWidgetPredicate(
+                (widget) =>
+                    widget is RichText &&
+                    widget.text.toPlainText().contains('آية 1'),
+              )
+              .first,
+        );
+        expect(
+          (richText.text as TextSpan).children!.whereType<WidgetSpan>(),
+          hasLength(2),
+        );
+        final first = tester.getRect(
+          find.byKey(const ValueKey('ayahBookmarkMarker-1:1')),
+        );
+        final second = tester.getRect(
+          find.byKey(const ValueKey('ayahBookmarkMarker-1:2')),
+        );
+        expect(first.overlaps(second), isFalse);
+        for (final verse in const [1, 2]) {
+          final inlineMarker = find.byKey(
+            ValueKey('ayahBookmarkMarker-1:$verse'),
+          );
+          final number = tester.getRect(
+            find.descendant(
+              of: inlineMarker,
+              matching: find.text(verse == 1 ? '١' : '٢'),
+            ),
+          );
+          final marker = tester.getRect(inlineMarker);
+          expect(number.center.dy, closeTo(marker.center.dy, 8));
+        }
+      },
+    );
 
     testWidgets('announces the saved ayah reference with its bookmark marker', (
       tester,
