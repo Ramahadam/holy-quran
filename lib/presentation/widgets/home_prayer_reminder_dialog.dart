@@ -372,7 +372,7 @@ class _HomePrayerReminderDialogState
               ),
               hourMinuteTextColor: WidgetStateColor.resolveWith(
                 (states) => states.contains(WidgetState.selected)
-                    ? colors.primary
+                    ? colors.onPrimaryContainer
                     : colors.onSurface,
               ),
               dayPeriodColor: WidgetStateColor.resolveWith(
@@ -382,7 +382,7 @@ class _HomePrayerReminderDialogState
               ),
               dayPeriodTextColor: WidgetStateColor.resolveWith(
                 (states) => states.contains(WidgetState.selected)
-                    ? colors.primary
+                    ? colors.onPrimaryContainer
                     : colors.onSurfaceVariant,
               ),
               shape: RoundedRectangleBorder(

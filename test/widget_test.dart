@@ -93,6 +93,7 @@ class _FakePrayerReminderSettingsStore
 
 class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
   PrayerReminderSettings? scheduledSettings;
+  int scheduleCalls = 0;
   PrayerReminderSettings? snoozedSettings;
   Object? requestPermissionError;
   var canceled = false;
@@ -115,6 +116,7 @@ class _FakePrayerReminderScheduler implements PrayerReminderScheduler {
 
   @override
   Future<void> schedule(PrayerReminderSettings settings) async {
+    scheduleCalls++;
     scheduledSettings = settings;
   }
 
@@ -1421,6 +1423,15 @@ void main() {
         ),
         colors.primaryContainer,
       );
+      for (final foreground in [
+        pickerTheme.hourMinuteTextColor!,
+        pickerTheme.dayPeriodTextColor!,
+      ]) {
+        expect(
+          WidgetStateProperty.resolveAs<Color>(foreground, selected),
+          colors.onPrimaryContainer,
+        );
+      }
     });
 
     testWidgets('uses the modern reminder shell when settings fail to load', (
@@ -1502,11 +1513,18 @@ void main() {
       expect(find.text('Enable reminder'), findsOneWidget);
       await tester.tap(find.text('Enable reminder'));
       await tester.pump();
-      await tester.tap(find.text('Save'));
+      final save = tester
+          .widget<FilledButton>(
+            find.byKey(const ValueKey('reminderSaveAction')),
+          )
+          .onPressed!;
+      save();
+      save();
       await tester.pumpAndSettle();
 
       expect(store.settings.enabled, isTrue);
       expect(scheduler.scheduledSettings?.enabled, isTrue);
+      expect(scheduler.scheduleCalls, 1);
       expect(find.text('Reading reminder scheduled'), findsOneWidget);
     });
 
