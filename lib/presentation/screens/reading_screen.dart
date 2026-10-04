@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -203,8 +204,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         ? context.l10n.mushaf
         : context.l10n.classic;
     final targetIcon = targetMode == ReadingMode.mushaf
-        ? Icons.image_outlined
-        : Icons.menu_book;
+        ? CupertinoIcons.doc_plaintext
+        : CupertinoIcons.book;
 
     return ReaderAppBar(
       surahName: widget.surah.nameArabic,

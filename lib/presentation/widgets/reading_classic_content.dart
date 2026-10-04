@@ -29,7 +29,7 @@ WidgetSpan _classicBookmarkedAyahSpan(
     textDirection: TextDirection.rtl,
     children: [
       Icon(
-        Icons.bookmark_rounded,
+        CupertinoIcons.bookmark_fill,
         color: Theme.of(context).colorScheme.primary,
         size: fontSize * .72,
       ),

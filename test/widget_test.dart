@@ -2275,7 +2275,7 @@ void main() {
       );
       expect(englishText.style?.fontSize, lessThanOrEqualTo(30));
       expect(find.text(classicVerse1.arabicText), findsNothing);
-      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+      expect(find.byTooltip('Bookmark verse'), findsOneWidget);
     });
 
     testWidgets('can bookmark the focused verse locally', (tester) async {
@@ -2296,7 +2296,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.bookmark_border));
+      await tester.tap(find.byTooltip('Bookmark verse'));
       await tester.pumpAndSettle();
 
       expect(bookmarkRepo.addedVerseIds, ['1:1']);
@@ -2321,7 +2321,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.bookmark));
+      await tester.tap(find.byTooltip('Remove bookmark'));
       await tester.pumpAndSettle();
 
       expect(bookmarkRepo.removedVerseIds, ['1:1']);

@@ -27,8 +27,6 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final accentWash = colors.primary.withValues(alpha: isDark ? .16 : .08);
 
     return AppBar(
       key: const ValueKey('readerAppBar'),
@@ -46,11 +44,7 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => Navigator.maybePop(context),
           icon: const BackButtonIcon(),
-          style: IconButton.styleFrom(
-            foregroundColor: colors.onSurface,
-            backgroundColor: accentWash,
-            side: BorderSide(color: colors.primary.withValues(alpha: .18)),
-          ),
+          style: IconButton.styleFrom(foregroundColor: colors.onSurface),
         ),
       ),
       titleSpacing: 0,
@@ -97,11 +91,9 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
               label: Text(switchModeLabel),
               style: TextButton.styleFrom(
                 foregroundColor: colors.primary,
-                backgroundColor: accentWash,
-                minimumSize: const Size(0, 40),
+                minimumSize: const Size(48, 48),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 shape: const StadiumBorder(),
-                side: BorderSide(color: colors.primary.withValues(alpha: .18)),
                 textStyle: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
