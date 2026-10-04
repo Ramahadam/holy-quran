@@ -943,6 +943,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Isha'**
   String get isha;
+
+  /// No description provided for @bookmarksSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved ayahs · Continue where you paused'**
+  String bookmarksSummary(int count);
+
+  /// No description provided for @bookmarkExcerptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah excerpt unavailable.'**
+  String get bookmarkExcerptUnavailable;
+
+  /// No description provided for @bookmarkExcerptLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading ayah…'**
+  String get bookmarkExcerptLoading;
 }
 
 class _AppLocalizationsDelegate

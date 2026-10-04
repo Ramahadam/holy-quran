@@ -485,4 +485,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get isha => 'Isha';
+
+  @override
+  String bookmarksSummary(int count) {
+    return '$count saved ayahs · Continue where you paused';
+  }
+
+  @override
+  String get bookmarkExcerptUnavailable => 'Ayah excerpt unavailable.';
+
+  @override
+  String get bookmarkExcerptLoading => 'Loading ayah…';
 }

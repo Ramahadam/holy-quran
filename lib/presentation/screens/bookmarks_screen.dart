@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,10 +56,21 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     return ListView.separated(
       key: const ValueKey('bookmarksList'),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      itemCount: bookmarks.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemCount: bookmarks.length + 1,
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
-        final bookmark = bookmarks[index];
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              context.l10n.bookmarksSummary(bookmarks.length),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+        final bookmark = bookmarks[index - 1];
         final surah = _surahForBookmark(bookmark, surahsByNumber);
         return _BookmarkListTile(
           bookmark: bookmark,
@@ -128,6 +140,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
         SnackBar(
           content: Text(l10n.bookmarkRemoved),
           duration: const Duration(seconds: 4),
+          persist: false,
           behavior: SnackBarBehavior.floating,
           action: SnackBarAction(
             label: l10n.undo,
@@ -211,7 +224,7 @@ class _BookmarksErrorState extends StatelessWidget {
   }
 }
 
-class _BookmarkListTile extends StatelessWidget {
+class _BookmarkListTile extends ConsumerWidget {
   final Bookmark bookmark;
   final Surah? surah;
   final _OpenReading onOpenReading;
@@ -225,7 +238,7 @@ class _BookmarkListTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final verseNumber = bookmark.verseId.split(':').elementAtOrNull(1) ?? '';
     final surahNumber = bookmark.verseId.split(':').first;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -238,10 +251,12 @@ class _BookmarkListTile extends StatelessWidget {
         ? surahName
         : '$surahName · ${context.l10n.verseNumber(verseNumber)}';
 
+    final excerpt = ref.watch(bookmarkVerseProvider(bookmark.verseId));
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         key: ValueKey('bookmarkRow-${bookmark.verseId}'),
@@ -254,15 +269,44 @@ class _BookmarkListTile extends StatelessWidget {
           key: ValueKey('removeBookmark-${bookmark.verseId}'),
           tooltip: context.l10n.removeBookmark,
           style: IconButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            foregroundColor: Theme.of(context).colorScheme.primary,
             minimumSize: const Size.square(48),
             maximumSize: const Size.square(48),
           ),
-          icon: const Icon(Icons.bookmark_rounded, size: 20),
+          icon: const Icon(CupertinoIcons.bookmark, size: 20),
           onPressed: onRemove,
         ),
-        title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
+        title: Text(title, style: Theme.of(context).textTheme.titleSmall),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: excerpt.when(
+            data: (verse) => verse == null
+                ? Text(context.l10n.bookmarkExcerptUnavailable)
+                : Text(
+                    verse.arabicText,
+                    textDirection: TextDirection.rtl,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontFamily: 'KFGQPCHafsUthmanicScript',
+                      height: 1.8,
+                    ),
+                  ),
+            loading: () => Text(context.l10n.bookmarkExcerptLoading),
+            error: (_, _) => Column(
+              key: ValueKey('bookmarkExcerptError-${bookmark.verseId}'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.bookmarkExcerptUnavailable),
+                TextButton(
+                  key: ValueKey('bookmarkExcerptRetry-${bookmark.verseId}'),
+                  onPressed: () =>
+                      ref.invalidate(bookmarkVerseProvider(bookmark.verseId)),
+                  child: Text(context.l10n.retry),
+                ),
+              ],
+            ),
+          ),
+        ),
         trailing: const Icon(Icons.chevron_right_rounded),
       ),
     );
