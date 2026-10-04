@@ -12,7 +12,7 @@ import 'package:holy_quran_app/data/local/entities/surah_entity.dart';
 import 'package:holy_quran_app/data/local/entities/verse_entity.dart';
 import 'package:holy_quran_app/data/repositories/quran_repository_impl.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -235,7 +235,7 @@ Future<void> _initializeIsarForTests() async {
       jsonDecode(await packageConfigFile.readAsString()) as Map;
   final packages = packageConfig['packages'] as List;
   final isarFlutterLibs = packages.cast<Map>().singleWhere(
-    (package) => package['name'] == 'isar_flutter_libs',
+    (package) => package['name'] == 'isar_community_flutter_libs',
   );
   final packageRoot = Directory.fromUri(
     packageConfigFile.absolute.uri.resolve(

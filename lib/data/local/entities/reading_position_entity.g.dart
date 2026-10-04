@@ -23,12 +23,9 @@ const ReadingPositionEntitySchema = CollectionSchema(
       name: r'lastReadAt',
       type: IsarType.dateTime,
     ),
-    r'verseId': PropertySchema(
-      id: 1,
-      name: r'verseId',
-      type: IsarType.string,
-    )
+    r'verseId': PropertySchema(id: 1, name: r'verseId', type: IsarType.string),
   },
+
   estimateSize: _readingPositionEntityEstimateSize,
   serialize: _readingPositionEntitySerialize,
   deserialize: _readingPositionEntityDeserialize,
@@ -37,10 +34,11 @@ const ReadingPositionEntitySchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _readingPositionEntityGetId,
   getLinks: _readingPositionEntityGetLinks,
   attach: _readingPositionEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _readingPositionEntityEstimateSize(
@@ -97,39 +95,45 @@ Id _readingPositionEntityGetId(ReadingPositionEntity object) {
 }
 
 List<IsarLinkBase<dynamic>> _readingPositionEntityGetLinks(
-    ReadingPositionEntity object) {
+  ReadingPositionEntity object,
+) {
   return [];
 }
 
 void _readingPositionEntityAttach(
-    IsarCollection<dynamic> col, Id id, ReadingPositionEntity object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  ReadingPositionEntity object,
+) {
   object.id = id;
 }
 
 extension ReadingPositionEntityQueryWhereSort
     on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QWhere> {
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhere>
-      anyId() {
+  anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension ReadingPositionEntityQueryWhere on QueryBuilder<ReadingPositionEntity,
-    ReadingPositionEntity, QWhereClause> {
+extension ReadingPositionEntityQueryWhere
+    on
+        QueryBuilder<
+          ReadingPositionEntity,
+          ReadingPositionEntity,
+          QWhereClause
+        > {
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      idEqualTo(Id id) {
+  idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      idNotEqualTo(Id id) {
+  idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -152,7 +156,7 @@ extension ReadingPositionEntityQueryWhere on QueryBuilder<ReadingPositionEntity,
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      idGreaterThan(Id id, {bool include = false}) {
+  idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -161,7 +165,7 @@ extension ReadingPositionEntityQueryWhere on QueryBuilder<ReadingPositionEntity,
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      idLessThan(Id id, {bool include = false}) {
+  idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -170,185 +174,241 @@ extension ReadingPositionEntityQueryWhere on QueryBuilder<ReadingPositionEntity,
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterWhereClause>
-      idBetween(
+  idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
 
-extension ReadingPositionEntityQueryFilter on QueryBuilder<
-    ReadingPositionEntity, ReadingPositionEntity, QFilterCondition> {
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> idEqualTo(Id value) {
+extension ReadingPositionEntityQueryFilter
+    on
+        QueryBuilder<
+          ReadingPositionEntity,
+          ReadingPositionEntity,
+          QFilterCondition
+        > {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> idBetween(
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> lastReadAtEqualTo(DateTime value) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  lastReadAtEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'lastReadAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastReadAt', value: value),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> lastReadAtGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  lastReadAtGreaterThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'lastReadAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastReadAt',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> lastReadAtLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  lastReadAtLessThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'lastReadAt',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastReadAt',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> lastReadAtBetween(
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  lastReadAtBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'lastReadAt',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastReadAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdLessThan(
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdBetween(
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -356,121 +416,155 @@ extension ReadingPositionEntityQueryFilter on QueryBuilder<
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'verseId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'verseId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-          QAfterFilterCondition>
-      verseIdContains(String value, {bool caseSensitive = true}) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-          QAfterFilterCondition>
-      verseIdMatches(String pattern, {bool caseSensitive = true}) {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'verseId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'verseId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdIsEmpty() {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'verseId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'verseId', value: ''),
+      );
     });
   }
 
-  QueryBuilder<ReadingPositionEntity, ReadingPositionEntity,
-      QAfterFilterCondition> verseIdIsNotEmpty() {
+  QueryBuilder<
+    ReadingPositionEntity,
+    ReadingPositionEntity,
+    QAfterFilterCondition
+  >
+  verseIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'verseId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'verseId', value: ''),
+      );
     });
   }
 }
 
-extension ReadingPositionEntityQueryObject on QueryBuilder<
-    ReadingPositionEntity, ReadingPositionEntity, QFilterCondition> {}
+extension ReadingPositionEntityQueryObject
+    on
+        QueryBuilder<
+          ReadingPositionEntity,
+          ReadingPositionEntity,
+          QFilterCondition
+        > {}
 
-extension ReadingPositionEntityQueryLinks on QueryBuilder<ReadingPositionEntity,
-    ReadingPositionEntity, QFilterCondition> {}
+extension ReadingPositionEntityQueryLinks
+    on
+        QueryBuilder<
+          ReadingPositionEntity,
+          ReadingPositionEntity,
+          QFilterCondition
+        > {}
 
 extension ReadingPositionEntityQuerySortBy
     on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QSortBy> {
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      sortByLastReadAt() {
+  sortByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.asc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      sortByLastReadAtDesc() {
+  sortByLastReadAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.desc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      sortByVerseId() {
+  sortByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      sortByVerseIdDesc() {
+  sortByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
@@ -480,42 +574,42 @@ extension ReadingPositionEntityQuerySortBy
 extension ReadingPositionEntityQuerySortThenBy
     on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QSortThenBy> {
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      thenById() {
+  thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      thenByIdDesc() {
+  thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      thenByLastReadAt() {
+  thenByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.asc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      thenByLastReadAtDesc() {
+  thenByLastReadAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastReadAt', Sort.desc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      thenByVerseId() {
+  thenByVerseId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.asc);
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QAfterSortBy>
-      thenByVerseIdDesc() {
+  thenByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
@@ -525,22 +619,27 @@ extension ReadingPositionEntityQuerySortThenBy
 extension ReadingPositionEntityQueryWhereDistinct
     on QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QDistinct> {
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QDistinct>
-      distinctByLastReadAt() {
+  distinctByLastReadAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lastReadAt');
     });
   }
 
   QueryBuilder<ReadingPositionEntity, ReadingPositionEntity, QDistinct>
-      distinctByVerseId({bool caseSensitive = true}) {
+  distinctByVerseId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseId', caseSensitive: caseSensitive);
     });
   }
 }
 
-extension ReadingPositionEntityQueryProperty on QueryBuilder<
-    ReadingPositionEntity, ReadingPositionEntity, QQueryProperty> {
+extension ReadingPositionEntityQueryProperty
+    on
+        QueryBuilder<
+          ReadingPositionEntity,
+          ReadingPositionEntity,
+          QQueryProperty
+        > {
   QueryBuilder<ReadingPositionEntity, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
@@ -548,14 +647,14 @@ extension ReadingPositionEntityQueryProperty on QueryBuilder<
   }
 
   QueryBuilder<ReadingPositionEntity, DateTime, QQueryOperations>
-      lastReadAtProperty() {
+  lastReadAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lastReadAt');
     });
   }
 
   QueryBuilder<ReadingPositionEntity, String, QQueryOperations>
-      verseIdProperty() {
+  verseIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'verseId');
     });
