@@ -474,4 +474,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get isha => 'العشاء';
+
+  @override
+  String bookmarksSummary(int count) {
+    return '$count آيات محفوظة · تابع من حيث توقفت';
+  }
+
+  @override
+  String get bookmarkExcerptUnavailable => 'تعذر عرض نص الآية.';
+
+  @override
+  String get bookmarkExcerptLoading => 'جارٍ تحميل الآية…';
 }

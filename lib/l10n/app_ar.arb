@@ -140,5 +140,9 @@
   "dhuhr": "الظهر",
   "asr": "العصر",
   "maghrib": "المغرب",
-  "isha": "العشاء"
+  "isha": "العشاء",
+  "bookmarksSummary": "{count} آيات محفوظة · تابع من حيث توقفت",
+  "@bookmarksSummary": {"placeholders": {"count": {"type": "int"}}},
+  "bookmarkExcerptUnavailable": "تعذر عرض نص الآية.",
+  "bookmarkExcerptLoading": "جارٍ تحميل الآية…"
 }

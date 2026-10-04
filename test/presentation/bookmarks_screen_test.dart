@@ -6,12 +6,90 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/data/repositories/bookmark_repository.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
+import 'package:holy_quran_app/domain/models/verse.dart';
 import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/bookmarks_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 
 void main() {
+  for (final locale in ['en', 'ar']) {
+    testWidgets('bookmark actions fit narrow $locale with large text', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        _TestApp(
+          locale: Locale(locale),
+          textScale: 2,
+          overrides: [
+            allBookmarksProvider.overrideWith(
+              (ref) async => [_bookmark('1:1')],
+            ),
+            surahListProvider.overrideWith((ref) async => const [_surah]),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const ValueKey('removeBookmark-1:1')), findsOneWidget);
+    });
+  }
+
+  testWidgets('shows repository excerpts with isolated retry on failure', (
+    tester,
+  ) async {
+    var fail = true;
+    await tester.pumpWidget(
+      _TestApp(
+        overrides: [
+          allBookmarksProvider.overrideWith((ref) async => [_bookmark('1:1')]),
+          surahListProvider.overrideWith((ref) async => const [_surah]),
+          bookmarkVerseProvider.overrideWith((ref, id) async {
+            if (fail) throw StateError('excerpt unavailable');
+            return const Verse(
+              verseId: '1:1',
+              surahNumber: 1,
+              verseNumber: 1,
+              arabicText: 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+            );
+          }),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('bookmarkExcerptError-1:1')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('bookmarkRow-1:1')), findsOneWidget);
+    fail = false;
+    await tester.tap(find.byKey(const ValueKey('bookmarkExcerptRetry-1:1')));
+    await tester.pumpAndSettle();
+    expect(find.text('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'), findsOneWidget);
+  });
+
+  testWidgets('Undo feedback expires automatically', (tester) async {
+    final repository = _MemoryBookmarkRepository([_bookmark('1:1')]);
+    await tester.pumpWidget(
+      _TestApp(
+        overrides: [
+          bookmarkRepositoryProvider.overrideWithValue(repository),
+          surahListProvider.overrideWith((ref) async => const [_surah]),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('removeBookmark-1:1')));
+    await tester.pumpAndSettle();
+    expect(find.text('Undo'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(find.text('Undo'), findsNothing);
+  });
   testWidgets(
     'lists every bookmark in one scrollable list and opens its VerseID',
     (tester) async {
@@ -170,17 +248,33 @@ const _surah = Surah(
 
 class _TestApp extends StatelessWidget {
   final List<Override> overrides;
+  final Locale locale;
+  final double textScale;
 
-  const _TestApp({required this.overrides});
+  const _TestApp({
+    required this.overrides,
+    this.locale = const Locale('en'),
+    this.textScale = 1,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
       key: UniqueKey(),
-      overrides: overrides,
+      overrides: [
+        bookmarkVerseProvider.overrideWith((ref, id) async => null),
+        ...overrides,
+      ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: locale,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         home: const BookmarksScreen(),
       ),
     );
