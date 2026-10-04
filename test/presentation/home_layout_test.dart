@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
+import 'package:holy_quran_app/data/notifications/prayer_reminder_settings.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/bookmarks_screen.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
+import 'package:holy_quran_app/presentation/screens/settings_screen.dart';
+import 'package:holy_quran_app/presentation/widgets/home_feedback_dialog.dart';
+import 'package:holy_quran_app/presentation/widgets/home_prayer_reminder_dialog.dart';
+import 'package:holy_quran_app/presentation/widgets/home_backup_passphrase_dialog.dart';
 import '../support/reading_test_fixtures.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 
@@ -37,6 +42,9 @@ Widget _app({
     surahListProvider.overrideWith((ref) async => const [_surah]),
     lastReadPositionProvider.overrideWith((ref) async => position),
     recentBookmarksProvider.overrideWith((ref) async => const []),
+    prayerReminderSettingsProvider.overrideWith(
+      (ref) async => PrayerReminderSettings.defaults,
+    ),
     allBookmarksProvider.overrideWith((ref) async => const []),
     feedbackPromptShouldShowProvider.overrideWith((ref) async => false),
     pageForVerseProvider.overrideWith((ref, id) async => 1),
@@ -76,12 +84,32 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('homeSettingsDestination')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('homeMenu-reminders')), findsOneWidget);
-    expect(
-      find.byKey(const ValueKey('homeMenu-restoreBackup')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('homeMenu-language')), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsOneWidget);
+    expect(find.byKey(const ValueKey('settings-reminders')), findsOneWidget);
+    expect(find.byKey(const ValueKey('settingsLanguage')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('settings-reminders')));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomePrayerReminderDialog), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    final backup = find.byKey(const ValueKey('settings-restore'));
+    await tester.ensureVisible(backup);
+    await tester.tap(backup);
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeBackupPassphraseDialog), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    final feedback = find.byKey(const ValueKey('settings-feedback'));
+    await tester.ensureVisible(feedback);
+    await tester.tap(feedback);
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeFeedbackDialog), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(find.byType(SettingsScreen), findsNothing);
   });
 
   testWidgets('resume opens the exact saved verse and displays its page', (
