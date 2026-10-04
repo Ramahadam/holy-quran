@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
 
 part 'surah_entity.g.dart';

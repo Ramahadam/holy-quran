@@ -18,7 +18,7 @@ import 'package:holy_quran_app/data/repositories/reading_position_repository_imp
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
 import 'package:holy_quran_app/domain/models/surah.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 void main() {
   late Directory databaseDirectory;
@@ -51,6 +51,59 @@ void main() {
   tearDown(() async {
     await IsarService.close();
     await databaseDirectory.delete(recursive: true);
+  });
+
+  test('opens original Isar 3.1 database without losing local state', () async {
+    await IsarService.close();
+    await File('${databaseDirectory.path}/legacy.isar').writeAsBytes(
+      gzip.decode(
+        await File('test/fixtures/isar_3_1/legacy.isar.gz').readAsBytes(),
+      ),
+    );
+    database = await Isar.open(
+      [
+        VerseEntitySchema,
+        SurahEntitySchema,
+        BookmarkEntitySchema,
+        ReadingPositionEntitySchema,
+        QuranDataMetadataEntitySchema,
+      ],
+      directory: databaseDirectory.path,
+      name: 'legacy',
+    );
+    await IsarService.getInstanceForTesting(() async => database);
+    final bookmark = (await bookmarkRepository.getAllBookmarks()).single;
+    expect(bookmark.verseId, '2:255');
+    expect(bookmark.note, 'Legacy bookmark');
+    expect(bookmark.timestamp.toUtc(), DateTime.utc(2026, 1, 1));
+    expect(
+      (await readingPositionRepository.getLastPosition())?.verseId,
+      '18:10',
+    );
+    await readingPositionRepository.savePosition(
+      ReadingPosition(verseId: '18:11', lastReadAt: DateTime.utc(2026, 1, 3)),
+    );
+    await IsarService.close();
+    database = await Isar.open(
+      [
+        VerseEntitySchema,
+        SurahEntitySchema,
+        BookmarkEntitySchema,
+        ReadingPositionEntitySchema,
+        QuranDataMetadataEntitySchema,
+      ],
+      directory: databaseDirectory.path,
+      name: 'legacy',
+    );
+    await IsarService.getInstanceForTesting(() async => database);
+    expect(
+      (await bookmarkRepository.getAllBookmarks()).single.note,
+      'Legacy bookmark',
+    );
+    expect(
+      (await readingPositionRepository.getLastPosition())?.verseId,
+      '18:11',
+    );
   });
 
   test(
@@ -217,7 +270,7 @@ Future<void> _initializeIsarForTests() async {
       jsonDecode(await packageConfigFile.readAsString()) as Map;
   final packages = packageConfig['packages'] as List;
   final isarFlutterLibs = packages.cast<Map>().singleWhere(
-    (package) => package['name'] == 'isar_flutter_libs',
+    (package) => package['name'] == 'isar_community_flutter_libs',
   );
   final packageRoot = Directory.fromUri(
     packageConfigFile.absolute.uri.resolve(

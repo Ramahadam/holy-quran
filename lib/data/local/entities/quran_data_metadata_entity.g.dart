@@ -32,8 +32,9 @@ const QuranDataMetadataEntitySchema = CollectionSchema(
       id: 2,
       name: r'verseCount',
       type: IsarType.long,
-    )
+    ),
   },
+
   estimateSize: _quranDataMetadataEntityEstimateSize,
   serialize: _quranDataMetadataEntitySerialize,
   deserialize: _quranDataMetadataEntityDeserialize,
@@ -42,10 +43,11 @@ const QuranDataMetadataEntitySchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _quranDataMetadataEntityGetId,
   getLinks: _quranDataMetadataEntityGetLinks,
   attach: _quranDataMetadataEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _quranDataMetadataEntityEstimateSize(
@@ -106,39 +108,53 @@ Id _quranDataMetadataEntityGetId(QuranDataMetadataEntity object) {
 }
 
 List<IsarLinkBase<dynamic>> _quranDataMetadataEntityGetLinks(
-    QuranDataMetadataEntity object) {
+  QuranDataMetadataEntity object,
+) {
   return [];
 }
 
 void _quranDataMetadataEntityAttach(
-    IsarCollection<dynamic> col, Id id, QuranDataMetadataEntity object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  QuranDataMetadataEntity object,
+) {
   object.id = id;
 }
 
 extension QuranDataMetadataEntityQueryWhereSort
     on QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QWhere> {
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterWhere>
-      anyId() {
+  anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
     });
   }
 }
 
-extension QuranDataMetadataEntityQueryWhere on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QWhereClause> {
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterWhereClause> idEqualTo(Id id) {
+extension QuranDataMetadataEntityQueryWhere
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QWhereClause
+        > {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterWhereClause
+  >
+  idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterWhereClause> idNotEqualTo(Id id) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterWhereClause
+  >
+  idNotEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -160,8 +176,12 @@ extension QuranDataMetadataEntityQueryWhere on QueryBuilder<
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterWhereClause> idGreaterThan(Id id, {bool include = false}) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterWhereClause
+  >
+  idGreaterThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -169,8 +189,12 @@ extension QuranDataMetadataEntityQueryWhere on QueryBuilder<
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterWhereClause> idLessThan(Id id, {bool include = false}) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterWhereClause
+  >
+  idLessThan(Id id, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -178,74 +202,104 @@ extension QuranDataMetadataEntityQueryWhere on QueryBuilder<
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterWhereClause> idBetween(
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterWhereClause
+  >
+  idBetween(
     Id lowerId,
     Id upperId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
 
-extension QuranDataMetadataEntityQueryFilter on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QFilterCondition> {
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+extension QuranDataMetadataEntityQueryFilter
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QFilterCondition
+        > {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'contentDigest',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'contentDigest',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'contentDigest',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestLessThan(
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'contentDigest',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'contentDigest',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestBetween(
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'contentDigest',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -253,395 +307,491 @@ extension QuranDataMetadataEntityQueryFilter on QueryBuilder<
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'contentDigest',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'contentDigest',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'contentDigest',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'contentDigest',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'contentDigest',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'contentDigest',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-          QAfterFilterCondition>
-      contentDigestContains(String value, {bool caseSensitive = true}) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'contentDigest',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'contentDigest',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-          QAfterFilterCondition>
-      contentDigestMatches(String pattern, {bool caseSensitive = true}) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'contentDigest',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'contentDigest',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestIsEmpty() {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'contentDigest',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'contentDigest', value: ''),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> contentDigestIsNotEmpty() {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  contentDigestIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'contentDigest',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'contentDigest', value: ''),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> idEqualTo(Id value) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> idBetween(
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  idBetween(
     Id lower,
     Id upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> surahCountEqualTo(int value) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  surahCountEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'surahCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'surahCount', value: value),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> surahCountGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  surahCountGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'surahCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'surahCount',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> surahCountLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  surahCountLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'surahCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'surahCount',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> surahCountBetween(
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  surahCountBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'surahCount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'surahCount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> verseCountEqualTo(int value) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  verseCountEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'verseCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'verseCount', value: value),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> verseCountGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  verseCountGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'verseCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'verseCount',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> verseCountLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  verseCountLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'verseCount',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'verseCount',
+          value: value,
+        ),
+      );
     });
   }
 
-  QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity,
-      QAfterFilterCondition> verseCountBetween(
+  QueryBuilder<
+    QuranDataMetadataEntity,
+    QuranDataMetadataEntity,
+    QAfterFilterCondition
+  >
+  verseCountBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'verseCount',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'verseCount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
 
-extension QuranDataMetadataEntityQueryObject on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QFilterCondition> {}
+extension QuranDataMetadataEntityQueryObject
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QFilterCondition
+        > {}
 
-extension QuranDataMetadataEntityQueryLinks on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QFilterCondition> {}
+extension QuranDataMetadataEntityQueryLinks
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QFilterCondition
+        > {}
 
 extension QuranDataMetadataEntityQuerySortBy
     on QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QSortBy> {
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      sortByContentDigest() {
+  sortByContentDigest() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'contentDigest', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      sortByContentDigestDesc() {
+  sortByContentDigestDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'contentDigest', Sort.desc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      sortBySurahCount() {
+  sortBySurahCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahCount', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      sortBySurahCountDesc() {
+  sortBySurahCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahCount', Sort.desc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      sortByVerseCount() {
+  sortByVerseCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseCount', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      sortByVerseCountDesc() {
+  sortByVerseCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseCount', Sort.desc);
     });
   }
 }
 
-extension QuranDataMetadataEntityQuerySortThenBy on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QSortThenBy> {
+extension QuranDataMetadataEntityQuerySortThenBy
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QSortThenBy
+        > {
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenByContentDigest() {
+  thenByContentDigest() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'contentDigest', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenByContentDigestDesc() {
+  thenByContentDigestDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'contentDigest', Sort.desc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenById() {
+  thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenByIdDesc() {
+  thenByIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.desc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenBySurahCount() {
+  thenBySurahCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahCount', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenBySurahCountDesc() {
+  thenBySurahCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahCount', Sort.desc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenByVerseCount() {
+  thenByVerseCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseCount', Sort.asc);
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QAfterSortBy>
-      thenByVerseCountDesc() {
+  thenByVerseCountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseCount', Sort.desc);
     });
   }
 }
 
-extension QuranDataMetadataEntityQueryWhereDistinct on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QDistinct> {
+extension QuranDataMetadataEntityQueryWhereDistinct
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QDistinct
+        > {
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QDistinct>
-      distinctByContentDigest({bool caseSensitive = true}) {
+  distinctByContentDigest({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'contentDigest',
-          caseSensitive: caseSensitive);
+      return query.addDistinctBy(
+        r'contentDigest',
+        caseSensitive: caseSensitive,
+      );
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QDistinct>
-      distinctBySurahCount() {
+  distinctBySurahCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'surahCount');
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, QuranDataMetadataEntity, QDistinct>
-      distinctByVerseCount() {
+  distinctByVerseCount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseCount');
     });
   }
 }
 
-extension QuranDataMetadataEntityQueryProperty on QueryBuilder<
-    QuranDataMetadataEntity, QuranDataMetadataEntity, QQueryProperty> {
+extension QuranDataMetadataEntityQueryProperty
+    on
+        QueryBuilder<
+          QuranDataMetadataEntity,
+          QuranDataMetadataEntity,
+          QQueryProperty
+        > {
   QueryBuilder<QuranDataMetadataEntity, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
@@ -649,21 +799,21 @@ extension QuranDataMetadataEntityQueryProperty on QueryBuilder<
   }
 
   QueryBuilder<QuranDataMetadataEntity, String, QQueryOperations>
-      contentDigestProperty() {
+  contentDigestProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'contentDigest');
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, int, QQueryOperations>
-      surahCountProperty() {
+  surahCountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'surahCount');
     });
   }
 
   QueryBuilder<QuranDataMetadataEntity, int, QQueryOperations>
-      verseCountProperty() {
+  verseCountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'verseCount');
     });

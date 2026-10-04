@@ -17,11 +17,7 @@ const BookmarkEntitySchema = CollectionSchema(
   name: r'BookmarkEntity',
   id: -7369956597930324689,
   properties: {
-    r'note': PropertySchema(
-      id: 0,
-      name: r'note',
-      type: IsarType.string,
-    ),
+    r'note': PropertySchema(id: 0, name: r'note', type: IsarType.string),
     r'surahNumber': PropertySchema(
       id: 1,
       name: r'surahNumber',
@@ -32,12 +28,9 @@ const BookmarkEntitySchema = CollectionSchema(
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
-    r'verseId': PropertySchema(
-      id: 3,
-      name: r'verseId',
-      type: IsarType.string,
-    )
+    r'verseId': PropertySchema(id: 3, name: r'verseId', type: IsarType.string),
   },
+
   estimateSize: _bookmarkEntityEstimateSize,
   serialize: _bookmarkEntitySerialize,
   deserialize: _bookmarkEntityDeserialize,
@@ -54,7 +47,7 @@ const BookmarkEntitySchema = CollectionSchema(
           name: r'verseId',
           type: IndexType.hash,
           caseSensitive: true,
-        )
+        ),
       ],
     ),
     r'surahNumber': IndexSchema(
@@ -67,16 +60,17 @@ const BookmarkEntitySchema = CollectionSchema(
           name: r'surahNumber',
           type: IndexType.value,
           caseSensitive: false,
-        )
+        ),
       ],
-    )
+    ),
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _bookmarkEntityGetId,
   getLinks: _bookmarkEntityGetLinks,
   attach: _bookmarkEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _bookmarkEntityEstimateSize(
@@ -151,7 +145,10 @@ List<IsarLinkBase<dynamic>> _bookmarkEntityGetLinks(BookmarkEntity object) {
 }
 
 void _bookmarkEntityAttach(
-    IsarCollection<dynamic> col, Id id, BookmarkEntity object) {
+  IsarCollection<dynamic> col,
+  Id id,
+  BookmarkEntity object,
+) {
   object.id = id;
 }
 
@@ -204,8 +201,10 @@ extension BookmarkEntityByIndex on IsarCollection<BookmarkEntity> {
     return putAllByIndex(r'verseId', objects);
   }
 
-  List<Id> putAllByVerseIdSync(List<BookmarkEntity> objects,
-      {bool saveLinks = true}) {
+  List<Id> putAllByVerseIdSync(
+    List<BookmarkEntity> objects, {
+    bool saveLinks = true,
+  }) {
     return putAllByIndexSync(r'verseId', objects, saveLinks: saveLinks);
   }
 }
@@ -230,17 +229,16 @@ extension BookmarkEntityQueryWhereSort
 extension BookmarkEntityQueryWhere
     on QueryBuilder<BookmarkEntity, BookmarkEntity, QWhereClause> {
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -263,8 +261,9 @@ extension BookmarkEntityQueryWhere
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idGreaterThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -273,8 +272,9 @@ extension BookmarkEntityQueryWhere
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause> idLessThan(
-      Id id,
-      {bool include = false}) {
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -289,150 +289,169 @@ extension BookmarkEntityQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      verseIdEqualTo(String verseId) {
+  verseIdEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'verseId',
-        value: [verseId],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'verseId', value: [verseId]),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      verseIdNotEqualTo(String verseId) {
+  verseIdNotEqualTo(String verseId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [],
-              upper: [verseId],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [verseId],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'verseId',
+                lower: [],
+                upper: [verseId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'verseId',
+                lower: [verseId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [verseId],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'verseId',
-              lower: [],
-              upper: [verseId],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'verseId',
+                lower: [verseId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'verseId',
+                lower: [],
+                upper: [verseId],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      surahNumberEqualTo(int surahNumber) {
+  surahNumberEqualTo(int surahNumber) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'surahNumber',
-        value: [surahNumber],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'surahNumber',
+          value: [surahNumber],
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      surahNumberNotEqualTo(int surahNumber) {
+  surahNumberNotEqualTo(int surahNumber) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [],
-              upper: [surahNumber],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [surahNumber],
-              includeLower: false,
-              upper: [],
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'surahNumber',
+                lower: [],
+                upper: [surahNumber],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'surahNumber',
+                lower: [surahNumber],
+                includeLower: false,
+                upper: [],
+              ),
+            );
       } else {
         return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [surahNumber],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'surahNumber',
-              lower: [],
-              upper: [surahNumber],
-              includeUpper: false,
-            ));
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'surahNumber',
+                lower: [surahNumber],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'surahNumber',
+                lower: [],
+                upper: [surahNumber],
+                includeUpper: false,
+              ),
+            );
       }
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      surahNumberGreaterThan(
-    int surahNumber, {
-    bool include = false,
-  }) {
+  surahNumberGreaterThan(int surahNumber, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber',
-        lower: [surahNumber],
-        includeLower: include,
-        upper: [],
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'surahNumber',
+          lower: [surahNumber],
+          includeLower: include,
+          upper: [],
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      surahNumberLessThan(
-    int surahNumber, {
-    bool include = false,
-  }) {
+  surahNumberLessThan(int surahNumber, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber',
-        lower: [],
-        upper: [surahNumber],
-        includeUpper: include,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'surahNumber',
+          lower: [],
+          upper: [surahNumber],
+          includeUpper: include,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterWhereClause>
-      surahNumberBetween(
+  surahNumberBetween(
     int lowerSurahNumber,
     int upperSurahNumber, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'surahNumber',
-        lower: [lowerSurahNumber],
-        includeLower: includeLower,
-        upper: [upperSurahNumber],
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'surahNumber',
+          lower: [lowerSurahNumber],
+          includeLower: includeLower,
+          upper: [upperSurahNumber],
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -440,40 +459,38 @@ extension BookmarkEntityQueryWhere
 extension BookmarkEntityQueryFilter
     on QueryBuilder<BookmarkEntity, BookmarkEntity, QFilterCondition> {
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      idGreaterThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idGreaterThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      idLessThan(
-    Id value, {
-    bool include = false,
-  }) {
+  idLessThan(Id value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -484,82 +501,87 @@ extension BookmarkEntityQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteIsNull() {
+  noteIsNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'note',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'note'),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteIsNotNull() {
+  noteIsNotNull() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'note',
-      ));
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'note'),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+  noteEqualTo(String? value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'note',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'note',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteLessThan(
+  noteGreaterThan(
     String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'note',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteBetween(
+  noteLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+  noteBetween(
     String? lower,
     String? upper, {
     bool includeLower = true,
@@ -567,247 +589,250 @@ extension BookmarkEntityQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'note',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'note',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  noteStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'note',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  noteEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'note',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteContains(String value, {bool caseSensitive = true}) {
+  noteContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'note',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'note',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteMatches(String pattern, {bool caseSensitive = true}) {
+  noteMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'note',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'note',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteIsEmpty() {
+  noteIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'note',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'note', value: ''),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      noteIsNotEmpty() {
+  noteIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'note',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'note', value: ''),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      surahNumberEqualTo(int value) {
+  surahNumberEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'surahNumber',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'surahNumber', value: value),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      surahNumberGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  surahNumberGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'surahNumber',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'surahNumber',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      surahNumberLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  surahNumberLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'surahNumber',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'surahNumber',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      surahNumberBetween(
+  surahNumberBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'surahNumber',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'surahNumber',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      timestampEqualTo(DateTime value) {
+  timestampEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'timestamp',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'timestamp', value: value),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      timestampGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  timestampGreaterThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'timestamp',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'timestamp',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      timestampLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
+  timestampLessThan(DateTime value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'timestamp',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'timestamp',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      timestampBetween(
+  timestampBetween(
     DateTime lower,
     DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'timestamp',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'timestamp',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  verseIdEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdLessThan(
+  verseIdGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdBetween(
+  verseIdLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
+  verseIdBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -815,84 +840,86 @@ extension BookmarkEntityQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'verseId',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'verseId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  verseIdStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  verseIdEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdContains(String value, {bool caseSensitive = true}) {
+  verseIdContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'verseId',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'verseId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdMatches(String pattern, {bool caseSensitive = true}) {
+  verseIdMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'verseId',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'verseId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdIsEmpty() {
+  verseIdIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'verseId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'verseId', value: ''),
+      );
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterFilterCondition>
-      verseIdIsNotEmpty() {
+  verseIdIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'verseId',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'verseId', value: ''),
+      );
     });
   }
 }
@@ -918,14 +945,14 @@ extension BookmarkEntityQuerySortBy
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      sortBySurahNumber() {
+  sortBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      sortBySurahNumberDesc() {
+  sortBySurahNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.desc);
     });
@@ -938,7 +965,7 @@ extension BookmarkEntityQuerySortBy
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      sortByTimestampDesc() {
+  sortByTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.desc);
     });
@@ -951,7 +978,7 @@ extension BookmarkEntityQuerySortBy
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      sortByVerseIdDesc() {
+  sortByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
@@ -985,14 +1012,14 @@ extension BookmarkEntityQuerySortThenBy
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      thenBySurahNumber() {
+  thenBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.asc);
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      thenBySurahNumberDesc() {
+  thenBySurahNumberDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'surahNumber', Sort.desc);
     });
@@ -1005,7 +1032,7 @@ extension BookmarkEntityQuerySortThenBy
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      thenByTimestampDesc() {
+  thenByTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.desc);
     });
@@ -1018,7 +1045,7 @@ extension BookmarkEntityQuerySortThenBy
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QAfterSortBy>
-      thenByVerseIdDesc() {
+  thenByVerseIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'verseId', Sort.desc);
     });
@@ -1027,29 +1054,31 @@ extension BookmarkEntityQuerySortThenBy
 
 extension BookmarkEntityQueryWhereDistinct
     on QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> {
-  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> distinctByNote(
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> distinctByNote({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'note', caseSensitive: caseSensitive);
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct>
-      distinctBySurahNumber() {
+  distinctBySurahNumber() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'surahNumber');
     });
   }
 
   QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct>
-      distinctByTimestamp() {
+  distinctByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timestamp');
     });
   }
 
-  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> distinctByVerseId(
-      {bool caseSensitive = true}) {
+  QueryBuilder<BookmarkEntity, BookmarkEntity, QDistinct> distinctByVerseId({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'verseId', caseSensitive: caseSensitive);
     });

@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 import '../../domain/models/bookmark.dart';
 import '../local/entities/bookmark_entity.dart';

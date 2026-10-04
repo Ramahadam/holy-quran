@@ -37,8 +37,8 @@ dependencies:
   flutter_riverpod: ^2.5.1
 
   # Local Database
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
+  isar_community: ^3.3.2
+  isar_community_flutter_libs: ^3.3.2
   path_provider: ^2.1.5
 
   # Backend API
@@ -67,8 +67,8 @@ dev_dependencies:
     sdk: flutter
 
   # Code Generation
-  build_runner: ^2.4.13
-  isar_generator: ^3.1.0+1
+  build_runner: 2.10.5
+  isar_community_generator: ^3.3.2
 
   # Linting
   flutter_lints: ^6.0.0

@@ -36,8 +36,9 @@ const SurahEntitySchema = CollectionSchema(
       id: 3,
       name: r'surahNumber',
       type: IsarType.long,
-    )
+    ),
   },
+
   estimateSize: _surahEntityEstimateSize,
   serialize: _surahEntitySerialize,
   deserialize: _surahEntityDeserialize,
@@ -46,10 +47,11 @@ const SurahEntitySchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _surahEntityGetId,
   getLinks: _surahEntityGetLinks,
   attach: _surahEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _surahEntityEstimateSize(
@@ -118,7 +120,10 @@ List<IsarLinkBase<dynamic>> _surahEntityGetLinks(SurahEntity object) {
 }
 
 void _surahEntityAttach(
-    IsarCollection<dynamic> col, Id id, SurahEntity object) {}
+  IsarCollection<dynamic> col,
+  Id id,
+  SurahEntity object,
+) {}
 
 extension SurahEntityQueryWhereSort
     on QueryBuilder<SurahEntity, SurahEntity, QWhere> {
@@ -133,15 +138,13 @@ extension SurahEntityQueryWhere
     on QueryBuilder<SurahEntity, SurahEntity, QWhereClause> {
   QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idEqualTo(Id id) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: id,
-        upper: id,
-      ));
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idNotEqualTo(
-      Id id) {
+    Id id,
+  ) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -163,8 +166,10 @@ extension SurahEntityQueryWhere
     });
   }
 
-  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idGreaterThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idGreaterThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.greaterThan(lower: id, includeLower: include),
@@ -172,8 +177,10 @@ extension SurahEntityQueryWhere
     });
   }
 
-  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idLessThan(Id id,
-      {bool include = false}) {
+  QueryBuilder<SurahEntity, SurahEntity, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         IdWhereClause.lessThan(upper: id, includeUpper: include),
@@ -188,12 +195,14 @@ extension SurahEntityQueryWhere
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IdWhereClause.between(
-        lower: lowerId,
-        includeLower: includeLower,
-        upper: upperId,
-        includeUpper: includeUpper,
-      ));
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -201,12 +210,12 @@ extension SurahEntityQueryWhere
 extension SurahEntityQueryFilter
     on QueryBuilder<SurahEntity, SurahEntity, QFilterCondition> {
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition> idEqualTo(
-      Id value) {
+    Id value,
+  ) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
     });
   }
 
@@ -215,11 +224,13 @@ extension SurahEntityQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -228,11 +239,13 @@ extension SurahEntityQueryFilter
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'id',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
     });
   }
 
@@ -243,64 +256,69 @@ extension SurahEntityQueryFilter
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'id',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  nameArabicEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'nameArabic',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'nameArabic',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'nameArabic',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicLessThan(
+  nameArabicGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'nameArabic',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'nameArabic',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicBetween(
+  nameArabicLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'nameArabic',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+  nameArabicBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -308,135 +326,140 @@ extension SurahEntityQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'nameArabic',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'nameArabic',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  nameArabicStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'nameArabic',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'nameArabic',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  nameArabicEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'nameArabic',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'nameArabic',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicContains(String value, {bool caseSensitive = true}) {
+  nameArabicContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'nameArabic',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'nameArabic',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicMatches(String pattern, {bool caseSensitive = true}) {
+  nameArabicMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'nameArabic',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'nameArabic',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicIsEmpty() {
+  nameArabicIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'nameArabic',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'nameArabic', value: ''),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameArabicIsNotEmpty() {
+  nameArabicIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'nameArabic',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'nameArabic', value: ''),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishEqualTo(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  nameEnglishEqualTo(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'nameEnglish',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'nameEnglish',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishGreaterThan(
-    String value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'nameEnglish',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishLessThan(
+  nameEnglishGreaterThan(
     String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'nameEnglish',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'nameEnglish',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishBetween(
+  nameEnglishLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'nameEnglish',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
+  nameEnglishBetween(
     String lower,
     String upper, {
     bool includeLower = true,
@@ -444,196 +467,196 @@ extension SurahEntityQueryFilter
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'nameEnglish',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'nameEnglish',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  nameEnglishStartsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'nameEnglish',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'nameEnglish',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
+  nameEnglishEndsWith(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'nameEnglish',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'nameEnglish',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishContains(String value, {bool caseSensitive = true}) {
+  nameEnglishContains(String value, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'nameEnglish',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'nameEnglish',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishMatches(String pattern, {bool caseSensitive = true}) {
+  nameEnglishMatches(String pattern, {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'nameEnglish',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'nameEnglish',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishIsEmpty() {
+  nameEnglishIsEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'nameEnglish',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'nameEnglish', value: ''),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      nameEnglishIsNotEmpty() {
+  nameEnglishIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'nameEnglish',
-        value: '',
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'nameEnglish', value: ''),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      numberOfVersesEqualTo(int value) {
+  numberOfVersesEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'numberOfVerses',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'numberOfVerses', value: value),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      numberOfVersesGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  numberOfVersesGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'numberOfVerses',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'numberOfVerses',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      numberOfVersesLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  numberOfVersesLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'numberOfVerses',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'numberOfVerses',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      numberOfVersesBetween(
+  numberOfVersesBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'numberOfVerses',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'numberOfVerses',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      surahNumberEqualTo(int value) {
+  surahNumberEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'surahNumber',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'surahNumber', value: value),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      surahNumberGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
+  surahNumberGreaterThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'surahNumber',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'surahNumber',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      surahNumberLessThan(
-    int value, {
-    bool include = false,
-  }) {
+  surahNumberLessThan(int value, {bool include = false}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'surahNumber',
-        value: value,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'surahNumber',
+          value: value,
+        ),
+      );
     });
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterFilterCondition>
-      surahNumberBetween(
+  surahNumberBetween(
     int lower,
     int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'surahNumber',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'surahNumber',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
     });
   }
 }
@@ -677,7 +700,7 @@ extension SurahEntityQuerySortBy
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy>
-      sortByNumberOfVersesDesc() {
+  sortByNumberOfVersesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfVerses', Sort.desc);
     });
@@ -741,7 +764,7 @@ extension SurahEntityQuerySortThenBy
   }
 
   QueryBuilder<SurahEntity, SurahEntity, QAfterSortBy>
-      thenByNumberOfVersesDesc() {
+  thenByNumberOfVersesDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'numberOfVerses', Sort.desc);
     });
@@ -762,15 +785,17 @@ extension SurahEntityQuerySortThenBy
 
 extension SurahEntityQueryWhereDistinct
     on QueryBuilder<SurahEntity, SurahEntity, QDistinct> {
-  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNameArabic(
-      {bool caseSensitive = true}) {
+  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNameArabic({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nameArabic', caseSensitive: caseSensitive);
     });
   }
 
-  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNameEnglish(
-      {bool caseSensitive = true}) {
+  QueryBuilder<SurahEntity, SurahEntity, QDistinct> distinctByNameEnglish({
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'nameEnglish', caseSensitive: caseSensitive);
     });
