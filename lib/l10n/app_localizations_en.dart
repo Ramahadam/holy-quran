@@ -22,6 +22,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparingApp => 'Preparing your Digital Sanctuary...';
 
   @override
+  String get quranNavigation => 'Quran';
+
+  @override
+  String get settingsSubtitle => 'Reading preferences and your data';
+
+  @override
+  String get appearanceAndLanguage => 'Appearance and language';
+
+  @override
+  String get appLanguage => 'App language';
+
+  @override
+  String get readingSettings => 'Reading';
+
+  @override
+  String get yourData => 'Your data';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
   String get menu => 'Menu';
 
   @override
@@ -464,4 +485,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get isha => 'Isha';
+
+  @override
+  String bookmarksSummary(int count) {
+    return '$count saved ayahs · Continue where you paused';
+  }
+
+  @override
+  String get bookmarkExcerptUnavailable => 'Ayah excerpt unavailable.';
+
+  @override
+  String get bookmarkExcerptLoading => 'Loading ayah…';
 }

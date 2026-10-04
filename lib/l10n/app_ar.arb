@@ -4,6 +4,13 @@
   "databaseError": "تعذر فتح قاعدة البيانات.\nبيانات قراءتك المحفوظة آمنة. يرجى إعادة المحاولة.",
   "dataLoadError": "تعذر تحميل بيانات القرآن.\nيرجى إعادة المحاولة.",
   "preparingApp": "جارٍ إعداد رحابك الرقمية...",
+  "quranNavigation": "القرآن",
+  "settingsSubtitle": "تجربة قراءة تناسبك",
+  "appearanceAndLanguage": "المظهر واللغة",
+  "appLanguage": "لغة التطبيق",
+  "readingSettings": "القراءة",
+  "yourData": "بياناتك",
+  "settings": "الإعدادات",
   "menu": "القائمة",
   "switchLanguage": "English",
   "darkMode": "الوضع الداكن",
@@ -133,5 +140,9 @@
   "dhuhr": "الظهر",
   "asr": "العصر",
   "maghrib": "المغرب",
-  "isha": "العشاء"
+  "isha": "العشاء",
+  "bookmarksSummary": "{count} آيات محفوظة · تابع من حيث توقفت",
+  "@bookmarksSummary": {"placeholders": {"count": {"type": "int"}}},
+  "bookmarkExcerptUnavailable": "تعذر عرض نص الآية.",
+  "bookmarkExcerptLoading": "جارٍ تحميل الآية…"
 }

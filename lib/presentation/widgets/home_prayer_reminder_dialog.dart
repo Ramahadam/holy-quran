@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,9 +34,11 @@ class _HomePrayerReminderDialogState
 
     return settingsAsync.when(
       loading: () => HomeDialog(
+        scrollable: true,
+        quietHeader: true,
         dialogKey: const ValueKey('homeDialog-remindersLoading'),
         headerKey: const ValueKey('homeDialogHeader-remindersLoading'),
-        icon: Icons.notifications_active_outlined,
+        icon: CupertinoIcons.bell,
         title: l10n.readingReminders,
         subtitle: l10n.loadingReminderSettings,
         content: SizedBox(
@@ -50,9 +53,11 @@ class _HomePrayerReminderDialogState
         actions: [],
       ),
       error: (_, _) => HomeDialog(
+        scrollable: true,
+        quietHeader: true,
         dialogKey: const ValueKey('homeDialog-remindersError'),
         headerKey: const ValueKey('homeDialogHeader-remindersError'),
-        icon: Icons.notifications_off_outlined,
+        icon: CupertinoIcons.bell_slash,
         title: l10n.readingReminders,
         subtitle: l10n.reminderSettingsUnavailable,
         content: HomeDialogNotice(
@@ -86,201 +91,205 @@ class _HomePrayerReminderDialogState
         );
 
         return HomeDialog(
+          scrollable: true,
+          quietHeader: true,
           dialogKey: const ValueKey('homeDialog-reminders'),
           headerKey: const ValueKey('homeDialogHeader-reminders'),
-          icon: Icons.notifications_active_outlined,
+          icon: CupertinoIcons.bell,
           title: l10n.readingReminders,
           subtitle: l10n.reminderSubtitle,
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Material(
-                  key: const ValueKey('reminderEnableCard'),
-                  color: colors.surfaceContainerLow,
-                  shape: sectionShape,
-                  clipBehavior: Clip.antiAlias,
-                  child: SwitchListTile(
-                    contentPadding: const EdgeInsets.fromLTRB(14, 4, 10, 4),
-                    title: Text(
-                      l10n.enableReminder,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: colors.onSurface,
-                        fontWeight: FontWeight.w600,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Material(
+                key: const ValueKey('reminderEnableCard'),
+                color: colors.surface,
+                shape: sectionShape,
+                clipBehavior: Clip.antiAlias,
+                child: SwitchListTile(
+                  contentPadding: const EdgeInsets.fromLTRB(14, 4, 10, 4),
+                  title: Text(
+                    l10n.enableReminder,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colors.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    _enabled
+                        ? l10n.reminderEnabledBody
+                        : l10n.reminderDisabledBody,
+                  ),
+                  value: _enabled,
+                  onChanged: _saving
+                      ? null
+                      : (value) => setState(() => _enabled = value),
+                ),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<PrayerReminderPrayer>(
+                initialValue: _prayer,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(14),
+                icon: const Icon(Icons.expand_more_rounded),
+                decoration: homeDialogInputDecoration(
+                  context,
+                  labelText: l10n.prayer,
+                  prefixIcon: CupertinoIcons.sun_max,
+                ),
+                items: PrayerReminderPrayer.values
+                    .map(
+                      (prayer) => DropdownMenuItem(
+                        value: prayer,
+                        child: Text(
+                          _localizedPrayerLabel(context, prayer),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      _enabled
-                          ? l10n.reminderEnabledBody
-                          : l10n.reminderDisabledBody,
-                    ),
-                    value: _enabled,
-                    onChanged: _saving
-                        ? null
-                        : (value) => setState(() => _enabled = value),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<PrayerReminderPrayer>(
-                  initialValue: _prayer,
-                  isExpanded: true,
-                  borderRadius: BorderRadius.circular(14),
-                  icon: const Icon(Icons.expand_more_rounded),
-                  decoration: homeDialogInputDecoration(
-                    context,
-                    labelText: l10n.prayer,
-                    prefixIcon: Icons.mosque_outlined,
-                  ),
-                  items: PrayerReminderPrayer.values
-                      .map(
-                        (prayer) => DropdownMenuItem(
-                          value: prayer,
-                          child: Text(
-                            _localizedPrayerLabel(context, prayer),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    )
+                    .toList(),
+                onChanged: !controlsEnabled
+                    ? null
+                    : (value) => setState(() {
+                        if (value != null) _prayer = value;
+                      }),
+              ),
+              const SizedBox(height: 12),
+              Material(
+                key: const ValueKey('reminderPrayerTimeCard'),
+                color: colors.surface,
+                shape: sectionShape,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  customBorder: sectionShape,
+                  onTap: controlsEnabled ? _pickPrayerTime : null,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: !controlsEnabled
-                      ? null
-                      : (value) => setState(() {
-                          if (value != null) _prayer = value;
-                        }),
-                ),
-                const SizedBox(height: 12),
-                Material(
-                  key: const ValueKey('reminderPrayerTimeCard'),
-                  color: colors.surfaceContainerLow,
-                  shape: sectionShape,
-                  clipBehavior: Clip.antiAlias,
-                  child: InkWell(
-                    customBorder: sectionShape,
-                    onTap: controlsEnabled ? _pickPrayerTime : null,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: controlsEnabled
-                                  ? colors.primaryContainer
-                                  : colors.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.schedule_rounded,
-                              color: controlsEnabled
-                                  ? colors.onPrimaryContainer
-                                  : colors.onSurfaceVariant.withValues(
-                                      alpha: 0.55,
-                                    ),
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  l10n.prayerTime,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colors.onSurfaceVariant,
+                          child: Icon(
+                            CupertinoIcons.clock,
+                            color: controlsEnabled
+                                ? colors.primary
+                                : colors.onSurfaceVariant.withValues(
+                                    alpha: 0.55,
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _formatTimeOfDay(_prayerTimeMinutes),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: controlsEnabled
-                                        ? colors.onSurface
-                                        : colors.onSurface.withValues(
-                                            alpha: 0.38,
-                                          ),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            size: 20,
                           ),
-                          Icon(
-                            Icons.chevron_right_rounded,
-                            color: colors.onSurfaceVariant.withValues(
-                              alpha: controlsEnabled ? 1 : 0.38,
-                            ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.prayerTime,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colors.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _formatTimeOfDay(_prayerTimeMinutes),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: controlsEnabled
+                                      ? colors.onSurface
+                                      : colors.onSurface.withValues(
+                                          alpha: 0.38,
+                                        ),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: colors.onSurfaceVariant.withValues(
+                            alpha: controlsEnabled ? 1 : 0.38,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<int>(
-                  initialValue: _offsetMinutes,
-                  isExpanded: true,
-                  borderRadius: BorderRadius.circular(14),
-                  icon: const Icon(Icons.expand_more_rounded),
-                  decoration: homeDialogInputDecoration(
-                    context,
-                    labelText: l10n.reminderAfter,
-                    prefixIcon: Icons.notifications_none_rounded,
-                  ),
-                  items: const [0, 5, 10, 15, 20, 30, 45, 60]
-                      .map(
-                        (minutes) => DropdownMenuItem(
-                          value: minutes,
-                          child: Text(
-                            minutes == 0
-                                ? l10n.atPrayerTime
-                                : l10n.minutesShort(minutes),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: !controlsEnabled
-                      ? null
-                      : (value) => setState(() {
-                          if (value != null) _offsetMinutes = value;
-                        }),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                initialValue: _offsetMinutes,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(14),
+                icon: const Icon(Icons.expand_more_rounded),
+                decoration: homeDialogInputDecoration(
+                  context,
+                  labelText: l10n.reminderAfter,
+                  prefixIcon: CupertinoIcons.bell,
                 ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<int>(
-                  initialValue: _snoozeMinutes,
-                  isExpanded: true,
-                  borderRadius: BorderRadius.circular(14),
-                  icon: const Icon(Icons.expand_more_rounded),
-                  decoration: homeDialogInputDecoration(
-                    context,
-                    labelText: l10n.snooze,
-                    prefixIcon: Icons.snooze_rounded,
-                  ),
-                  items: const [5, 10, 15, 30, 45, 60]
-                      .map(
-                        (minutes) => DropdownMenuItem(
-                          value: minutes,
-                          child: Text(
-                            l10n.minutesShort(minutes),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                items:
+                    ([
+                          ...{0, 5, 10, 15, 20, 30, 45, 60, _offsetMinutes},
+                        ]..sort())
+                        .map(
+                          (minutes) => DropdownMenuItem(
+                            value: minutes,
+                            child: Text(
+                              minutes == 0
+                                  ? l10n.atPrayerTime
+                                  : l10n.minutesShort(minutes),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: !controlsEnabled
-                      ? null
-                      : (value) => setState(() {
-                          if (value != null) _snoozeMinutes = value;
-                        }),
+                        )
+                        .toList(),
+                onChanged: !controlsEnabled
+                    ? null
+                    : (value) => setState(() {
+                        if (value != null) _offsetMinutes = value;
+                      }),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                initialValue: _snoozeMinutes,
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(14),
+                icon: const Icon(Icons.expand_more_rounded),
+                decoration: homeDialogInputDecoration(
+                  context,
+                  labelText: l10n.snooze,
+                  prefixIcon: CupertinoIcons.moon_zzz,
                 ),
-              ],
-            ),
+                items:
+                    ([
+                          ...{5, 10, 15, 30, 45, 60, _snoozeMinutes},
+                        ]..sort())
+                        .map(
+                          (minutes) => DropdownMenuItem(
+                            value: minutes,
+                            child: Text(
+                              l10n.minutesShort(minutes),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        )
+                        .toList(),
+                onChanged: !controlsEnabled
+                    ? null
+                    : (value) => setState(() {
+                        if (value != null) _snoozeMinutes = value;
+                      }),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -407,6 +416,7 @@ class _HomePrayerReminderDialogState
   }
 
   Future<void> _save() async {
+    if (_saving) return;
     setState(() => _saving = true);
 
     final settings = PrayerReminderSettings(

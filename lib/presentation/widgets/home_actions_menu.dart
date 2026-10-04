@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
@@ -151,21 +152,10 @@ class HomeActionsMenu extends StatelessWidget {
       child: SizedBox.square(
         dimension: 48,
         child: Center(
-          child: Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: colors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.7),
-              ),
-            ),
-            child: Icon(
-              Icons.more_horiz_rounded,
-              color: colors.onSurfaceVariant,
-              size: 22,
-            ),
+          child: Icon(
+            CupertinoIcons.slider_horizontal_3,
+            color: colors.onSurfaceVariant,
+            size: 24,
           ),
         ),
       ),

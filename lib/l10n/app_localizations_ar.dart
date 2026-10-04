@@ -22,6 +22,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get preparingApp => 'جارٍ إعداد رحابك الرقمية...';
 
   @override
+  String get quranNavigation => 'القرآن';
+
+  @override
+  String get settingsSubtitle => 'تجربة قراءة تناسبك';
+
+  @override
+  String get appearanceAndLanguage => 'المظهر واللغة';
+
+  @override
+  String get appLanguage => 'لغة التطبيق';
+
+  @override
+  String get readingSettings => 'القراءة';
+
+  @override
+  String get yourData => 'بياناتك';
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
   String get menu => 'القائمة';
 
   @override
@@ -453,4 +474,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get isha => 'العشاء';
+
+  @override
+  String bookmarksSummary(int count) {
+    return '$count آيات محفوظة · تابع من حيث توقفت';
+  }
+
+  @override
+  String get bookmarkExcerptUnavailable => 'تعذر عرض نص الآية.';
+
+  @override
+  String get bookmarkExcerptLoading => 'جارٍ تحميل الآية…';
 }

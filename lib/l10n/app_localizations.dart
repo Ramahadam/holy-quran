@@ -122,6 +122,48 @@ abstract class AppLocalizations {
   /// **'Preparing your Digital Sanctuary...'**
   String get preparingApp;
 
+  /// No description provided for @quranNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get quranNavigation;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading preferences and your data'**
+  String get settingsSubtitle;
+
+  /// No description provided for @appearanceAndLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance and language'**
+  String get appearanceAndLanguage;
+
+  /// No description provided for @appLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'App language'**
+  String get appLanguage;
+
+  /// No description provided for @readingSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get readingSettings;
+
+  /// No description provided for @yourData.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get yourData;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
   /// No description provided for @menu.
   ///
   /// In en, this message translates to:
@@ -901,6 +943,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Isha'**
   String get isha;
+
+  /// No description provided for @bookmarksSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved ayahs · Continue where you paused'**
+  String bookmarksSummary(int count);
+
+  /// No description provided for @bookmarkExcerptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah excerpt unavailable.'**
+  String get bookmarkExcerptUnavailable;
+
+  /// No description provided for @bookmarkExcerptLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading ayah…'**
+  String get bookmarkExcerptLoading;
 }
 
 class _AppLocalizationsDelegate

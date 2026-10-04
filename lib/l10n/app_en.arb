@@ -4,6 +4,13 @@
   "databaseError": "Could not open the database.\nYour saved reading data is safe. Please try again.",
   "dataLoadError": "Failed to load Quran data.\nPlease try again.",
   "preparingApp": "Preparing your Digital Sanctuary...",
+  "quranNavigation": "Quran",
+  "settingsSubtitle": "Reading preferences and your data",
+  "appearanceAndLanguage": "Appearance and language",
+  "appLanguage": "App language",
+  "readingSettings": "Reading",
+  "yourData": "Your data",
+  "settings": "Settings",
   "menu": "Menu",
   "switchLanguage": "العربية",
   "darkMode": "Dark mode",
@@ -146,5 +153,9 @@
   "dhuhr": "Dhuhr",
   "asr": "Asr",
   "maghrib": "Maghrib",
-  "isha": "Isha"
+  "isha": "Isha",
+  "bookmarksSummary": "{count} saved ayahs · Continue where you paused",
+  "@bookmarksSummary": {"placeholders": {"count": {"type": "int"}}},
+  "bookmarkExcerptUnavailable": "Ayah excerpt unavailable.",
+  "bookmarkExcerptLoading": "Loading ayah…"
 }

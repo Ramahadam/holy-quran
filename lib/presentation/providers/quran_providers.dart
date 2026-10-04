@@ -245,3 +245,11 @@ final bookmarksBySurahProvider = FutureProvider.family<Set<String>, int>((
       .watch(bookmarkRepositoryProvider)
       .getBookmarkedVerseIdsBySurah(surahNumber);
 });
+
+final bookmarkVerseProvider = FutureProvider.family<Verse?, String>((
+  ref,
+  verseId,
+) async {
+  await ref.watch(initializeDataProvider.future);
+  return ref.watch(quranRepositoryProvider).getVerseById(verseId);
+});
