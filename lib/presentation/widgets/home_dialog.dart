@@ -8,6 +8,8 @@ class HomeDialog extends StatelessWidget {
   final String subtitle;
   final Widget content;
   final List<Widget> actions;
+  final bool scrollable;
+  final bool quietHeader;
 
   const HomeDialog({
     super.key,
@@ -18,6 +20,8 @@ class HomeDialog extends StatelessWidget {
     required this.subtitle,
     required this.content,
     required this.actions,
+    this.scrollable = false,
+    this.quietHeader = false,
   });
 
   @override
@@ -27,7 +31,10 @@ class HomeDialog extends StatelessWidget {
 
     return AlertDialog(
       key: dialogKey,
-      backgroundColor: colors.surfaceContainerHigh,
+      scrollable: scrollable,
+      backgroundColor: quietHeader
+          ? colors.surface
+          : colors.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
       elevation: 8,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -45,10 +52,14 @@ class HomeDialog extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: colors.primaryContainer,
+              color: quietHeader ? Colors.transparent : colors.primaryContainer,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(icon, color: colors.onPrimaryContainer, size: 21),
+            child: Icon(
+              icon,
+              color: quietHeader ? colors.primary : colors.onPrimaryContainer,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
