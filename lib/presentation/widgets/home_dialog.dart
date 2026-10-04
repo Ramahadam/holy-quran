@@ -58,7 +58,7 @@ class HomeDialog extends StatelessWidget {
             child: Icon(
               icon,
               color: quietHeader ? colors.primary : colors.onPrimaryContainer,
-              size: 24,
+              size: quietHeader ? 24 : 21,
             ),
           ),
           const SizedBox(width: 12),
