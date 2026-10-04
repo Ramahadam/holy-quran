@@ -17,6 +17,7 @@ import '../widgets/home_prayer_reminder_dialog.dart';
 import '../widgets/quran_index.dart';
 import 'bookmarks_screen.dart';
 import 'reading_screen.dart';
+import 'settings_screen.dart';
 
 typedef _OpenReading =
     Future<void> Function(Surah surah, {String? initialVerseId});
@@ -73,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       bottomNavigationBar: _HomeNavigation(
         onOpenBookmarks: () => unawaited(_openBookmarksScreen()),
-        settingsMenu: _buildActionsMenu(bottom: true),
+        onOpenSettings: () => unawaited(_openSettingsScreen()),
       ),
       body: surahsAsync.when(
         data: (surahs) {
@@ -119,11 +120,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildActionsMenu({bool bottom = false}) {
+  Widget _buildActionsMenu() {
     final darkModeEnabled = ref.watch(themeModeProvider) == ThemeMode.dark;
     final locale = ref.watch(appLocaleProvider);
     return HomeActionsMenu(
-      buttonKey: bottom ? const ValueKey('homeSettingsDestination') : null,
       darkModeEnabled: darkModeEnabled,
       onSwitchLanguage: () => unawaited(
         ref
@@ -144,12 +144,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       onSaveBackup: () => unawaited(_saveBackup(context)),
       onShareBackup: () => unawaited(_shareBackup(context)),
       onRestoreBackup: () => unawaited(_restoreBackup(context)),
-      child: bottom
-          ? _HomeNavigationLabel(
-              icon: CupertinoIcons.slider_horizontal_3,
-              label: context.l10n.settings,
-            )
-          : null,
+    );
+  }
+
+  Future<void> _openSettingsScreen() {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(
+          onOpenReminders: () => unawaited(_showPrayerReminderDialog(context)),
+          onSendFeedback: () => unawaited(_showFeedbackDialog(context)),
+          onSaveBackup: () => unawaited(_saveBackup(context)),
+          onShareBackup: () => unawaited(_shareBackup(context)),
+          onRestoreBackup: () => unawaited(_restoreBackup(context)),
+        ),
+      ),
     );
   }
 
@@ -455,11 +463,11 @@ class _LastReadBanner extends ConsumerWidget {
 
 class _HomeNavigation extends StatelessWidget {
   final VoidCallback onOpenBookmarks;
-  final Widget settingsMenu;
+  final VoidCallback onOpenSettings;
 
   const _HomeNavigation({
     required this.onOpenBookmarks,
-    required this.settingsMenu,
+    required this.onOpenSettings,
   });
 
   @override
@@ -499,7 +507,16 @@ class _HomeNavigation extends StatelessWidget {
                   ),
                 ),
               ),
-              Expanded(child: settingsMenu),
+              Expanded(
+                child: TextButton(
+                  key: const ValueKey('homeSettingsDestination'),
+                  onPressed: onOpenSettings,
+                  child: _HomeNavigationLabel(
+                    icon: CupertinoIcons.slider_horizontal_3,
+                    label: context.l10n.settings,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

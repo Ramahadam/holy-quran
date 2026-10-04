@@ -14,8 +14,6 @@ enum _HomeMenuAction {
 }
 
 class HomeActionsMenu extends StatelessWidget {
-  final Key? buttonKey;
-  final Widget? child;
   final bool darkModeEnabled;
   final VoidCallback onSwitchLanguage;
   final VoidCallback onToggleDarkMode;
@@ -27,8 +25,6 @@ class HomeActionsMenu extends StatelessWidget {
 
   const HomeActionsMenu({
     super.key,
-    this.buttonKey,
-    this.child,
     required this.darkModeEnabled,
     required this.onSwitchLanguage,
     required this.onToggleDarkMode,
@@ -45,8 +41,8 @@ class HomeActionsMenu extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return PopupMenuButton<_HomeMenuAction>(
-      key: buttonKey ?? const ValueKey('homeMenuButton'),
-      tooltip: child == null ? l10n.menu : l10n.settings,
+      key: const ValueKey('homeMenuButton'),
+      tooltip: l10n.menu,
       position: PopupMenuPosition.under,
       offset: const Offset(0, 4),
       color: colors.surfaceContainerHigh,
@@ -153,18 +149,16 @@ class HomeActionsMenu extends StatelessWidget {
           ),
         ),
       ],
-      child:
-          child ??
-          SizedBox.square(
-            dimension: 48,
-            child: Center(
-              child: Icon(
-                CupertinoIcons.slider_horizontal_3,
-                color: colors.onSurfaceVariant,
-                size: 24,
-              ),
-            ),
+      child: SizedBox.square(
+        dimension: 48,
+        child: Center(
+          child: Icon(
+            CupertinoIcons.slider_horizontal_3,
+            color: colors.onSurfaceVariant,
+            size: 24,
           ),
+        ),
+      ),
     );
   }
 }

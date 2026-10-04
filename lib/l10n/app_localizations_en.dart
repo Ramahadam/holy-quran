@@ -25,6 +25,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quranNavigation => 'Quran';
 
   @override
+  String get settingsSubtitle => 'Reading preferences and your data';
+
+  @override
+  String get appearanceAndLanguage => 'Appearance and language';
+
+  @override
+  String get appLanguage => 'App language';
+
+  @override
+  String get readingSettings => 'Reading';
+
+  @override
+  String get yourData => 'Your data';
+
+  @override
   String get settings => 'Settings';
 
   @override

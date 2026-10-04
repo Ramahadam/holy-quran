@@ -128,6 +128,36 @@ abstract class AppLocalizations {
   /// **'Quran'**
   String get quranNavigation;
 
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading preferences and your data'**
+  String get settingsSubtitle;
+
+  /// No description provided for @appearanceAndLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance and language'**
+  String get appearanceAndLanguage;
+
+  /// No description provided for @appLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'App language'**
+  String get appLanguage;
+
+  /// No description provided for @readingSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get readingSettings;
+
+  /// No description provided for @yourData.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get yourData;
+
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
