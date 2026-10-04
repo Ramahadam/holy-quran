@@ -24,10 +24,6 @@ class QuranIndexTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
-    );
 
     return Semantics(
       button: true,
@@ -36,16 +32,14 @@ class QuranIndexTile extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         key: ValueKey('${keyPrefix}Card-$number'),
-        color: colors.surfaceContainerLow,
-        shape: shape,
+        color: Theme.of(context).scaffoldBackgroundColor,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          customBorder: shape,
           onTap: onTap,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: 76),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
               child: Row(
                 children: [
                   _NumberBadge(
@@ -65,7 +59,7 @@ class QuranIndexTile extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.titleMedium?.copyWith(
                             color: colors.onSurface,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                           textDirection: _containsArabic(title)
                               ? TextDirection.rtl
@@ -135,16 +129,12 @@ class _NumberBadge extends StatelessWidget {
       key: badgeKey,
       width: 44,
       height: 44,
-      decoration: BoxDecoration(
-        color: colors.primaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
       alignment: Alignment.center,
       child: Text(
         '$number',
         style: theme.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: colors.onPrimaryContainer,
+          fontWeight: FontWeight.w400,
+          color: colors.onSurfaceVariant,
         ),
       ),
     );

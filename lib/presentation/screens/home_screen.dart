@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/backup/quran_backup_file_operations.dart';
-import '../../domain/models/bookmark.dart';
 import '../../domain/models/surah.dart';
 import '../../l10n/l10n.dart';
 import '../providers/locale_provider.dart';
@@ -43,62 +43,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = context.l10n;
     final surahsAsync = ref.watch(surahListProvider);
     final lastPositionAsync = ref.watch(lastReadPositionProvider);
-    final bookmarksAsync = ref.watch(recentBookmarksProvider);
     final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
-    final themeMode = ref.watch(themeModeProvider);
-    final darkModeEnabled = themeMode == ThemeMode.dark;
-    final locale = ref.watch(appLocaleProvider);
-
     _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
+        toolbarHeight: 44 + MediaQuery.textScalerOf(context).scale(44),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'القرآن الكريم',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.headlineLarge,
               textDirection: TextDirection.rtl,
             ),
-            Text(l10n.appTitle, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              l10n.appTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ],
         ),
-        actions: [
-          HomeActionsMenu(
-            darkModeEnabled: darkModeEnabled,
-            onSwitchLanguage: () {
-              final nextLocale = locale.languageCode == 'ar'
-                  ? const Locale('en')
-                  : const Locale('ar');
-              unawaited(
-                ref.read(appLocaleProvider.notifier).setLocale(nextLocale),
-              );
-            },
-            onToggleDarkMode: () => unawaited(
-              ref
-                  .read(themeModeProvider.notifier)
-                  .setThemeMode(
-                    darkModeEnabled ? ThemeMode.light : ThemeMode.dark,
-                  ),
-            ),
-            onOpenReminders: () =>
-                unawaited(_showPrayerReminderDialog(context)),
-            onSendFeedback: () => unawaited(_showFeedbackDialog(context)),
-            onSaveBackup: () => unawaited(_saveBackup(context)),
-            onShareBackup: () => unawaited(_shareBackup(context)),
-            onRestoreBackup: () => unawaited(_restoreBackup(context)),
-          ),
-        ],
+        actions: [_buildActionsMenu()],
+      ),
+      bottomNavigationBar: _HomeNavigation(
+        onOpenBookmarks: () => unawaited(_openBookmarksScreen()),
+        settingsMenu: _buildActionsMenu(bottom: true),
       ),
       body: surahsAsync.when(
         data: (surahs) {
           final lastPosition = lastPositionAsync.valueOrNull;
-          final bookmarks = bookmarksAsync.valueOrNull ?? const <Bookmark>[];
-          final surahsByNumber = {
-            for (final surah in surahs) surah.surahNumber: surah,
-          };
           Surah? lastSurah;
           if (lastPosition != null) {
             final surahNum = int.tryParse(
@@ -111,28 +90,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             }
           }
 
-          return Column(
-            children: [
-              if (lastSurah != null)
-                _LastReadBanner(
-                  surah: lastSurah,
-                  verseId: lastPosition!.verseId,
-                  onOpenReading: _openReadingScreen,
-                ),
-              if (bookmarks.isNotEmpty)
-                _BookmarksSection(
-                  bookmarks: bookmarks,
-                  surahsByNumber: surahsByNumber,
-                  onOpenReading: _openReadingScreen,
-                  onViewAll: _openBookmarksScreen,
-                ),
-              Expanded(
-                child: QuranIndex(
-                  surahs: surahs,
-                  onOpenReading: _openReadingScreen,
-                ),
-              ),
-            ],
+          return QuranIndex(
+            surahs: surahs,
+            onOpenReading: _openReadingScreen,
+            header: lastSurah == null
+                ? null
+                : _LastReadBanner(
+                    surah: lastSurah,
+                    verseId: lastPosition!.verseId,
+                    onOpenReading: _openReadingScreen,
+                  ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -149,6 +116,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildActionsMenu({bool bottom = false}) {
+    final darkModeEnabled = ref.watch(themeModeProvider) == ThemeMode.dark;
+    final locale = ref.watch(appLocaleProvider);
+    return HomeActionsMenu(
+      buttonKey: bottom ? const ValueKey('homeSettingsDestination') : null,
+      darkModeEnabled: darkModeEnabled,
+      onSwitchLanguage: () => unawaited(
+        ref
+            .read(appLocaleProvider.notifier)
+            .setLocale(
+              locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar'),
+            ),
+      ),
+      onToggleDarkMode: () => unawaited(
+        ref
+            .read(themeModeProvider.notifier)
+            .setThemeMode(darkModeEnabled ? ThemeMode.light : ThemeMode.dark),
+      ),
+      onOpenReminders: () => unawaited(_showPrayerReminderDialog(context)),
+      onSendFeedback: () => unawaited(_showFeedbackDialog(context)),
+      onSaveBackup: () => unawaited(_saveBackup(context)),
+      onShareBackup: () => unawaited(_shareBackup(context)),
+      onRestoreBackup: () => unawaited(_restoreBackup(context)),
+      child: bottom
+          ? _HomeNavigationLabel(
+              icon: CupertinoIcons.slider_horizontal_3,
+              label: context.l10n.settings,
+            )
+          : null,
     );
   }
 
@@ -357,12 +358,11 @@ class _LastReadBanner extends ConsumerWidget {
     final verseNum = verseId.split(':').elementAtOrNull(1) ?? '';
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final readingLabel = verseNum.isEmpty
-        ? surah.nameArabic
-        : '${surah.nameArabic} · ${context.l10n.verseNumber(verseNum)}';
+    final page = ref.watch(pageForVerseProvider(verseId)).valueOrNull;
+    final readingLabel =
+        '${surah.nameArabic} · ${context.l10n.verseNumber(verseNum)}';
     final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
+      borderRadius: BorderRadius.circular(24),
     );
     void openReading() =>
         unawaited(onOpenReading(surah, initialVerseId: verseId));
@@ -376,60 +376,73 @@ class _LastReadBanner extends ConsumerWidget {
         excludeSemantics: true,
         child: Material(
           key: const ValueKey('continueReadingCard'),
-          color: colors.surfaceContainerLow,
+          color: colors.primary,
           shape: cardShape,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             customBorder: cardShape,
             onTap: openReading,
             child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: colors.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.menu_book_rounded,
-                      color: colors.onPrimaryContainer,
-                      size: 21,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.continueReading,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colors.onPrimary,
+                          ),
+                        ),
+                      ),
+                      Icon(CupertinoIcons.book, color: colors.onPrimary),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    surah.nameArabic,
+                    textDirection: TextDirection.rtl,
+                    textAlign: Directionality.of(context) == TextDirection.rtl
+                        ? TextAlign.right
+                        : TextAlign.left,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: colors.onPrimary,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 8),
+                  Text(
+                    '${context.l10n.verseNumber(verseNum)}${page == null ? '' : ' · ${context.l10n.pageNumber(page)}'}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.onPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    key: const ValueKey('continueReadingButton'),
+                    onPressed: openReading,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: colors.surface,
+                      foregroundColor: colors.primary,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
                       children: [
-                        Text(
-                          context.l10n.continueReading,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          readingLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colors.onSurface,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                        Text(context.l10n.continueReading),
+                        const Icon(Icons.arrow_forward_rounded),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: colors.onSurfaceVariant,
-                    size: 20,
-                  ),
                 ],
               ),
             ),
@@ -440,227 +453,92 @@ class _LastReadBanner extends ConsumerWidget {
   }
 }
 
-class _BookmarksSection extends ConsumerWidget {
-  final List<Bookmark> bookmarks;
-  final Map<int, Surah> surahsByNumber;
-  final _OpenReading onOpenReading;
-  final VoidCallback onViewAll;
+class _HomeNavigation extends StatelessWidget {
+  final VoidCallback onOpenBookmarks;
+  final Widget settingsMenu;
 
-  const _BookmarksSection({
-    required this.bookmarks,
-    required this.surahsByNumber,
-    required this.onOpenReading,
-    required this.onViewAll,
+  const _HomeNavigation({
+    required this.onOpenBookmarks,
+    required this.settingsMenu,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.7)),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Material(
-        key: const ValueKey('bookmarksCard'),
-        color: colors.surfaceContainerLow,
-        shape: cardShape,
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 8, 8, 8),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.bookmark_border_rounded,
-                    color: colors.primary,
-                    size: 19,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    context.l10n.bookmarks,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surface,
+      child: SafeArea(
+        top: false,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: colors.outlineVariant)),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  selected: true,
+                  child: TextButton(
+                    onPressed: () {},
+                    child: _HomeNavigationLabel(
+                      icon: CupertinoIcons.book,
+                      label: context.l10n.quranNavigation,
+                      selected: true,
                     ),
                   ),
-                  const Spacer(),
-                  TextButton(
-                    key: const ValueKey('homeViewAllBookmarks'),
-                    onPressed: onViewAll,
-                    child: Text(context.l10n.viewAllBookmarks),
-                  ),
-                ],
-              ),
-            ),
-            Divider(
-              height: 1,
-              color: colors.outlineVariant.withValues(alpha: 0.7),
-            ),
-            for (var index = 0; index < bookmarks.length; index++) ...[
-              if (index > 0)
-                Divider(
-                  height: 1,
-                  indent: 64,
-                  endIndent: 14,
-                  color: colors.outlineVariant.withValues(alpha: 0.55),
                 ),
-              _BookmarkRow(
-                bookmark: bookmarks[index],
-                surah: _surahForBookmark(bookmarks[index]),
-                onOpenReading: onOpenReading,
               ),
+              Expanded(
+                child: TextButton(
+                  key: const ValueKey('homeBookmarksDestination'),
+                  onPressed: onOpenBookmarks,
+                  child: _HomeNavigationLabel(
+                    icon: CupertinoIcons.bookmark,
+                    label: context.l10n.bookmarks,
+                  ),
+                ),
+              ),
+              Expanded(child: settingsMenu),
             ],
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  Surah? _surahForBookmark(Bookmark bookmark) {
-    final surahNum = int.tryParse(bookmark.verseId.split(':').first);
-    if (surahNum == null) return null;
-    return surahsByNumber[surahNum];
   }
 }
 
-class _BookmarkRow extends ConsumerWidget {
-  final Bookmark bookmark;
-  final Surah? surah;
-  final _OpenReading onOpenReading;
+class _HomeNavigationLabel extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool selected;
 
-  const _BookmarkRow({
-    required this.bookmark,
-    required this.surah,
-    required this.onOpenReading,
+  const _HomeNavigationLabel({
+    required this.icon,
+    required this.label,
+    this.selected = false,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final verseNum = bookmark.verseId.split(':').elementAtOrNull(1) ?? '';
-    final title =
-        surah?.nameArabic ??
-        context.l10n.surahNumber(bookmark.verseId.split(':').first);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return InkWell(
-      onTap: surah == null
-          ? null
-          : () => unawaited(
-              onOpenReading(surah!, initialVerseId: bookmark.verseId),
-            ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 6, 12, 6),
-        child: Row(
-          children: [
-            IconButton(
-              tooltip: context.l10n.removeBookmark,
-              style: IconButton.styleFrom(
-                foregroundColor: colors.onPrimaryContainer,
-                backgroundColor: colors.primaryContainer,
-                minimumSize: const Size.square(48),
-                maximumSize: const Size.square(48),
-                padding: EdgeInsets.zero,
-              ),
-              icon: const Icon(Icons.bookmark_rounded, size: 20),
-              onPressed: () => _removeBookmark(context, ref),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                verseNum.isEmpty
-                    ? title
-                    : '$title · ${context.l10n.verseNumber(verseNum)}',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: colors.onSurfaceVariant,
-              size: 20,
-            ),
-          ],
-        ),
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final color = selected ? colors.primary : colors.onSurfaceVariant;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: color),
+          ),
+        ],
       ),
     );
-  }
-
-  Future<void> _removeBookmark(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref
-          .read(bookmarkRepositoryProvider)
-          .removeBookmark(bookmark.verseId);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.bookmarkRemoveFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
-    ref.invalidate(recentBookmarksProvider);
-    ref.invalidate(allBookmarksProvider);
-    final surahNum = int.tryParse(bookmark.verseId.split(':').first);
-    if (surahNum != null) {
-      ref.invalidate(bookmarksBySurahProvider(surahNum));
-    }
-
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.bookmarkRemoved),
-          duration: const Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-          action: SnackBarAction(
-            label: context.l10n.undo,
-            onPressed: () => unawaited(_restoreBookmark(context, ref)),
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _restoreBookmark(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
-      ref.invalidate(recentBookmarksProvider);
-      ref.invalidate(allBookmarksProvider);
-      final surahNum = int.tryParse(bookmark.verseId.split(':').first);
-      if (surahNum != null) {
-        ref.invalidate(bookmarksBySurahProvider(surahNum));
-      }
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.bookmarkRestored),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.bookmarkRestoreFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
   }
 }

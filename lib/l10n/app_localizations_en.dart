@@ -22,6 +22,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preparingApp => 'Preparing your Digital Sanctuary...';
 
   @override
+  String get quranNavigation => 'Quran';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
   String get menu => 'Menu';
 
   @override
