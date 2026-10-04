@@ -22,6 +22,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get preparingApp => 'جارٍ إعداد رحابك الرقمية...';
 
   @override
+  String get quranNavigation => 'القرآن';
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
   String get menu => 'القائمة';
 
   @override

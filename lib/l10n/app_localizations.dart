@@ -122,6 +122,18 @@ abstract class AppLocalizations {
   /// **'Preparing your Digital Sanctuary...'**
   String get preparingApp;
 
+  /// No description provided for @quranNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get quranNavigation;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
   /// No description provided for @menu.
   ///
   /// In en, this message translates to:

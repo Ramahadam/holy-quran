@@ -64,6 +64,7 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
           bookmark: bookmark,
           surah: surah,
           onOpenReading: _openReadingScreen,
+          onRemove: () => unawaited(_removeBookmark(bookmark)),
         );
       },
     );
@@ -94,6 +95,80 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     );
     if (!mounted) return;
     ref.invalidate(allBookmarksProvider);
+  }
+
+  Future<void> _removeBookmark(Bookmark bookmark) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(bookmarkRepositoryProvider)
+          .removeBookmark(bookmark.verseId);
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookmarkRemoveFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+    ref.invalidate(recentBookmarksProvider);
+    ref.invalidate(allBookmarksProvider);
+    final surahNum = int.tryParse(bookmark.verseId.split(':').first);
+    if (surahNum != null) {
+      ref.invalidate(bookmarksBySurahProvider(surahNum));
+    }
+
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.bookmarkRemoved),
+          duration: const Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: l10n.undo,
+            onPressed: () => unawaited(_restoreBookmark(bookmark)),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _restoreBookmark(Bookmark bookmark) async {
+    if (!mounted) return;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
+      if (!mounted) return;
+      ref.invalidate(recentBookmarksProvider);
+      ref.invalidate(allBookmarksProvider);
+      final surahNum = int.tryParse(bookmark.verseId.split(':').first);
+      if (surahNum != null) {
+        ref.invalidate(bookmarksBySurahProvider(surahNum));
+      }
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookmarkRestored),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookmarkRestoreFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _retry() {
@@ -136,19 +211,21 @@ class _BookmarksErrorState extends StatelessWidget {
   }
 }
 
-class _BookmarkListTile extends ConsumerWidget {
+class _BookmarkListTile extends StatelessWidget {
   final Bookmark bookmark;
   final Surah? surah;
   final _OpenReading onOpenReading;
+  final VoidCallback onRemove;
 
   const _BookmarkListTile({
     required this.bookmark,
     required this.surah,
     required this.onOpenReading,
+    required this.onRemove,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final verseNumber = bookmark.verseId.split(':').elementAtOrNull(1) ?? '';
     final surahNumber = bookmark.verseId.split(':').first;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -183,43 +260,10 @@ class _BookmarkListTile extends ConsumerWidget {
             maximumSize: const Size.square(48),
           ),
           icon: const Icon(Icons.bookmark_rounded, size: 20),
-          onPressed: () => _removeBookmark(context, ref),
+          onPressed: onRemove,
         ),
         title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
         trailing: const Icon(Icons.chevron_right_rounded),
-      ),
-    );
-  }
-
-  Future<void> _removeBookmark(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref
-          .read(bookmarkRepositoryProvider)
-          .removeBookmark(bookmark.verseId);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.bookmarkRemoveFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
-    ref.invalidate(allBookmarksProvider);
-    ref.invalidate(recentBookmarksProvider);
-    final surahNumber = int.tryParse(bookmark.verseId.split(':').first);
-    if (surahNumber != null) {
-      ref.invalidate(bookmarksBySurahProvider(surahNumber));
-    }
-
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.bookmarkRemoved),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

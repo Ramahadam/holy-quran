@@ -85,7 +85,9 @@ void main() {
     expect(find.byKey(const ValueKey('bookmarksErrorState')), findsOneWidget);
   });
 
-  testWidgets('removing a bookmark refreshes the full list', (tester) async {
+  testWidgets('removing and undoing a bookmark survive list refresh', (
+    tester,
+  ) async {
     final repository = _MemoryBookmarkRepository([
       _bookmark('1:1'),
       _bookmark('1:2'),
@@ -106,6 +108,10 @@ void main() {
 
     expect(find.byKey(const ValueKey('bookmarkRow-1:1')), findsNothing);
     expect(find.byKey(const ValueKey('bookmarkRow-1:2')), findsOneWidget);
+    await tester.tap(find.text('Undo'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('bookmarkRow-1:1')), findsOneWidget);
+    expect(repository.bookmarks, contains(_bookmark('1:1')));
   });
 }
 

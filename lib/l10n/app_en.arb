@@ -4,6 +4,8 @@
   "databaseError": "Could not open the database.\nYour saved reading data is safe. Please try again.",
   "dataLoadError": "Failed to load Quran data.\nPlease try again.",
   "preparingApp": "Preparing your Digital Sanctuary...",
+  "quranNavigation": "Quran",
+  "settings": "Settings",
   "menu": "Menu",
   "switchLanguage": "العربية",
   "darkMode": "Dark mode",

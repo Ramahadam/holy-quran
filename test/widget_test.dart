@@ -830,67 +830,51 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Continue Reading'), findsOneWidget);
+      expect(find.text('Continue Reading'), findsNWidgets(2));
       expect(find.textContaining('الفاتحة'), findsWidgets);
       expect(find.textContaining('Verse 3'), findsOneWidget);
     });
 
-    testWidgets('styles reading shortcuts as modern inset cards', (
+    testWidgets('resume card and bottom navigation expose accessible actions', (
       tester,
     ) async {
       final semantics = tester.ensureSemantics();
-      final position = ReadingPosition(
-        verseId: '1:3',
-        lastReadAt: DateTime(2026, 5, 24),
-      );
-      final bookmark = Bookmark(
-        verseId: '1:1',
-        timestamp: DateTime(2026, 5, 24),
-      );
-
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             surahListProvider.overrideWith((ref) async => [classicSurah1]),
-            lastReadPositionProvider.overrideWith((ref) async => position),
-            recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
+            lastReadPositionProvider.overrideWith(
+              (ref) async =>
+                  ReadingPosition(verseId: '1:3', lastReadAt: DateTime(2026)),
+            ),
+            pageForVerseProvider('1:3').overrideWith((ref) async => 1),
+            feedbackPromptShouldShowProvider.overrideWith((ref) async => false),
           ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            home: HomeScreen(),
-          ),
+          child: MaterialApp(theme: AppTheme.light, home: HomeScreen()),
         ),
       );
       await tester.pumpAndSettle();
-
-      final colors = AppTheme.light.colorScheme;
-      for (final key in const [
-        ValueKey('continueReadingCard'),
-        ValueKey('bookmarksCard'),
-      ]) {
-        final cardFinder = find.byKey(key);
-        expect(cardFinder, findsOneWidget);
-
-        final card = tester.widget<Material>(cardFinder);
-        expect(card.color, colors.surfaceContainerLow);
-        expect(card.shape, isA<RoundedRectangleBorder>());
-
-        final shape = card.shape! as RoundedRectangleBorder;
-        expect(shape.borderRadius, BorderRadius.circular(16));
-        expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
-        expect(tester.getTopLeft(cardFinder).dx, 16);
-        expect(tester.getBottomRight(cardFinder).dx, 784);
-      }
-
-      final continueReadingData = tester
-          .getSemantics(find.byKey(const ValueKey('continueReadingCard')))
-          .getSemanticsData();
-      expect(continueReadingData.hasAction(SemanticsAction.tap), isTrue);
-
+      final cardFinder = find.byKey(const ValueKey('continueReadingCard'));
+      final card = tester.widget<Material>(cardFinder);
+      expect(card.color, AppTheme.light.colorScheme.primary);
       expect(
-        tester.getSize(find.widgetWithIcon(IconButton, Icons.bookmark_rounded)),
-        const Size.square(48),
+        (card.shape! as RoundedRectangleBorder).borderRadius,
+        BorderRadius.circular(24),
+      );
+      expect(
+        tester
+            .getSemantics(cardFinder)
+            .getSemanticsData()
+            .hasAction(SemanticsAction.tap),
+        isTrue,
+      );
+      expect(
+        find.byKey(const ValueKey('homeBookmarksDestination')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('homeSettingsDestination')),
+        findsOneWidget,
       );
       semantics.dispose();
     });
@@ -946,12 +930,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Continue Reading'));
+      await tester.tap(find.byKey(const ValueKey('continueReadingButton')));
       await tester.pumpAndSettle();
       expect(find.byType(ReadingScreen), findsOneWidget);
     });
 
-    testWidgets('shows bookmarks and removes one from the home screen', (
+    testWidgets('home bookmarks destination retains removal and undo', (
       tester,
     ) async {
       final repo = _FakeBookmarkRepository();
@@ -966,7 +950,7 @@ void main() {
             bookmarkRepositoryProvider.overrideWithValue(repo),
             surahListProvider.overrideWith((ref) async => [classicSurah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
-            recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
+            allBookmarksProvider.overrideWith((ref) async => [bookmark]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
           ],
           child: MaterialApp(
@@ -978,8 +962,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Bookmarks'), findsOneWidget);
-      expect(find.text('الفاتحة · Verse 1'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('homeBookmarksDestination')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('bookmarkRow-1:1')), findsOneWidget);
 
       await tester.tap(find.byTooltip('Remove bookmark'));
       await tester.pumpAndSettle();
@@ -1009,12 +994,15 @@ void main() {
             bookmarkRepositoryProvider.overrideWithValue(repo),
             surahListProvider.overrideWith((ref) async => [classicSurah1]),
             lastReadPositionProvider.overrideWith((ref) async => null),
-            recentBookmarksProvider.overrideWith((ref) async => [bookmark]),
+            allBookmarksProvider.overrideWith((ref) async => [bookmark]),
             bookmarksBySurahProvider(1).overrideWith((ref) async => {'1:1'}),
           ],
           child: MaterialApp(theme: AppTheme.light, home: HomeScreen()),
         ),
       );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('homeBookmarksDestination')));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byTooltip('Remove bookmark'));
@@ -2083,7 +2071,9 @@ void main() {
   });
 
   group('SurahTile', () {
-    testWidgets('uses a calm tonal card with one green accent', (tester) async {
+    testWidgets('uses a quiet index row with readable neutral numbers', (
+      tester,
+    ) async {
       final semanticsHandle = tester.ensureSemantics();
 
       await tester.pumpWidget(
@@ -2100,16 +2090,12 @@ void main() {
       final context = tester.element(cardFinder);
       final colors = Theme.of(context).colorScheme;
       final card = tester.widget<Material>(cardFinder);
-      final shape = card.shape! as RoundedRectangleBorder;
       final badge = tester.widget<Container>(badgeFinder);
-      final badgeDecoration = badge.decoration! as BoxDecoration;
       final arabicName = tester.widget<Text>(find.text('الفاتحة'));
 
-      expect(card.color, colors.surfaceContainerLow);
-      expect(shape.borderRadius, BorderRadius.circular(16));
-      expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
-      expect(badgeDecoration.color, colors.primaryContainer);
-      expect(badgeDecoration.shape, BoxShape.rectangle);
+      expect(card.color, AppTheme.light.scaffoldBackgroundColor);
+      expect(card.shape, isNull);
+      expect(badge.decoration, isNull);
       expect(arabicName.style?.color, colors.onSurface);
       expect(
         find.bySemanticsLabel('Surah 1, الفاتحة, The Opening, 7 verses'),
