@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/data/localization/app_locale_store.dart';
@@ -8,6 +11,19 @@ import 'package:holy_quran_app/presentation/providers/locale_provider.dart';
 import 'package:holy_quran_app/presentation/providers/theme_mode_provider.dart';
 import 'package:holy_quran_app/presentation/screens/settings_screen.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
+
+class _PolicyBundle extends CachingAssetBundle {
+  final String policy;
+  _PolicyBundle(this.policy);
+
+  @override
+  Future<ByteData> load(String key) {
+    expect(key, 'assets/privacy/privacy_policy.json');
+    return Future.value(
+      ByteData.sublistView(Uint8List.fromList(utf8.encode(policy))),
+    );
+  }
+}
 
 class _LocaleStore implements AppLocaleStore {
   String? value;
@@ -60,6 +76,10 @@ Widget _screen(List<String> actions) => SettingsScreen(
 );
 
 void main() {
+  late String policy;
+  setUpAll(() async {
+    policy = await rootBundle.loadString('assets/privacy/privacy_policy.json');
+  });
   testWidgets('language and theme update repeatedly and persist', (
     tester,
   ) async {
@@ -129,6 +149,45 @@ void main() {
   });
 
   for (final locale in ['en', 'ar']) {
+    testWidgets('privacy policy is reachable offline in $locale', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            initialAppLocaleProvider.overrideWithValue(Locale(locale)),
+          ],
+          child: DefaultAssetBundle(
+            bundle: _PolicyBundle(policy),
+            child: _App(screen: _screen([]), scale: 2),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final privacy = find.byKey(const ValueKey('settings-privacy'));
+      await tester.scrollUntilVisible(privacy, 250);
+      await tester.ensureVisible(privacy);
+      await tester.pumpAndSettle();
+      await tester.tap(privacy);
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('privacyPolicyBody')), findsOneWidget);
+      expect(
+        find.text(
+          locale == 'ar' ? 'الملاحظات الاختيارية' : 'Optional feedback',
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsScreen), findsOneWidget);
+    });
+
     testWidgets('settings scroll at 320px and 2x text in $locale', (
       tester,
     ) async {

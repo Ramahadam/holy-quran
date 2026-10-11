@@ -127,6 +127,18 @@ describe("feedback", () => {
     ]);
   });
 
+  it("keeps network and installation identities out of stored feedback", async () => {
+    const database = new FakeDatabase();
+    const response = await worker.fetch(new Request("https://example.com/v1/feedback", {
+      method: "POST", headers: mobileClientHeaders,
+      body: JSON.stringify({feedback_text: "Suggestion", platform: "android", app_version: "1.0",
+        client_id: mobileClientHeaders["x-client-id"], ip: "203.0.113.10", bookmarks: ["1:1"]}),
+    }), baseEnv(database));
+    expect(response.status).toBe(201);
+    expect(database.statement.values).toEqual(["Suggestion", "android", "1.0"]);
+    expect(database.sql).not.toMatch(/client_id|ip|bookmarks/);
+  });
+
   it("rejects empty feedback", async () => {
     const response = await worker.fetch(
       new Request("https://example.com/v1/feedback", {
@@ -547,3 +559,41 @@ function tafsirRequest(
     body: JSON.stringify(body),
   });
 }
+
+
+describe("public privacy policy", () => {
+  for (const [path, language, title] of [
+    ["/privacy", "en", "Optional feedback"],
+    ["/privacy/ar", "ar", "الملاحظات الاختيارية"],
+  ]) {
+    it(`serves ${language} without credentials or database access`, async () => {
+      const response = await worker.fetch(new Request(`https://example.com${path}`), {} as Env);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toContain("text/html");
+      expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
+      expect(response.headers.has("set-cookie")).toBe(false);
+      expect(await response.text()).toContain(title);
+    });
+  }
+  it("provides HEAD and rejects writes", async () => {
+    const head = await worker.fetch(new Request("https://example.com/privacy", {method: "HEAD"}), {} as Env);
+    expect(head.status).toBe(200);
+    expect(await head.text()).toBe("");
+    const post = await worker.fetch(new Request("https://example.com/privacy", {method: "POST"}), {} as Env);
+    expect(post.status).toBe(405);
+    expect(post.headers.get("allow")).toBe("GET, HEAD");
+  });
+});
+
+
+describe("security response headers", () => {
+  for (const [path, method] of [["/health", "GET"], ["/privacy", "GET"], ["/missing", "GET"], ["/v1/feedback", "GET"], ["/v1/feedback", "OPTIONS"]]) {
+    it(`protects ${method} ${path}`, async () => {
+      const response = await worker.fetch(new Request(`https://example.com${path}`, { method }), baseEnv());
+      expect(response.headers.get("strict-transport-security")).toBe("max-age=31536000");
+      expect(response.headers.get("x-frame-options")).toBe("DENY");
+      expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
+    });
+  }
+});

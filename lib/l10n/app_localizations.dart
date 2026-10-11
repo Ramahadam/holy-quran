@@ -956,6 +956,18 @@ abstract class AppLocalizations {
   /// **'Ayah excerpt unavailable.'**
   String get bookmarkExcerptUnavailable;
 
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyPolicyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The privacy policy could not be loaded.'**
+  String get privacyPolicyUnavailable;
+
   /// No description provided for @bookmarkExcerptLoading.
   ///
   /// In en, this message translates to:

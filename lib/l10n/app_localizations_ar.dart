@@ -484,5 +484,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bookmarkExcerptUnavailable => 'تعذر عرض نص الآية.';
 
   @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get privacyPolicyUnavailable => 'تعذر تحميل سياسة الخصوصية.';
+
+  @override
   String get bookmarkExcerptLoading => 'جارٍ تحميل الآية…';
 }

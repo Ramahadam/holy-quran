@@ -5,7 +5,8 @@
   "compatibility_date": "2026-07-21",
   "workers_dev": true,
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "logs": { "invocation_logs": false }
   },
   "secrets": {
     "required": ["QF_CLIENT_ID", "QF_CLIENT_SECRET"]

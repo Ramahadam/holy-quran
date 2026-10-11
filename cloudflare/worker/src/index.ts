@@ -1,3 +1,5 @@
+import { privacyPolicyResponse } from "./privacy-policy";
+
 export interface Env {
   FEEDBACK_DB: D1Database;
   TAFSIR_RATE_LIMITER: RateLimit;
@@ -443,6 +445,24 @@ function withCorsHeaders(response: Response, request: Request): Response {
   });
 }
 
+function withSecurityHeaders(response: Response): Response {
+  const headers = new Headers(response.headers);
+  headers.set("Strict-Transport-Security", "max-age=31536000");
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Content-Type-Options", "nosniff");
+  if (!headers.has("Content-Security-Policy")) {
+    headers.set(
+      "Content-Security-Policy",
+      "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    );
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 function preflightResponse(request: Request, env: Env): Response {
   if (!isAllowedBrowserOrigin(request, env)) {
     return jsonResponse({ error: "Browser origin is not allowed." }, 403);
@@ -465,13 +485,15 @@ async function fetchHandler(
   context?: ExecutionContext,
 ): Promise<Response> {
   if (request.method === "OPTIONS") {
-    return preflightResponse(request, env);
+    return withSecurityHeaders(preflightResponse(request, env));
   }
 
   const path = new URL(request.url).pathname.replace(/\/$/, "") || "/";
   let response: Response;
   try {
-    if (path === "/health" && request.method === "GET") {
+    if (path === "/privacy" || path === "/privacy/ar") {
+      response = privacyPolicyResponse(request, path === "/privacy/ar");
+    } else if (path === "/health" && request.method === "GET") {
       response = jsonResponse({ status: "ok" });
     } else if (path === "/v1/tafsir") {
       response = await handleTafsir(request, env, context);
@@ -495,9 +517,11 @@ async function fetchHandler(
       );
     }
   }
-  return isAllowedBrowserOrigin(request, env)
-    ? withCorsHeaders(response, request)
-    : response;
+  return withSecurityHeaders(
+    isAllowedBrowserOrigin(request, env)
+      ? withCorsHeaders(response, request)
+      : response,
+  );
 }
 
 export default { fetch: fetchHandler } satisfies ExportedHandler<Env>;

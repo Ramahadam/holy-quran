@@ -157,5 +157,7 @@
   "bookmarksSummary": "{count} saved ayahs · Continue where you paused",
   "@bookmarksSummary": {"placeholders": {"count": {"type": "int"}}},
   "bookmarkExcerptUnavailable": "Ayah excerpt unavailable.",
+  "privacyPolicy": "Privacy policy",
+  "privacyPolicyUnavailable": "The privacy policy could not be loaded.",
   "bookmarkExcerptLoading": "Loading ayah…"
 }
