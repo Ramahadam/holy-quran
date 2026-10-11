@@ -495,5 +495,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarkExcerptUnavailable => 'Ayah excerpt unavailable.';
 
   @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get privacyPolicyUnavailable =>
+      'The privacy policy could not be loaded.';
+
+  @override
   String get bookmarkExcerptLoading => 'Loading ayah…';
 }

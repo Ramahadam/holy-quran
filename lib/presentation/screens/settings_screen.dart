@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/l10n.dart';
+import 'privacy_policy_screen.dart';
 import '../providers/locale_provider.dart';
 import '../providers/theme_mode_provider.dart';
 
@@ -118,6 +119,17 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
+          _action(
+            context,
+            'privacy',
+            CupertinoIcons.lock_shield,
+            l10n.privacyPolicy,
+            () => unawaited(
+              Navigator.of(context).push<void>(
+                MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+              ),
+            ),
+          ),
           _action(
             context,
             'feedback',

@@ -14,6 +14,7 @@ included in Flutter Dart defines, committed files, or client-side code.
 ## API
 
 - `GET /health`
+- `GET /privacy` and `GET /privacy/ar` (draft #149 policy; deployment pending)
 - `POST /v1/tafsir` with `{"operation":"sources"}`
 - `POST /v1/tafsir` with `{"operation":"ayah","verseKey":"1:1","resourceId":169}`
 - `POST /v1/feedback` with `feedback_text`, `platform`, and `app_version`
@@ -112,3 +113,11 @@ Never place secret values in `wrangler.jsonc`.
 
 The repository-wide local and CI rules are documented in
 [Backend configuration security](backend-configuration-security.md).
+
+## Privacy policy preparation
+
+The #149 policy and Data Safety review are documented in
+[Privacy policy](privacy/README.md). Worker invocation logs are disabled in the
+new release configuration. Deploy only after the contact/retention details and
+policy are approved; existing deployed logs and provider security processing
+require account review separately.

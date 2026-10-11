@@ -6,6 +6,7 @@
     "lib": ["ES2022"],
     "types": ["@cloudflare/workers-types", "vitest/globals"],
     "strict": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true
   },

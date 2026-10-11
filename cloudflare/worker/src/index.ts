@@ -1,3 +1,5 @@
+import { privacyPolicyResponse } from "./privacy-policy";
+
 export interface Env {
   FEEDBACK_DB: D1Database;
   TAFSIR_RATE_LIMITER: RateLimit;
@@ -471,7 +473,9 @@ async function fetchHandler(
   const path = new URL(request.url).pathname.replace(/\/$/, "") || "/";
   let response: Response;
   try {
-    if (path === "/health" && request.method === "GET") {
+    if (path === "/privacy" || path === "/privacy/ar") {
+      response = privacyPolicyResponse(request, path === "/privacy/ar");
+    } else if (path === "/health" && request.method === "GET") {
       response = jsonResponse({ status: "ok" });
     } else if (path === "/v1/tafsir") {
       response = await handleTafsir(request, env, context);
