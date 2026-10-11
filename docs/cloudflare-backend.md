@@ -118,6 +118,5 @@ The repository-wide local and CI rules are documented in
 
 The #149 policy and Data Safety review are documented in
 [Privacy policy](privacy/README.md). Worker invocation logs are disabled in the
-new release configuration. Deploy only after the contact/retention details and
-policy are approved; existing deployed logs and provider security processing
+new release configuration. Deploy only after the final policy is approved; existing deployed logs and provider security processing
 require account review separately.

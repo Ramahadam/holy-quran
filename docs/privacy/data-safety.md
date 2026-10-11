@@ -2,14 +2,14 @@
 
 Status: **draft, not submitted**. The shared policy in
 `assets/privacy/privacy_policy.json` identifies Mohamed Adam and mohamedadam.tech@gmail.com using owner-confirmed
-details. The retention decision and policy approval remain pending; do not deploy
+details. The owner approved 90-day feedback retention. Final policy approval remains pending; do not deploy
 or ship the draft until those are resolved.
 
 ## Verified release data flows
 
 | Data | Destination and use | Storage |
 | --- | --- | --- |
-| Feedback text, platform, app-version metadata | Cloudflare Worker → D1; voluntary suggestions and problem reports | Feedback text, platform, app version, generated ID, server timestamp only. No automatic expiry currently. |
+| Feedback text, platform, app-version metadata | Cloudflare Worker → D1; voluntary suggestions and problem reports | Feedback text, platform, app version, generated ID, server timestamp only. 90 days, removed at the next daily cleanup after deployment. Provider recovery copies are separate. |
 | Random installation ID | Worker request header; security rate limiting | Local preferences and Cloudflare rate-limit counters; excluded from D1 and Tafsir cache keys. |
 | Connecting IP | Cloudflare infrastructure and Worker rate limiter; security | Excluded from D1 and Tafsir cache keys. Counter window is 60 seconds. Provider infrastructure processing needs deployment/account review. |
 | Requested verse key and Tafsir resource ID; source-list request | Worker → Quran Foundation Content API; provide selected content | Shared content responses cached for one hour; no installation or network identity in cache keys. |
@@ -56,8 +56,8 @@ advertising SDK is present in the app dependency inventory.
 
 ## Publication and Console completion
 
-1. Confirm developer identity/contact and feedback retention; if a finite limit
-   is chosen, implement and verify expiry before promising it in the policy.
+1. Developer identity/contact and 90-day feedback retention are owner-confirmed.
+   Deploy and verify the daily expiry job before publishing the retention promise.
 2. Owner reviews the English and Arabic policy, deletion handling, and worksheet.
 3. Deploy the reviewed Worker and verify the new invocation-logging setting,
    existing endpoint behavior, and public HTTPS policy pages:

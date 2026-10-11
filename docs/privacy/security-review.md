@@ -28,8 +28,8 @@ The anonymous API also has existing rate controls.
   preserved so its inline stylesheet continues to work.
 - Five new tests failed before the header fix. All 25 Worker tests and TypeScript
   checking pass after it.
-- Updated developer/contact information in both policy languages. Retention and
-  owner approval remain pending; this is still a draft and has not been deployed.
+- Updated developer/contact information in both policy languages. The owner subsequently approved 90-day retention;
+  final policy approval remains pending; this is still a draft and has not been deployed.
 
 ## Open findings
 
