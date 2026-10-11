@@ -2,8 +2,8 @@
 
 Status: **draft, not submitted**. The shared policy in
 `assets/privacy/privacy_policy.json` identifies Mohamed Adam and mohamedadam.tech@gmail.com using owner-confirmed
-details. The owner approved 90-day feedback retention. Final policy approval remains pending; do not deploy
-or ship the draft until those are resolved.
+details. The owner approved 90-day feedback retention. Final policy and contact monitoring are owner-approved. Deployment verification
+and Play Console submission remain pending.
 
 ## Verified release data flows
 
@@ -58,7 +58,8 @@ advertising SDK is present in the app dependency inventory.
 
 1. Developer identity/contact and 90-day feedback retention are owner-confirmed.
    Deploy and verify the daily expiry job before publishing the retention promise.
-2. Owner reviews the English and Arabic policy, deletion handling, and worksheet.
+2. Owner approved the bilingual policy and monitored deletion-request contact.
+   Review the final Console worksheet/preview before production submission.
 3. Deploy the reviewed Worker and verify the new invocation-logging setting,
    existing endpoint behavior, and public HTTPS policy pages:
    `https://holy-quran-api.mohamedadam-tech.workers.dev/privacy` and `/privacy/ar`.
