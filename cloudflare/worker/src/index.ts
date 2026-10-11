@@ -399,9 +399,26 @@ async function readJsonObject(
     throw new ServiceError("Request is too large.", 413);
   }
 
-  const rawBody = await request.text();
-  if (rawBody.length > maxLength) {
-    throw new ServiceError("Request is too large.", 413);
+  let rawBody = "";
+  const reader = request.body?.getReader();
+  if (reader) {
+    const decoder = new TextDecoder();
+    let byteLength = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        byteLength += value.byteLength;
+        if (byteLength > maxLength) {
+          await reader.cancel();
+          throw new ServiceError("Request is too large.", 413);
+        }
+        rawBody += decoder.decode(value, { stream: true });
+      }
+      rawBody += decoder.decode();
+    } finally {
+      reader.releaseLock();
+    }
   }
 
   try {

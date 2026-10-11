@@ -29,25 +29,23 @@ The anonymous API also has existing rate controls.
 - Five new tests failed before the header fix. All 25 Worker tests and TypeScript
   checking pass after it.
 - Updated developer/contact information in both policy languages. The owner subsequently approved 90-day retention;
-  final policy approval remains pending; this is still a draft and has not been deployed.
+  final policy publication and contact monitoring are now owner-approved.
+  Production deployment verification remains pending.
 
-## Open findings
+## Findings and remediation
 
-1. **P2 — Development dependency advisories.** `npm audit --json` reports seven
+1. **Resolved — Development dependency advisories (#168).** The initial `npm audit --json` reported seven
    advisories (five high, two moderate) across Vitest/mocker, Wrangler/Miniflare,
    sharp, and undici. These packages are development dependencies, not deployed
-   Worker application imports. Local development/test tooling remains exposed to
-   the applicable advisory conditions. Update the affected tooling and rerun
-   tests, type checking, and a Wrangler bundle dry run before the next deployment.
-   This PR does not update dependencies. Tracked in
+   Worker application imports. The original privacy PR deferred the tooling
+   update. The pre-deployment update below resolves these advisories. Tracked in
    [#168](https://github.com/Ramahadam/holy-quran/issues/168), assigned to the
    repository owner. Review by 2026-10-18.
-2. **P2 — Request size is checked after buffering.** `readJsonObject` checks a
+2. **Resolved — Request size is checked after buffering (#167).** `readJsonObject` checks a
    supplied Content-Length but then calls `request.text()` before its final size
    check. A body without that header can consume memory before rejection, and
-   string length counts UTF-16 code units rather than received bytes. A separate
-   fix should cap streamed bytes and cancel oversized bodies, with tests for
-   missing headers, multibyte text, and bodies exceeding the limit. This behavior
+   string length counts UTF-16 code units rather than received bytes. The pre-deployment fix below caps streamed bytes and cancels oversized
+   bodies, with tests for missing headers, multibyte text, and limit boundaries. This behavior
    predates the privacy change. Tracked in
    [#167](https://github.com/Ramahadam/holy-quran/issues/167), assigned to the
    repository owner. Review by 2026-10-18.
@@ -55,3 +53,17 @@ The anonymous API also has existing rate controls.
 Cloudflare account MFA, deployed secret/API-token scopes, database permissions,
 and platform log/backup retention were not verified. Source configuration alone
 does not establish those account settings. Verify them before production release.
+
+## Pre-deployment remediation — 2026-10-11
+
+Updated Vitest within 4.x to the patched 4.1.11 release and Wrangler to 4.149.0.
+A clean `npm ci` succeeds and `npm audit` reports zero advisories.
+The [Vitest advisory](https://github.com/advisories/GHSA-82fw-gwwq-j7x9)
+identifies 4.1.11 as patched.
+
+`readJsonObject` now enforces received byte limits while reading the stream and
+cancels it before decoding an oversized chunk. Tests reproduce the old failure
+and cover absent Content-Length, oversized multibyte text, early cancellation,
+the exact byte boundary, and multibyte characters split across chunks.
+The policy approval and email monitoring confirmation are recorded in the owner
+conversation; release verification and Console submission remain outstanding.
