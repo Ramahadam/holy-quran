@@ -1,7 +1,8 @@
 # Google Play listing assets — #150
 
-Status: **draft, awaiting owner approval**. Do not upload until the icon,
-feature graphics, screenshots, and both language versions of the copy are approved.
+Status: **branding and listing copy approved by the owner on 2026-10-11**.
+The prepared pack is ready for code review. Refresh the English Home screenshot
+after #146 and complete the remaining launcher checks before store upload.
 
 ## Files
 
@@ -42,8 +43,9 @@ Al-Fatihah and other unaffected reading content. #146 also remains open;
 several of its fixes are already present on main. Refresh screenshots after any
 further visual changes before publishing the listing.
 
-Before upload, the owner should approve the name, emblem, graphics, Arabic
-wording, English wording, and screenshots. This issue remains open until approval.
+The owner approved the prepared branding direction and bilingual listing copy
+in this chat. #150 remains open for the English Home screenshot refresh and
+remaining launcher checks; no Play Console upload has been performed.
 
 ## Local verification
 
