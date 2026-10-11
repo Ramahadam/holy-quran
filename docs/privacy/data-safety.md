@@ -2,14 +2,15 @@
 
 Status: **draft, not submitted**. The shared policy in
 `assets/privacy/privacy_policy.json` identifies Mohamed Adam and mohamedadam.tech@gmail.com using owner-confirmed
-details. The owner approved 90-day feedback retention. Final policy and contact monitoring are owner-approved. Deployment verification
-and Play Console submission remain pending.
+details. The owner approved 90-day feedback retention. The existing public policy, contact monitoring and 90-day retention are owner-approved
+and deployed. This preset-feedback release requires a Worker deployment before
+distributing the updated app. Play Console submission remains pending.
 
 ## Verified release data flows
 
 | Data | Destination and use | Storage |
 | --- | --- | --- |
-| Feedback text, platform, app-version metadata | Cloudflare Worker → D1; voluntary suggestions and problem reports | Feedback text, platform, app version, generated ID, server timestamp only. 90 days, removed at the next daily cleanup after deployment. Provider recovery copies are separate. |
+| Preset feedback topic, platform, app-version metadata | Cloudflare Worker → D1; voluntary suggestions and problem reports | Fixed topic code (in the existing feedback_text column), platform, app version, generated ID, server timestamp only. 90 days, removed at the next daily cleanup. Provider recovery copies are separate. |
 | Random installation ID | Worker request header; security rate limiting | Local preferences and Cloudflare rate-limit counters; excluded from D1 and Tafsir cache keys. |
 | Connecting IP | Cloudflare infrastructure and Worker rate limiter; security | Excluded from D1 and Tafsir cache keys. Counter window is 60 seconds. Provider infrastructure processing needs deployment/account review. |
 | Requested verse key and Tafsir resource ID; source-list request | Worker → Quran Foundation Content API; provide selected content | Shared content responses cached for one hour; no installation or network identity in cache keys. |
@@ -22,8 +23,9 @@ Evidence: `lib/data/feedback/anonymous_feedback_service.dart`,
 `lib/data/backend/cloudflare_client_id_store.dart`,
 `lib/data/backup/quran_backup_service.dart`,
 `cloudflare/worker/src/index.ts`, and `migrations/0001_anonymous_feedback.sql`.
-The feedback identity-exclusion test also submits extra identifiers and verifies
-that they are not written to the database.
+The Worker accepts only the five fixed choice codes, known platforms and
+app-version metadata. Unknown fields and free-text submissions are rejected.
+Existing text feedback from earlier builds still expires after 90 days.
 
 ## Proposed form answers
 
@@ -32,7 +34,7 @@ These are review inputs, not a claim that Play Console has been completed.
 | Question/type | Proposed answer | Basis or remaining check |
 | --- | --- | --- |
 | Collect any user data? | Yes | Feedback and online API requests leave the device. “Anonymous feedback” does not mean “no collection.” |
-| Other user-generated content | Collected, optional, not ephemeral; app functionality and analytics | Feedback text is retained and used to improve the app and diagnose reports. Do not interpret “analytics” as an analytics SDK. |
+| Preset feedback topics | Collected, optional, not ephemeral; app functionality and analytics | Reassess the saved Other user-generated content classification against the current Console definitions: the app sends a fixed topic, with no user-authored text. It may fit app interactions. Do not remove the old classification before legacy feedback and the release configuration are reviewed. |
 | Diagnostics | Collected, optional, not ephemeral; analytics | Platform/app-version metadata accompanies retained feedback for reported-problem diagnosis. Confirm category against the Console's current prompts. |
 | Device or other IDs | Collected; security/fraud prevention; conservatively not ephemeral | Installation ID and IP rate-limit keys. They are optional by avoiding online features. If Console treats required online-feature metadata as required, select required and explain that offline reading remains available. Do not equate a 60-second counter with real-time-only ephemeral processing. |
 | App interactions | Collected when using online Tafsir; app functionality; conservatively not ephemeral | Requests reveal the chosen verse/source. Quran Foundation receives content identifiers without the user's installation ID or IP. |
@@ -87,3 +89,11 @@ not disabled by this setting. Avoid live feedback submissions as test data.
 The classifications above are engineering inferences from the implementation and
 provider documentation. Final answers require the owner to confirm the live
 services and the Console preview.
+
+## All-ages feedback change (#171)
+
+The owner selected preset choices for everyone. No feedback text box, age field,
+contact field or reading context is included. This closes the open child-PII
+entry channel; it does not establish overall Families compliance or settle
+Cloudflare/Quran Foundation provider roles. The Data Safety draft must be
+reviewed after deployment, with owner approval before selecting new answers.

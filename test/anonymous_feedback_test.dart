@@ -28,12 +28,12 @@ const _verse1 = Verse(
 
 void main() {
   group('AnonymousFeedbackService', () {
-    test('submits trimmed feedback with privacy-safe metadata only', () async {
+    test('submits the selected code with privacy-safe metadata only', () async {
       final transport = _FakeFeedbackTransport();
       final service = AnonymousFeedbackService(transport: transport);
 
       await service.submitFeedback(
-        '  Please add larger font controls.  ',
+        FeedbackChoice.readingDisplay,
         metadata: const FeedbackMetadata(
           platform: 'android',
           appVersion: '1.0.0+1',
@@ -42,7 +42,7 @@ void main() {
 
       expect(transport.payloads, hasLength(1));
       expect(transport.payloads.single, {
-        'feedback_text': 'Please add larger font controls.',
+        'feedback_choice': 'reading_display',
         'platform': 'android',
         'app_version': '1.0.0+1',
       });
@@ -60,30 +60,6 @@ void main() {
       );
     });
 
-    test('rejects empty feedback', () async {
-      final service = AnonymousFeedbackService(
-        transport: _FakeFeedbackTransport(),
-      );
-
-      expect(
-        () => service.submitFeedback('   '),
-        throwsA(isA<FeedbackValidationException>()),
-      );
-    });
-
-    test('rejects overly long feedback', () async {
-      final service = AnonymousFeedbackService(
-        transport: _FakeFeedbackTransport(),
-      );
-
-      expect(
-        () => service.submitFeedback(
-          List.filled(AnonymousFeedbackService.maxLength + 1, 'a').join(),
-        ),
-        throwsA(isA<FeedbackValidationException>()),
-      );
-    });
-
     test(
       'reports submit failures without exposing transport details',
       () async {
@@ -94,7 +70,7 @@ void main() {
         );
 
         expect(
-          () => service.submitFeedback('The app is calming.'),
+          () => service.submitFeedback(FeedbackChoice.suggestion),
           throwsA(isA<FeedbackSubmissionException>()),
         );
       },
@@ -134,11 +110,14 @@ void main() {
       await tester.tap(find.text('Send feedback'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'Thank you for the app.');
+      await tester.tap(
+        find.byKey(const ValueKey('feedbackChoice-reading_display')),
+      );
+      await tester.pump();
       await tester.tap(find.text('Send'));
       await tester.pumpAndSettle();
 
-      expect(feedbackService.submittedText, 'Thank you for the app.');
+      expect(feedbackService.submittedChoice, FeedbackChoice.readingDisplay);
       expect(find.text('Feedback sent'), findsOneWidget);
     });
 
@@ -238,11 +217,14 @@ void main() {
       expect(promptService.dismissed, isFalse);
       expect(find.text('Send feedback'), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField), 'Mushaf mode is calm.');
+      await tester.tap(
+        find.byKey(const ValueKey('feedbackChoice-reading_display')),
+      );
+      await tester.pump();
       await tester.tap(find.text('Send'));
       await tester.pumpAndSettle();
 
-      expect(feedbackService.submittedText, 'Mushaf mode is calm.');
+      expect(feedbackService.submittedChoice, FeedbackChoice.readingDisplay);
       expect(promptService.submitted, isTrue);
       expect(find.text('Feedback sent'), findsOneWidget);
     });
@@ -278,7 +260,10 @@ void main() {
 
         await tester.tap(find.text('Give feedback'));
         await tester.pumpAndSettle();
-        await tester.enterText(find.byType(TextField), 'Please add retry.');
+        await tester.tap(
+          find.byKey(const ValueKey('feedbackChoice-reading_display')),
+        );
+        await tester.pump();
         await tester.tap(find.text('Send'));
         await tester.pumpAndSettle();
 
@@ -414,18 +399,21 @@ class _FakeFeedbackTransport implements FeedbackTransport {
 }
 
 class _RecordingFeedbackService extends AnonymousFeedbackService {
-  String? submittedText;
+  FeedbackChoice? submittedChoice;
   final bool shouldFail;
 
   _RecordingFeedbackService({this.shouldFail = false})
     : super(transport: _FakeFeedbackTransport());
 
   @override
-  Future<void> submitFeedback(String text, {FeedbackMetadata? metadata}) async {
+  Future<void> submitFeedback(
+    FeedbackChoice choice, {
+    FeedbackMetadata? metadata,
+  }) async {
     if (shouldFail) {
       throw FeedbackSubmissionException();
     }
-    submittedText = text;
+    submittedChoice = choice;
   }
 }
 

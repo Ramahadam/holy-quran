@@ -357,30 +357,30 @@ async function handleFeedback(request: Request, env: Env): Promise<Response> {
   );
 
   const body = await readJsonObject(request, 4096);
-  const feedbackText = body.feedback_text;
+  const feedbackChoice = body.feedback_choice;
   const platform = body.platform;
   const appVersion = body.app_version;
 
   if (
-    typeof feedbackText !== "string" ||
-    feedbackText.trim().length < 1 ||
-    feedbackText.trim().length > 2000 ||
+    Object.keys(body).some(key => !["feedback_choice", "platform", "app_version"].includes(key)) ||
+    typeof feedbackChoice !== "string" ||
+    !["reading_display", "translation_tafsir", "reminders", "app_problem", "suggestion"].includes(feedbackChoice) ||
     typeof platform !== "string" ||
-    platform.length < 1 ||
-    platform.length > 32 ||
+    !["android", "ios", "web", "linux", "macOS", "windows", "fuchsia"].includes(platform) ||
     typeof appVersion !== "string" ||
-    appVersion.length < 1 ||
-    appVersion.length > 64
+    appVersion.length > 64 ||
+    !/^(?:unknown|[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9]+)?)$/.test(appVersion)
   ) {
     throw new ServiceError("Invalid feedback.", 400);
   }
 
+  // Reuse the existing column for the fixed choice code; legacy rows expire normally.
   await env.FEEDBACK_DB.prepare(
     `INSERT INTO anonymous_feedback
       (feedback_text, platform, app_version)
       VALUES (?, ?, ?)`,
   )
-    .bind(feedbackText.trim(), platform, appVersion)
+    .bind(feedbackChoice, platform, appVersion)
     .run();
 
   return jsonResponse({ submitted: true }, 201);

@@ -26,7 +26,7 @@ function post(body: BodyInit, path = "/v1/feedback") {
 }
 
 function feedback(text: string) {
-  return JSON.stringify({ feedback_text: text, platform: "android", app_version: "1" });
+  return JSON.stringify({ feedback_choice: text, platform: "android", app_version: "1.0.0" });
 }
 
 describe("request byte limits", () => {
@@ -79,7 +79,7 @@ describe("request byte limits", () => {
     });
   }
 
-  it("decodes multibyte text split between streamed chunks", async () => {
+  it("decodes multibyte text split between streamed chunks before validation", async () => {
     const database = env();
     const bytes = new TextEncoder().encode(feedback("ملاحظة"));
     const split = bytes.findIndex(byte => byte >= 0xc0) + 1;
@@ -91,13 +91,14 @@ describe("request byte limits", () => {
       },
     });
     const response = await worker.fetch(post(body), database.value);
-    expect(response.status).toBe(201);
-    expect(database.run).toHaveBeenCalledTimes(1);
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ error: "Invalid feedback." });
+    expect(database.run).not.toHaveBeenCalled();
   });
 
   it("accepts valid JSON at exactly 4096 bytes with no Content-Length", async () => {
     const database = env();
-    const json = feedback("Suggestion");
+    const json = feedback("suggestion");
     const body = json + " ".repeat(4096 - new TextEncoder().encode(json).byteLength);
     const request = post(body);
     expect(request.headers.has("content-length")).toBe(false);

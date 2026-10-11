@@ -24,10 +24,10 @@ void main() {
       );
 
       await service.submitFeedback(
-        'Codex live SDK connectivity test',
+        FeedbackChoice.appProblem,
         metadata: const FeedbackMetadata(
-          platform: 'flutter_test',
-          appVersion: 'live',
+          platform: 'android',
+          appVersion: '0.0.0+0',
         ),
       );
     },

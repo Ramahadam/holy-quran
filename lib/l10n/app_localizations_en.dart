@@ -123,11 +123,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get feedbackPromptSubtitle =>
-      'A quick anonymous note can help shape what comes next.';
+      'A quick choice can help improve the app.';
 
   @override
   String get feedbackPromptBody =>
-      'If you have a moment, share what would make the app better. Your note is anonymous.';
+      'If you have a moment, choose a feedback topic. No account is required.';
 
   @override
   String get notNow => 'Not now';
@@ -261,18 +261,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reminderPermissionDenied => 'Reminder permission was not granted';
 
   @override
-  String get feedbackSubtitle =>
-      'Help us improve the Quran reading experience.';
-
-  @override
-  String get feedback => 'Feedback';
-
-  @override
-  String get feedbackHint => 'Share what would make the app better.';
+  String get feedbackSubtitle => 'Choose one topic to send.';
 
   @override
   String get feedbackPrivacy =>
-      'Sent anonymously. Do not include private information.';
+      'We send only your selected topic, platform and app version. Network identifiers are used to prevent abuse.';
 
   @override
   String get sending => 'Sending';
@@ -286,12 +279,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get feedbackSendFailed =>
       'Feedback could not be sent. Please try again later.';
-
-  @override
-  String get feedbackRequired => 'Feedback cannot be empty.';
-
-  @override
-  String get feedbackTooLong => 'Feedback is too long.';
 
   @override
   String verseNumber(String number) {
@@ -503,4 +490,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bookmarkExcerptLoading => 'Loading ayah…';
+
+  @override
+  String get feedbackReadingDisplay => 'Reading or display problem';
+
+  @override
+  String get feedbackTranslationTafsir => 'Translation or Tafsir problem';
+
+  @override
+  String get feedbackReminders => 'Reminder problem';
+
+  @override
+  String get feedbackAppProblem => 'App not working correctly';
+
+  @override
+  String get feedbackSuggestion => 'More improvements wanted';
 }

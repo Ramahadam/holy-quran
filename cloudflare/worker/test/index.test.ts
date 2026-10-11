@@ -103,14 +103,14 @@ afterEach(() => {
 });
 
 describe("feedback", () => {
-  it("validates and stores anonymous feedback", async () => {
+  it("validates and stores preset feedback", async () => {
     const database = new FakeDatabase();
     const response = await worker.fetch(
       new Request("https://example.com/v1/feedback", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          feedback_text: "  Helpful app  ",
+          feedback_choice: "suggestion",
           platform: "android",
           app_version: "1.0.0",
         }),
@@ -121,7 +121,7 @@ describe("feedback", () => {
     expect(response.status).toBe(201);
     expect(database.sql).toContain("INSERT INTO anonymous_feedback");
     expect(database.statement.values).toEqual([
-      "Helpful app",
+      "suggestion",
       "android",
       "1.0.0",
     ]);
@@ -131,13 +131,41 @@ describe("feedback", () => {
     const database = new FakeDatabase();
     const response = await worker.fetch(new Request("https://example.com/v1/feedback", {
       method: "POST", headers: mobileClientHeaders,
-      body: JSON.stringify({feedback_text: "Suggestion", platform: "android", app_version: "1.0",
-        client_id: mobileClientHeaders["x-client-id"], ip: "203.0.113.10", bookmarks: ["1:1"]}),
+      body: JSON.stringify({feedback_choice: "suggestion", platform: "android", app_version: "1.0.0"}),
     }), baseEnv(database));
     expect(response.status).toBe(201);
-    expect(database.statement.values).toEqual(["Suggestion", "android", "1.0"]);
+    expect(database.statement.values).toEqual(["suggestion", "android", "1.0.0"]);
     expect(database.sql).not.toMatch(/client_id|ip|bookmarks/);
   });
+
+  for (const body of [
+    { feedback_text: "My name and email", platform: "android", app_version: "1.0.0" },
+    { feedback_choice: "My name and email", platform: "android", app_version: "1.0.0" },
+    { feedback_choice: "suggestion", feedback_text: "My name and email", platform: "android", app_version: "1.0.0" },
+    { feedback_choice: "suggestion", platform: "my@email.example", app_version: "1.0.0" },
+    { feedback_choice: "suggestion", platform: "android", app_version: "my@email.example" },
+  ]) {
+    it(`rejects free-form feedback or metadata: ${JSON.stringify(body)}`, async () => {
+      const database = new FakeDatabase();
+      const response = await worker.fetch(new Request("https://example.com/v1/feedback", {
+        method: "POST", headers: mobileClientHeaders, body: JSON.stringify(body),
+      }), baseEnv(database));
+      expect(response.status).toBe(400);
+      expect(database.statement.run).not.toHaveBeenCalled();
+    });
+  }
+
+  for (const choice of ["reading_display", "translation_tafsir", "reminders", "app_problem", "suggestion"]) {
+    it(`stores preset ${choice} without localization or personal text`, async () => {
+      const database = new FakeDatabase();
+      const response = await worker.fetch(new Request("https://example.com/v1/feedback", {
+        method: "POST", headers: mobileClientHeaders,
+        body: JSON.stringify({ feedback_choice: choice, platform: "android", app_version: "unknown" }),
+      }), baseEnv(database));
+      expect(response.status).toBe(201);
+      expect(database.statement.values).toEqual([choice, "android", "unknown"]);
+    });
+  }
 
   it("rejects empty feedback", async () => {
     const response = await worker.fetch(
@@ -164,7 +192,7 @@ describe("feedback", () => {
         method: "POST",
         headers: mobileClientHeaders,
         body: JSON.stringify({
-          feedback_text: "Helpful app",
+          feedback_choice: "suggestion",
           platform: "android",
           app_version: "1.0.0",
         }),
@@ -188,7 +216,7 @@ describe("feedback", () => {
         method: "POST",
         headers: mobileClientHeaders,
         body: JSON.stringify({
-          feedback_text: "Helpful app",
+          feedback_choice: "suggestion",
           platform: "android",
           app_version: "1.0.0",
         }),

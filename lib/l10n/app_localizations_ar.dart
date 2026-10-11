@@ -121,12 +121,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get feedbackPromptTitle => 'كيف كانت تجربتك في قراءة القرآن؟';
 
   @override
-  String get feedbackPromptSubtitle =>
-      'ملاحظة قصيرة مجهولة تساعدنا في تطوير التطبيق.';
+  String get feedbackPromptSubtitle => 'اختيار بسيط يساعدنا في تطوير التطبيق.';
 
   @override
   String get feedbackPromptBody =>
-      'إن كان لديك وقت، أخبرنا بما يجعل التطبيق أفضل. ملاحظتك مجهولة الهوية.';
+      'إن كان لديك وقت، اختر موضوعًا للملاحظات. لا يلزم إنشاء حساب.';
 
   @override
   String get notNow => 'ليس الآن';
@@ -256,16 +255,11 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reminderPermissionDenied => 'لم يُمنح إذن التذكيرات';
 
   @override
-  String get feedbackSubtitle => 'ساعدنا في تحسين تجربة قراءة القرآن.';
+  String get feedbackSubtitle => 'اختر موضوعًا واحدًا لإرساله.';
 
   @override
-  String get feedback => 'الملاحظات';
-
-  @override
-  String get feedbackHint => 'أخبرنا بما يجعل التطبيق أفضل.';
-
-  @override
-  String get feedbackPrivacy => 'تُرسل ملاحظتك دون هوية. لا تكتب معلومات خاصة.';
+  String get feedbackPrivacy =>
+      'نرسل الموضوع الذي تختاره ونوع المنصة وإصدار التطبيق فقط. تُستخدم معرّفات الشبكة لمنع إساءة الاستخدام.';
 
   @override
   String get sending => 'جارٍ الإرسال';
@@ -278,12 +272,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get feedbackSendFailed => 'تعذر إرسال الملاحظة. يرجى المحاولة لاحقًا.';
-
-  @override
-  String get feedbackRequired => 'لا يمكن إرسال ملاحظة فارغة.';
-
-  @override
-  String get feedbackTooLong => 'الملاحظة طويلة جدًا.';
 
   @override
   String verseNumber(String number) {
@@ -491,4 +479,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get bookmarkExcerptLoading => 'جارٍ تحميل الآية…';
+
+  @override
+  String get feedbackReadingDisplay => 'مشكلة في القراءة أو العرض';
+
+  @override
+  String get feedbackTranslationTafsir => 'مشكلة في الترجمة أو التفسير';
+
+  @override
+  String get feedbackReminders => 'مشكلة في التذكيرات';
+
+  @override
+  String get feedbackAppProblem => 'التطبيق لا يعمل بشكل صحيح';
+
+  @override
+  String get feedbackSuggestion => 'أرغب في مزيد من التحسينات';
 }

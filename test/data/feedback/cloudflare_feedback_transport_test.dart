@@ -18,7 +18,7 @@ void main() {
         }),
       );
       const payload = {
-        'feedback_text': 'Helpful app',
+        'feedback_choice': 'suggestion',
         'platform': 'android',
         'app_version': '1.0.0',
       };
@@ -45,7 +45,7 @@ void main() {
 
       await expectLater(
         transport.submit(const {
-          'feedback_text': 'Helpful app',
+          'feedback_choice': 'suggestion',
           'platform': 'android',
           'app_version': '1.0.0',
         }),

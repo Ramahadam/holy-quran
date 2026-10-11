@@ -17,9 +17,16 @@ included in Flutter Dart defines, committed files, or client-side code.
 - `GET /privacy` and `GET /privacy/ar` (draft #149 policy; deployment pending)
 - `POST /v1/tafsir` with `{"operation":"sources"}`
 - `POST /v1/tafsir` with `{"operation":"ayah","verseKey":"1:1","resourceId":169}`
-- `POST /v1/feedback` with `feedback_text`, `platform`, and `app_version`
+- `POST /v1/feedback` with `feedback_choice`, `platform`, and `app_version`
 
-Feedback is anonymous by design. Do not add account identifiers, names, email
+Feedback uses preset choices for everyone. The choice codes are `reading_display`,
+`translation_tafsir`, `reminders`, `app_problem`, and `suggestion`. The Worker
+stores the code in the existing `feedback_text` column; no schema migration is
+needed. It rejects unknown fields, free text, unknown platforms and invalid
+app-version metadata. Versions must be `unknown` or a Dart package version
+(e.g. `1.0.0`, `1.0.0-beta.1+2`). Deploy the Worker before distributing the new
+app: older builds that submit free text will receive HTTP 400. Existing rows
+remain subject to 90-day retention. Feedback is not linked to an account. Do not add account identifiers, names, email
 addresses, bookmarks, reading history, IP addresses, or last-read position to
 the stored payload.
 

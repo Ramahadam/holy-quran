@@ -323,13 +323,13 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackPromptSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'A quick anonymous note can help shape what comes next.'**
+  /// **'A quick choice can help improve the app.'**
   String get feedbackPromptSubtitle;
 
   /// No description provided for @feedbackPromptBody.
   ///
   /// In en, this message translates to:
-  /// **'If you have a moment, share what would make the app better. Your note is anonymous.'**
+  /// **'If you have a moment, choose a feedback topic. No account is required.'**
   String get feedbackPromptBody;
 
   /// No description provided for @notNow.
@@ -575,25 +575,13 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Help us improve the Quran reading experience.'**
+  /// **'Choose one topic to send.'**
   String get feedbackSubtitle;
-
-  /// No description provided for @feedback.
-  ///
-  /// In en, this message translates to:
-  /// **'Feedback'**
-  String get feedback;
-
-  /// No description provided for @feedbackHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Share what would make the app better.'**
-  String get feedbackHint;
 
   /// No description provided for @feedbackPrivacy.
   ///
   /// In en, this message translates to:
-  /// **'Sent anonymously. Do not include private information.'**
+  /// **'We send only your selected topic, platform and app version. Network identifiers are used to prevent abuse.'**
   String get feedbackPrivacy;
 
   /// No description provided for @sending.
@@ -619,18 +607,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Feedback could not be sent. Please try again later.'**
   String get feedbackSendFailed;
-
-  /// No description provided for @feedbackRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Feedback cannot be empty.'**
-  String get feedbackRequired;
-
-  /// No description provided for @feedbackTooLong.
-  ///
-  /// In en, this message translates to:
-  /// **'Feedback is too long.'**
-  String get feedbackTooLong;
 
   /// No description provided for @verseNumber.
   ///
@@ -973,6 +949,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading ayah…'**
   String get bookmarkExcerptLoading;
+
+  /// No description provided for @feedbackReadingDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading or display problem'**
+  String get feedbackReadingDisplay;
+
+  /// No description provided for @feedbackTranslationTafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation or Tafsir problem'**
+  String get feedbackTranslationTafsir;
+
+  /// No description provided for @feedbackReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder problem'**
+  String get feedbackReminders;
+
+  /// No description provided for @feedbackAppProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'App not working correctly'**
+  String get feedbackAppProblem;
+
+  /// No description provided for @feedbackSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'More improvements wanted'**
+  String get feedbackSuggestion;
 }
 
 class _AppLocalizationsDelegate
