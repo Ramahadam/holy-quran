@@ -7,7 +7,7 @@
     "sections": [
       {
         "heading": "Holy Quran and its developer",
-        "body": "Holy Quran is maintained by Ramahadam (developer name awaiting owner confirmation). Privacy contact: OWNER_CONTACT_REQUIRED. This policy covers the app and its feedback and Tafsir services. Holy Quran is an independent application, not an official Quran Foundation app. It uses Quran Foundation Content APIs for Tafsir access; it does not connect to a Quran Foundation account or use account-related APIs."
+        "body": "Holy Quran is maintained by Mohamed Adam. Privacy contact: mohamedadam.tech@gmail.com. This policy covers the app and its feedback and Tafsir services. Holy Quran is an independent application, not an official Quran Foundation app. It uses Quran Foundation Content APIs for Tafsir access; it does not connect to a Quran Foundation account or use account-related APIs."
       },
       {
         "heading": "Data on your device",
@@ -15,11 +15,11 @@
       },
       {
         "heading": "Optional feedback",
-        "body": "When you choose to send feedback, we receive the text you enter, your platform (such as Android), and app-version metadata. We store these with a server timestamp in Cloudflare D1 to review suggestions, diagnose reported problems, and improve the app. No name, email, account, reading history, bookmark, last-read position, installation ID, or IP address is automatically attached to the stored feedback record. Please do not put personal or sensitive information in your message: anything you type is included. Feedback is not linked to an account, but network requests are not fully anonymous."
+        "body": "When you choose to send feedback, we receive the text you enter, your platform (such as Android), and app-version metadata. We store these with a server timestamp in Cloudflare to review suggestions, diagnose reported problems, and improve the app. No name, email, account, reading history, bookmark, last-read position, installation ID, or IP address is automatically attached to the stored feedback record. Please do not put personal or sensitive information in your message: anything you type is included. Feedback is not linked to an account, but network requests are not fully anonymous."
       },
       {
         "heading": "Online Tafsir and abuse prevention",
-        "body": "Opening Ayah Study requests the available Tafsir sources. Loading a passage sends the requested verse key and Tafsir source ID to our Cloudflare Worker. The Worker fetches public content from Quran Foundation using developer credentials. It does not forward your installation ID, IP address, feedback, or local reading records to Quran Foundation. The provider receives the requested content identifiers and the Worker network request. This is a specific content request, not an upload of your reading history. Cloudflare can process your connecting IP and network metadata. For feedback and Tafsir requests, the app also sends a random 128-bit installation ID stored in local preferences. It is not a hardware ID or advertising ID. Our Worker uses this ID and the connecting IP in short-lived rate-limit counters to prevent abuse, not to build a personal or religious profile."
+        "body": "Opening Ayah Study requests the available Tafsir sources. Loading a passage sends the requested verse key and Tafsir source ID to our Cloudflare-hosted service. The service fetches public content from Quran Foundation using developer credentials. It does not forward your installation ID, IP address, feedback, or local reading records to Quran Foundation. The provider receives the requested content identifiers and our service’s network request. This is a specific content request, not an upload of your reading history. Cloudflare can process your connecting IP and network metadata. For feedback and Tafsir requests, the app also sends a random 128-bit installation ID stored in local preferences. It is not a hardware ID or advertising ID. Our service uses this ID and the connecting IP in short-lived rate-limit counters to prevent abuse, not to build a personal or religious profile."
       },
       {
         "heading": "Service providers and sharing",
@@ -27,15 +27,15 @@
       },
       {
         "heading": "Retention and deletion",
-        "body": "Local app data remains until you remove it, clear app storage, or uninstall the app. Operating-system backups can restore it. Removing a bookmark deletes the local bookmark; clearing app storage also removes preferences and the locally stored installation ID. Exported backup files remain wherever you saved or shared them and must be deleted separately. The current feedback database has no automatic expiry; stored feedback remains until manually deleted. A retention limit requires owner confirmation before this policy is published. Tafsir responses are cached for up to one hour under shared verse/source keys, without your installation ID or IP in the cache key. Rate-limit counters use 60-second windows. Worker invocation logging is disabled for this release. Our Worker does not explicitly log request bodies, headers, installation IDs, or IP addresses. Cloudflare may still process infrastructure and security metadata under its own practices. To request deletion of a feedback message, contact the developer privately with its approximate submission time and enough of its text to locate it. We cannot search feedback by account, installation ID, or IP because those identifiers are not stored in feedback records."
+        "body": "Local app data remains until you remove it, clear app storage, or uninstall the app. Operating-system backups can restore it. Removing a bookmark deletes the local bookmark; clearing app storage also removes preferences and the locally stored installation ID. Exported backup files remain wherever you saved or shared them and must be deleted separately. The current feedback database has no automatic expiry; stored feedback remains until manually deleted. A retention limit requires owner confirmation before this policy is published. Tafsir responses are cached for up to one hour under shared verse/source keys, without your installation ID or IP in the cache key. Rate-limit counters use 60-second windows. Application request logging is disabled for this release. Our service does not explicitly log request bodies, headers, installation IDs, or IP addresses. Cloudflare may still process infrastructure and security metadata under its own practices. To request deletion of a feedback message, contact the developer privately with its approximate submission time and enough of its text to locate it. We cannot search feedback by account, installation ID, or IP because those identifiers are not stored in feedback records."
       },
       {
         "heading": "Security and your choices",
-        "body": "The production app communicates with our Worker over HTTPS; the Worker uses HTTPS for Quran Foundation requests. Access to stored feedback is restricted through the developer Cloudflare account. Exported backups use passphrase-based encryption. Feedback is optional, and Quran reading works offline. Online Tafsir requires network processing as described above. You can turn reminders off and control notification permissions in the app or device settings. The app does not require sign-in or request your name, age, contacts, photographs, or precise location. Do not submit children’s personal information or other private information through feedback."
+        "body": "The production app communicates with our service over HTTPS; the service uses HTTPS for Quran Foundation requests. Access to stored feedback is restricted through the developer Cloudflare account. Exported backups use passphrase-based encryption. Feedback is optional, and Quran reading works offline. Online Tafsir requires network processing as described above. You can turn reminders off and control notification permissions in the app or device settings. The app does not require sign-in or request your name, age, contacts, photographs, or precise location. Do not submit children’s personal information or other private information through feedback."
       },
       {
         "heading": "Changes and contact",
-        "body": "We update this policy when data practices change and show the revision date above. The public policy and the copy bundled with the app describe the same release. Contact and deletion requests: OWNER_CONTACT_REQUIRED. Owner approval and the final contact and retention decisions are required before publication."
+        "body": "We update this policy when data practices change and show the revision date above. The public policy and the copy bundled with the app describe the same release. Contact and deletion requests: mohamedadam.tech@gmail.com. Owner approval and the final retention decision are required before publication."
       }
     ]
   },
@@ -45,7 +45,7 @@
     "sections": [
       {
         "heading": "القرآن الكريم ومطوّره",
-        "body": "يتولى Ramahadam صيانة تطبيق القرآن الكريم (اسم المطوّر بانتظار تأكيد المالك). جهة التواصل بشأن الخصوصية: OWNER_CONTACT_REQUIRED. تشمل هذه السياسة التطبيق وخدمات الملاحظات والتفسير. التطبيق مستقل وليس تطبيقًا رسميًا لمؤسسة القرآن Quran Foundation. يستخدم واجهات المحتوى التابعة للمؤسسة للوصول إلى التفسير، ولا يرتبط بحساب لدى المؤسسة ولا يستخدم واجهات الحسابات."
+        "body": "يتولى Mohamed Adam صيانة تطبيق القرآن الكريم. جهة التواصل بشأن الخصوصية: mohamedadam.tech@gmail.com. تشمل هذه السياسة التطبيق وخدمات الملاحظات والتفسير. التطبيق مستقل وليس تطبيقًا رسميًا لمؤسسة القرآن Quran Foundation. يستخدم واجهات المحتوى التابعة للمؤسسة للوصول إلى التفسير، ولا يرتبط بحساب لدى المؤسسة ولا يستخدم واجهات الحسابات."
       },
       {
         "heading": "البيانات على جهازك",
@@ -53,11 +53,11 @@
       },
       {
         "heading": "الملاحظات الاختيارية",
-        "body": "عندما تختار إرسال ملاحظة، نتلقى النص الذي تكتبه ونوع المنصة مثل Android وبيانات إصدار التطبيق. نحفظها مع وقت الاستلام في قاعدة Cloudflare D1 لمراجعة الاقتراحات وتشخيص المشكلات المبلّغ عنها وتحسين التطبيق. لا يُرفق تلقائيًا بالسجل المحفوظ اسم أو بريد إلكتروني أو حساب أو سجل قراءة أو علامة مرجعية أو آخر موضع قراءة أو معرّف تثبيت أو عنوان IP. لا تكتب معلومات شخصية أو حساسة في رسالتك، فكل ما تكتبه يُرسل. لا ترتبط الملاحظات بحساب، لكن طلبات الشبكة ليست مجهولة تمامًا."
+        "body": "عندما تختار إرسال ملاحظة، نتلقى النص الذي تكتبه ونوع المنصة مثل Android وبيانات إصدار التطبيق. نحفظها مع وقت الاستلام في قاعدة Cloudflare لمراجعة الاقتراحات وتشخيص المشكلات المبلّغ عنها وتحسين التطبيق. لا يُرفق تلقائيًا بالسجل المحفوظ اسم أو بريد إلكتروني أو حساب أو سجل قراءة أو علامة مرجعية أو آخر موضع قراءة أو معرّف تثبيت أو عنوان IP. لا تكتب معلومات شخصية أو حساسة في رسالتك، فكل ما تكتبه يُرسل. لا ترتبط الملاحظات بحساب، لكن طلبات الشبكة ليست مجهولة تمامًا."
       },
       {
         "heading": "التفسير عبر الإنترنت ومنع إساءة الاستخدام",
-        "body": "يطلب فتح دراسة الآية قائمة مصادر التفسير. وعند تحميل تفسير آية، يرسل التطبيق معرّف الآية ومعرّف مصدر التفسير إلى خدمة Cloudflare Worker. تجلب الخدمة المحتوى العام من Quran Foundation باستخدام بيانات اعتماد المطوّر، ولا تمرر إلى المؤسسة معرّف تثبيتك أو عنوان IP الخاص بك أو ملاحظاتك أو سجلات قراءتك المحلية. يتلقى المزوّد معرّفات المحتوى المطلوب وطلب الشبكة الصادر من الخدمة. هذا طلب لمحتوى محدد وليس رفعًا لسجل قراءتك. تستطيع Cloudflare معالجة عنوان IP المتصل وبيانات الشبكة. يرسل التطبيق أيضًا معرّف تثبيت عشوائيًا من 128 بت، محفوظًا في التفضيلات المحلية، مع طلبات الملاحظات والتفسير. ليس هذا معرّف جهاز ماديًا ولا معرّفًا إعلانيًا. تستخدم خدمتنا هذا المعرّف وعنوان IP في عدّادات قصيرة الأجل للحد من الطلبات ومنع الإساءة، وليس لبناء ملف شخصي أو ديني."
+        "body": "يطلب فتح دراسة الآية قائمة مصادر التفسير. وعند تحميل تفسير آية، يرسل التطبيق معرّف الآية ومعرّف مصدر التفسير إلى خدمتنا المستضافة لدى Cloudflare. تجلب الخدمة المحتوى العام من Quran Foundation باستخدام بيانات اعتماد المطوّر، ولا تمرر إلى المؤسسة معرّف تثبيتك أو عنوان IP الخاص بك أو ملاحظاتك أو سجلات قراءتك المحلية. يتلقى المزوّد معرّفات المحتوى المطلوب وطلب الشبكة الصادر من الخدمة. هذا طلب لمحتوى محدد وليس رفعًا لسجل قراءتك. تستطيع Cloudflare معالجة عنوان IP المتصل وبيانات الشبكة. يرسل التطبيق أيضًا معرّف تثبيت عشوائيًا من 128 بت، محفوظًا في التفضيلات المحلية، مع طلبات الملاحظات والتفسير. ليس هذا معرّف جهاز ماديًا ولا معرّفًا إعلانيًا. تستخدم خدمتنا هذا المعرّف وعنوان IP في عدّادات قصيرة الأجل للحد من الطلبات ومنع الإساءة، وليس لبناء ملف شخصي أو ديني."
       },
       {
         "heading": "مزوّدو الخدمات والمشاركة",
@@ -73,7 +73,7 @@
       },
       {
         "heading": "التغييرات والتواصل",
-        "body": "نحدّث السياسة عند تغير ممارسات البيانات ونعرض تاريخ المراجعة أعلاه. تصف السياسة العامة والنسخة المضمّنة في التطبيق الإصدار نفسه. للتواصل وطلبات الحذف: OWNER_CONTACT_REQUIRED. يلزم اعتماد المالك وتحديد جهة التواصل ومدة الاحتفاظ النهائية قبل النشر."
+        "body": "نحدّث السياسة عند تغير ممارسات البيانات ونعرض تاريخ المراجعة أعلاه. تصف السياسة العامة والنسخة المضمّنة في التطبيق الإصدار نفسه. للتواصل وطلبات الحذف: mohamedadam.tech@gmail.com. يلزم اعتماد المالك وتحديد مدة الاحتفاظ النهائية قبل النشر."
       }
     ]
   }

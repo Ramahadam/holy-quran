@@ -584,3 +584,16 @@ describe("public privacy policy", () => {
     expect(post.headers.get("allow")).toBe("GET, HEAD");
   });
 });
+
+
+describe("security response headers", () => {
+  for (const [path, method] of [["/health", "GET"], ["/privacy", "GET"], ["/missing", "GET"], ["/v1/feedback", "GET"], ["/v1/feedback", "OPTIONS"]]) {
+    it(`protects ${method} ${path}`, async () => {
+      const response = await worker.fetch(new Request(`https://example.com${path}`, { method }), baseEnv());
+      expect(response.headers.get("strict-transport-security")).toBe("max-age=31536000");
+      expect(response.headers.get("x-frame-options")).toBe("DENY");
+      expect(response.headers.get("x-content-type-options")).toBe("nosniff");
+      expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
+    });
+  }
+});

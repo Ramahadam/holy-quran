@@ -1,9 +1,9 @@
 # #149 — Data Safety review worksheet
 
 Status: **draft, not submitted**. The shared policy in
-`assets/privacy/privacy_policy.json` still needs the owner's developer name,
-monitored privacy email, retention decision, and policy approval. Do not deploy
-or ship the draft contact placeholders.
+`assets/privacy/privacy_policy.json` identifies Mohamed Adam and mohamedadam.tech@gmail.com using owner-confirmed
+details. The retention decision and policy approval remain pending; do not deploy
+or ship the draft until those are resolved.
 
 ## Verified release data flows
 
