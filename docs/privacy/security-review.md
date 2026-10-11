@@ -39,14 +39,18 @@ The anonymous API also has existing rate controls.
    Worker application imports. Local development/test tooling remains exposed to
    the applicable advisory conditions. Update the affected tooling and rerun
    tests, type checking, and a Wrangler bundle dry run before the next deployment.
-   This PR does not update dependencies. Review by 2026-10-18.
+   This PR does not update dependencies. Tracked in
+   [#168](https://github.com/Ramahadam/holy-quran/issues/168), assigned to the
+   repository owner. Review by 2026-10-18.
 2. **P2 — Request size is checked after buffering.** `readJsonObject` checks a
    supplied Content-Length but then calls `request.text()` before its final size
    check. A body without that header can consume memory before rejection, and
    string length counts UTF-16 code units rather than received bytes. A separate
    fix should cap streamed bytes and cancel oversized bodies, with tests for
    missing headers, multibyte text, and bodies exceeding the limit. This behavior
-   predates the privacy change. Review by 2026-10-18.
+   predates the privacy change. Tracked in
+   [#167](https://github.com/Ramahadam/holy-quran/issues/167), assigned to the
+   repository owner. Review by 2026-10-18.
 
 Cloudflare account MFA, deployed secret/API-token scopes, database permissions,
 and platform log/backup retention were not verified. Source configuration alone
