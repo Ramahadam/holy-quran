@@ -71,25 +71,29 @@ class UnconfiguredFeedbackTransport implements FeedbackTransport {
   }
 }
 
-class AnonymousFeedbackService {
-  static const int maxLength = 2000;
+enum FeedbackChoice {
+  readingDisplay('reading_display'),
+  translationTafsir('translation_tafsir'),
+  reminders('reminders'),
+  appProblem('app_problem'),
+  suggestion('suggestion');
 
+  final String code;
+  const FeedbackChoice(this.code);
+}
+
+class AnonymousFeedbackService {
   final FeedbackTransport transport;
 
   const AnonymousFeedbackService({required this.transport});
 
-  Future<void> submitFeedback(String text, {FeedbackMetadata? metadata}) async {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) {
-      throw const FeedbackValidationException('Feedback cannot be empty.');
-    }
-    if (trimmed.length > maxLength) {
-      throw const FeedbackValidationException('Feedback is too long.');
-    }
-
+  Future<void> submitFeedback(
+    FeedbackChoice choice, {
+    FeedbackMetadata? metadata,
+  }) async {
     final safeMetadata = metadata ?? FeedbackMetadata.current();
     final payload = <String, dynamic>{
-      'feedback_text': trimmed,
+      'feedback_choice': choice.code,
       'platform': safeMetadata.platform,
       'app_version': safeMetadata.appVersion,
     };
@@ -102,12 +106,6 @@ class AnonymousFeedbackService {
       throw FeedbackSubmissionException('Feedback transport failed.', e);
     }
   }
-}
-
-class FeedbackValidationException implements Exception {
-  final String message;
-
-  const FeedbackValidationException(this.message);
 }
 
 class FeedbackSubmissionException implements Exception {
