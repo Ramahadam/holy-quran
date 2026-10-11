@@ -524,4 +524,17 @@ async function fetchHandler(
   );
 }
 
-export default { fetch: fetchHandler } satisfies ExportedHandler<Env>;
+async function scheduledHandler(
+  _event: ScheduledController,
+  env: Env,
+): Promise<void> {
+  const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  await env.FEEDBACK_DB.prepare(
+    "DELETE FROM anonymous_feedback WHERE created_at <= ?",
+  ).bind(cutoff).run();
+}
+
+export default {
+  fetch: fetchHandler,
+  scheduled: scheduledHandler,
+} satisfies ExportedHandler<Env>;

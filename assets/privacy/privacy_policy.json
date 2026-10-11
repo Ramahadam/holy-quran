@@ -27,7 +27,7 @@
       },
       {
         "heading": "Retention and deletion",
-        "body": "Local app data remains until you remove it, clear app storage, or uninstall the app. Operating-system backups can restore it. Removing a bookmark deletes the local bookmark; clearing app storage also removes preferences and the locally stored installation ID. Exported backup files remain wherever you saved or shared them and must be deleted separately. The current feedback database has no automatic expiry; stored feedback remains until manually deleted. A retention limit requires owner confirmation before this policy is published. Tafsir responses are cached for up to one hour under shared verse/source keys, without your installation ID or IP in the cache key. Rate-limit counters use 60-second windows. Application request logging is disabled for this release. Our service does not explicitly log request bodies, headers, installation IDs, or IP addresses. Cloudflare may still process infrastructure and security metadata under its own practices. To request deletion of a feedback message, contact the developer privately with its approximate submission time and enough of its text to locate it. We cannot search feedback by account, installation ID, or IP because those identifiers are not stored in feedback records."
+        "body": "Local app data remains until you remove it, clear app storage, or uninstall the app. Operating-system backups can restore it. Removing a bookmark deletes the local bookmark; clearing app storage also removes preferences and the locally stored installation ID. Exported backup files remain wherever you saved or shared them and must be deleted separately. We keep submitted feedback for 90 days and delete it from the active database during the next daily cleanup. Provider backup copies may remain for their separate recovery periods. Tafsir responses are cached for up to one hour under shared verse/source keys, without your installation ID or IP in the cache key. Rate-limit counters use 60-second windows. Application request logging is disabled for this release. Our service does not explicitly log request bodies, headers, installation IDs, or IP addresses. Cloudflare may still process infrastructure and security metadata under its own practices. To request deletion of a feedback message, contact the developer privately with its approximate submission time and enough of its text to locate it. We cannot search feedback by account, installation ID, or IP because those identifiers are not stored in feedback records."
       },
       {
         "heading": "Security and your choices",
@@ -35,7 +35,7 @@
       },
       {
         "heading": "Changes and contact",
-        "body": "We update this policy when data practices change and show the revision date above. The public policy and the copy bundled with the app describe the same release. Contact and deletion requests: mohamedadam.tech@gmail.com. Owner approval and the final retention decision are required before publication."
+        "body": "We update this policy when data practices change and show the revision date above. The public policy and the copy bundled with the app describe the same release. Contact and deletion requests: mohamedadam.tech@gmail.com."
       }
     ]
   },
@@ -65,7 +65,7 @@
       },
       {
         "heading": "الاحتفاظ بالبيانات وحذفها",
-        "body": "تبقى البيانات المحلية إلى أن تحذفها أو تمسح بيانات التطبيق أو تزيله. قد تعيد نسخ نظام التشغيل الاحتياطية هذه البيانات. حذف علامة مرجعية يزيلها محليًا، ومسح بيانات التطبيق يزيل التفضيلات ومعرّف التثبيت المحلي أيضًا. تبقى ملفات النسخ الاحتياطية المصدّرة في الأماكن التي حفظتها أو شاركتها فيها، ويجب حذفها بشكل منفصل. لا توجد حاليًا مدة انتهاء تلقائي للملاحظات، وتبقى الملاحظات المحفوظة إلى أن تُحذف يدويًا. يلزم تأكيد المالك لمدة الاحتفاظ قبل نشر السياسة. يُخزّن التفسير مؤقتًا لمدة تصل إلى ساعة بمفاتيح مشتركة للآية والمصدر، دون معرّف تثبيتك أو عنوان IP في المفتاح. تستخدم عدّادات الحد من الطلبات نوافذ مدتها 60 ثانية. تسجيل استدعاءات الخدمة معطّل لهذا الإصدار. لا تسجّل خدمتنا صراحةً محتوى الطلبات أو ترويساتها أو معرّفات التثبيت أو عناوين IP. قد تظل Cloudflare تعالج بيانات البنية التحتية والأمان وفق ممارساتها الخاصة. لطلب حذف ملاحظة، تواصل مع المطوّر بشكل خاص واذكر وقت الإرسال التقريبي وجزءًا كافيًا من النص للعثور عليها. لا يمكن البحث عن الملاحظة بالحساب أو معرّف التثبيت أو عنوان IP لأنها لا تُحفظ في سجل الملاحظة."
+        "body": "تبقى البيانات المحلية إلى أن تحذفها أو تمسح بيانات التطبيق أو تزيله. قد تعيد نسخ نظام التشغيل الاحتياطية هذه البيانات. حذف علامة مرجعية يزيلها محليًا، ومسح بيانات التطبيق يزيل التفضيلات ومعرّف التثبيت المحلي أيضًا. تبقى ملفات النسخ الاحتياطية المصدّرة في الأماكن التي حفظتها أو شاركتها فيها، ويجب حذفها بشكل منفصل. نحتفظ بالملاحظات المرسلة لمدة 90 يومًا، ثم نحذفها من قاعدة البيانات النشطة خلال عملية التنظيف اليومية التالية. قد تبقى نسخ احتياطية لدى المزوّد خلال فترات الاستعادة الخاصة به. يُخزّن التفسير مؤقتًا لمدة تصل إلى ساعة بمفاتيح مشتركة للآية والمصدر، دون معرّف تثبيتك أو عنوان IP في المفتاح. تستخدم عدّادات الحد من الطلبات نوافذ مدتها 60 ثانية. تسجيل استدعاءات الخدمة معطّل لهذا الإصدار. لا تسجّل خدمتنا صراحةً محتوى الطلبات أو ترويساتها أو معرّفات التثبيت أو عناوين IP. قد تظل Cloudflare تعالج بيانات البنية التحتية والأمان وفق ممارساتها الخاصة. لطلب حذف ملاحظة، تواصل مع المطوّر بشكل خاص واذكر وقت الإرسال التقريبي وجزءًا كافيًا من النص للعثور عليها. لا يمكن البحث عن الملاحظة بالحساب أو معرّف التثبيت أو عنوان IP لأنها لا تُحفظ في سجل الملاحظة."
       },
       {
         "heading": "الأمان وخياراتك",
@@ -73,7 +73,7 @@
       },
       {
         "heading": "التغييرات والتواصل",
-        "body": "نحدّث السياسة عند تغير ممارسات البيانات ونعرض تاريخ المراجعة أعلاه. تصف السياسة العامة والنسخة المضمّنة في التطبيق الإصدار نفسه. للتواصل وطلبات الحذف: mohamedadam.tech@gmail.com. يلزم اعتماد المالك وتحديد مدة الاحتفاظ النهائية قبل النشر."
+        "body": "نحدّث السياسة عند تغير ممارسات البيانات ونعرض تاريخ المراجعة أعلاه. تصف السياسة العامة والنسخة المضمّنة في التطبيق الإصدار نفسه. للتواصل وطلبات الحذف: mohamedadam.tech@gmail.com."
       }
     ]
   }
