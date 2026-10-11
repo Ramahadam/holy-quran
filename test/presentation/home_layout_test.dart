@@ -65,6 +65,46 @@ Widget _app({
 );
 
 void main() {
+  for (final arabic in [false, true]) {
+    testWidgets('continue reading uses the selected locale (Arabic: $arabic)', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        await tester.pumpWidget(
+          _app(
+            arabic: arabic,
+            position: ReadingPosition(
+              verseId: '1:3',
+              lastReadAt: DateTime(2026),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final name = arabic ? 'الفاتحة' : 'Al-Fatihah';
+        final title = find.descendant(
+          of: find.byKey(const ValueKey('continueReadingCard')),
+          matching: find.text(name),
+        );
+        expect(title, findsOneWidget);
+        expect(
+          tester.widget<Text>(title).textDirection,
+          arabic ? TextDirection.rtl : TextDirection.ltr,
+        );
+        expect(
+          find.bySemanticsLabel(
+            arabic
+                ? 'متابعة القراءة، الفاتحة · الآية 3'
+                : 'Continue reading, Al-Fatihah · Verse 3',
+          ),
+          findsOneWidget,
+        );
+      } finally {
+        semantics.dispose();
+      }
+    });
+  }
+
   testWidgets('bottom navigation opens bookmarks even without saved ayahs', (
     tester,
   ) async {

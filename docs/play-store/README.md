@@ -1,8 +1,10 @@
 # Google Play listing assets — #150
 
 Status: **branding and listing copy approved by the owner on 2026-10-11**.
-The prepared pack is ready for code review. Refresh the English Home screenshot
-after #146 and complete the remaining launcher checks before store upload.
+The English and Arabic Home screenshots were refreshed after the #146
+localization fix. Adaptive and themed launcher rendering were verified on the
+Android 15 emulator. The prepared pack is ready for store upload when the
+production signing and Play Console prerequisites are complete.
 
 ## Files
 
@@ -39,13 +41,12 @@ local inspection. Production signing and Play uploads belong to #148 and #151.
 No private user data or real feedback submissions are used in screenshots.
 
 The open #143 Sajda-marker issue is outside this change. Screenshots use
-Al-Fatihah and other unaffected reading content. #146 also remains open;
-several of its fixes are already present on main. Refresh screenshots after any
+Al-Fatihah and other unaffected reading content. Refresh screenshots after any
 further visual changes before publishing the listing.
 
 The owner approved the prepared branding direction and bilingual listing copy
-in this chat. #150 remains open for the English Home screenshot refresh and
-remaining launcher checks; no Play Console upload has been performed.
+in this chat. The screenshot refresh and launcher checks complete the remaining
+#150 preparation work; no Play Console upload has been performed.
 
 ## Local verification
 
@@ -53,10 +54,11 @@ remaining launcher checks; no Play Console upload has been performed.
 - The installed adaptive icon was inspected in the launcher's circular mask.
 - All density PNG dimensions, adaptive XML parsing, store image dimensions and
   color modes, all eight screenshot dimensions, and copy length limits pass.
-- Screenshots show the existing English Home localization limitation tracked by
-  #146: the continue-reading Surah name remains Arabic. Do not alter screenshots
-  to hide it; recapture that screen after the code is fixed.
+- Home screenshots were recaptured in both languages from the release build
+  after #146. The English continue-reading card uses the English Surah name.
 - `review-preview.png` is a contact sheet for owner review, not an upload asset.
-- No Dart behavior changed; no application test rerun was needed for this asset
-  change. Monochrome resources compile, but themed-icon behavior on other
-  launchers still needs a final device review before publication.
+- The #146 follow-up passed 29 focused reader, bookmark, localization, and layout
+  tests and Flutter analysis. The release APK built and installed successfully.
+- The API 33+ monochrome layer was inspected with themed icons enabled on the
+  Android 15 launcher; the book and arch silhouette renders without clipping.
+  Other OEM launchers are covered by the broader #152 production device testing.

@@ -367,8 +367,9 @@ class _LastReadBanner extends ConsumerWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final page = ref.watch(pageForVerseProvider(verseId)).valueOrNull;
-    final readingLabel =
-        '${surah.nameArabic} · ${context.l10n.verseNumber(verseNum)}';
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final surahName = isArabic ? surah.nameArabic : surah.nameEnglish;
+    final readingLabel = '$surahName · ${context.l10n.verseNumber(verseNum)}';
     final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(24),
     );
@@ -410,8 +411,10 @@ class _LastReadBanner extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    surah.nameArabic,
-                    textDirection: TextDirection.rtl,
+                    surahName,
+                    textDirection: isArabic
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                     textAlign: Directionality.of(context) == TextDirection.rtl
                         ? TextAlign.right
                         : TextAlign.left,
