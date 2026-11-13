@@ -62,12 +62,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               style: Theme.of(context).textTheme.headlineLarge,
               textDirection: TextDirection.rtl,
             ),
-            Text(
-              l10n.appTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            // The Arabic app title already matches the heading above.
+            if (l10n.appTitle != 'القرآن الكريم')
+              Text(
+                l10n.appTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
           ],
         ),
         actions: [_buildActionsMenu()],
