@@ -1204,6 +1204,100 @@ void main() {
       );
     });
 
+    group('Al-Fatihah ayah 1 marker', () {
+      const bismillahVerse = Verse(
+        verseId: '1:1',
+        surahNumber: 1,
+        verseNumber: 1,
+        arabicText: classicBismillah,
+      );
+      const hamdVerse = Verse(
+        verseId: '1:2',
+        surahNumber: 1,
+        verseNumber: 2,
+        arabicText: 'ٱلۡحَمۡدُ لِلَّهِ رَبِّ ٱلۡعَٰلَمِينَ',
+      );
+
+      Future<void> pumpFatiha(
+        WidgetTester tester, {
+        Set<String> bookmarks = const {},
+        FakeReadingPositionRepository? positionRepo,
+      }) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              if (positionRepo != null)
+                readingPositionRepositoryProvider.overrideWithValue(
+                  positionRepo,
+                ),
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              classicVersesProvider(
+                1,
+              ).overrideWith((ref) async => [bismillahVerse, hamdVerse]),
+              versesByPageProvider(
+                1,
+              ).overrideWith((ref) async => [bismillahVerse, hamdVerse]),
+              bookmarksBySurahProvider(
+                1,
+              ).overrideWith((ref) async => bookmarks),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.light,
+              home: ReadingScreen(surah: classicSurah1),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      String paragraphText(WidgetTester tester) => tester
+          .widget<RichText>(
+            find.textContaining('ٱلۡحَمۡدُ', findRichText: true),
+          )
+          .text
+          .toPlainText();
+
+      testWidgets('ends the Bismillah instead of starting ayah 2', (
+        tester,
+      ) async {
+        await pumpFatiha(tester);
+
+        final bismillah = tester.widget<Text>(
+          find.byKey(const ValueKey('classicBismillah')),
+        );
+        expect(bismillah.textSpan!.toPlainText().trimRight(), endsWith('١'));
+        expect(paragraphText(tester), isNot(contains('١')));
+        expect(paragraphText(tester), startsWith('ٱلۡحَمۡدُ'));
+      });
+
+      testWidgets('keeps the ayah 1 bookmark with the Bismillah', (
+        tester,
+      ) async {
+        await pumpFatiha(tester, bookmarks: {'1:1'});
+
+        expect(
+          find.descendant(
+            of: find.byKey(const ValueKey('classicBismillah')),
+            matching: find.byKey(const ValueKey('ayahBookmarkMarker-1:1')),
+          ),
+          findsOneWidget,
+        );
+        expect(paragraphText(tester), startsWith('ٱلۡحَمۡدُ'));
+      });
+
+      testWidgets('still records ayah 1 as the visible reading position', (
+        tester,
+      ) async {
+        final positionRepo = FakeReadingPositionRepository();
+        await pumpFatiha(tester, positionRepo: positionRepo);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+
+        expect(positionRepo.savedPosition?.verseId, '1:1');
+      });
+    });
+
     testWidgets('shows Classic Juz dividers at mid-Surah boundaries', (
       tester,
     ) async {
