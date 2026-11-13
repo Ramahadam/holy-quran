@@ -231,6 +231,21 @@ void main() {
       },
     );
 
+    test('registers a background handler for reminder actions', () async {
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Etc/UTC',
+        onBackgroundNotificationResponse: snoozeReminderInBackground,
+      );
+
+      await scheduler.cancel();
+
+      final arguments =
+          calls.firstWhere((call) => call.method == 'initialize').arguments
+              as Map<Object?, Object?>;
+      expect(arguments['callback_handle'], isNotNull);
+      expect(arguments['dispatcher_handle'], isNotNull);
+    });
+
     test('uses Arabic notification text for Arabic locales', () async {
       final scheduler = LocalPrayerReminderScheduler(
         localeProvider: () => const Locale('ar'),
@@ -514,6 +529,36 @@ void main() {
 
       await service.snoozeCurrentReminder();
 
+      expect(scheduler.snoozed, store.loaded);
+    });
+
+    test('snoozes from the background only for the snooze action', () async {
+      final store = _FakePrayerReminderSettingsStore(
+        loaded: PrayerReminderSettings.defaults.copyWith(enabled: true),
+      );
+      final scheduler = _FakePrayerReminderScheduler(permissionGranted: true);
+      final service = PrayerReminderService(
+        settingsStore: store,
+        scheduler: scheduler,
+      );
+
+      await handleReminderResponse(
+        const NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+        ),
+        service,
+      );
+      expect(scheduler.snoozed, isNull);
+
+      await handleReminderResponse(
+        const NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotificationAction,
+          actionId: LocalPrayerReminderScheduler.snoozeActionId,
+        ),
+        service,
+      );
       expect(scheduler.snoozed, store.loaded);
     });
 

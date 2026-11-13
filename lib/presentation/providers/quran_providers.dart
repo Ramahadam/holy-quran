@@ -120,6 +120,7 @@ final prayerReminderSchedulerProvider = Provider<PrayerReminderScheduler>((
   late final LocalPrayerReminderScheduler scheduler;
   scheduler = LocalPrayerReminderScheduler(
     localeProvider: () => locale,
+    onBackgroundNotificationResponse: snoozeReminderInBackground,
     onSnoozeRequested: () async {
       final settings = await settingsStore.load();
       if (!settings.enabled) return;
