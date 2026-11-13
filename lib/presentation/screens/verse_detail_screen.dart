@@ -11,7 +11,7 @@ import '../widgets/verse_detail_tafsir_section.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
 final _embeddedAyahMarkerPattern = RegExp(
-  r'\s*(?:[\u06DD\u06DE\u06E9]\s*[٠-٩0-9]*|[﴾﴿])\s*',
+  r'\s*(?:[\u06DD\u06DE]\s*[٠-٩0-9]*|[﴾﴿])\s*',
 );
 final _ayahWhitespacePattern = RegExp(r'\s+');
 
