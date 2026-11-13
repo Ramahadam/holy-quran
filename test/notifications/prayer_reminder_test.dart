@@ -289,6 +289,35 @@ void main() {
       expect(actions.single['title'], 'Remind me later');
     });
 
+    test('falls back to inexact alarms without exact alarm access', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (methodCall) async {
+            calls.add(methodCall);
+            return switch (methodCall.method) {
+              'initialize' => true,
+              'canScheduleExactNotifications' => false,
+              _ => null,
+            };
+          });
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Etc/UTC',
+      );
+      final settings = PrayerReminderSettings.defaults.copyWith(enabled: true);
+
+      await scheduler.schedule(settings);
+      await scheduler.snooze(settings);
+
+      final scheduleModes = calls
+          .where((call) => call.method == 'zonedSchedule')
+          .map((call) {
+            final arguments = call.arguments as Map<Object?, Object?>;
+            final platformSpecifics =
+                arguments['platformSpecifics'] as Map<Object?, Object?>;
+            return platformSpecifics['scheduleMode'];
+          });
+      expect(scheduleModes, ['inexactAllowWhileIdle', 'inexactAllowWhileIdle']);
+    });
+
     test(
       'schedules snoozed reminders as exact allow-while-idle alarms',
       () async {
