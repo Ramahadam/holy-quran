@@ -263,6 +263,33 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
   });
 
+  testWidgets('credits the English translation only when it is shown', (
+    tester,
+  ) async {
+    for (final language in ['en', 'ar']) {
+      await tester.pumpWidget(
+        ProviderScope(
+          key: ValueKey(language),
+          overrides: [
+            appLocaleStoreProvider.overrideWithValue(_MemoryAppLocaleStore()),
+            initialAppLocaleProvider.overrideWithValue(Locale(language)),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            tafsirRepositoryProvider.overrideWithValue(
+              const _FailingTafsirRepository(),
+            ),
+          ],
+          child: const _LocalizedVerseDetailTestApp(verse: _verse),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Source: Saheeh International'),
+        language == 'en' ? findsOneWidget : findsNothing,
+      );
+    }
+  });
+
   testWidgets('hides bundled translation footnote markers', (tester) async {
     const footnotedVerses = [
       (
