@@ -66,6 +66,23 @@ Widget _app({
 
 void main() {
   for (final arabic in [false, true]) {
+    testWidgets('header names the app once (Arabic: $arabic)', (tester) async {
+      await tester.pumpWidget(_app(arabic: arabic));
+      await tester.pumpAndSettle();
+
+      final header = find.byType(AppBar);
+      expect(
+        find.descendant(of: header, matching: find.text('القرآن الكريم')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: header, matching: find.text('Holy Quran')),
+        arabic ? findsNothing : findsOneWidget,
+      );
+    });
+  }
+
+  for (final arabic in [false, true]) {
     testWidgets('continue reading uses the selected locale (Arabic: $arabic)', (
       tester,
     ) async {

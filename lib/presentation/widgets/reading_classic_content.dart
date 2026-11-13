@@ -66,7 +66,7 @@ WidgetSpan _classicBookmarkedAyahSpan(
 }
 
 final _classicEmbeddedMarkerPattern = RegExp(
-  r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
+  r'\s*(?:۞|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
 );
 final _whitespacePattern = RegExp(r'\s+');
 
