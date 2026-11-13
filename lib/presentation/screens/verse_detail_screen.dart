@@ -15,6 +15,9 @@ final _embeddedAyahMarkerPattern = RegExp(
   r'\s*(?:[\u06DD\u06DE\u06E9]\s*[٠-٩0-9]*|[﴾﴿])\s*',
 );
 final _ayahWhitespacePattern = RegExp(r'\s+');
+// The bundled translation keeps upstream footnote numbers, usually glued to the
+// preceding word or punctuation (e.g. "Lord1", "Allāh,1").
+final _translationFootnotePattern = RegExp(r'(?<=[^\s\d])\d+|\s+\d+$');
 
 class VerseDetailScreen extends ConsumerStatefulWidget {
   final Verse verse;
@@ -62,7 +65,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final ayahText = isArabic
         ? _cleanArabicAyahText(_verse.arabicText)
-        : _verse.translation ?? _verse.arabicText;
+        : _cleanTranslationText(_verse.translation) ?? _verse.arabicText;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -375,6 +378,9 @@ String _cleanArabicAyahText(String text) => text
     .replaceAll(_embeddedAyahMarkerPattern, ' ')
     .replaceAll(_ayahWhitespacePattern, ' ')
     .trim();
+
+String? _cleanTranslationText(String? text) =>
+    text?.replaceAll(_translationFootnotePattern, '');
 
 class _VerseBadge extends StatelessWidget {
   final int number;
