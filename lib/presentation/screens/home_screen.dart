@@ -19,6 +19,8 @@ import 'bookmarks_screen.dart';
 import 'reading_screen.dart';
 import 'settings_screen.dart';
 
+const _arabicAppTitle = 'القرآن الكريم';
+
 typedef _OpenReading =
     Future<void> Function(Surah surah, {String? initialVerseId});
 
@@ -56,14 +58,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'القرآن الكريم',
+              _arabicAppTitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.headlineLarge,
               textDirection: TextDirection.rtl,
             ),
             // The Arabic app title already matches the heading above.
-            if (l10n.appTitle != 'القرآن الكريم')
+            if (l10n.appTitle != _arabicAppTitle)
               Text(
                 l10n.appTitle,
                 maxLines: 1,
