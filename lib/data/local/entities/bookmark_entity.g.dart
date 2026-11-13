@@ -30,6 +30,7 @@ const BookmarkEntitySchema = CollectionSchema(
     ),
     r'verseId': PropertySchema(id: 3, name: r'verseId', type: IsarType.string),
   },
+
   estimateSize: _bookmarkEntityEstimateSize,
   serialize: _bookmarkEntitySerialize,
   deserialize: _bookmarkEntityDeserialize,
@@ -65,10 +66,11 @@ const BookmarkEntitySchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _bookmarkEntityGetId,
   getLinks: _bookmarkEntityGetLinks,
   attach: _bookmarkEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _bookmarkEntityEstimateSize(

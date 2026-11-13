@@ -20,14 +20,12 @@ class AyahBookmarkMarkerOverlay extends StatefulWidget {
   final Widget child;
   final List<AyahBookmarkMarker> markers;
   final double iconSize;
-  final TextDirection textDirection;
 
   const AyahBookmarkMarkerOverlay({
     super.key,
     required this.child,
     required this.markers,
     this.iconSize = 18,
-    this.textDirection = TextDirection.rtl,
   });
 
   @override
@@ -36,6 +34,7 @@ class AyahBookmarkMarkerOverlay extends StatefulWidget {
 }
 
 class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
+  final GlobalKey _overlayKey = GlobalKey();
   final GlobalKey _childKey = GlobalKey();
   List<_MarkerPosition> _positions = const [];
   bool _measurementScheduled = false;
@@ -44,8 +43,7 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
   void didUpdateWidget(covariant AyahBookmarkMarkerOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_sameMarkers(oldWidget.markers, widget.markers) ||
-        oldWidget.iconSize != widget.iconSize ||
-        oldWidget.textDirection != widget.textDirection) {
+        oldWidget.iconSize != widget.iconSize) {
       _positions = const [];
       _scheduleMeasurement();
     }
@@ -57,6 +55,7 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
       _scheduleMeasurement();
     }
     return Stack(
+      key: _overlayKey,
       fit: StackFit.passthrough,
       clipBehavior: Clip.none,
       children: [
@@ -92,9 +91,10 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
   }
 
   void _measureMarkers() {
+    final overlay = _overlayKey.currentContext?.findRenderObject();
     final childRenderObject = _childKey.currentContext?.findRenderObject();
     final paragraph = _findParagraph(childRenderObject);
-    if (paragraph == null) return;
+    if (overlay is! RenderBox || !overlay.hasSize || paragraph == null) return;
 
     final nextPositions = <_MarkerPosition>[];
     for (final marker in widget.markers) {
@@ -110,26 +110,27 @@ class _AyahBookmarkMarkerOverlayState extends State<AyahBookmarkMarkerOverlay> {
           .toList();
       if (boxes.isEmpty) continue;
 
-      final box = boxes.last;
-      final gap = 2.0;
-      final textSideLeft = widget.textDirection == TextDirection.rtl
-          ? box.right + gap
-          : box.left - widget.iconSize - gap;
-      final outerSideLeft = widget.textDirection == TextDirection.rtl
-          ? box.left - widget.iconSize - gap
-          : box.right + gap;
-      final maxLeft = paragraph.size.width - widget.iconSize;
-      final left = textSideLeft >= 0 && textSideLeft <= maxLeft
-          ? textSideLeft
-          : outerSideLeft;
-      final clampedLeft = left.clamp(0.0, maxLeft.clamp(0.0, double.infinity));
-      nextPositions.add(
-        _MarkerPosition(
-          marker: marker,
-          left: clampedLeft.toDouble(),
-          top: box.center.dy - widget.iconSize / 2,
-        ),
+      // The QCF page and icon share the same canonical page layout. Convert
+      // each ayah-number box into the overlay's coordinate space first.
+      final box = boxes
+          .map(
+            (rect) => Rect.fromPoints(
+              paragraph.localToGlobal(rect.topLeft, ancestor: overlay),
+              paragraph.localToGlobal(rect.bottomRight, ancestor: overlay),
+            ),
+          )
+          .reduce((a, b) => a.expandToInclude(b));
+      final left = (box.center.dx - widget.iconSize / 2).clamp(
+        0.0,
+        (overlay.size.width - widget.iconSize).clamp(0.0, double.infinity),
       );
+      // QCF lines leave room above the ornament, while neighboring words
+      // commonly touch both of its sides.
+      final top = (box.top + 2).clamp(
+        0.0,
+        (overlay.size.height - widget.iconSize).clamp(0.0, double.infinity),
+      );
+      nextPositions.add(_MarkerPosition(marker: marker, left: left, top: top));
     }
 
     if (!_samePositions(_positions, nextPositions)) {

@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:holy_quran_app/data/quran/qcf_quran_data_source.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 
 void main() {
@@ -19,6 +20,15 @@ void main() {
     });
 
     for (var page = 1; page <= 604; page += 1) {
+      final bookmarkedVerseIds = {
+        for (final range in qcfQuranDataSource.pageRanges(page))
+          for (
+            var verse = range.firstVerse;
+            verse <= range.lastVerse;
+            verse += 1
+          )
+            '${range.surahNumber}:$verse',
+      };
       final pageName = page.toString().padLeft(3, '0');
       await (FontLoader('packages/qcf_quran/QCF_P$pageName')..addFont(
             rootBundle.load(
@@ -33,12 +43,32 @@ void main() {
           home: MediaQuery(
             data: const MediaQueryData(textScaler: TextScaler.linear(2)),
             child: Scaffold(
-              body: MushafSamplePage(key: ValueKey(page), page: page),
+              body: MushafSamplePage(
+                key: ValueKey(page),
+                page: page,
+                bookmarkedVerseIds: bookmarkedVerseIds,
+              ),
             ),
           ),
         ),
       );
       await tester.pump();
+      await tester.pump();
+
+      final markerRects = <Rect>[];
+      for (final verseId in bookmarkedVerseIds) {
+        final markerFinder = find.byKey(
+          ValueKey('ayahBookmarkMarker-$verseId'),
+        );
+        expect(markerFinder, findsOneWidget, reason: 'Page $page $verseId.');
+        final marker = tester.getRect(markerFinder);
+        expect(
+          markerRects.every((other) => !other.overlaps(marker)),
+          isTrue,
+          reason: 'Page $page $verseId overlaps another bookmark.',
+        );
+        markerRects.add(marker);
+      }
 
       final textFinder = find.byKey(ValueKey('mushafPageText-$page'));
       final paragraph = tester.renderObject<RenderParagraph>(textFinder);

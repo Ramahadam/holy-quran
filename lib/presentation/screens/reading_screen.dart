@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -13,7 +14,6 @@ import '../../domain/models/verse.dart';
 import '../../l10n/l10n.dart';
 import '../providers/quran_providers.dart';
 import '../theme/app_theme.dart';
-import '../widgets/ayah_bookmark_marker.dart';
 import '../widgets/mushaf_reader_chrome.dart';
 import '../widgets/mushaf_sample_page.dart';
 import '../widgets/reader_app_bar.dart';
@@ -204,8 +204,8 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         ? context.l10n.mushaf
         : context.l10n.classic;
     final targetIcon = targetMode == ReadingMode.mushaf
-        ? Icons.image_outlined
-        : Icons.menu_book;
+        ? CupertinoIcons.doc_plaintext
+        : CupertinoIcons.book;
 
     return ReaderAppBar(
       surahName: widget.surah.nameArabic,

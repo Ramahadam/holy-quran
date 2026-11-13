@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,15 +56,27 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     return ListView.separated(
       key: const ValueKey('bookmarksList'),
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-      itemCount: bookmarks.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemCount: bookmarks.length + 1,
+      separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, index) {
-        final bookmark = bookmarks[index];
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              context.l10n.bookmarksSummary(bookmarks.length),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+        final bookmark = bookmarks[index - 1];
         final surah = _surahForBookmark(bookmark, surahsByNumber);
         return _BookmarkListTile(
           bookmark: bookmark,
           surah: surah,
           onOpenReading: _openReadingScreen,
+          onRemove: () => unawaited(_removeBookmark(bookmark)),
         );
       },
     );
@@ -94,6 +107,81 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
     );
     if (!mounted) return;
     ref.invalidate(allBookmarksProvider);
+  }
+
+  Future<void> _removeBookmark(Bookmark bookmark) async {
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(bookmarkRepositoryProvider)
+          .removeBookmark(bookmark.verseId);
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookmarkRemoveFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      return;
+    }
+    if (!mounted) return;
+    ref.invalidate(recentBookmarksProvider);
+    ref.invalidate(allBookmarksProvider);
+    final surahNum = int.tryParse(bookmark.verseId.split(':').first);
+    if (surahNum != null) {
+      ref.invalidate(bookmarksBySurahProvider(surahNum));
+    }
+
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.bookmarkRemoved),
+          duration: const Duration(seconds: 4),
+          persist: false,
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: l10n.undo,
+            onPressed: () => unawaited(_restoreBookmark(bookmark)),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _restoreBookmark(Bookmark bookmark) async {
+    if (!mounted) return;
+    final l10n = context.l10n;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(bookmarkRepositoryProvider).saveBookmark(bookmark);
+      if (!mounted) return;
+      ref.invalidate(recentBookmarksProvider);
+      ref.invalidate(allBookmarksProvider);
+      final surahNum = int.tryParse(bookmark.verseId.split(':').first);
+      if (surahNum != null) {
+        ref.invalidate(bookmarksBySurahProvider(surahNum));
+      }
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookmarkRestored),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.bookmarkRestoreFailed),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _retry() {
@@ -140,11 +228,13 @@ class _BookmarkListTile extends ConsumerWidget {
   final Bookmark bookmark;
   final Surah? surah;
   final _OpenReading onOpenReading;
+  final VoidCallback onRemove;
 
   const _BookmarkListTile({
     required this.bookmark,
     required this.surah,
     required this.onOpenReading,
+    required this.onRemove,
   });
 
   @override
@@ -161,10 +251,12 @@ class _BookmarkListTile extends ConsumerWidget {
         ? surahName
         : '$surahName · ${context.l10n.verseNumber(verseNumber)}';
 
+    final excerpt = ref.watch(bookmarkVerseProvider(bookmark.verseId));
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
         key: ValueKey('bookmarkRow-${bookmark.verseId}'),
@@ -177,49 +269,45 @@ class _BookmarkListTile extends ConsumerWidget {
           key: ValueKey('removeBookmark-${bookmark.verseId}'),
           tooltip: context.l10n.removeBookmark,
           style: IconButton.styleFrom(
-            foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            foregroundColor: Theme.of(context).colorScheme.primary,
             minimumSize: const Size.square(48),
             maximumSize: const Size.square(48),
           ),
-          icon: const Icon(Icons.bookmark_rounded, size: 20),
-          onPressed: () => _removeBookmark(context, ref),
+          icon: const Icon(CupertinoIcons.bookmark, size: 20),
+          onPressed: onRemove,
         ),
-        title: Text(title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        trailing: const Icon(Icons.chevron_right_rounded),
-      ),
-    );
-  }
-
-  Future<void> _removeBookmark(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref
-          .read(bookmarkRepositoryProvider)
-          .removeBookmark(bookmark.verseId);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.bookmarkRemoveFailed),
-            behavior: SnackBarBehavior.floating,
+        title: Text(title, style: Theme.of(context).textTheme.titleSmall),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: excerpt.when(
+            data: (verse) => verse == null
+                ? Text(context.l10n.bookmarkExcerptUnavailable)
+                : Text(
+                    verse.arabicText,
+                    textDirection: TextDirection.rtl,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontFamily: 'KFGQPCHafsUthmanicScript',
+                      height: 1.8,
+                    ),
+                  ),
+            loading: () => Text(context.l10n.bookmarkExcerptLoading),
+            error: (_, _) => Column(
+              key: ValueKey('bookmarkExcerptError-${bookmark.verseId}'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(context.l10n.bookmarkExcerptUnavailable),
+                TextButton(
+                  key: ValueKey('bookmarkExcerptRetry-${bookmark.verseId}'),
+                  onPressed: () =>
+                      ref.invalidate(bookmarkVerseProvider(bookmark.verseId)),
+                  child: Text(context.l10n.retry),
+                ),
+              ],
+            ),
           ),
-        );
-      }
-      return;
-    }
-    ref.invalidate(allBookmarksProvider);
-    ref.invalidate(recentBookmarksProvider);
-    final surahNumber = int.tryParse(bookmark.verseId.split(':').first);
-    if (surahNumber != null) {
-      ref.invalidate(bookmarksBySurahProvider(surahNumber));
-    }
-
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.bookmarkRemoved),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
       ),
     );
   }

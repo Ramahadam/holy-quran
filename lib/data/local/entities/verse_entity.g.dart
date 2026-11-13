@@ -40,6 +40,7 @@ const VerseEntitySchema = CollectionSchema(
       type: IsarType.long,
     ),
   },
+
   estimateSize: _verseEntityEstimateSize,
   serialize: _verseEntitySerialize,
   deserialize: _verseEntityDeserialize,
@@ -88,10 +89,11 @@ const VerseEntitySchema = CollectionSchema(
   },
   links: {},
   embeddedSchemas: {},
+
   getId: _verseEntityGetId,
   getLinks: _verseEntityGetLinks,
   attach: _verseEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _verseEntityEstimateSize(

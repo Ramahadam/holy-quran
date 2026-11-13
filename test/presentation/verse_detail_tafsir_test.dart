@@ -263,33 +263,82 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
   });
 
-  testWidgets('handles a narrow Arabic layout with larger text', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(320, 640);
-    tester.view.devicePixelRatio = 1;
-    tester.platformDispatcher.textScaleFactorTestValue = 1.5;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          appLocaleStoreProvider.overrideWithValue(_MemoryAppLocaleStore()),
-          initialAppLocaleProvider.overrideWithValue(const Locale('ar')),
-          bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
-          tafsirRepositoryProvider.overrideWithValue(_FakeTafsirRepository()),
-        ],
-        child: const _LocalizedVerseDetailTestApp(),
+  testWidgets('hides bundled translation footnote markers', (tester) async {
+    const footnotedVerses = [
+      (
+        Verse(
+          verseId: '1:1',
+          surahNumber: 1,
+          verseNumber: 1,
+          arabicText: 'بِسْمِ اللَّهِ',
+          translation:
+              'In the name of Allāh,1 the Entirely Merciful, the Especially Merciful.2',
+        ),
+        'In the name of Allāh, the Entirely Merciful, the Especially Merciful.',
       ),
-    );
-    await tester.pumpAndSettle();
+      (
+        Verse(
+          verseId: '85:7',
+          surahNumber: 85,
+          verseNumber: 7,
+          arabicText: 'وَهُمْ',
+          translation:
+              'And they, to what they were doing against the believers, were witnesses. 1',
+        ),
+        'And they, to what they were doing against the believers, were witnesses.',
+      ),
+    ];
 
-    expect(find.byKey(const ValueKey('verseDetailAyahCard')), findsOneWidget);
-    expect(find.byKey(const ValueKey('tafsirCard')), findsOneWidget);
-    expect(tester.takeException(), isNull);
+    for (final (verse, expected) in footnotedVerses) {
+      await tester.pumpWidget(
+        ProviderScope(
+          key: ValueKey(verse.verseId),
+          overrides: [
+            bookmarksBySurahProvider(
+              verse.surahNumber,
+            ).overrideWith((ref) async => {}),
+            tafsirRepositoryProvider.overrideWithValue(
+              const _FailingTafsirRepository(),
+            ),
+          ],
+          child: MaterialApp(home: VerseDetailScreen(verse: verse)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(expected), findsOneWidget);
+    }
   });
+
+  for (final language in ['en', 'ar']) {
+    testWidgets('handles a narrow $language layout with larger text', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(320, 640);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appLocaleStoreProvider.overrideWithValue(_MemoryAppLocaleStore()),
+            initialAppLocaleProvider.overrideWithValue(Locale(language)),
+            bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            tafsirRepositoryProvider.overrideWithValue(_FakeTafsirRepository()),
+          ],
+          child: const _LocalizedVerseDetailTestApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('verseDetailAyahCard')), findsOneWidget);
+      expect(find.byKey(const ValueKey('tafsirCard')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('shows a numbered marker and removes embedded marker glyphs', (
     tester,
@@ -409,9 +458,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final topNext = find.byKey(const ValueKey('topNextAyahButton'));
-    final topPrevious = find.byKey(const ValueKey('topPreviousAyahButton'));
+    final topNext = find.byKey(const ValueKey('nextAyahButton'));
+    final topPrevious = find.byKey(const ValueKey('previousAyahButton'));
     expect(topNext, findsOneWidget);
+    expect(find.byKey(const ValueKey('topNextAyahButton')), findsNothing);
+    expect(find.byKey(const ValueKey('topPreviousAyahButton')), findsNothing);
     expect(topPrevious, findsOneWidget);
     expect(tester.getTopLeft(topNext).dy, lessThan(500));
     expect(tester.getTopLeft(topPrevious).dy, lessThan(500));

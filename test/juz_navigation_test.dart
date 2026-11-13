@@ -52,9 +52,7 @@ const _juz11Start = Verse(
 );
 
 void main() {
-  testWidgets('Juz rows match the modern Quran index card treatment', (
-    tester,
-  ) async {
+  testWidgets('Juz rows match the quiet Quran index treatment', (tester) async {
     final semanticsHandle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -79,16 +77,12 @@ void main() {
     final context = tester.element(cardFinder);
     final colors = Theme.of(context).colorScheme;
     final card = tester.widget<Material>(cardFinder);
-    final shape = card.shape! as RoundedRectangleBorder;
     final badge = tester.widget<Container>(badgeFinder);
-    final badgeDecoration = badge.decoration! as BoxDecoration;
     final title = tester.widget<Text>(find.text('Juz 2'));
 
-    expect(card.color, colors.surfaceContainerLow);
-    expect(shape.borderRadius, BorderRadius.circular(16));
-    expect(shape.side.color, colors.outlineVariant.withValues(alpha: 0.7));
-    expect(badgeDecoration.color, colors.primaryContainer);
-    expect(badgeDecoration.shape, BoxShape.rectangle);
+    expect(card.color, AppTheme.light.scaffoldBackgroundColor);
+    expect(card.shape, isNull);
+    expect(badge.decoration, isNull);
     expect(title.style?.color, colors.onSurface);
     expect(find.text('الجزء ٢'), findsNothing);
     expect(find.text('Starts at Al-Baqarah 2:142 · Page 22'), findsOneWidget);

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +15,9 @@ final _embeddedAyahMarkerPattern = RegExp(
   r'\s*(?:[\u06DD\u06DE]\s*[٠-٩0-9]*|[﴾﴿])\s*',
 );
 final _ayahWhitespacePattern = RegExp(r'\s+');
+// The bundled translation keeps upstream footnote numbers, usually glued to the
+// preceding word or punctuation (e.g. "Lord1", "Allāh,1").
+final _translationFootnotePattern = RegExp(r'(?<=[^\s\d])\d+|\s+\d+$');
 
 class VerseDetailScreen extends ConsumerStatefulWidget {
   final Verse verse;
@@ -61,7 +65,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final ayahText = isArabic
         ? _cleanArabicAyahText(_verse.arabicText)
-        : _verse.translation ?? _verse.arabicText;
+        : _cleanTranslationText(_verse.translation) ?? _verse.arabicText;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -82,7 +86,9 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                 ? context.l10n.removeBookmark
                 : context.l10n.bookmarkVerse,
             icon: Icon(
-              isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+              isBookmarked
+                  ? CupertinoIcons.bookmark_fill
+                  : CupertinoIcons.bookmark,
               color: Theme.of(context).colorScheme.primary,
             ),
             onPressed: () => _toggleBookmark(context, isBookmarked),
@@ -103,7 +109,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                     key: const ValueKey('verseDetailAyahCard'),
                     margin: EdgeInsets.zero,
                     elevation: 0,
-                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                    color: Theme.of(context).colorScheme.surface,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
@@ -151,7 +157,6 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                   ),
                   const SizedBox(height: 24),
                   _AyahNavigation(
-                    keyPrefix: 'top',
                     onPrevious: _canGoPrevious && !_isChangingVerse
                         ? _goToPreviousAyah
                         : null,
@@ -161,15 +166,6 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                   ),
                   const SizedBox(height: 24),
                   VerseDetailTafsirSection(verseKey: _verse.verseId),
-                  const SizedBox(height: 16),
-                  _AyahNavigation(
-                    onPrevious: _canGoPrevious && !_isChangingVerse
-                        ? _goToPreviousAyah
-                        : null,
-                    onNext: _canGoNext && !_isChangingVerse
-                        ? _goToNextAyah
-                        : null,
-                  ),
                 ],
               ),
             ),
@@ -231,6 +227,7 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                 : context.l10n.bookmarked,
           ),
           duration: Duration(seconds: isBookmarked ? 4 : 2),
+          persist: false,
           behavior: SnackBarBehavior.floating,
           action: isBookmarked
               ? SnackBarAction(
@@ -348,13 +345,8 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
 class _AyahNavigation extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
-  final String keyPrefix;
 
-  const _AyahNavigation({
-    required this.onPrevious,
-    required this.onNext,
-    this.keyPrefix = '',
-  });
+  const _AyahNavigation({required this.onPrevious, required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -362,11 +354,7 @@ class _AyahNavigation extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            key: ValueKey(
-              keyPrefix.isEmpty
-                  ? 'previousAyahButton'
-                  : '${keyPrefix}PreviousAyahButton',
-            ),
+            key: const ValueKey('previousAyahButton'),
             onPressed: onPrevious,
             icon: const Icon(Icons.arrow_back_rounded),
             label: Text(context.l10n.previousAyah),
@@ -375,11 +363,7 @@ class _AyahNavigation extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: FilledButton.icon(
-            key: ValueKey(
-              keyPrefix.isEmpty
-                  ? 'nextAyahButton'
-                  : '${keyPrefix}NextAyahButton',
-            ),
+            key: const ValueKey('nextAyahButton'),
             onPressed: onNext,
             icon: const Icon(Icons.arrow_forward_rounded),
             label: Text(context.l10n.nextAyah),
@@ -394,6 +378,9 @@ String _cleanArabicAyahText(String text) => text
     .replaceAll(_embeddedAyahMarkerPattern, ' ')
     .replaceAll(_ayahWhitespacePattern, ' ')
     .trim();
+
+String? _cleanTranslationText(String? text) =>
+    text?.replaceAll(_translationFootnotePattern, '');
 
 class _VerseBadge extends StatelessWidget {
   final int number;

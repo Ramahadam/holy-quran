@@ -9,7 +9,7 @@ import file_saver
 import file_selector_macos
 import flutter_local_notifications
 import flutter_timezone
-import isar_flutter_libs
+import isar_community_flutter_libs
 import share_plus
 import shared_preferences_foundation
 

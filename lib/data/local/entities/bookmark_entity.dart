@@ -1,4 +1,4 @@
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 import 'package:holy_quran_app/domain/models/bookmark.dart';
 
 part 'bookmark_entity.g.dart';

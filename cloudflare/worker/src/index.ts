@@ -1,3 +1,5 @@
+import { privacyPolicyResponse } from "./privacy-policy";
+
 export interface Env {
   FEEDBACK_DB: D1Database;
   TAFSIR_RATE_LIMITER: RateLimit;
@@ -355,30 +357,30 @@ async function handleFeedback(request: Request, env: Env): Promise<Response> {
   );
 
   const body = await readJsonObject(request, 4096);
-  const feedbackText = body.feedback_text;
+  const feedbackChoice = body.feedback_choice;
   const platform = body.platform;
   const appVersion = body.app_version;
 
   if (
-    typeof feedbackText !== "string" ||
-    feedbackText.trim().length < 1 ||
-    feedbackText.trim().length > 2000 ||
+    Object.keys(body).some(key => !["feedback_choice", "platform", "app_version"].includes(key)) ||
+    typeof feedbackChoice !== "string" ||
+    !["reading_display", "translation_tafsir", "reminders", "app_problem", "suggestion"].includes(feedbackChoice) ||
     typeof platform !== "string" ||
-    platform.length < 1 ||
-    platform.length > 32 ||
+    !["android", "ios", "web", "linux", "macOS", "windows", "fuchsia"].includes(platform) ||
     typeof appVersion !== "string" ||
-    appVersion.length < 1 ||
-    appVersion.length > 64
+    appVersion.length > 64 ||
+    !/^(?:unknown|[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9]+)?)$/.test(appVersion)
   ) {
     throw new ServiceError("Invalid feedback.", 400);
   }
 
+  // Reuse the existing column for the fixed choice code; legacy rows expire normally.
   await env.FEEDBACK_DB.prepare(
     `INSERT INTO anonymous_feedback
       (feedback_text, platform, app_version)
       VALUES (?, ?, ?)`,
   )
-    .bind(feedbackText.trim(), platform, appVersion)
+    .bind(feedbackChoice, platform, appVersion)
     .run();
 
   return jsonResponse({ submitted: true }, 201);
@@ -397,9 +399,26 @@ async function readJsonObject(
     throw new ServiceError("Request is too large.", 413);
   }
 
-  const rawBody = await request.text();
-  if (rawBody.length > maxLength) {
-    throw new ServiceError("Request is too large.", 413);
+  let rawBody = "";
+  const reader = request.body?.getReader();
+  if (reader) {
+    const decoder = new TextDecoder();
+    let byteLength = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        byteLength += value.byteLength;
+        if (byteLength > maxLength) {
+          await reader.cancel();
+          throw new ServiceError("Request is too large.", 413);
+        }
+        rawBody += decoder.decode(value, { stream: true });
+      }
+      rawBody += decoder.decode();
+    } finally {
+      reader.releaseLock();
+    }
   }
 
   try {
@@ -443,6 +462,24 @@ function withCorsHeaders(response: Response, request: Request): Response {
   });
 }
 
+function withSecurityHeaders(response: Response): Response {
+  const headers = new Headers(response.headers);
+  headers.set("Strict-Transport-Security", "max-age=31536000");
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Content-Type-Options", "nosniff");
+  if (!headers.has("Content-Security-Policy")) {
+    headers.set(
+      "Content-Security-Policy",
+      "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    );
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 function preflightResponse(request: Request, env: Env): Response {
   if (!isAllowedBrowserOrigin(request, env)) {
     return jsonResponse({ error: "Browser origin is not allowed." }, 403);
@@ -465,13 +502,15 @@ async function fetchHandler(
   context?: ExecutionContext,
 ): Promise<Response> {
   if (request.method === "OPTIONS") {
-    return preflightResponse(request, env);
+    return withSecurityHeaders(preflightResponse(request, env));
   }
 
   const path = new URL(request.url).pathname.replace(/\/$/, "") || "/";
   let response: Response;
   try {
-    if (path === "/health" && request.method === "GET") {
+    if (path === "/privacy" || path === "/privacy/ar") {
+      response = privacyPolicyResponse(request, path === "/privacy/ar");
+    } else if (path === "/health" && request.method === "GET") {
       response = jsonResponse({ status: "ok" });
     } else if (path === "/v1/tafsir") {
       response = await handleTafsir(request, env, context);
@@ -495,9 +534,24 @@ async function fetchHandler(
       );
     }
   }
-  return isAllowedBrowserOrigin(request, env)
-    ? withCorsHeaders(response, request)
-    : response;
+  return withSecurityHeaders(
+    isAllowedBrowserOrigin(request, env)
+      ? withCorsHeaders(response, request)
+      : response,
+  );
 }
 
-export default { fetch: fetchHandler } satisfies ExportedHandler<Env>;
+async function scheduledHandler(
+  _event: ScheduledController,
+  env: Env,
+): Promise<void> {
+  const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+  await env.FEEDBACK_DB.prepare(
+    "DELETE FROM anonymous_feedback WHERE created_at <= ?",
+  ).bind(cutoff).run();
+}
+
+export default {
+  fetch: fetchHandler,
+  scheduled: scheduledHandler,
+} satisfies ExportedHandler<Env>;

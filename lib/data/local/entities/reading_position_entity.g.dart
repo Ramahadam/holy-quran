@@ -25,6 +25,7 @@ const ReadingPositionEntitySchema = CollectionSchema(
     ),
     r'verseId': PropertySchema(id: 1, name: r'verseId', type: IsarType.string),
   },
+
   estimateSize: _readingPositionEntityEstimateSize,
   serialize: _readingPositionEntitySerialize,
   deserialize: _readingPositionEntityDeserialize,
@@ -33,10 +34,11 @@ const ReadingPositionEntitySchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _readingPositionEntityGetId,
   getLinks: _readingPositionEntityGetLinks,
   attach: _readingPositionEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _readingPositionEntityEstimateSize(

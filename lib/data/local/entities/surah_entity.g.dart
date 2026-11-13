@@ -38,6 +38,7 @@ const SurahEntitySchema = CollectionSchema(
       type: IsarType.long,
     ),
   },
+
   estimateSize: _surahEntityEstimateSize,
   serialize: _surahEntitySerialize,
   deserialize: _surahEntityDeserialize,
@@ -46,10 +47,11 @@ const SurahEntitySchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _surahEntityGetId,
   getLinks: _surahEntityGetLinks,
   attach: _surahEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _surahEntityEstimateSize(

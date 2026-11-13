@@ -49,15 +49,9 @@ class HomeFeedbackDialog extends ConsumerStatefulWidget {
 }
 
 class _HomeFeedbackDialogState extends ConsumerState<HomeFeedbackDialog> {
-  final TextEditingController _feedbackController = TextEditingController();
+  FeedbackChoice? _choice;
   bool _submitting = false;
   String? _errorText;
-
-  @override
-  void dispose() {
-    _feedbackController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,45 +64,57 @@ class _HomeFeedbackDialogState extends ConsumerState<HomeFeedbackDialog> {
       icon: Icons.feedback_outlined,
       title: l10n.sendFeedback,
       subtitle: l10n.feedbackSubtitle,
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _feedbackController,
-              autofocus: true,
-              minLines: 4,
-              maxLines: 6,
-              maxLength: AnonymousFeedbackService.maxLength,
-              textInputAction: TextInputAction.newline,
-              decoration: homeDialogInputDecoration(
-                context,
-                labelText: l10n.feedback,
-                hintText: l10n.feedbackHint,
-                alignLabelWithHint: true,
-              ),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RadioGroup<FeedbackChoice>(
+            groupValue: _choice,
+            onChanged: (choice) => setState(() {
+              _choice = choice;
+              _errorText = null;
+            }),
+            child: Column(
+              children: [
+                for (final choice in FeedbackChoice.values)
+                  RadioListTile<FeedbackChoice>(
+                    key: ValueKey('feedbackChoice-${choice.code}'),
+                    value: choice,
+                    enabled: !_submitting,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(switch (choice) {
+                      FeedbackChoice.readingDisplay =>
+                        l10n.feedbackReadingDisplay,
+                      FeedbackChoice.translationTafsir =>
+                        l10n.feedbackTranslationTafsir,
+                      FeedbackChoice.reminders => l10n.feedbackReminders,
+                      FeedbackChoice.appProblem => l10n.feedbackAppProblem,
+                      FeedbackChoice.suggestion => l10n.feedbackSuggestion,
+                    }),
+                  ),
+              ],
             ),
+          ),
+          const SizedBox(height: 12),
+          HomeDialogNotice(
+            noticeKey: const ValueKey('feedbackPrivacyNotice'),
+            icon: Icons.privacy_tip_outlined,
+            text: l10n.feedbackPrivacy,
+          ),
+          if (_errorText != null) ...[
             const SizedBox(height: 12),
-            HomeDialogNotice(
-              noticeKey: const ValueKey('feedbackPrivacyNotice'),
-              icon: Icons.privacy_tip_outlined,
-              text: l10n.feedbackPrivacy,
-            ),
-            if (_errorText != null) ...[
-              const SizedBox(height: 12),
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  _errorText!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: colors.error),
-                ),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                _errorText!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colors.error),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
       actions: [
         TextButton(
@@ -137,7 +143,7 @@ class _HomeFeedbackDialogState extends ConsumerState<HomeFeedbackDialog> {
         else
           FilledButton.icon(
             style: FilledButton.styleFrom(minimumSize: const Size(88, 44)),
-            onPressed: _submit,
+            onPressed: _choice == null ? null : _submit,
             icon: const Icon(Icons.send_rounded, size: 18),
             label: Text(l10n.send),
           ),
@@ -146,15 +152,15 @@ class _HomeFeedbackDialogState extends ConsumerState<HomeFeedbackDialog> {
   }
 
   Future<void> _submit() async {
+    final choice = _choice;
+    if (choice == null || _submitting) return;
     setState(() {
       _submitting = true;
       _errorText = null;
     });
 
     try {
-      await ref
-          .read(anonymousFeedbackServiceProvider)
-          .submitFeedback(_feedbackController.text);
+      await ref.read(anonymousFeedbackServiceProvider).submitFeedback(choice);
       try {
         await widget.onSubmitted?.call();
       } catch (error) {
@@ -169,14 +175,6 @@ class _HomeFeedbackDialogState extends ConsumerState<HomeFeedbackDialog> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-    } on FeedbackValidationException catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _errorText = error.message == 'Feedback is too long.'
-            ? context.l10n.feedbackTooLong
-            : context.l10n.feedbackRequired;
-        _submitting = false;
-      });
     } catch (error) {
       if (!mounted) return;
       debugPrint('Failed to submit anonymous feedback: $error');

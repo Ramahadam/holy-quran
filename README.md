@@ -96,6 +96,10 @@ verification source.
   bookmarks or reading state are replaced, so validation failures leave local
   state unchanged.
 
+The #149 policy preparation is documented in [Privacy policy](docs/privacy/README.md)
+and the [Data Safety worksheet](docs/privacy/data-safety.md). Owner approval and
+public deployment remain pending.
+
 See [Cloudflare backend](docs/cloudflare-backend.md) for endpoint, D1, caching,
 rate-limit, and deployment details.
 

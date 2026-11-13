@@ -130,3 +130,43 @@ Use the repository's existing lightweight GitHub label vocabulary. See `docs/age
 ### Domain docs
 
 This is a single-context repository using root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
+
+## Project overview
+
+Privacy-first Flutter Quran reader (Android + iOS only; desktop/web dirs are unsupported scaffolding) plus a Cloudflare Worker in `cloudflare/worker/`. Read `README.md` for the full privacy/backup rules and `CONTEXT.md` for domain vocabulary before changing behavior.
+
+## Commands
+
+CI (`.github/workflows/quality.yml`) pins Flutter 3.38.9. Run the same lanes locally:
+
+```sh
+flutter pub get
+bash scripts/check_dart_format.sh           # non-mutating format check (excludes *.g.dart)
+flutter analyze
+flutter test --coverage --exclude-tags golden
+python3 scripts/check_persistence_coverage.py   # line-coverage floors for repositories + backup service
+flutter test test/presentation/bookmarks_screen_test.dart          # single file
+flutter test test/quran_backup_test.dart --plain-name "rejects"    # single test by name
+```
+
+- Golden tests (`--tags golden`, `test/mushaf_golden_test.dart`, snapshots in `test/goldens/`) are owned by CI's macOS 26 Intel runner; local results on other machines may differ. Failure diffs land in `test/failures/`.
+- `test/anonymous_feedback_live_test.dart` writes to production D1; it only runs with `--dart-define=RUN_CLOUDFLARE_LIVE_TESTS=true`.
+- Isar schema changes: `dart run build_runner build --delete-conflicting-outputs` (regenerates `lib/data/local/entities/*.g.dart`; `build.yaml` sets `web: true`). Never hand-edit or hand-format `.g.dart` files.
+- Localization: edit `lib/l10n/app_en.arb` / `app_ar.arb`; `flutter pub get` / build regenerates `app_localizations*.dart` (checked in, must stay formatter-clean).
+- Worker (Node 22): `cd cloudflare/worker && npm ci && npm run typecheck && npm test`; single test: `npx vitest run test/request-size.test.ts`.
+- Python tooling (3.12): `python3 scripts/test_fetch_quran_data.py`, `scripts/test_verify_madani_page_boundaries.py`, `scripts/test_import_mushaf_svg_coordinates.py`, `python3 -m unittest discover -s scripts -p test_check_android_page_alignment.py`.
+- Run against a non-default Worker: `flutter run --dart-define-from-file=config/cloudflare.local.json` (copy from `config/cloudflare.local.example.json`; public values only).
+
+## Architecture
+
+- **Layers**: `lib/domain/models` (plain models) → `lib/data` (Isar entities, repositories, services) → `lib/presentation` (Riverpod providers, screens, widgets). Repositories are exposed as Riverpod `Provider`s in `lib/presentation/providers/quran_providers.dart`; tests swap implementations via `ProviderScope` overrides. `main.dart` initializes `IsarService` and preloaded locale/theme stores before `runApp`, falling back to `DatabaseErrorApp` on DB failure.
+- **Quran content install**: text ships as `assets/quran/{surahs,verses}.json` with SHA-256 digests in `assets/quran/checksums.txt`. On startup `QuranRepositoryImpl` compares the bundled digest to the one recorded in Isar (`QuranDataMetadataEntity`) and, if changed, validates and replaces the Quran collections in a single transaction. Bookmarks and reading position live in separate collections and must survive upgrades (`test/data/repositories/quran_repository_upgrade_test.dart`, legacy fixture in `test/fixtures/isar_3_1/`). Any asset change must regenerate checksums and pass `scripts/verify_madani_page_boundaries.py`; do not use `scripts/add_page_numbers.py` as a source of truth.
+- **Two readers (ADR-0001)**: Classic (vertical, reflowable, `reading_classic_content.dart`) and Mushaf (horizontal 604 pages rendered with the `qcf_quran` package's glyph fonts, not images — `mushaf_*` widgets, `qcf_quran_data_source.dart`). Both resolve bookmarks/last-read/verse detail via the canonical `VerseID`. Only import the public `package:qcf_quran/` API; `test/data/quran/qcf_dependency_boundary_test.dart` fails on `package:qcf_quran/src/` imports.
+- **Online features**: only Ayah Study tafsir and anonymous feedback touch the network, both through one Worker (`cloudflare/worker/src/index.ts`: `/v1/tafsir`, `/v1/feedback`, `/health`, `/privacy[/ar]`). The Worker holds Quran Foundation credentials as secrets and stores feedback in D1 (`migrations/`). The Flutter app must never carry secrets (`test/backend_configuration_policy_test.dart`) and must not send reading data or identifiers beyond the rate-limit installation ID. See `docs/cloudflare-backend.md`.
+- **Backups**: `lib/data/backup/` — passphrase-encrypted (PBKDF2 + AES-256-GCM) local files; restore validates every `VerseID` against bundled data before replacing state. Limits are in `quran_backup_limits.dart`. File I/O uses conditional imports (`_io` / `_stub`).
+
+## Gotchas
+
+- Some tests assert on repo files: `test/dart_formatting_policy_test.dart` checks that `README.md` and `quality.yml` contain the exact format-check command and step order. Update them together.
+- `docs/handoff-*` and the root image-download docs are historical (Supabase / scanned-image experiments) — not current instructions.
+- Release builds: `flutter build appbundle --release` / `flutter build ipa --release`; see `docs/release-builds.md` and `docs/android-16kb-release-check.md`.

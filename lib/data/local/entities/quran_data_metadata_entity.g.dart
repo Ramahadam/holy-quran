@@ -34,6 +34,7 @@ const QuranDataMetadataEntitySchema = CollectionSchema(
       type: IsarType.long,
     ),
   },
+
   estimateSize: _quranDataMetadataEntityEstimateSize,
   serialize: _quranDataMetadataEntitySerialize,
   deserialize: _quranDataMetadataEntityDeserialize,
@@ -42,10 +43,11 @@ const QuranDataMetadataEntitySchema = CollectionSchema(
   indexes: {},
   links: {},
   embeddedSchemas: {},
+
   getId: _quranDataMetadataEntityGetId,
   getLinks: _quranDataMetadataEntityGetLinks,
   attach: _quranDataMetadataEntityAttach,
-  version: '3.1.0+1',
+  version: '3.3.2',
 );
 
 int _quranDataMetadataEntityEstimateSize(

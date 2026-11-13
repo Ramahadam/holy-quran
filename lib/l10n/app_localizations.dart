@@ -122,6 +122,48 @@ abstract class AppLocalizations {
   /// **'Preparing your Digital Sanctuary...'**
   String get preparingApp;
 
+  /// No description provided for @quranNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get quranNavigation;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading preferences and your data'**
+  String get settingsSubtitle;
+
+  /// No description provided for @appearanceAndLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance and language'**
+  String get appearanceAndLanguage;
+
+  /// No description provided for @appLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'App language'**
+  String get appLanguage;
+
+  /// No description provided for @readingSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading'**
+  String get readingSettings;
+
+  /// No description provided for @yourData.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data'**
+  String get yourData;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
   /// No description provided for @menu.
   ///
   /// In en, this message translates to:
@@ -281,13 +323,13 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackPromptSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'A quick anonymous note can help shape what comes next.'**
+  /// **'A quick choice can help improve the app.'**
   String get feedbackPromptSubtitle;
 
   /// No description provided for @feedbackPromptBody.
   ///
   /// In en, this message translates to:
-  /// **'If you have a moment, share what would make the app better. Your note is anonymous.'**
+  /// **'If you have a moment, choose a feedback topic. No account is required.'**
   String get feedbackPromptBody;
 
   /// No description provided for @notNow.
@@ -533,25 +575,13 @@ abstract class AppLocalizations {
   /// No description provided for @feedbackSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Help us improve the Quran reading experience.'**
+  /// **'Choose one topic to send.'**
   String get feedbackSubtitle;
-
-  /// No description provided for @feedback.
-  ///
-  /// In en, this message translates to:
-  /// **'Feedback'**
-  String get feedback;
-
-  /// No description provided for @feedbackHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Share what would make the app better.'**
-  String get feedbackHint;
 
   /// No description provided for @feedbackPrivacy.
   ///
   /// In en, this message translates to:
-  /// **'Sent anonymously. Do not include private information.'**
+  /// **'We send only your selected topic, platform and app version. Network identifiers are used to prevent abuse.'**
   String get feedbackPrivacy;
 
   /// No description provided for @sending.
@@ -577,18 +607,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Feedback could not be sent. Please try again later.'**
   String get feedbackSendFailed;
-
-  /// No description provided for @feedbackRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Feedback cannot be empty.'**
-  String get feedbackRequired;
-
-  /// No description provided for @feedbackTooLong.
-  ///
-  /// In en, this message translates to:
-  /// **'Feedback is too long.'**
-  String get feedbackTooLong;
 
   /// No description provided for @verseNumber.
   ///
@@ -901,6 +919,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Isha'**
   String get isha;
+
+  /// No description provided for @bookmarksSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved ayahs · Continue where you paused'**
+  String bookmarksSummary(int count);
+
+  /// No description provided for @bookmarkExcerptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ayah excerpt unavailable.'**
+  String get bookmarkExcerptUnavailable;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyPolicyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The privacy policy could not be loaded.'**
+  String get privacyPolicyUnavailable;
+
+  /// No description provided for @bookmarkExcerptLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading ayah…'**
+  String get bookmarkExcerptLoading;
+
+  /// No description provided for @feedbackReadingDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading or display problem'**
+  String get feedbackReadingDisplay;
+
+  /// No description provided for @feedbackTranslationTafsir.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation or Tafsir problem'**
+  String get feedbackTranslationTafsir;
+
+  /// No description provided for @feedbackReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder problem'**
+  String get feedbackReminders;
+
+  /// No description provided for @feedbackAppProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'App not working correctly'**
+  String get feedbackAppProblem;
+
+  /// No description provided for @feedbackSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'More improvements wanted'**
+  String get feedbackSuggestion;
 }
 
 class _AppLocalizationsDelegate

@@ -12,12 +12,14 @@ import 'surah_tile.dart';
 enum _QuranIndexSection { surahs, juz }
 
 class QuranIndex extends ConsumerStatefulWidget {
+  final Widget? header;
   final List<Surah> surahs;
   final Future<void> Function(Surah surah, {String? initialVerseId})
   onOpenReading;
 
   const QuranIndex({
     super.key,
+    this.header,
     required this.surahs,
     required this.onOpenReading,
   });
@@ -33,76 +35,65 @@ class _QuranIndexState extends ConsumerState<QuranIndex> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-          child: SegmentedButton<_QuranIndexSection>(
-            segments: [
-              ButtonSegment(
-                value: _QuranIndexSection.surahs,
-                label: Text(l10n.surahs),
-              ),
-              ButtonSegment(
-                value: _QuranIndexSection.juz,
-                label: Text(l10n.juz),
-              ),
-            ],
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.resolveWith((states) {
-                final colors = Theme.of(context).colorScheme;
-                return states.contains(WidgetState.selected)
-                    ? colors.primaryContainer
-                    : colors.surfaceContainerLow;
-              }),
-              foregroundColor: WidgetStateProperty.resolveWith((states) {
-                final colors = Theme.of(context).colorScheme;
-                return states.contains(WidgetState.selected)
-                    ? colors.onPrimaryContainer
-                    : colors.onSurfaceVariant;
-              }),
-              side: WidgetStatePropertyAll(
-                BorderSide(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.outlineVariant.withValues(alpha: 0.7),
-                ),
-              ),
-              textStyle: const WidgetStatePropertyAll(
-                TextStyle(fontWeight: FontWeight.w600),
+    return DefaultTabController(
+      length: 2,
+      child: CustomScrollView(
+        key: const ValueKey('homeQuranScroll'),
+        slivers: [
+          if (widget.header != null) SliverToBoxAdapter(child: widget.header),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+              child: TabBar(
+                tabAlignment: TabAlignment.start,
+                isScrollable: true,
+                labelColor: Theme.of(context).colorScheme.primary,
+                unselectedLabelColor: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant,
+                indicatorColor: Theme.of(context).colorScheme.primary,
+                dividerColor: Theme.of(context).colorScheme.outlineVariant,
+                onTap: (index) =>
+                    setState(() => _section = _QuranIndexSection.values[index]),
+                tabs: [
+                  Tab(text: l10n.surahs),
+                  Tab(text: l10n.juz),
+                ],
               ),
             ),
-            selected: {_section},
-            showSelectedIcon: false,
-            onSelectionChanged: (selection) {
-              setState(() => _section = selection.first);
-            },
           ),
-        ),
-        Expanded(
-          child: _section == _QuranIndexSection.surahs
+          _section == _QuranIndexSection.surahs
               ? _buildSurahList()
               : _buildJuzList(),
-        ),
-      ],
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+        ],
+      ),
     );
   }
 
   Widget _buildSurahList() {
     if (widget.surahs.isEmpty) {
-      return Center(child: Text(context.l10n.noSurahs));
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(child: Text(context.l10n.noSurahs)),
+      );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-      itemCount: widget.surahs.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 10),
-      itemBuilder: (context, index) {
-        final surah = widget.surahs[index];
-        return SurahTile(
-          surah: surah,
-          onTap: () => unawaited(widget.onOpenReading(surah)),
-        );
-      },
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverList.separated(
+        itemCount: widget.surahs.length,
+        separatorBuilder: (context, index) => Divider(
+          height: 1,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+        itemBuilder: (context, index) {
+          final surah = widget.surahs[index];
+          return SurahTile(
+            surah: surah,
+            onTap: () => unawaited(widget.onOpenReading(surah)),
+          );
+        },
+      ),
     );
   }
 
@@ -113,35 +104,46 @@ class _QuranIndexState extends ConsumerState<QuranIndex> {
     return ref
         .watch(juzListProvider)
         .when(
-          data: (entries) => ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-            itemCount: entries.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 10),
-            itemBuilder: (context, index) {
-              final entry = entries[index];
-              final startSurah = surahsByNumber[entry.juz.startSurahNumber]!;
-              return JuzTile(
-                juz: entry.juz,
-                startSurah: startSurah,
-                page: entry.page,
-                onTap: () => unawaited(
-                  widget.onOpenReading(
-                    startSurah,
-                    initialVerseId: entry.juz.startVerseId,
+          data: (entries) => SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList.separated(
+              itemCount: entries.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                color: Theme.of(context).colorScheme.outlineVariant,
+              ),
+              itemBuilder: (context, index) {
+                final entry = entries[index];
+                final startSurah = surahsByNumber[entry.juz.startSurahNumber]!;
+                return JuzTile(
+                  juz: entry.juz,
+                  startSurah: startSurah,
+                  page: entry.page,
+                  onTap: () => unawaited(
+                    widget.onOpenReading(
+                      startSurah,
+                      initialVerseId: entry.juz.startVerseId,
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Text(
-                context.l10n.juzLoadError,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
+          loading: () => const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, stackTrace) => SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  context.l10n.juzLoadError,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               ),
             ),
