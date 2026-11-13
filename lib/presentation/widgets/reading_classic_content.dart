@@ -65,6 +65,32 @@ WidgetSpan _classicBookmarkedAyahSpan(
   );
 }
 
+Color _classicAyahMarkerColor(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.light
+    ? AppTheme.quranAyahMarker
+    : AppTheme.quranGold;
+
+TextSpan _classicAyahNumberSpan(
+  Verse verse,
+  double fontSize,
+  Color markerColor, {
+  GestureRecognizer? recognizer,
+}) {
+  return TextSpan(
+    // A non-breaking space keeps the ayah marker attached to the final
+    // word instead of allowing it to become orphaned on the next line.
+    text: '\u00a0${_toArabicNumeral(verse.verseNumber)} ',
+    recognizer: recognizer,
+    style: TextStyle(
+      fontFamily: _kfgqpcHafsFontFamily,
+      color: markerColor,
+      fontSize: fontSize * _classicAyahMarkerFontScale,
+      fontWeight: FontWeight.w500,
+      height: _classicAyahMarkerLineHeight,
+    ),
+  );
+}
+
 final _classicEmbeddedMarkerPattern = RegExp(
   r'\s*(?:۞|۩|۝\s*[٠-٩0-9]*|[ۖۗۘۙۚۛۜ])\s*',
 );
@@ -124,6 +150,11 @@ String _normalizedClassicArabicText(Verse verse) => verse.arabicText
     .replaceAll(_classicEmbeddedMarkerPattern, ' ')
     .replaceAll(_whitespacePattern, ' ')
     .trim();
+
+/// Al-Fatihah 1:1 whose whole text is the Bismillah, so the Classic reader
+/// shows it, and its ayah marker, as the Surah's Bismillah heading.
+bool _isBismillahOnlyVerse(Verse verse) =>
+    _hasEmbeddedBismillah(verse) && _classicDisplayArabicText(verse).isEmpty;
 
 bool _hasEmbeddedBismillah(Verse verse) {
   if (verse.surahNumber != 1 || verse.verseNumber != 1) return false;
@@ -508,13 +539,15 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
                     _openVerseDetail(context, verse);
                   }
                 : null,
+            bismillahAyah: _isBismillahOnlyVerse(verse) ? verse : null,
+            isBismillahAyahBookmarked: bookmarks.contains(verse.verseId),
           ),
         );
         lastSurah = verse.surahNumber;
       }
 
       if (verse.verseId == widget.initialVerseId &&
-          paragraphVerses.isNotEmpty) {
+          !paragraphVerses.every(_isBismillahOnlyVerse)) {
         flushParagraph();
       }
 
@@ -539,8 +572,14 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
 
 class _BismillahHeader extends StatelessWidget {
   final VoidCallback? onLongPress;
+  final Verse? ayah;
+  final bool isAyahBookmarked;
 
-  const _BismillahHeader({this.onLongPress});
+  const _BismillahHeader({
+    this.onLongPress,
+    this.ayah,
+    this.isAyahBookmarked = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -550,9 +589,17 @@ class _BismillahHeader extends StatelessWidget {
       fontWeight: FontWeight.w400,
       height: _bismillahLineHeight,
     );
+    final ayah = this.ayah;
+    final markerColor = _classicAyahMarkerColor(context);
     final bismillah = Semantics(
       header: true,
-      label: _bismillahText,
+      label: ayah == null
+          ? _bismillahText
+          : [
+              _bismillahText,
+              context.l10n.verseNumber(ayah.verseNumber.toString()),
+              if (isAyahBookmarked) context.l10n.bookmarked,
+            ].join(', '),
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -567,6 +614,16 @@ class _BismillahHeader extends StatelessWidget {
                 style: const TextStyle(color: AppTheme.quranRed),
               ),
               const TextSpan(text: ' ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ'),
+              if (ayah != null && isAyahBookmarked) ...[
+                const TextSpan(text: '\u00a0'),
+                _classicBookmarkedAyahSpan(
+                  context,
+                  ayah,
+                  _bismillahFontSize,
+                  markerColor,
+                ),
+              ] else if (ayah != null)
+                _classicAyahNumberSpan(ayah, _bismillahFontSize, markerColor),
             ],
           ),
           textAlign: TextAlign.center,
@@ -587,11 +644,15 @@ class _ClassicSurahOpening extends ConsumerWidget {
   final int surahNumber;
   final bool showBismillah;
   final VoidCallback? onBismillahLongPress;
+  final Verse? bismillahAyah;
+  final bool isBismillahAyahBookmarked;
 
   const _ClassicSurahOpening({
     required this.surahNumber,
     required this.showBismillah,
     this.onBismillahLongPress,
+    this.bismillahAyah,
+    this.isBismillahAyahBookmarked = false,
   });
 
   @override
@@ -635,7 +696,11 @@ class _ClassicSurahOpening extends ConsumerWidget {
             ),
           ),
           if (showBismillah)
-            _BismillahHeader(onLongPress: onBismillahLongPress),
+            _BismillahHeader(
+              onLongPress: onBismillahLongPress,
+              ayah: bismillahAyah,
+              isAyahBookmarked: isBismillahAyahBookmarked,
+            ),
         ],
       ),
     );
@@ -823,6 +888,12 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
       return null;
     }
 
+    // The first verse may have no text here (Al-Fatihah 1:1 lives in the
+    // Bismillah heading just above), so a visible top means the first verse.
+    if (paragraphBounds.top >= viewport.top) {
+      return (verse: widget.verses.first, top: paragraphBounds.top);
+    }
+
     final localTop = (viewport.top - paragraphOrigin.dy).clamp(
       0.0,
       paragraph.size.height - 1,
@@ -854,6 +925,10 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
     var textEnd = 0;
     final verseTextEnds = <int>[];
     for (final verse in widget.verses) {
+      if (_isBismillahOnlyVerse(verse)) {
+        verseTextEnds.add(textEnd);
+        continue;
+      }
       textEnd += _classicDisplayArabicText(verse).length;
       textEnd += widget.bookmarks.contains(verse.verseId)
           ? 3 // Non-breaking space, inline marker, trailing space.
@@ -864,12 +939,11 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
   }
 
   List<InlineSpan> _buildVerseSpans(BuildContext context, double fontSize) {
-    final markerColor = Theme.of(context).brightness == Brightness.light
-        ? AppTheme.quranAyahMarker
-        : AppTheme.quranGold;
+    final markerColor = _classicAyahMarkerColor(context);
     final spans = <InlineSpan>[];
 
     for (final verse in widget.verses) {
+      if (_isBismillahOnlyVerse(verse)) continue;
       final recognizer = widget.verses.length == 1
           ? null
           : _verseRecognizer(verse);
@@ -889,18 +963,11 @@ class _ClassicVerseParagraphState extends State<_ClassicVerseParagraph> {
         ]);
       } else {
         spans.add(
-          TextSpan(
-            // A non-breaking space keeps the ayah marker attached to the final
-            // word instead of allowing it to become orphaned on the next line.
-            text: '\u00a0${_toArabicNumeral(verse.verseNumber)} ',
+          _classicAyahNumberSpan(
+            verse,
+            fontSize,
+            markerColor,
             recognizer: recognizer,
-            style: TextStyle(
-              fontFamily: _kfgqpcHafsFontFamily,
-              color: markerColor,
-              fontSize: fontSize * _classicAyahMarkerFontScale,
-              fontWeight: FontWeight.w500,
-              height: _classicAyahMarkerLineHeight,
-            ),
           ),
         );
       }
