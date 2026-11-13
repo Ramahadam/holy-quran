@@ -263,6 +263,53 @@ void main() {
     expect(find.text('Retry'), findsOneWidget);
   });
 
+  testWidgets('hides bundled translation footnote markers', (tester) async {
+    const footnotedVerses = [
+      (
+        Verse(
+          verseId: '1:1',
+          surahNumber: 1,
+          verseNumber: 1,
+          arabicText: 'بِسْمِ اللَّهِ',
+          translation:
+              'In the name of Allāh,1 the Entirely Merciful, the Especially Merciful.2',
+        ),
+        'In the name of Allāh, the Entirely Merciful, the Especially Merciful.',
+      ),
+      (
+        Verse(
+          verseId: '85:7',
+          surahNumber: 85,
+          verseNumber: 7,
+          arabicText: 'وَهُمْ',
+          translation:
+              'And they, to what they were doing against the believers, were witnesses. 1',
+        ),
+        'And they, to what they were doing against the believers, were witnesses.',
+      ),
+    ];
+
+    for (final (verse, expected) in footnotedVerses) {
+      await tester.pumpWidget(
+        ProviderScope(
+          key: ValueKey(verse.verseId),
+          overrides: [
+            bookmarksBySurahProvider(
+              verse.surahNumber,
+            ).overrideWith((ref) async => {}),
+            tafsirRepositoryProvider.overrideWithValue(
+              const _FailingTafsirRepository(),
+            ),
+          ],
+          child: MaterialApp(home: VerseDetailScreen(verse: verse)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(expected), findsOneWidget);
+    }
+  });
+
   for (final language in ['en', 'ar']) {
     testWidgets('handles a narrow $language layout with larger text', (
       tester,
