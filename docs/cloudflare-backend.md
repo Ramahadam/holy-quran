@@ -56,6 +56,13 @@ Cloudflare Cache API under deterministic synthetic GET keys. Cache entries are
 local to the data center serving the request; a miss calls Quran Foundation and
 stores the normalized response for later identical requests in that location.
 
+The app also keeps returned tafsir text and the source list in its OS cache
+directory (`tafsir/v1/`) for up to 7 days, capped at about 10 MB with the oldest
+entries removed first (`CachingTafsirRepository`). Seven days is the Quran
+Foundation Developer Terms limit for storing content outside the Content Sync
+APIs, so expired entries are deleted rather than served. Failures are never
+cached.
+
 Browser CORS is closed by default. Native requests do not include an `Origin`
 header and continue to work. If a browser client is released, configure exact
 comma-separated origins in the non-secret `ALLOWED_ORIGINS` Worker variable,
