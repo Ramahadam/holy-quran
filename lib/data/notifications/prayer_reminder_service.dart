@@ -1,3 +1,8 @@
+import 'dart:ui';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import '../localization/app_locale_store.dart';
 import 'prayer_reminder_scheduler.dart';
 import 'prayer_reminder_settings.dart';
 import 'prayer_reminder_settings_store.dart';
@@ -46,4 +51,31 @@ class PrayerReminderService {
     if (!settings.enabled) return;
     await _scheduler.snooze(settings);
   }
+}
+
+/// Android delivers reminder actions that do not open the app to a background
+/// isolate, so this must be a top-level entry point.
+@pragma('vm:entry-point')
+Future<void> snoozeReminderInBackground(NotificationResponse response) async {
+  DartPluginRegistrant.ensureInitialized();
+  // Matches the app's default language when none has been chosen.
+  final languageCode =
+      await SharedPreferencesAppLocaleStore().readLanguageCode() ?? 'ar';
+  await handleReminderResponse(
+    response,
+    PrayerReminderService(
+      settingsStore: PrayerReminderSettingsStore(),
+      scheduler: LocalPrayerReminderScheduler(
+        localeProvider: () => Locale(languageCode),
+      ),
+    ),
+  );
+}
+
+Future<void> handleReminderResponse(
+  NotificationResponse response,
+  PrayerReminderService service,
+) async {
+  if (response.actionId != LocalPrayerReminderScheduler.snoozeActionId) return;
+  await service.snoozeCurrentReminder();
 }

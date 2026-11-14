@@ -23,6 +23,8 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
 
   final FlutterLocalNotificationsPlugin _notifications;
   final Future<void> Function()? _onSnoozeRequested;
+  final DidReceiveBackgroundNotificationResponseCallback?
+  _onBackgroundNotificationResponse;
   final Locale Function() _localeProvider;
   final Future<String> Function() _localTimezoneNameProvider;
   final DateTime Function() _nowProvider;
@@ -33,11 +35,14 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
   LocalPrayerReminderScheduler({
     FlutterLocalNotificationsPlugin? notifications,
     Future<void> Function()? onSnoozeRequested,
+    DidReceiveBackgroundNotificationResponseCallback?
+    onBackgroundNotificationResponse,
     Locale Function()? localeProvider,
     Future<String> Function()? localTimezoneNameProvider,
     DateTime Function()? nowProvider,
   }) : _notifications = notifications ?? FlutterLocalNotificationsPlugin(),
        _onSnoozeRequested = onSnoozeRequested,
+       _onBackgroundNotificationResponse = onBackgroundNotificationResponse,
        _localeProvider =
            localeProvider ?? (() => PlatformDispatcher.instance.locale),
        _localTimezoneNameProvider =
@@ -207,6 +212,8 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
     await _notifications.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: _handleNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse:
+          _onBackgroundNotificationResponse,
     );
     _initialized = true;
   }
