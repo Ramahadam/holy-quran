@@ -48,9 +48,11 @@ void main() {
       TextDirection.rtl,
     );
 
-    await tester.tap(find.byKey(const ValueKey('homeMenuButton')));
+    await tester.tap(find.byKey(const ValueKey('homeSettingsDestination')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('English'));
+    await tester.tap(find.byKey(const ValueKey('settingsLanguage')));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
     await tester.pumpAndSettle();
 
     expect(find.text('Surahs'), findsOneWidget);

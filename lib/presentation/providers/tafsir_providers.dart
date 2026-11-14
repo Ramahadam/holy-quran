@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import '../../data/backend/cloudflare_config.dart';
+import '../../data/tafsir/caching_tafsir_repository.dart';
 import '../../data/tafsir/quran_foundation_tafsir_repository.dart';
 import '../../data/tafsir/tafsir_repository.dart';
 import '../../data/tafsir/tafsir_transport.dart';
@@ -23,7 +27,12 @@ final tafsirRepositoryProvider = Provider<TafsirRepository>((ref) {
     client: client,
     clientId: clientIdStore.getOrCreate,
   );
-  return QuranFoundationTafsirRepository(transport: transport);
+  return CachingTafsirRepository(
+    inner: QuranFoundationTafsirRepository(transport: transport),
+    // The OS may clear this directory, and it is excluded from backups.
+    directory: () async =>
+        Directory('${(await getApplicationCacheDirectory()).path}/tafsir/v1'),
+  );
 });
 
 final tafsirSourcesProvider = FutureProvider.autoDispose<List<TafsirSource>>((

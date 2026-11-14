@@ -231,6 +231,21 @@ void main() {
       },
     );
 
+    test('registers a background handler for reminder actions', () async {
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Etc/UTC',
+        onBackgroundNotificationResponse: snoozeReminderInBackground,
+      );
+
+      await scheduler.cancel();
+
+      final arguments =
+          calls.firstWhere((call) => call.method == 'initialize').arguments
+              as Map<Object?, Object?>;
+      expect(arguments['callback_handle'], isNotNull);
+      expect(arguments['dispatcher_handle'], isNotNull);
+    });
+
     test('uses Arabic notification text for Arabic locales', () async {
       final scheduler = LocalPrayerReminderScheduler(
         localeProvider: () => const Locale('ar'),
@@ -287,6 +302,35 @@ void main() {
         'Gentle reminders to read Quran after prayer.',
       );
       expect(actions.single['title'], 'Remind me later');
+    });
+
+    test('falls back to inexact alarms without exact alarm access', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (methodCall) async {
+            calls.add(methodCall);
+            return switch (methodCall.method) {
+              'initialize' => true,
+              'canScheduleExactNotifications' => false,
+              _ => null,
+            };
+          });
+      final scheduler = LocalPrayerReminderScheduler(
+        localTimezoneNameProvider: () async => 'Etc/UTC',
+      );
+      final settings = PrayerReminderSettings.defaults.copyWith(enabled: true);
+
+      await scheduler.schedule(settings);
+      await scheduler.snooze(settings);
+
+      final scheduleModes = calls
+          .where((call) => call.method == 'zonedSchedule')
+          .map((call) {
+            final arguments = call.arguments as Map<Object?, Object?>;
+            final platformSpecifics =
+                arguments['platformSpecifics'] as Map<Object?, Object?>;
+            return platformSpecifics['scheduleMode'];
+          });
+      expect(scheduleModes, ['inexactAllowWhileIdle', 'inexactAllowWhileIdle']);
     });
 
     test(
@@ -485,6 +529,36 @@ void main() {
 
       await service.snoozeCurrentReminder();
 
+      expect(scheduler.snoozed, store.loaded);
+    });
+
+    test('snoozes from the background only for the snooze action', () async {
+      final store = _FakePrayerReminderSettingsStore(
+        loaded: PrayerReminderSettings.defaults.copyWith(enabled: true),
+      );
+      final scheduler = _FakePrayerReminderScheduler(permissionGranted: true);
+      final service = PrayerReminderService(
+        settingsStore: store,
+        scheduler: scheduler,
+      );
+
+      await handleReminderResponse(
+        const NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+        ),
+        service,
+      );
+      expect(scheduler.snoozed, isNull);
+
+      await handleReminderResponse(
+        const NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotificationAction,
+          actionId: LocalPrayerReminderScheduler.snoozeActionId,
+        ),
+        service,
+      );
       expect(scheduler.snoozed, store.loaded);
     });
 

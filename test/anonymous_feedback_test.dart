@@ -11,6 +11,8 @@ import 'package:holy_quran_app/presentation/screens/home_screen.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 
+import 'support/home_test_helpers.dart';
+
 const _surah1 = Surah(
   surahNumber: 1,
   nameArabic: 'الفاتحة',
@@ -105,9 +107,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Send feedback'));
+      await tapSettingsRow(tester, 'Send feedback');
       await tester.pumpAndSettle();
 
       await tester.tap(
@@ -152,9 +152,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Send feedback'));
+      await tapSettingsRow(tester, 'Send feedback');
       await tester.pumpAndSettle();
 
       final colors = AppTheme.light.colorScheme;

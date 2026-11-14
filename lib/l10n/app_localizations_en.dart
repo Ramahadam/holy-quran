@@ -43,12 +43,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get menu => 'Menu';
-
-  @override
-  String get switchLanguage => 'العربية';
-
-  @override
   String get darkMode => 'Dark mode';
 
   @override

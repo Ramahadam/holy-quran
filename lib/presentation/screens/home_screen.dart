@@ -7,10 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/backup/quran_backup_file_operations.dart';
 import '../../domain/models/surah.dart';
 import '../../l10n/l10n.dart';
-import '../providers/locale_provider.dart';
 import '../providers/quran_providers.dart';
-import '../providers/theme_mode_provider.dart';
-import '../widgets/home_actions_menu.dart';
 import '../widgets/home_backup_passphrase_dialog.dart';
 import '../widgets/home_feedback_dialog.dart';
 import '../widgets/home_prayer_reminder_dialog.dart';
@@ -74,7 +71,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
           ],
         ),
-        actions: [_buildActionsMenu()],
       ),
       bottomNavigationBar: _HomeNavigation(
         onOpenBookmarks: () => unawaited(_openBookmarksScreen()),
@@ -121,33 +117,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildActionsMenu() {
-    final darkModeEnabled = ref.watch(themeModeProvider) == ThemeMode.dark;
-    final locale = ref.watch(appLocaleProvider);
-    return HomeActionsMenu(
-      darkModeEnabled: darkModeEnabled,
-      onSwitchLanguage: () => unawaited(
-        ref
-            .read(appLocaleProvider.notifier)
-            .setLocale(
-              locale.languageCode == 'ar'
-                  ? const Locale('en')
-                  : const Locale('ar'),
-            ),
-      ),
-      onToggleDarkMode: () => unawaited(
-        ref
-            .read(themeModeProvider.notifier)
-            .setThemeMode(darkModeEnabled ? ThemeMode.light : ThemeMode.dark),
-      ),
-      onOpenReminders: () => unawaited(_showPrayerReminderDialog(context)),
-      onSendFeedback: () => unawaited(_showFeedbackDialog(context)),
-      onSaveBackup: () => unawaited(_saveBackup(context)),
-      onShareBackup: () => unawaited(_shareBackup(context)),
-      onRestoreBackup: () => unawaited(_restoreBackup(context)),
     );
   }
 
@@ -374,6 +343,10 @@ class _LastReadBanner extends ConsumerWidget {
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final surahName = isArabic ? surah.nameArabic : surah.nameEnglish;
     final readingLabel = '$surahName · ${context.l10n.verseNumber(verseNum)}';
+    // Dark mode's primary is a bright green, so the card uses the deep container.
+    final isDark = theme.brightness == Brightness.dark;
+    final cardColor = isDark ? colors.primaryContainer : colors.primary;
+    final onCardColor = isDark ? colors.onPrimaryContainer : colors.onPrimary;
     final cardShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(24),
     );
@@ -389,7 +362,7 @@ class _LastReadBanner extends ConsumerWidget {
         excludeSemantics: true,
         child: Material(
           key: const ValueKey('continueReadingCard'),
-          color: colors.primary,
+          color: cardColor,
           shape: cardShape,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
@@ -406,11 +379,11 @@ class _LastReadBanner extends ConsumerWidget {
                         child: Text(
                           context.l10n.continueReading,
                           style: theme.textTheme.bodyLarge?.copyWith(
-                            color: colors.onPrimary,
+                            color: onCardColor,
                           ),
                         ),
                       ),
-                      Icon(CupertinoIcons.book, color: colors.onPrimary),
+                      Icon(CupertinoIcons.book, color: onCardColor),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -423,14 +396,14 @@ class _LastReadBanner extends ConsumerWidget {
                         ? TextAlign.right
                         : TextAlign.left,
                     style: theme.textTheme.headlineLarge?.copyWith(
-                      color: colors.onPrimary,
+                      color: onCardColor,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '${context.l10n.verseNumber(verseNum)}${page == null ? '' : ' · ${context.l10n.pageNumber(page)}'}',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colors.onPrimary,
+                      color: onCardColor,
                     ),
                   ),
                   const SizedBox(height: 24),

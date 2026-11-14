@@ -164,18 +164,6 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @menu.
-  ///
-  /// In en, this message translates to:
-  /// **'Menu'**
-  String get menu;
-
-  /// No description provided for @switchLanguage.
-  ///
-  /// In en, this message translates to:
-  /// **'العربية'**
-  String get switchLanguage;
-
   /// No description provided for @darkMode.
   ///
   /// In en, this message translates to:
