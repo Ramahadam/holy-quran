@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:holy_quran_app/domain/models/surah.dart';
+import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/domain/models/verse.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/reading_screen.dart';
@@ -649,6 +650,39 @@ void main() {
       expect(find.text('Mushaf'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    for (final (languageCode, name) in const [
+      ('en', 'The Opening'),
+      ('ar', 'الفاتحة'),
+    ]) {
+      testWidgets('titles the reader in the app language ($languageCode)', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              startPageForSurahProvider(1).overrideWith((ref) async => 1),
+              classicVersesProvider(
+                1,
+              ).overrideWith((ref) async => [classicVerse1]),
+              bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+            ],
+            child: MaterialApp(
+              locale: Locale(languageCode),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: const ReadingScreen(surah: classicSurah1),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final title = tester.widget<Text>(
+          find.byKey(const ValueKey('readerHeaderSurah')),
+        );
+        expect(title.data, name);
+      });
+    }
 
     testWidgets('switches between Classic and Mushaf modes', (tester) async {
       await tester.pumpWidget(

@@ -207,8 +207,10 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
         ? CupertinoIcons.doc_plaintext
         : CupertinoIcons.book;
 
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return ReaderAppBar(
-      surahName: widget.surah.nameArabic,
+      surahName: isArabic ? widget.surah.nameArabic : widget.surah.nameEnglish,
+      isArabicSurahName: isArabic,
       contextLabel:
           '${context.l10n.pageNumber(_currentPage)} · $currentModeLabel',
       switchModeLabel: targetLabel,
