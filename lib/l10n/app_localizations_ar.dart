@@ -43,12 +43,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
-  String get menu => 'القائمة';
-
-  @override
-  String get switchLanguage => 'English';
-
-  @override
   String get darkMode => 'الوضع الداكن';
 
   @override
