@@ -400,6 +400,31 @@ void main() {
     expect(marker.data, contains('3'));
   });
 
+  testWidgets('keeps the Sajda sign in Arabic ayah text', (tester) async {
+    const sajdaVerse = Verse(
+      verseId: '53:62',
+      surahNumber: 53,
+      verseNumber: 62,
+      arabicText: 'فَٱسۡجُدُواْۤ لِلَّهِۤ وَٱعۡبُدُواْ۩',
+      page: 526,
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appLocaleStoreProvider.overrideWithValue(_MemoryAppLocaleStore()),
+          initialAppLocaleProvider.overrideWithValue(const Locale('ar')),
+          bookmarksBySurahProvider(53).overrideWith((ref) async => {}),
+          tafsirRepositoryProvider.overrideWithValue(_FakeTafsirRepository()),
+        ],
+        child: const _LocalizedVerseDetailTestApp(verse: sajdaVerse),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(sajdaVerse.arabicText), findsOneWidget);
+  });
+
   testWidgets('moves to the next and previous ayah without leaving study', (
     tester,
   ) async {

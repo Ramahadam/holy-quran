@@ -23,6 +23,8 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
 
   final FlutterLocalNotificationsPlugin _notifications;
   final Future<void> Function()? _onSnoozeRequested;
+  final DidReceiveBackgroundNotificationResponseCallback?
+  _onBackgroundNotificationResponse;
   final Locale Function() _localeProvider;
   final Future<String> Function() _localTimezoneNameProvider;
   final DateTime Function() _nowProvider;
@@ -33,11 +35,14 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
   LocalPrayerReminderScheduler({
     FlutterLocalNotificationsPlugin? notifications,
     Future<void> Function()? onSnoozeRequested,
+    DidReceiveBackgroundNotificationResponseCallback?
+    onBackgroundNotificationResponse,
     Locale Function()? localeProvider,
     Future<String> Function()? localTimezoneNameProvider,
     DateTime Function()? nowProvider,
   }) : _notifications = notifications ?? FlutterLocalNotificationsPlugin(),
        _onSnoozeRequested = onSnoozeRequested,
+       _onBackgroundNotificationResponse = onBackgroundNotificationResponse,
        _localeProvider =
            localeProvider ?? (() => PlatformDispatcher.instance.locale),
        _localTimezoneNameProvider =
@@ -142,7 +147,7 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
       body: text.dailyBody,
       scheduledDate: scheduledAt,
       notificationDetails: _notificationDetails(text),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: await _androidScheduleMode(),
       matchDateTimeComponents: DateTimeComponents.time,
       payload: 'reading-reminder:${settings.prayer.name}',
     );
@@ -171,9 +176,23 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
       body: text.snoozeBody,
       scheduledDate: scheduledAt,
       notificationDetails: _notificationDetails(text),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: await _androidScheduleMode(),
       payload: 'reading-reminder:snooze',
     );
+  }
+
+  // Exact alarm access can be denied by default (Android 14+) or revoked later;
+  // an inexact reminder is better than none.
+  Future<AndroidScheduleMode> _androidScheduleMode() async {
+    final android = _notifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final canScheduleExact =
+        await android?.canScheduleExactNotifications() ?? true;
+    return canScheduleExact
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
   Future<void> _initialize() async {
@@ -193,6 +212,8 @@ class LocalPrayerReminderScheduler implements PrayerReminderScheduler {
     await _notifications.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: _handleNotificationResponse,
+      onDidReceiveBackgroundNotificationResponse:
+          _onBackgroundNotificationResponse,
     );
     _initialized = true;
   }
