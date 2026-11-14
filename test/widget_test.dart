@@ -878,6 +878,37 @@ void main() {
       semantics.dispose();
     });
 
+    testWidgets('uses a deep green resume card in dark mode', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            surahListProvider.overrideWith((ref) async => [classicSurah1]),
+            lastReadPositionProvider.overrideWith(
+              (ref) async =>
+                  ReadingPosition(verseId: '1:3', lastReadAt: DateTime(2026)),
+            ),
+            pageForVerseProvider('1:3').overrideWith((ref) async => 1),
+            feedbackPromptShouldShowProvider.overrideWith((ref) async => false),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: ThemeMode.dark,
+            home: HomeScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final colors = AppTheme.dark.colorScheme;
+      final card = tester.widget<Material>(
+        find.byKey(const ValueKey('continueReadingCard')),
+      );
+      expect(card.color, colors.primaryContainer);
+      final title = tester.widget<Text>(find.text('The Opening'));
+      expect(title.style?.color, colors.onPrimaryContainer);
+    });
+
     testWidgets('does not show Last Read banner when no position saved', (
       tester,
     ) async {

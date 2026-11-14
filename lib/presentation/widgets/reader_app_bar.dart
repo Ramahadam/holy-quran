@@ -6,6 +6,7 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   static const double height = 68;
 
   final String surahName;
+  final bool isArabicSurahName;
   final String contextLabel;
   final String switchModeLabel;
   final IconData switchModeIcon;
@@ -14,6 +15,7 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ReaderAppBar({
     super.key,
     required this.surahName,
+    required this.isArabicSurahName,
     required this.contextLabel,
     required this.switchModeLabel,
     required this.switchModeIcon,
@@ -57,9 +59,9 @@ class ReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
             key: const ValueKey('readerHeaderSurah'),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            textDirection: TextDirection.rtl,
+            textDirection: isArabicSurahName ? TextDirection.rtl : null,
             style: theme.textTheme.titleMedium?.copyWith(
-              fontFamily: AppTheme.quranFontFamily,
+              fontFamily: isArabicSurahName ? AppTheme.quranFontFamily : null,
               fontSize: 18,
               fontWeight: FontWeight.w400,
               height: 1.2,
