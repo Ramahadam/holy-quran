@@ -11,6 +11,8 @@ import '../providers/quran_providers.dart';
 import '../widgets/verse_detail_tafsir_section.dart';
 
 const _kfgqpcHafsFontFamily = 'KFGQPCHafsUthmanicScript';
+// Bundled by scripts/fetch_quran_data.py (Quran.com translation 20).
+const _translationSource = 'Saheeh International';
 final _embeddedAyahMarkerPattern = RegExp(
   r'\s*(?:[\u06DD\u06DE]\s*[٠-٩0-9]*|[﴾﴿])\s*',
 );
@@ -150,6 +152,19 @@ class _VerseDetailScreenState extends ConsumerState<VerseDetailScreen> {
                                     ),
                               textAlign: TextAlign.start,
                             ),
+                            if (!isArabic && _verse.translation != null) ...[
+                              const SizedBox(height: 12),
+                              Text(
+                                context.l10n.sourceName(_translationSource),
+                                key: const ValueKey('translationAttribution'),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
