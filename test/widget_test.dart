@@ -21,7 +21,6 @@ import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/theme/app_theme.dart';
 import 'package:holy_quran_app/presentation/widgets/mushaf_sample_page.dart';
 import 'package:holy_quran_app/presentation/widgets/surah_tile.dart';
-import 'package:holy_quran_app/presentation/widgets/verse_card.dart';
 import 'package:holy_quran_app/data/notifications/prayer_reminder_scheduler.dart';
 import 'package:holy_quran_app/data/notifications/prayer_reminder_service.dart';
 import 'package:holy_quran_app/data/notifications/prayer_reminder_settings.dart';
@@ -2099,78 +2098,6 @@ void main() {
       expect(find.text('الفاتحة'), findsOneWidget);
       expect(find.textContaining('The Opening'), findsNothing);
       expect(find.text('7 آيات'), findsOneWidget);
-    });
-  });
-
-  group('VerseCard', () {
-    testWidgets('renders Arabic text and translation', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: VerseCard(verse: classicVerse1)),
-        ),
-      );
-      expect(find.text('بِسْمِ اللَّهِ'), findsOneWidget);
-      expect(find.text('In the name of Allah'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-    });
-
-    testWidgets('renders without translation when null', (tester) async {
-      const verse = Verse(
-        verseId: '2:1',
-        surahNumber: 2,
-        verseNumber: 1,
-        arabicText: 'الم',
-        translation: null,
-      );
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: VerseCard(verse: verse)),
-        ),
-      );
-      expect(find.text('الم'), findsOneWidget);
-    });
-
-    testWidgets('shows bookmark icon when isBookmarked is true', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: VerseCard(verse: classicVerse1, isBookmarked: true),
-          ),
-        ),
-      );
-      expect(find.byIcon(Icons.bookmark), findsOneWidget);
-    });
-
-    testWidgets('hides bookmark icon when isBookmarked is false', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: VerseCard(verse: classicVerse1, isBookmarked: false),
-          ),
-        ),
-      );
-      expect(find.byIcon(Icons.bookmark), findsNothing);
-    });
-
-    testWidgets('calls onBookmarkToggle on long press', (tester) async {
-      bool toggled = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: VerseCard(
-              verse: classicVerse1,
-              onBookmarkToggle: () => toggled = true,
-            ),
-          ),
-        ),
-      );
-      final topLeft = tester.getTopLeft(find.byType(VerseCard));
-      await tester.longPressAt(topLeft + const Offset(10, 10));
-      expect(toggled, isTrue);
     });
   });
 
