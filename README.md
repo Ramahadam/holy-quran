@@ -69,7 +69,8 @@ Quran content intact. Bookmarks and last-read state use separate collections
 and are preserved across Quran content upgrades.
 
 `scripts/fetch_quran_data.py` fetches Quran Foundation QPC Hafs text for the
-bundled KFGQPC font. It is an upstream-data fetch helper, not a complete
+bundled KFGQPC font, and the Saheeh International English translation
+(Quran.com translation 20), which Ayah Study credits wherever it is shown. It is an upstream-data fetch helper, not a complete
 asset-release pipeline: its output still requires verified Mushaf page
 assignments. Any Quran asset update must preserve those assignments, regenerate
 `assets/quran/checksums.txt`, pass the repository upgrade tests, and pass the
