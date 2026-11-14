@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show CheckedState;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -28,6 +27,7 @@ import 'package:holy_quran_app/data/notifications/prayer_reminder_service.dart';
 import 'package:holy_quran_app/data/notifications/prayer_reminder_settings.dart';
 import 'package:holy_quran_app/data/notifications/prayer_reminder_settings_store.dart';
 
+import 'support/home_test_helpers.dart';
 import 'support/reading_test_fixtures.dart'
     show
         FakeReadingPositionRepository,
@@ -727,7 +727,7 @@ void main() {
       expect(find.textContaining('Failed to load surahs'), findsOneWidget);
     });
 
-    testWidgets('uses explicit light and dark modes from the home menu', (
+    testWidgets('uses explicit light and dark modes from Settings', (
       tester,
     ) async {
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
@@ -761,14 +761,13 @@ void main() {
           ThemeMode.light,
         );
         expect(
-          Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+          Theme.of(
+            tester.element(find.byType(HomeScreen, skipOffstage: false)),
+          ).brightness,
           Brightness.light,
         );
 
-        await tester.tap(find.byTooltip('Menu'));
-        await tester.pumpAndSettle();
-        expect(find.text('Dark mode'), findsOneWidget);
-        await tester.tap(find.text('Dark mode'));
+        await tapSettingsRow(tester, 'Dark mode');
         await tester.pumpAndSettle();
 
         expect(
@@ -776,14 +775,13 @@ void main() {
           ThemeMode.dark,
         );
 
-        await tester.tap(find.byTooltip('Menu'));
-        await tester.pumpAndSettle();
-        final darkModeSemantics = tester
-            .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
-            .getSemanticsData();
         expect(
-          darkModeSemantics.flagsCollection.isChecked,
-          CheckedState.isTrue,
+          tester
+              .widget<SwitchListTile>(
+                find.byKey(const ValueKey('settingsDarkMode')),
+              )
+              .value,
+          isTrue,
         );
 
         await tester.tap(find.text('Dark mode'));
@@ -794,18 +792,18 @@ void main() {
           ThemeMode.light,
         );
         expect(
-          Theme.of(tester.element(find.byType(HomeScreen))).brightness,
+          Theme.of(
+            tester.element(find.byType(HomeScreen, skipOffstage: false)),
+          ).brightness,
           Brightness.light,
         );
-
-        await tester.tap(find.byTooltip('Menu'));
-        await tester.pumpAndSettle();
-        final lightModeSemantics = tester
-            .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
-            .getSemanticsData();
         expect(
-          lightModeSemantics.flagsCollection.isChecked,
-          CheckedState.isFalse,
+          tester
+              .widget<SwitchListTile>(
+                find.byKey(const ValueKey('settingsDarkMode')),
+              )
+              .value,
+          isFalse,
         );
       }
     });
@@ -1015,93 +1013,6 @@ void main() {
       expect(repo.removedVerseIds, isEmpty);
     });
 
-    testWidgets('shows a compact, coordinated home action menu', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            surahListProvider.overrideWith((ref) async => [classicSurah1]),
-            lastReadPositionProvider.overrideWith((ref) async => null),
-            recentBookmarksProvider.overrideWith((ref) async => const []),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            home: HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      final menuButtonFinder = find.byKey(const ValueKey('homeMenuButton'));
-      expect(menuButtonFinder, findsOneWidget);
-
-      final menuButton = tester.widget<PopupMenuButton>(menuButtonFinder);
-      expect(menuButton.color, AppTheme.light.colorScheme.surfaceContainerHigh);
-      expect(menuButton.shape, isA<RoundedRectangleBorder>());
-      final menuShape = menuButton.shape! as RoundedRectangleBorder;
-      expect(menuShape.borderRadius, BorderRadius.circular(16));
-
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-
-      for (final action in const [
-        'darkMode',
-        'reminders',
-        'feedback',
-        'saveBackup',
-        'shareBackup',
-        'restoreBackup',
-      ]) {
-        final row = find.byKey(ValueKey('homeMenu-$action'));
-        expect(row, findsOneWidget);
-        expect(tester.getSize(row).height, greaterThanOrEqualTo(48));
-        expect(
-          find.descendant(of: row, matching: find.byType(ListTile)),
-          findsNothing,
-        );
-      }
-
-      final darkModeData = tester
-          .getSemantics(find.byKey(const ValueKey('homeMenu-darkMode')))
-          .getSemanticsData();
-      expect(darkModeData.flagsCollection.isChecked, CheckedState.isFalse);
-    });
-
-    testWidgets('home action menu grows for large text', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            surahListProvider.overrideWith((ref) async => [classicSurah1]),
-            lastReadPositionProvider.overrideWith((ref) async => null),
-            recentBookmarksProvider.overrideWith((ref) async => const []),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: const TextScaler.linear(2)),
-              child: child!,
-            ),
-            home: HomeScreen(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-
-      expect(
-        tester.getSize(find.byKey(const ValueKey('homeMenu-reminders'))).height,
-        greaterThan(48),
-      );
-      expect(tester.takeException(), isNull);
-    });
-
     testWidgets('uses coordinated modern dialogs for backup actions', (
       tester,
     ) async {
@@ -1121,9 +1032,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Save backup to device'));
+      await tapSettingsRow(tester, 'Save backup to device');
       await tester.pumpAndSettle();
 
       final colors = AppTheme.light.colorScheme;
@@ -1159,9 +1068,7 @@ void main() {
 
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Share backup'));
+      await tapSettingsRow(tester, 'Share backup');
       await tester.pumpAndSettle();
 
       expect(
@@ -1172,9 +1079,7 @@ void main() {
 
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Restore backup'));
+      await tapSettingsRow(tester, 'Restore backup');
       await tester.pumpAndSettle();
 
       final restoreDialogFinder = find.byKey(
@@ -1219,9 +1124,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pumpAndSettle();
 
       final colors = AppTheme.light.colorScheme;
@@ -1292,9 +1195,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pumpAndSettle();
 
       expect(
@@ -1331,9 +1232,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -1378,9 +1277,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('reminderPrayerTimeCard')));
       await tester.pumpAndSettle();
@@ -1456,9 +1353,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pumpAndSettle();
 
       expect(
@@ -1505,9 +1400,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pumpAndSettle();
 
       expect(find.text('Enable reminder'), findsOneWidget);
@@ -1556,9 +1449,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Menu'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reading reminders'));
+      await tapSettingsRow(tester, 'Reading reminders');
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Enable reminder'));
