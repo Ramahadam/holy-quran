@@ -127,6 +127,22 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
   });
 
+  testWidgets('landscape keeps settings clear of a side navigation bar', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1600, 720)
+      ..devicePixelRatio = 2
+      ..padding = const FakeViewPadding(right: 96)
+      ..viewPadding = const FakeViewPadding(right: 96);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(ProviderScope(child: _App(screen: _screen([]))));
+    await tester.pumpAndSettle();
+
+    final tile = tester.getRect(find.byKey(const ValueKey('settingsDarkMode')));
+    expect(tile.right, lessThanOrEqualTo(800 - 48));
+  });
+
   testWidgets('all existing action flows remain reachable', (tester) async {
     final actions = <String>[];
     await tester.pumpWidget(

@@ -122,6 +122,35 @@ void main() {
     });
   }
 
+  for (final arabic in [false, true]) {
+    testWidgets(
+      'landscape keeps content clear of a side navigation bar (Arabic: $arabic)',
+      (tester) async {
+        tester.view
+          ..physicalSize = const Size(1600, 720)
+          ..devicePixelRatio = 2
+          ..padding = const FakeViewPadding(right: 96)
+          ..viewPadding = const FakeViewPadding(right: 96);
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          _app(
+            arabic: arabic,
+            position: ReadingPosition(
+              verseId: '1:1',
+              lastReadAt: DateTime(2026),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final card = tester.getRect(
+          find.byKey(const ValueKey('continueReadingCard')),
+        );
+        expect(card.right, lessThanOrEqualTo(800 - 48));
+      },
+    );
+  }
+
   testWidgets('bottom navigation opens bookmarks even without saved ayahs', (
     tester,
   ) async {

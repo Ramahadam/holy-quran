@@ -29,17 +29,19 @@ class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.bookmarks)),
-      body: bookmarksAsync.when(
-        data: (bookmarks) {
-          if (bookmarks.isEmpty) return _buildEmptyState(context);
-          return surahsAsync.when(
-            data: (surahs) => _buildContent(context, bookmarks, surahs),
-            loading: () => _BookmarksLoadingState(),
-            error: (_, _) => _BookmarksErrorState(onRetry: _retry),
-          );
-        },
-        loading: () => _BookmarksLoadingState(),
-        error: (_, _) => _BookmarksErrorState(onRetry: _retry),
+      body: SafeArea(
+        child: bookmarksAsync.when(
+          data: (bookmarks) {
+            if (bookmarks.isEmpty) return _buildEmptyState(context);
+            return surahsAsync.when(
+              data: (surahs) => _buildContent(context, bookmarks, surahs),
+              loading: () => _BookmarksLoadingState(),
+              error: (_, _) => _BookmarksErrorState(onRetry: _retry),
+            );
+          },
+          loading: () => _BookmarksLoadingState(),
+          error: (_, _) => _BookmarksErrorState(onRetry: _retry),
+        ),
       ),
     );
   }
