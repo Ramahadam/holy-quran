@@ -46,32 +46,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final feedbackPromptAsync = ref.watch(feedbackPromptShouldShowProvider);
     _maybeScheduleHeartbeatPrompt(feedbackPromptAsync);
 
+    // A landscape phone has compact height; the header would crowd out the
+    // index, so it is hidden there.
+    final compactHeight = MediaQuery.sizeOf(context).height < 480;
+
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        toolbarHeight: 44 + MediaQuery.textScalerOf(context).scale(44),
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              _arabicAppTitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.headlineLarge,
-              textDirection: TextDirection.rtl,
-            ),
-            // The Arabic app title already matches the heading above.
-            if (l10n.appTitle != _arabicAppTitle)
-              Text(
-                l10n.appTitle,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
+      appBar: compactHeight
+          ? null
+          : AppBar(
+              centerTitle: false,
+              toolbarHeight: MediaQuery.textScalerOf(
+                context,
+              ).scale(kToolbarHeight),
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _arabicAppTitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textDirection: TextDirection.rtl,
+                  ),
+                  // The Arabic app title already matches the heading above.
+                  if (l10n.appTitle != _arabicAppTitle)
+                    Text(
+                      l10n.appTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                ],
               ),
-          ],
-        ),
-      ),
+            ),
       bottomNavigationBar: _HomeNavigation(
         onOpenBookmarks: () => unawaited(_openBookmarksScreen()),
         onOpenSettings: () => unawaited(_openSettingsScreen()),
@@ -371,67 +379,57 @@ class _LastReadBanner extends ConsumerWidget {
             customBorder: cardShape,
             onTap: openReading,
             child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
+                  Icon(CupertinoIcons.book, color: onCardColor),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
                           context.l10n.continueReading,
-                          style: theme.textTheme.bodyLarge?.copyWith(
+                          style: theme.textTheme.labelMedium?.copyWith(
                             color: onCardColor,
                           ),
                         ),
-                      ),
-                      Icon(CupertinoIcons.book, color: onCardColor),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    surahName,
-                    textDirection: isArabic
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
-                    textAlign: Directionality.of(context) == TextDirection.rtl
-                        ? TextAlign.right
-                        : TextAlign.left,
-                    style: theme.textTheme.headlineLarge?.copyWith(
-                      color: onCardColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${context.l10n.verseNumber(verseNum)}${page == null ? '' : ' · ${context.l10n.pageNumber(page)}'}',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: onCardColor,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    key: const ValueKey('continueReadingButton'),
-                    onPressed: openReading,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: colors.surface,
-                      foregroundColor: colors.primary,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      children: [
-                        Text(context.l10n.continueReading),
-                        const Icon(Icons.arrow_forward_rounded),
+                        const SizedBox(height: 2),
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            Text(
+                              surahName,
+                              textDirection: isArabic
+                                  ? TextDirection.rtl
+                                  : TextDirection.ltr,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: onCardColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '${context.l10n.verseNumber(verseNum)}${page == null ? '' : ' · ${context.l10n.pageNumber(page)}'}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: onCardColor,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
+                  ),
+                  IconButton.filled(
+                    key: const ValueKey('continueReadingButton'),
+                    tooltip: context.l10n.continueReading,
+                    onPressed: openReading,
+                    style: IconButton.styleFrom(
+                      backgroundColor: colors.surface,
+                      foregroundColor: colors.primary,
+                    ),
+                    icon: const Icon(Icons.arrow_forward_rounded),
                   ),
                 ],
               ),

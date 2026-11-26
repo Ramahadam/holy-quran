@@ -32,11 +32,15 @@ class _MushafReaderChromeState extends State<MushafReaderChrome> {
   @override
   void initState() {
     super.initState();
+    // Mushaf pages are portrait layouts; landscape shrinks them to a narrow
+    // column. Android ignores this lock on large screens (sw600dp+).
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _scheduleSystemUiUpdate();
   }
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }

@@ -50,6 +50,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
   bool _resolved = false;
   ReadingMode _readingMode = ReadingMode.classic;
   bool _showMushafControls = false;
+  bool _showClassicBar = true;
   bool _showMushafPageNumberOverlay = false;
   Timer? _mushafPageNumberOverlayTimer;
   DateTime? _openedAt;
@@ -223,6 +224,7 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
     setState(() {
       _readingMode = mode;
       _showMushafControls = false;
+      _showClassicBar = true;
       if (mode == ReadingMode.mushaf) {
         _currentPageFirstVerseId = null;
         _showMushafPageNumberOverlay = true;
@@ -313,9 +315,34 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       );
     }
 
+    // The Classic bar slides away while reading down and returns on scroll up.
     return Scaffold(
-      appBar: _buildAppBar(),
-      body: SafeArea(child: reader),
+      body: NotificationListener<UserScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.axis != Axis.vertical) return false;
+          final show = switch (notification.direction) {
+            ScrollDirection.forward => true,
+            ScrollDirection.reverse => false,
+            ScrollDirection.idle => _showClassicBar,
+          };
+          if (show != _showClassicBar) setState(() => _showClassicBar = show);
+          return false;
+        },
+        child: Column(
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: _showClassicBar
+                  ? _buildAppBar()
+                  : const SizedBox(width: double.infinity),
+            ),
+            Expanded(
+              child: SafeArea(top: !_showClassicBar, child: reader),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

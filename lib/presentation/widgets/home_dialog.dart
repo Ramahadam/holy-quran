@@ -37,7 +37,11 @@ class HomeDialog extends StatelessWidget {
           : colors.surfaceContainerHigh,
       surfaceTintColor: Colors.transparent,
       elevation: 8,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      // With a landscape keyboard open, every vertical pixel is needed.
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: MediaQuery.sizeOf(context).height < 480 ? 8 : 24,
+      ),
       constraints: const BoxConstraints(minWidth: 280, maxWidth: 420),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),

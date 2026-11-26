@@ -829,7 +829,8 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Continue Reading'), findsNWidgets(2));
+      expect(find.text('Continue Reading'), findsOneWidget);
+      expect(find.byTooltip('Continue Reading'), findsOneWidget);
       expect(find.textContaining('الفاتحة'), findsWidgets);
       expect(find.textContaining('Verse 3'), findsOneWidget);
     });
