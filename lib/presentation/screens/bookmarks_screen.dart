@@ -275,7 +275,7 @@ class _BookmarkListTile extends ConsumerWidget {
             minimumSize: const Size.square(48),
             maximumSize: const Size.square(48),
           ),
-          icon: const Icon(CupertinoIcons.bookmark, size: 20),
+          icon: const Icon(CupertinoIcons.bookmark_fill, size: 20),
           onPressed: onRemove,
         ),
         title: Text(title, style: Theme.of(context).textTheme.titleSmall),

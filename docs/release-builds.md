@@ -8,7 +8,9 @@ targets or removing them requires a separate approved change.
 
 ## Product Metadata
 
-The Android application label and iOS display name are **Holy Quran**.
+The Android application label and iOS display name are **القرآن الكريم** on
+every device, matching the in-app Arabic title (#206). Play listing titles stay
+per language: `docs/play-store/en-US/title.txt` and `docs/play-store/ar/title.txt`.
 
 | Platform | Release identifier |
 | --- | --- |

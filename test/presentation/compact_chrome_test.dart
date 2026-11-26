@@ -163,4 +163,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TextField).first.hitTestable(), findsOneWidget);
   });
+
+  testWidgets('home title outranks Surah names', (tester) async {
+    await tester.pumpWidget(_home());
+    await tester.pumpAndSettle();
+    final title = tester.widget<Text>(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('القرآن الكريم'),
+      ),
+    );
+    final surah = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const ValueKey('surahCard-1')),
+        matching: find.text(classicSurah1.nameArabic),
+      ),
+    );
+    final surahSize =
+        surah.style?.fontSize ??
+        Theme.of(
+          tester.element(find.byType(HomeScreen)),
+        ).textTheme.titleMedium!.fontSize!;
+    expect(title.style!.fontSize!, greaterThanOrEqualTo(surahSize + 6));
+    expect(title.style!.fontWeight, FontWeight.w700);
+  });
+
+  test('app bars separate from content scrolled under them', () {
+    for (final theme in [AppTheme.light, AppTheme.dark]) {
+      expect(theme.appBarTheme.scrolledUnderElevation, greaterThan(0));
+      expect(theme.appBarTheme.shadowColor!.a, greaterThan(0));
+    }
+  });
 }
