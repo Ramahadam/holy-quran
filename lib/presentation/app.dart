@@ -79,6 +79,9 @@ class _HolyQuranAppState extends ConsumerState<HolyQuranApp>
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
+      // Switch instantly: a cross-fade shows mixed light/dark frames because
+      // some colours are chosen from brightness rather than interpolated.
+      themeAnimationDuration: Duration.zero,
       home: const LoadingScreen(),
     );
   }

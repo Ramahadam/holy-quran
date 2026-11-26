@@ -66,7 +66,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _arabicAppTitle,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
                     textDirection: TextDirection.rtl,
                   ),
                   // The Arabic app title already matches the heading above.

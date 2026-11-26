@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -36,6 +37,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byKey(const ValueKey('removeBookmark-1:1')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('removeBookmark-1:1')),
+          matching: find.byIcon(CupertinoIcons.bookmark_fill),
+        ),
+        findsOneWidget,
+      );
     });
   }
 

@@ -161,6 +161,8 @@ void main() {
 
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(app.themeMode, ThemeMode.dark);
+      // Switch instantly; a cross-fade shows mixed light/dark frames.
+      expect(app.themeAnimationDuration, Duration.zero);
     });
 
     testWidgets('synchronizes the reminder timezone on launch and resume', (

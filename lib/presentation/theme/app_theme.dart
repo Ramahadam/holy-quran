@@ -120,6 +120,9 @@ class AppTheme {
         foregroundColor: colors.onSurface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        // A hairline shadow separates the bar from content scrolled under it.
+        scrolledUnderElevation: 2,
+        shadowColor: colors.outlineVariant,
         centerTitle: true,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(color: colors.primary),
