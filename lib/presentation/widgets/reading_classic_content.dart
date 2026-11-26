@@ -309,6 +309,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
   final Map<String, GlobalKey<_ClassicVerseParagraphState>> _paragraphKeys = {};
   final Set<String> _additionalBookmarks = {};
   String? _lastReportedVisibleVerseId;
+  Verse? _topVisibleVerse;
   bool _visibleVerseUpdateScheduled = false;
   bool _isLoadingAdjacentSurah = false;
 
@@ -392,16 +393,25 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
             itemBuilder: (context, index) => contentWidgets[index],
           );
 
-    return RefreshIndicator(
-      onRefresh: _loadPreviousSurah,
-      child: NotificationListener<OverscrollNotification>(
-        onNotification: (notification) {
-          if (notification.overscroll > 0) {
-            unawaited(_loadNextSurah());
-          }
-          return false;
-        },
-        child: scrollable,
+    return FastScroller(
+      controller: _scrollController,
+      labelBuilder: () {
+        final verse = _topVisibleVerse;
+        if (verse == null) return null;
+        return '${context.l10n.pageNumber(verse.page)} · '
+            '${context.l10n.verseNumber(verse.verseNumber.toString())}';
+      },
+      child: RefreshIndicator(
+        onRefresh: _loadPreviousSurah,
+        child: NotificationListener<OverscrollNotification>(
+          onNotification: (notification) {
+            if (notification.overscroll > 0) {
+              unawaited(_loadNextSurah());
+            }
+            return false;
+          },
+          child: scrollable,
+        ),
       ),
     );
   }
@@ -469,6 +479,7 @@ class _ClassicSurahContentState extends ConsumerState<_ClassicSurahContent> {
     }
 
     final visibleVerse = firstVisible?.verse;
+    if (visibleVerse != null) _topVisibleVerse = visibleVerse;
     if (visibleVerse != null &&
         visibleVerse.verseId != _lastReportedVisibleVerseId) {
       _lastReportedVisibleVerseId = visibleVerse.verseId;

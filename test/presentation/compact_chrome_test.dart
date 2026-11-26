@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:holy_quran_app/domain/models/reading_position.dart';
+import 'package:holy_quran_app/domain/models/surah.dart';
 import 'package:holy_quran_app/l10n/app_localizations.dart';
 import 'package:holy_quran_app/presentation/providers/quran_providers.dart';
 import 'package:holy_quran_app/presentation/screens/home_screen.dart';
@@ -193,5 +194,99 @@ void main() {
       expect(theme.appBarTheme.scrolledUnderElevation, greaterThan(0));
       expect(theme.appBarTheme.shadowColor!.a, greaterThan(0));
     }
+  });
+
+  testWidgets('index handle names the Surah at the top while dragging', (
+    tester,
+  ) async {
+    final surahs = [
+      for (var n = 1; n <= 114; n++)
+        Surah(
+          surahNumber: n,
+          nameArabic: 'سورة $n',
+          nameEnglish: 'Surah $n',
+          numberOfVerses: 7,
+        ),
+    ];
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          surahListProvider.overrideWith((ref) async => surahs),
+          lastReadPositionProvider.overrideWith((ref) async => null),
+          feedbackPromptShouldShowProvider.overrideWith((ref) async => false),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const ValueKey('homeQuranScroll')),
+      const Offset(0, -200),
+    );
+    await tester.pump();
+
+    final handle = find.byKey(const ValueKey('fastScrollHandle'));
+    final gesture = await tester.startGesture(tester.getCenter(handle));
+    await gesture.moveTo(Offset(tester.getCenter(handle).dx, 5000));
+    await tester.pump();
+    await tester.pump();
+    final label = tester.widget<Text>(
+      find.descendant(
+        of: find.byKey(const ValueKey('fastScrollLabel')),
+        matching: find.byType(Text),
+      ),
+    );
+    final number = int.parse(label.data!.split(' · ').first);
+    expect(number, greaterThan(100));
+    // The labelled row is the first row visible under the top of the list.
+    final listTop = tester
+        .getTopLeft(find.byKey(const ValueKey('homeQuranScroll')))
+        .dy;
+    final row = tester.getRect(find.byKey(ValueKey('surahCard-$number')));
+    expect(row.bottom, greaterThan(listTop));
+    expect(row.top, lessThanOrEqualTo(listTop));
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('classic reader handle shows page and verse', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          startPageForSurahProvider(1).overrideWith((ref) async => 1),
+          classicVersesProvider(
+            1,
+          ).overrideWith((ref) async => classicSurahVerses(300)),
+          bookmarksBySurahProvider(1).overrideWith((ref) async => {}),
+          readingPositionRepositoryProvider.overrideWithValue(
+            FakeReadingPositionRepository(),
+          ),
+        ],
+        child: const MaterialApp(home: ReadingScreen(surah: classicSurah1)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, -300));
+    await tester.pump();
+
+    final handle = find.byKey(const ValueKey('fastScrollHandle'));
+    final gesture = await tester.startGesture(tester.getCenter(handle));
+    await gesture.moveBy(const Offset(0, 200));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('fastScrollLabel')),
+        matching: find.textContaining(RegExp(r'^Page \d+ · Verse \d+$')),
+      ),
+      findsOneWidget,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 }
