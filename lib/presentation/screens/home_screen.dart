@@ -76,42 +76,44 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onOpenBookmarks: () => unawaited(_openBookmarksScreen()),
         onOpenSettings: () => unawaited(_openSettingsScreen()),
       ),
-      body: surahsAsync.when(
-        data: (surahs) {
-          final lastPosition = lastPositionAsync.valueOrNull;
-          Surah? lastSurah;
-          if (lastPosition != null) {
-            final surahNum = int.tryParse(
-              lastPosition.verseId.split(':').first,
-            );
-            if (surahNum != null) {
-              lastSurah = surahs.firstWhereOrNull(
-                (s) => s.surahNumber == surahNum,
+      body: SafeArea(
+        child: surahsAsync.when(
+          data: (surahs) {
+            final lastPosition = lastPositionAsync.valueOrNull;
+            Surah? lastSurah;
+            if (lastPosition != null) {
+              final surahNum = int.tryParse(
+                lastPosition.verseId.split(':').first,
               );
+              if (surahNum != null) {
+                lastSurah = surahs.firstWhereOrNull(
+                  (s) => s.surahNumber == surahNum,
+                );
+              }
             }
-          }
 
-          return QuranIndex(
-            surahs: surahs,
-            onOpenReading: _openReadingScreen,
-            header: lastSurah == null
-                ? null
-                : _LastReadBanner(
-                    surah: lastSurah,
-                    verseId: lastPosition!.verseId,
-                    onOpenReading: _openReadingScreen,
-                  ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              l10n.surahLoadError,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.error,
+            return QuranIndex(
+              surahs: surahs,
+              onOpenReading: _openReadingScreen,
+              header: lastSurah == null
+                  ? null
+                  : _LastReadBanner(
+                      surah: lastSurah,
+                      verseId: lastPosition!.verseId,
+                      onOpenReading: _openReadingScreen,
+                    ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(
+                l10n.surahLoadError,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
               ),
             ),
           ),

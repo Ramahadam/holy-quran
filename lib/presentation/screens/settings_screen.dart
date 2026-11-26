@@ -39,105 +39,111 @@ class SettingsScreen extends ConsumerWidget {
         centerTitle: false,
         backgroundColor: theme.scaffoldBackgroundColor,
       ),
-      body: ListView(
-        key: const ValueKey('settingsList'),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          Text(l10n.settingsSubtitle, style: theme.textTheme.bodyMedium),
-          _section(context, l10n.appearanceAndLanguage),
-          _SettingsGroup(
-            children: [
-              SwitchListTile(
-                key: const ValueKey('settingsDarkMode'),
-                secondary: Icon(CupertinoIcons.moon, color: colors.primary),
-                title: Text(l10n.darkMode),
-                value: dark,
-                onChanged: (enabled) => unawaited(
-                  ref
-                      .read(themeModeProvider.notifier)
-                      .setThemeMode(enabled ? ThemeMode.dark : ThemeMode.light),
+      body: SafeArea(
+        child: ListView(
+          key: const ValueKey('settingsList'),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          children: [
+            Text(l10n.settingsSubtitle, style: theme.textTheme.bodyMedium),
+            _section(context, l10n.appearanceAndLanguage),
+            _SettingsGroup(
+              children: [
+                SwitchListTile(
+                  key: const ValueKey('settingsDarkMode'),
+                  secondary: Icon(CupertinoIcons.moon, color: colors.primary),
+                  title: Text(l10n.darkMode),
+                  value: dark,
+                  onChanged: (enabled) => unawaited(
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .setThemeMode(
+                          enabled ? ThemeMode.dark : ThemeMode.light,
+                        ),
+                  ),
                 ),
-              ),
-              ListTile(
-                key: const ValueKey('settingsLanguage'),
-                leading: Icon(CupertinoIcons.globe, color: colors.primary),
-                title: Text(l10n.appLanguage),
-                subtitle: Text(
-                  locale.languageCode == 'ar'
-                      ? l10n.languageArabic
-                      : l10n.languageEnglish,
+                ListTile(
+                  key: const ValueKey('settingsLanguage'),
+                  leading: Icon(CupertinoIcons.globe, color: colors.primary),
+                  title: Text(l10n.appLanguage),
+                  subtitle: Text(
+                    locale.languageCode == 'ar'
+                        ? l10n.languageArabic
+                        : l10n.languageEnglish,
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () => unawaited(
+                    ref
+                        .read(appLocaleProvider.notifier)
+                        .setLocale(
+                          locale.languageCode == 'ar'
+                              ? const Locale('en')
+                              : const Locale('ar'),
+                        ),
+                  ),
                 ),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => unawaited(
-                  ref
-                      .read(appLocaleProvider.notifier)
-                      .setLocale(
-                        locale.languageCode == 'ar'
-                            ? const Locale('en')
-                            : const Locale('ar'),
-                      ),
+              ],
+            ),
+            _section(context, l10n.readingSettings),
+            _SettingsGroup(
+              children: [
+                _action(
+                  context,
+                  'reminders',
+                  CupertinoIcons.bell,
+                  l10n.readingReminders,
+                  onOpenReminders,
                 ),
-              ),
-            ],
-          ),
-          _section(context, l10n.readingSettings),
-          _SettingsGroup(
-            children: [
-              _action(
-                context,
-                'reminders',
-                CupertinoIcons.bell,
-                l10n.readingReminders,
-                onOpenReminders,
-              ),
-            ],
-          ),
-          _section(context, l10n.yourData),
-          _SettingsGroup(
-            children: [
-              _action(
-                context,
-                'save',
-                CupertinoIcons.arrow_down_to_line,
-                l10n.saveBackupToDevice,
-                onSaveBackup,
-              ),
-              _action(
-                context,
-                'share',
-                CupertinoIcons.square_arrow_up,
-                l10n.shareBackup,
-                onShareBackup,
-              ),
-              _action(
-                context,
-                'restore',
-                CupertinoIcons.arrow_counterclockwise,
-                l10n.restoreBackup,
-                onRestoreBackup,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          _action(
-            context,
-            'privacy',
-            CupertinoIcons.lock_shield,
-            l10n.privacyPolicy,
-            () => unawaited(
-              Navigator.of(context).push<void>(
-                MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+              ],
+            ),
+            _section(context, l10n.yourData),
+            _SettingsGroup(
+              children: [
+                _action(
+                  context,
+                  'save',
+                  CupertinoIcons.arrow_down_to_line,
+                  l10n.saveBackupToDevice,
+                  onSaveBackup,
+                ),
+                _action(
+                  context,
+                  'share',
+                  CupertinoIcons.square_arrow_up,
+                  l10n.shareBackup,
+                  onShareBackup,
+                ),
+                _action(
+                  context,
+                  'restore',
+                  CupertinoIcons.arrow_counterclockwise,
+                  l10n.restoreBackup,
+                  onRestoreBackup,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _action(
+              context,
+              'privacy',
+              CupertinoIcons.lock_shield,
+              l10n.privacyPolicy,
+              () => unawaited(
+                Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicyScreen(),
+                  ),
+                ),
               ),
             ),
-          ),
-          _action(
-            context,
-            'feedback',
-            CupertinoIcons.bubble_left,
-            l10n.sendFeedback,
-            onSendFeedback,
-          ),
-        ],
+            _action(
+              context,
+              'feedback',
+              CupertinoIcons.bubble_left,
+              l10n.sendFeedback,
+              onSendFeedback,
+            ),
+          ],
+        ),
       ),
     );
   }

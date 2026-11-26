@@ -313,7 +313,10 @@ class _ReadingScreenState extends ConsumerState<ReadingScreen> {
       );
     }
 
-    return Scaffold(appBar: _buildAppBar(), body: reader);
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: SafeArea(child: reader),
+    );
   }
 
   Widget _buildClassicScroll() {
