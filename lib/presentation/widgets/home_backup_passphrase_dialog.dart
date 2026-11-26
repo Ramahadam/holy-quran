@@ -73,63 +73,62 @@ class _HomeBackupPassphraseDialogState
       icon: icon,
       title: title,
       subtitle: subtitle,
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _passphraseController,
+            autofocus: true,
+            obscureText: true,
+            textInputAction: confirm
+                ? TextInputAction.next
+                : TextInputAction.done,
+            onSubmitted: (_) {
+              if (!confirm) _submit();
+            },
+            decoration: homeDialogInputDecoration(
+              context,
+              labelText: l10n.passphrase,
+              prefixIcon: Icons.lock_outline_rounded,
+            ),
+          ),
+          if (confirm) ...[
+            const SizedBox(height: 12),
             TextField(
-              controller: _passphraseController,
-              autofocus: true,
+              controller: _confirmController,
               obscureText: true,
-              textInputAction: confirm
-                  ? TextInputAction.next
-                  : TextInputAction.done,
-              onSubmitted: (_) {
-                if (!confirm) _submit();
-              },
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
               decoration: homeDialogInputDecoration(
                 context,
-                labelText: l10n.passphrase,
+                labelText: l10n.confirmPassphrase,
                 prefixIcon: Icons.lock_outline_rounded,
               ),
             ),
-            if (confirm) ...[
-              const SizedBox(height: 12),
-              TextField(
-                controller: _confirmController,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                onSubmitted: (_) => _submit(),
-                decoration: homeDialogInputDecoration(
-                  context,
-                  labelText: l10n.confirmPassphrase,
-                  prefixIcon: Icons.lock_outline_rounded,
-                ),
-              ),
-            ],
-            const SizedBox(height: 12),
-            HomeDialogNotice(
-              noticeKey: const ValueKey('backupProtectionNotice'),
-              icon: Icons.shield_outlined,
-              text: confirm
-                  ? l10n.backupProtectionCreate
-                  : l10n.backupProtectionRestore,
-            ),
-            if (_errorText != null) ...[
-              const SizedBox(height: 12),
-              Semantics(
-                liveRegion: true,
-                child: Text(
-                  _errorText!,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: colors.error),
-                ),
-              ),
-            ],
           ],
-        ),
+          const SizedBox(height: 12),
+          HomeDialogNotice(
+            noticeKey: const ValueKey('backupProtectionNotice'),
+            icon: Icons.shield_outlined,
+            text: confirm
+                ? l10n.backupProtectionCreate
+                : l10n.backupProtectionRestore,
+          ),
+          if (_errorText != null) ...[
+            const SizedBox(height: 12),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                _errorText!,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: colors.error),
+              ),
+            ),
+          ],
+        ],
       ),
       actions: [
         TextButton(
